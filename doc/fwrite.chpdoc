@@ -1,0 +1,16 @@
+*fwrite* | V-$CHIPVR ($CHIPCN)
+
+''fwrite(bytes, handle)''
+
+Writes bytes to a file handle.
+
+*Parameters:*
+- ''bytes'': Bytes to write
+- ''handle'': File handle
+
+*Returns:*
+- Number: Bytes written on success
+- ''err'' on failure
+
+*Errors:*
+- Runtime error if handle is invalid

@@ -1,0 +1,37 @@
+*Documentation System* | V-$CHIPVR ($CHIPCN)
+
+The ChipLang documentation system searches for ''.chpdoc'' files in multiple locations.
+
+*Search Order*
+
+The documentation system searches paths in the following priority order:
+
+1. ''doc/'' - Local development directory
+2. ''~/.local/share/chiplang/doc/'' - User-local documentation
+3. ''/usr/share/doc/chiplang'' - System documentation (managed by installer)
+
+*Usage*
+
+'''
+chippy doc                  # Show index page
+chippy doc <document>       # Show specific document
+chippy doc list             # List all available documents
+'''
+
+*Document Format*
+
+Documentation files use the ''.chpdoc'' extension, which is custom. It is designed for simple rendering to a terminal and supports:
+
+- *Bold text* using the * character
+- ''Inline code'' highlighting using double apostrophes
+- Version variables ''CHIPVR'' and ''CHIPCN'' (prefixed with ''$'') are expanded automatically
+- Code blocks using triple apostrophes with line numbers:
+'''
+Like
+this
+'''
+I recommend you look at ''/usr/share/doc/chiplang'' for practical examples on how to use ''chpdoc'', it really is very simple.
+
+*Third-party Integration*
+
+Third-party packages can install documentation to ''~/.local/share/chiplang/doc/'' without interfering with system documentation. This directory is not touched by the installer on reinstalls and upgrades. I don't recommend installing your documents to ''/usr/share/doc/chiplang''.

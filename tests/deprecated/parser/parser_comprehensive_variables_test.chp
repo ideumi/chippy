@@ -1,0 +1,257 @@
+#!/usr/bin/chippy
+# Comprehensive Parser Test: Variable Operations
+# Tests parsing of variable declarations, assignments, scoping, and access patterns
+
+load("lib/libprint.chh");
+
+Print("=== Parser Comprehensive Variables Test ===\n");
+
+# Test 1: Simple variable declarations
+Print("Test 1: Simple variable declarations\n");
+var simple_var = 42;
+var another_var = "hello";
+var third_var = 3.14;
+Println(simple_var);
+Println(another_var);
+Println(third_var);
+
+# Test 2: Variable assignments without var keyword
+Print("Test 2: Variable assignments\n");
+assignment_var = 100;
+string_assignment = "world";
+float_assignment = 2.71;
+Println(assignment_var);
+Println(string_assignment);
+Println(float_assignment);
+
+# Test 3: Multiple assignments
+Print("Test 3: Multiple assignments\n");
+var a = b = c = 50;
+Println(a);
+Println(b);
+Println(c);
+
+# Test 4: Chained assignments
+Print("Test 4: Chained assignments\n");
+d = e = f = g = 25;
+Println(d);
+Println(e);
+Println(f);
+Println(g);
+
+# Test 5: Variable updates/reassignments
+Print("Test 5: Variable updates\n");
+var update_var = 10;
+Println(update_var);
+update_var = 20;
+Println(update_var);
+update_var = update_var + 5;
+Println(update_var);
+
+# Test 6: Variables in expressions
+Print("Test 6: Variables in expressions\n");
+var x = 5;
+var y = 10;
+var sum = x + y;
+var product = x * y;
+var complex = (x + y) * (x - y);
+Println(sum);
+Println(product);
+Println(complex);
+
+# Test 7: Variable naming patterns
+Print("Test 7: Variable naming patterns\n");
+var simple = 1;
+var with_underscore = 2;
+var camelCase = 3;
+var PascalCase = 4;
+var snake_case_long = 5;
+var var1 = 6;
+var var123 = 7;
+var _leading_underscore = 8;
+Println(simple);
+Println(with_underscore);
+Println(camelCase);
+Println(PascalCase);
+Println(snake_case_long);
+Println(var1);
+Println(var123);
+Println(_leading_underscore);
+
+# Test 8: Variables with different types
+Print("Test 8: Variables with different types\n");
+var int_var = 42;
+var float_var = 3.14159;
+var string_var = "ChipLang";
+var bool_var = true;
+var list_var = [1, 2, 3];
+var empty_list = [];
+var nested_list = [[1, 2], [3, 4]];
+Println(int_var);
+Println(float_var);
+Println(string_var);
+Println(bool_var);
+Println(list_var);
+Println(empty_list);
+Println(nested_list);
+
+# Test 9: Variable scoping in functions
+Print("Test 9: Variable scoping in functions\n");
+var global_var = "global";
+
+func scopeTest() {
+    var local_var = "local";
+    var global_var = "overridden global";  # Local shadow
+    Print("Inside function - local: ");
+    Println(local_var);
+    Print("Inside function - global: ");
+    Println(global_var);
+    return local_var;
+}
+
+var func_result = scopeTest();
+Print("Outside function - global: ");
+Println(global_var);
+Print("Function returned: ");
+Println(func_result);
+
+# Test 10: Variable scoping in control structures
+Print("Test 10: Variable scoping in control structures\n");
+var outer_scope = "outer";
+
+if true {
+    var block_scope = "block";
+    var outer_scope = "modified in block";
+    Print("In if block - block: ");
+    Println(block_scope);
+    Print("In if block - outer: ");
+    Println(outer_scope);
+}
+
+Print("After if block - outer: ");
+Println(outer_scope);
+
+for i = 0 utl 3 {
+    var loop_var = i * 2;
+    Print("Loop iteration ");
+    Print(i);
+    Print(", loop_var: ");
+    Println(loop_var);
+}
+
+while false {
+    var unreachable = "never set";
+}
+
+# Test 11: Variable assignments in expressions
+Print("Test 11: Variable assignments in expressions\n");
+var base = 5;
+var result1 = (increment = base + 1) * 2;
+Println(base);
+Println(increment);
+Println(result1);
+
+var result2 = (factor = 3) + (multiplier = 4) * factor;
+Println(factor);
+Println(multiplier);
+Println(result2);
+
+# Test 12: Variables with function calls
+Print("Test 12: Variables with function calls\n");
+func getValue() {
+    return 42;
+}
+
+func getString() {
+    return "function result";
+}
+
+var func_var = getValue();
+var string_func_var = getString();
+var expr_func_var = getValue() + 8;
+Println(func_var);
+Println(string_func_var);
+Println(expr_func_var);
+
+# Test 13: Variable access patterns
+Print("Test 13: Variable access patterns\n");
+var access_test = 100;
+var copy1 = access_test;
+var copy2 = copy1;
+var expr_access = access_test + copy1 + copy2;
+Println(access_test);
+Println(copy1);
+Println(copy2);
+Println(expr_access);
+
+# Test 14: List variable operations
+Print("Test 14: List variable operations\n");
+var my_list = [10, 20, 30];
+var first_element = my_list[0];
+var second_element = my_list[1];
+var list_copy = my_list;
+Println(my_list);
+Println(first_element);
+Println(second_element);
+Println(list_copy);
+
+# List modifications
+my_list[0] = 15;
+Println(my_list);
+
+# Test 15: Variable edge cases
+Print("Test 15: Variable edge cases\n");
+var zero = 0;
+var empty_string = "";
+var negative = -42;
+var very_long_variable_name_that_is_still_valid = "long name";
+Println(zero);
+Println(empty_string);
+Println(negative);
+Println(very_long_variable_name_that_is_still_valid);
+
+# Test 16: Variable operations with different operators
+Print("Test 16: Variable operations with operators\n");
+var op_var = 10;
+var add_op = op_var + 5;
+var sub_op = op_var - 3;
+var mul_op = op_var * 2;
+var div_op = op_var / 2;
+var pow_op = op_var ^ 2;
+var mod_op = op_var % 3;
+Println(add_op);
+Println(sub_op);
+Println(mul_op);
+Println(div_op);
+Println(pow_op);
+Println(mod_op);
+
+# Test 17: Variables in complex nested structures
+Print("Test 17: Variables in nested structures\n");
+var nest_test = 5;
+
+func nestedFunc() {
+    var nest_test = 10;  # Shadow outer variable
+    
+    if nest_test > 5 {
+        var nest_test = 15;  # Shadow function variable
+        
+        for i = 0 utl 2 {
+            var nest_test = 20 + i;  # Shadow block variable
+            Print("Deeply nested nest_test: ");
+            Println(nest_test);
+        }
+        
+        Print("Block nest_test: ");
+        Println(nest_test);
+    }
+    
+    Print("Function nest_test: ");
+    Println(nest_test);
+}
+
+nestedFunc();
+Print("Global nest_test: ");
+Println(nest_test);
+
+Print("=== Variables test completed ===\n");

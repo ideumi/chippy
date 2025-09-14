@@ -1,0 +1,39 @@
+#!/usr/bin/chippy
+#
+# avant - main.chp
+#
+
+# This is a almost 1:1 port of HERA's avant.py
+# to Chip, it shows a basic evaluation of the
+# current day.
+
+load("display.chh");
+load("libavantjien.chh");
+load("libgregorian.chh");
+load("libhandles.chh");
+
+func Main()
+{
+	var currentTime = time();
+	var gregorianDate = GregorianFormatTime(currentTime);
+	
+	Println("Avantjien eval for gregorian date " + gregorianDate + ":");
+	Println("");
+	
+	var avantComponents = AvantjienDate(currentTime);
+	var aDay = get(avantComponents, 0);
+	var aMonth = get(avantComponents, 1);
+	var aYear = get(avantComponents, 2);
+	
+	var cycle = AvantjienCycle(currentTime);
+	var timePeriod = AvantjienTime(currentTime);
+	
+	var isPrime = IsAvantjienPrime(aDay, aMonth);
+	var isNewMonth = IsAvantjienNewMonth(aDay, aMonth);
+	var isNewYear = IsAvantjienNewYear(aDay, aMonth);
+	
+	PrintDetail(aDay, aMonth, aYear, cycle, timePeriod, isPrime, isNewMonth, isNewYear);
+	Println("");
+}
+
+Main();

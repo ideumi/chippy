@@ -1,0 +1,8 @@
+*error* | V-$CHIPVR ($CHIPCN)
+
+''error(message)''
+
+Throws a runtime error with the specified message.
+
+*Parameters:*
+- ''message'': String error message

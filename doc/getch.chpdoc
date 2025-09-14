@@ -1,0 +1,14 @@
+*getch* | V-$CHIPVR ($CHIPCN)
+
+''getch()''
+
+Reads a single keystroke from the terminal in raw mode without echoing.
+
+*Returns:*
+- Bytes: Raw key sequence
+- ''err'' on failure
+
+*Notes:*
+- Terminal is temporarily set to raw mode during input
+- Handles UTF-8 multi-byte characters and escape sequences
+- Returns immediately without waiting for Enter key

@@ -1,0 +1,21 @@
+*select* | V-$CHIPVR ($CHIPCN)
+
+''select(readFds, writeFds, timeoutMs)''
+
+Waits for I/O readiness on multiple handles with timeout.
+
+*Parameters:*
+- ''readFds'': List of file handles to monitor for reading
+- ''writeFds'': List of file handles to monitor for writing  
+- ''timeoutMs'': Number timeout in milliseconds (0 = no timeout)
+
+*Returns:*
+- List: Handles ready for I/O (read-ready and write-ready handles combined)
+- List: Empty list on timeout
+- ''err'' on system call failure
+
+*Errors:*
+- Runtime error if readFds or writeFds is not a list
+- Runtime error if handle elements are not numbers
+- Runtime error if handles are invalid (file/socket/process)
+- Runtime error if file descriptors exceed system limits

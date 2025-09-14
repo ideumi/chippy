@@ -1,0 +1,117 @@
+#!/usr/bin/chippy
+# Comprehensive Parser Test: Literals and Basic Values
+# Tests parsing of all literal types and edge cases
+
+load("lib/libprint.chh");
+
+Print("=== Parser Comprehensive Literals Test ===\n");
+
+# Test 1: Integer literals
+Print("Test 1: Integer literals\n");
+var int_zero = 0;
+var int_positive = 42;
+var int_negative = -17;
+var int_large = 999999999;
+Println(int_zero);
+Println(int_positive);
+Println(int_negative);
+Println(int_large);
+
+# Test 2: Float literals
+Print("Test 2: Float literals\n");
+var float_zero = 0.0;
+var float_simple = 3.14;
+var float_negative = -2.71;
+var float_no_leading = .5;
+var float_no_trailing = 42.;
+var float_scientific = 1.23e10;
+var float_scientific_neg = 5.67e-3;
+Println(float_zero);
+Println(float_simple);
+Println(float_negative);
+Println(float_no_leading);
+Println(float_no_trailing);
+
+# Test 3: String literals
+Print("Test 3: String literals\n");
+var empty_string = "";
+var simple_string = "hello";
+var string_with_spaces = "hello world";
+var string_with_quotes = "He said \"hello\"";
+var string_with_escapes = "Line 1\nLine 2\tTabbed";
+var string_with_backslash = "Path\\to\\file";
+var unicode_string = "Unicode: αβγ 😀";
+Println(empty_string);
+Println(simple_string);
+Println(string_with_spaces);
+Println(string_with_quotes);
+Println(string_with_escapes);
+Println(string_with_backslash);
+Println(unicode_string);
+
+# Test 4: Boolean literals (represented as numbers)
+Print("Test 4: Boolean values\n");
+var bool_true = true;
+var bool_false = false;
+Println(bool_true);
+Println(bool_false);
+
+# Test 5: List literals - empty and simple
+Print("Test 5: Simple list literals\n");
+var empty_list = [];
+var number_list = [1, 2, 3, 4, 5];
+var string_list = ["apple", "banana", "cherry"];
+var mixed_list = [1, "hello", 3.14, true];
+Println(empty_list);
+Println(number_list);
+Println(string_list);
+Println(mixed_list);
+
+# Test 6: Nested list literals
+Print("Test 6: Nested list literals\n");
+var nested_simple = [[1, 2], [3, 4]];
+var nested_mixed = [[1, "a"], ["b", 2], []];
+var deeply_nested = [[[1]], [[2, 3]], [[[4, 5, 6]]]];
+Println(nested_simple);
+Println(nested_mixed);
+Println(deeply_nested);
+
+# Test 7: Lists with expressions
+Print("Test 7: Lists with expressions\n");
+var expr_list = [1 + 2, 3 * 4, 5 - 1];
+var var_list = [int_positive, float_simple, simple_string];
+Println(expr_list);
+Println(var_list);
+
+# Test 8: Edge case literals
+Print("Test 8: Edge case literals\n");
+var single_char = "a";
+var single_digit = 7;
+var zero_float = 0.0;
+var negative_zero = -0;
+Println(single_char);
+Println(single_digit);
+Println(zero_float);
+Println(negative_zero);
+
+# Test 9: Literals in complex expressions
+Print("Test 9: Literals in expressions\n");
+var complex_expr = 42 + 3.14 - 1;
+var string_concat = "Hello " + "World";
+var list_access = [10, 20, 30][1];
+Println(complex_expr);
+Println(string_concat);
+Println(list_access);
+
+# Test 10: Assignment with literals
+Print("Test 10: Multiple assignment patterns\n");
+var a = b = c = 100;
+var x = 1, y = 2, z = 3;
+Println(a);
+Println(b);
+Println(c);
+Println(x);
+Println(y);
+Println(z);
+
+Print("=== Literals test completed ===\n");

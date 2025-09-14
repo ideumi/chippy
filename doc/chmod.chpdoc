@@ -1,0 +1,13 @@
+*chmod* | V-$CHIPVR ($CHIPCN)
+
+''chmod(path, mode)''
+
+Changes the permissions of the file or directory at path.
+
+*Parameters:*
+- ''path'': String path to the file or directory
+- ''mode'': File permissions in octal representation
+
+*Returns:*
+- ''ok'' on success
+- ''err'' on failure

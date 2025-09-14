@@ -1,0 +1,16 @@
+*sread* | V-$CHIPVR ($CHIPCN)
+
+''sread(handle, maxBytes)''
+
+Reads bytes from a socket handle with explicit buffer size limit.
+
+*Parameters:*
+- ''handle'': Socket handle
+- ''maxBytes'': Maximum bytes to read
+
+*Returns:*
+- Bytes
+- ''err'' on failure
+
+*Misc:*
+- ''maxBytes = 0'' is not allowed because of safety for now.

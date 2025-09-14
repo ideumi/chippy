@@ -1,0 +1,16 @@
+*pack* | V-$CHIPVR ($CHIPCN)
+
+''pack(value)''
+
+Converts a string or list of numbers to bytes.
+
+*Parameters:*
+- ''value'': String or list of numbers (0-255)
+
+*Returns:*
+- Bytes: Converted byte representation
+
+*Errors:*
+- Runtime error if value is not string or list
+- Runtime error if list contains non-number elements
+- Runtime error if list contains numbers outside 0-255 range

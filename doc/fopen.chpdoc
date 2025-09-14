@@ -1,0 +1,16 @@
+*fopen* | V-$CHIPVR ($CHIPCN)
+
+''fopen(path, mode)''
+
+Opens a file and returns a file handle.
+
+*Parameters:*
+- ''path'': String file path
+- ''mode'': String mode ("r", "w", "a", "rw")
+
+*Returns:*
+- Number: File handle on success
+- ''err'' on failure
+
+*Errors:*
+- Runtime error if mode is invalid

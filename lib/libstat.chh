@@ -1,0 +1,209 @@
+#!/usr/bin/chippy
+#
+# corelib - libstat.chh
+#
+
+load("libgregorian.chh");
+load("libfsio.chh");
+
+# STATSIZE
+# (2025-08-13)
+# File size in bytes
+
+var STATSIZE = 0;
+
+# STATMTIME
+# (2025-08-13)
+# Last modified time (Unix timestamp)
+
+var STATMTIME = 1;
+
+# STATATIME
+# (2025-08-13)
+# Last access time (Unix timestamp)
+
+var STATATIME = 2;
+
+# STATCTIME
+# (2025-08-13)
+# Creation/change time (Unix timestamp)
+
+var STATCTIME = 3;
+
+# STATMODE
+# (2025-08-13)
+# File permissions/mode bits
+
+var STATMODE = 4;
+
+# STATUID
+# (2025-08-13)
+# Owner user ID
+
+var STATUID = 5;
+
+# STATGID
+# (2025-08-13)
+# Owner group ID
+
+var STATGID = 6;
+
+# STATNLINK
+# (2025-08-13)
+# Number of hard links
+
+var STATNLINK = 7;
+
+# STATINODE
+# (2025-08-13)
+# Inode number
+
+var STATINODE = 8;
+
+# STATDEVICE
+# (2025-08-13)
+# Device ID
+
+var STATDEVICE = 9;
+
+# STATTYPE
+# (2025-08-13)
+# File type string
+
+var STATTYPE = 10;
+
+
+# TYPEFILE
+# (2025-08-13)
+# Regular file type
+
+var TYPEFILE = "file";
+
+# TYPEDIR
+# (2025-08-13)
+# Directory type
+
+var TYPEDIR = "dir";
+
+# TYPESYMLINK
+# (2025-08-13)
+# Symbolic link type
+
+var TYPESYMLINK = "symlink";
+
+# TYPECHAR
+# (2025-08-13)
+# Character device type
+
+var TYPECHAR = "char";
+
+# TYPEBLOCK
+# (2025-08-13)
+# Block device type
+
+var TYPEBLOCK = "block";
+
+# TYPEFIFO
+# (2025-08-13)
+# Named pipe (FIFO) type
+
+var TYPEFIFO = "fifo";
+
+# TYPESOCKET
+# (2025-08-13)
+# Socket type
+
+var TYPESOCKET = "socket";
+
+# TYPEUNKNOWN
+# (2025-08-13)
+# Unknown file type
+
+var TYPEUNKNOWN = "unknown";
+
+# func StatType(statResult)
+# V-1.0.0 (2025-08-13)
+#
+# Extracts the file type from stat() result list statResult.
+
+func StatType(statResult)
+{
+	if type(statResult) == "list" and len(statResult) > STATTYPE
+	{ return get(statResult, STATTYPE); }
+
+	return TYPEUNKNOWN;
+}
+
+# func PathExists(path)
+# V-1.0.0 (2025-08-13)
+#
+# Returns true if path exists (file, directory, or any other
+# type), false otherwise.
+
+func PathExists(path)
+{
+	var info = stat(path);
+
+	return type(info) == "list";
+}
+
+# func IsFile(path)
+# V-1.0.0 (2025-08-13)
+#
+# Returns true if file at path exists, false otherwise.
+
+func IsFile(path)
+{
+	var info = stat(path);
+
+	return StatType(info) == TYPEFILE;
+}
+
+# func IsDir(path)
+# V-1.0.0 (2025-08-13)
+#
+# Returns true if directory at path exists, false otherwise.
+
+func IsDir(path)
+{
+	var info = stat(path);
+
+	return StatType(info) == TYPEDIR;
+}
+
+# func IsSymlink(path)
+# V-1.0.0 (2025-08-13)
+#
+# Returns true if symlink at path exists, false otherwise.
+
+func IsSymlink(path)
+{
+	var info = lstat(path);
+
+	return StatType(info) == TYPESYMLINK;
+}
+
+# func StatInfo(path)
+# V-1.0.0 (2025-08-13)
+#
+# Returns a formatted string with detailed filesystem object information
+# of the object at path, or err if path is invalid.
+
+func StatInfo(path)
+{
+	var info = stat(path);
+
+	if type(info) != "list" { return err; }
+
+	var result = "Path: " + path + "\n";
+
+	result = result + "Type: " + StatType(info) + "\n";
+	result = result + "Size: " + SizeToString(get(info, STATSIZE)) + "\n";
+	result = result + "Modified: " + GregorianFormatTime(get(info, STATMTIME)) + "\n";
+	result = result + "Mode: " + str(get(info, STATMODE)) + "\n";
+	result = result + "UID: " + str(get(info, STATUID)) + "\n";
+	result = result + "GID: " + str(get(info, STATGID)) + "\n";
+	result = result + "Inode: " + str(get(info, STATINODE));
+
+	return result;
+}

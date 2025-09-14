@@ -1,0 +1,12 @@
+*dclose* | V-$CHIPVR ($CHIPCN)
+
+''dclose(handle)''
+
+Closes a directory handle.
+
+*Parameters:*
+- ''handle'': Directory handle
+
+*Returns:*
+- ''ok'' on success
+- ''err'' on failure

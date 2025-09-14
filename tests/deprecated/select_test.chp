@@ -1,0 +1,66 @@
+#!/usr/bin/chippy
+#
+# tests - select_test.chp
+#
+
+
+load("lib/libprint.chh");
+
+
+Println("Testing select() with popen handles...");
+
+var echoProc = popen("echo 'Hello from process'", "r");
+
+if echoProc <= 0
+{
+	Println("Failed to create echo process");
+	off(1);
+}
+
+Println("Created echo process: handle " + str(echoProc));
+
+Println("Testing select() with process handle...");
+var ready = select([echoProc], [], 1000);
+
+if type(ready) == "list"
+{
+	Println("select() returned list with " + str(len(ready)) + " ready handles");
+
+	if len(ready) > 0
+	{
+		var readyHandle = get(ready, 0);
+		Println("Ready handle: " + str(readyHandle));
+
+		if readyHandle == echoProc
+		{
+			Println("SUCCESS: Process handle detected as ready!");
+
+			var data = fread(echoProc, 1024);
+
+			if len(data) > 0
+			{
+				var text = unpack(data);
+				Println("Read from process: '" + text + "'");
+			}
+			else
+			{
+				Println("No data available to read");
+			}
+		}
+		else
+		{
+			Println("ERROR: Wrong handle returned");
+		}
+	}
+	else
+	{
+		Println("No handles ready (timeout)");
+	}
+}
+else
+{
+	Println("select() returned error: " + str(ready));
+}
+
+pclose(echoProc);
+Println("Test completed successfully!");

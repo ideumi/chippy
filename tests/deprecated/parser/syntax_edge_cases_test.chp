@@ -1,0 +1,43 @@
+load("lib/libprint.chh");
+
+Print("=== Parser Syntax Edge Cases ===\n");
+
+# Test 1: Assignment vs variable access disambiguation
+Print("Test 1: Variable access vs assignment\n");
+var testVar = "original";
+Print("Access: ");
+Println(testVar);  # Should be variable access
+testVar = "modified";  # Should be assignment
+Print("Modified: ");
+Println(testVar);
+
+# Test 2: Assignment in function arguments (if supported)
+Print("Test 2: Function with variable arguments\n");
+func printTwo(first, second){
+    Println(first);
+    Println(second);
+}
+var arg1 = "First";
+var arg2 = "Second";
+printTwo(arg1, arg2);
+
+# Test 3: Assignment with parentheses
+Print("Test 3: Assignment with parentheses\n");
+wrapped = (42 + 8);
+Println(wrapped);
+
+# Test 4: Assignment vs equality (should be assignment)
+Print("Test 4: Assignment precedence\n");
+equality_test = 5;  # Assignment, not comparison
+Println(equality_test);
+
+# Test 5: Multiple assignments in sequence
+Print("Test 5: Sequential assignments\n");
+first = 1;
+second = 2;
+third = 3;
+Println(first);
+Println(second);  
+Println(third);
+
+Print("=== Syntax edge case tests completed ===\n");

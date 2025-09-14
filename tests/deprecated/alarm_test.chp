@@ -1,0 +1,25 @@
+#!/usr/bin/chippy
+
+load("lib/libprint.chh");
+load("lib/libsignals.chh");
+
+# Test alarm and signal handling
+Println("Testing alarm() and SIGALRM handling...");
+
+# Define alarm handler
+func alarmHandler() {
+    Println(2);
+}
+
+# Set up SIGALRM handler
+signal(SIGALRM, alarmHandler);
+
+# Set alarm for 3000 milliseconds (3 seconds)
+var remaining = alarm(3000);
+Println("Alarm set for 3000ms (previous remaining: " + str(remaining) + "ms)");
+
+# Wait for the alarm
+Println("Waiting for alarm...");
+sleep(5000);
+
+Println("Test completed.");

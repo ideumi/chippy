@@ -1,0 +1,310 @@
+#!/usr/bin/chippy
+#
+# corelib - libgregorian.chh
+#
+
+load("libmath.chh");
+load("libtime.chh");
+
+# UNIXEPOCHYEAR
+# (2025-08-13)
+# UNIX epoch start year
+
+var UNIXEPOCHYEAR = 1970;
+
+# DAYSINYEAR
+# (2025-08-13)
+# Number of days in a regular year
+
+var DAYSINYEAR = 365;
+
+# DAYSINLEAPYEAR
+# (2025-08-13)
+# Number of days in a leap year
+
+var DAYSINLEAPYEAR = 366;
+
+# MONTHSINYEAR
+# (2025-08-13)
+# Number of months in a year
+
+var MONTHSINYEAR = 12;
+
+# WEEKDAYS
+# (2025-08-13)
+# Weekday names in English
+
+var WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+# MONTHS
+# (2025-08-13)
+# Month names in English
+
+var MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+# MONTHDAYS
+# (2025-08-13)
+# Days in each month (non-leap year)
+
+var MONTHDAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+# UNIXEPOCHWEEKDAY
+# (2025-08-16)
+# UNIX start day of week
+
+var UNIXEPOCHWEEKDAY = 3;
+
+# TIMEZONEOFFSET
+# (2025-08-16)
+# Timezone offset in seconds from UTC
+
+var TIMEZONEOFFSET = 0;
+
+# func IsLeapYear(year)
+# V-1.0.0 (2025-08-13)
+#
+# If year is a leap year, true is returned, otherwise false.
+
+func IsLeapYear(year)
+{
+	return (Mod(year, 4) == 0 and Mod(year, 100) != 0) or (Mod(year, 400) == 0);
+}
+
+# func GregorianYear(days)
+# V-1.0.0 (2025-08-13)
+#
+# Calculates year and remaining days from days.
+
+func GregorianYear(days)
+{
+	var year = UNIXEPOCHYEAR;
+	var remainingDays = days;
+
+	var approxYears = int(days / DAYSINYEAR);
+	year = year + approxYears;
+
+	remainingDays = remainingDays - (approxYears * DAYSINYEAR);
+
+	var leapDaysFromEpoch = 0;
+	var yearIter = UNIXEPOCHYEAR;
+
+	while yearIter < year
+	{
+		if IsLeapYear(yearIter) { leapDaysFromEpoch = leapDaysFromEpoch + 1; }
+
+		yearIter = yearIter + 1;
+	}
+
+	remainingDays = remainingDays - leapDaysFromEpoch;
+
+	while remainingDays < 0
+	{
+		year = year - 1;
+
+		var daysInPrevYear = DAYSINYEAR;
+
+		if IsLeapYear(year) { daysInPrevYear = DAYSINLEAPYEAR; }
+
+		remainingDays = remainingDays + daysInPrevYear;
+	}
+
+	while true
+	{
+		var daysInYear = DAYSINYEAR;
+
+		if IsLeapYear(year) { daysInYear = DAYSINLEAPYEAR; }
+
+		if remainingDays >= daysInYear
+		{
+			remainingDays = remainingDays - daysInYear;
+			year = year + 1;
+		}
+		else { break; }
+	}
+
+	return [year, remainingDays];
+}
+
+# func GregorianMonthAndDay(year, remainingDays)
+# V-1.0.0 (2025-08-13)
+#
+# Calculates month and day from remainingDays in year.
+
+func GregorianMonthAndDay(year, remainingDays)
+{
+	var isLeap = IsLeapYear(year);
+	var month = 1;
+	var daysLeft = remainingDays;
+
+	while month <= MONTHSINYEAR
+	{
+		var daysInMonth = get(MONTHDAYS, month - 1);
+
+		if month == 2 and isLeap { daysInMonth = 29; }
+
+		if daysLeft >= daysInMonth
+		{
+			daysLeft = daysLeft - daysInMonth;
+			month = month + 1;
+		}
+		else { break; }
+	}
+
+	return [month, daysLeft + 1];
+}
+
+# func GregorianFormatTime(timestamp)
+# V-1.0.0 (2025-08-13)
+#
+# UNIX timestamp to "YYYY-MM-DD HH:MM:SS" string.
+
+func GregorianFormatTime(timestamp)
+{
+	var components = GregorianParseTime(timestamp);
+
+	if str(components) == err { return err; }
+
+	var year = get(components, 0);
+	var month = get(components, 1);
+	var day = get(components, 2);
+	var hours = get(components, 3);
+	var minutes = get(components, 4);
+	var seconds = get(components, 5);
+
+	var pad = func(val) {
+		if val < 10 { return "0" + str(val); }
+
+		return str(val);
+	};
+
+	return str(year) + "-" + pad(month) + "-" + pad(day) + " " + pad(hours) + ":" + pad(minutes) + ":" + pad(seconds);
+}
+
+# func GregorianDaysInMonth(year, month)
+# V-1.0.0 (2025-08-13)
+#
+# Returns the number of days in month and year.
+
+func GregorianDaysInMonth(year, month)
+{
+	if month < 1 or month > MONTHSINYEAR { return err; }
+
+	if month == 2 and IsLeapYear(year) { return 29; }
+
+	return get(MONTHDAYS, month - 1);
+}
+
+# func GregorianDayOfYear(timestamp)
+# V-1.0.0 (2025-08-13)
+#
+# Returns the day of year.
+
+func GregorianDayOfYear(timestamp)
+{
+	if timestamp < 0 { return err; }
+
+	# Timezone
+	var localTimestamp = timestamp + TIMEZONEOFFSET;
+
+	var days = int(localTimestamp / SECONDSPERDAY);
+	var yearResult = GregorianYear(days);
+	var remainingDays = get(yearResult, 1);
+
+	return remainingDays + 1;
+}
+
+# func GregorianParseTime(timestamp)
+# V-1.0.0 (2025-08-13)
+#
+# Parses timestamp to [year, month, day, hour, minute, second].
+
+func GregorianParseTime(timestamp)
+{
+	if timestamp < 0 { return err; }
+
+	# Timezone
+	var localTimestamp = timestamp + TIMEZONEOFFSET;
+
+	var days = int(localTimestamp / SECONDSPERDAY);
+	var hours = int(Mod(localTimestamp, SECONDSPERDAY) / SECONDSPERHOUR);
+	var minutes = int(Mod(localTimestamp, SECONDSPERHOUR) / SECONDSPERMINUTE);
+	var seconds = int(Mod(localTimestamp, SECONDSPERMINUTE));
+
+	var yearResult = GregorianYear(days);
+	var year = get(yearResult, 0);
+
+	var remainingDays = get(yearResult, 1);
+
+	var dateResult = GregorianMonthAndDay(year, remainingDays);
+
+	var month = get(dateResult, 0);
+
+	var day = get(dateResult, 1);
+
+	return [year, month, day, hours, minutes, seconds];
+}
+
+# func GregorianDayOfWeek(timestamp)
+# V-1.0.0 (2025-08-16)
+#
+# Returns the day of week (0 = Monday, 6 = Sunday).
+
+func GregorianDayOfWeek(timestamp)
+{
+	if timestamp < 0 { return err; }
+
+	var localTimestamp = timestamp + TIMEZONEOFFSET;
+
+	var days = int(localTimestamp / SECONDSPERDAY);
+
+	return Mod(days + UNIXEPOCHWEEKDAY, 7);
+}
+
+# func GregorianDateToTimestamp(year, month, day, hour, minute, second)
+# V-1.0.0 (2025-08-16)
+#
+# Converts Gregorian date/time to UNIX timestamp.
+
+func GregorianDateToTimestamp(year, month, day, hour, minute, second)
+{
+	if year < UNIXEPOCHYEAR { return err; }
+	if month < 1 or month > MONTHSINYEAR { return err; }
+	if day < 1 or day > GregorianDaysInMonth(year, month) { return err; }
+	if hour < 0 or hour >= HOURSPERDAY { return err; }
+	if minute < 0 or minute >= MINUTESPERHOUR { return err; }
+	if second < 0 or second >= SECONDSPERMINUTE { return err; }
+
+	var totalDays = 0;
+	var yearIter = UNIXEPOCHYEAR;
+
+	while yearIter < year
+	{
+		var daysInYear = DAYSINYEAR;
+
+		if IsLeapYear(yearIter) { daysInYear = DAYSINLEAPYEAR; }
+
+		totalDays = totalDays + daysInYear;
+		yearIter = yearIter + 1;
+	}
+
+	var monthIter = 1;
+
+	while monthIter < month
+	{
+		totalDays = totalDays + GregorianDaysInMonth(year, monthIter);
+		monthIter = monthIter + 1;
+	}
+
+	totalDays = totalDays + (day - 1);
+
+	# Convert to timestamp
+	var timestamp = totalDays * SECONDSPERDAY;
+	timestamp = timestamp + (hour * SECONDSPERHOUR);
+	timestamp = timestamp + (minute * SECONDSPERMINUTE);
+	timestamp = timestamp + second;
+
+	# UTC
+	timestamp = timestamp - TIMEZONEOFFSET;
+
+	return timestamp;
+}

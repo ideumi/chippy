@@ -1,0 +1,81 @@
+/*
+ *
+ * RR2 - internal/builtins/mkdir.go
+ *
+ */
+
+package builtins
+
+import (
+	"chip-go/internal/builtins/shared"
+	"chip-go/internal/constants"
+	"chip-go/internal/errors"
+	"chip-go/internal/values"
+	"os"
+	"strconv"
+)
+
+func mkdirFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+	res := values.NewRuntimeResult()
+
+	if len(args) != 2 {
+		var posStart, posEnd *errors.Position
+
+		if len(args) > 0 {
+			posStart, posEnd = args[0].GetPos()
+		}
+
+		return res.Failure(errors.NewRTError(
+			posStart, posEnd,
+			shared.Errors.InvalidArgCountWithHint("mkdir", 2, "path, mode"),
+			ctx,
+		))
+	}
+
+	pathStr, ok := args[0].(*values.String)
+
+	if !ok {
+		posStart, posEnd := args[0].GetPos()
+
+		return res.Failure(errors.NewRTError(
+			posStart, posEnd,
+			shared.Errors.InvalidArgTypePositionalWithHint("mkdir", shared.PositionFirst, shared.TypeString, "path"),
+			ctx,
+		))
+	}
+
+	modeNum, ok := args[1].(*values.Number)
+
+	if !ok {
+		posStart, posEnd := args[1].GetPos()
+
+		return res.Failure(errors.NewRTError(
+			posStart, posEnd,
+			shared.Errors.InvalidArgTypePositionalWithHint("mkdir", shared.PositionSecond, shared.TypeNumber, "mode"),
+			ctx,
+		))
+	}
+
+	// Convert octal notation to proper file mode
+	modeStr := strconv.FormatInt(int64(modeNum.Value), 10)
+	octalMode, err := strconv.ParseInt(modeStr, 8, 32)
+
+	if err != nil {
+		posStart, posEnd := args[1].GetPos()
+
+		return res.Failure(errors.NewRTError(
+			posStart, posEnd,
+			"Invalid octal mode: "+modeStr,
+			ctx,
+		))
+	}
+
+	mode := os.FileMode(octalMode)
+	err = os.Mkdir(pathStr.Value, mode)
+
+	if err != nil {
+		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+	}
+
+	return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
+}

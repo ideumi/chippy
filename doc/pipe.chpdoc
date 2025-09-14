@@ -1,0 +1,9 @@
+*pipe* | V-$CHIPVR ($CHIPCN)
+
+''pipe()''
+
+Creates an anonymous pipe and returns read and write handles.
+
+*Returns:*
+- List: [read_handle, write_handle]
+- ''err'' on failure

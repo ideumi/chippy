@@ -1,0 +1,19 @@
+*num* | V-$CHIPVR ($CHIPCN)
+
+''num(value)''
+
+Converts a value to number.
+
+*Parameters:*
+- ''value'': Value to convert
+
+*Returns:*
+- Number: Converted value
+  - Number: Returns copy of original
+  - String: Parses as floating point number
+  - List: Returns 0 for empty list, single number element if list has one number
+
+*Errors:*
+- Runtime error if string cannot be parsed as number
+- Runtime error if list cannot be converted to number
+- Runtime error if value type cannot be converted

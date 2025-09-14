@@ -1,0 +1,8 @@
+*getppid* | V-$CHIPVR ($CHIPCN)
+
+''getppid()''
+
+Gets the process ID of the parent process.
+
+*Returns:*
+- Number: Parent process ID

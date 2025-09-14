@@ -1,0 +1,13 @@
+*fread* | V-$CHIPVR ($CHIPCN)
+
+''fread(handle, count)''
+
+Reads bytes from a file handle.
+
+*Parameters:*
+- ''handle'': File handle
+- ''count'': Number of bytes to read, or 0 to read entire file
+
+*Returns:*
+- Bytes
+- ''err'' on failure

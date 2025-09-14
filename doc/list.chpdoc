@@ -1,0 +1,18 @@
+*list* | V-$CHIPVR ($CHIPCN)
+
+''list()''
+''list(value)''
+''list(value1, value2, ...)''
+
+Creates a list from the given arguments.
+
+*Parameters:*
+- No arguments: Creates empty list
+- One argument: Converts value to list
+- Multiple arguments: Creates list containing all arguments
+
+*Returns:*
+- List: New list based on arguments
+
+*Errors:*
+- Runtime error if single argument cannot be converted to list

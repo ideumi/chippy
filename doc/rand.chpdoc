@@ -1,0 +1,16 @@
+*rand* | V-$CHIPVR ($CHIPCN)
+
+''rand(count)''
+
+Generates cryptographically secure random bytes.
+
+*Parameters:*
+- ''count'': Number of random bytes to generate
+
+*Returns:*
+- List: List of numbers (0-255) representing random bytes
+- ''err'' on failure
+
+*Errors:*
+- Runtime error if count is not a number
+- Runtime error if count is not positive

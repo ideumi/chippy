@@ -1,0 +1,12 @@
+*lstat* | V-$CHIPVR ($CHIPCN)
+
+''lstat(path)''
+
+Returns file status information as a list, without following symbolic links.
+
+*Parameters:*
+- ''path'': String file path
+
+*Returns:*
+- List: [size, mtime, atime, ctime, mode, uid, gid, nlink, ino, dev, type]
+- ''err'' on failure

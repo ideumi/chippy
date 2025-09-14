@@ -1,0 +1,8 @@
+*getuid* | V-$CHIPVR ($CHIPCN)
+
+''getuid()''
+
+Gets the user ID of the current process.
+
+*Returns:*
+- Number: Current user ID

@@ -1,0 +1,8 @@
+*time* | V-$CHIPVR ($CHIPCN)
+
+''time()''
+
+Returns the current Unix timestamp with nanosecond precision.
+
+*Returns:*
+- Number: Unix timestamp with nanosecond precision

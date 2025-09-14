@@ -1,0 +1,12 @@
+*setsid* | V-$CHIPVR ($CHIPCN)
+
+''setsid()''
+
+Creates a new session and sets the process as the session leader.
+
+*Returns:*
+- Number: Session ID of the new session
+- ''err'' on failure
+
+*Notes:*
+The calling process becomes the session leader of the new session, is the process group leader of the new process group, and has no controlling terminal.

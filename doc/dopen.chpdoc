@@ -1,0 +1,12 @@
+*dopen* | V-$CHIPVR ($CHIPCN)
+
+''dopen(path)''
+
+Opens a directory for reading.
+
+*Parameters:*
+- ''path'': String path to the directory
+
+*Returns:*
+- Number: Directory handle
+- ''err'' on failure

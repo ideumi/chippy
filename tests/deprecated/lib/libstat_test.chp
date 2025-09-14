@@ -1,0 +1,82 @@
+#!/usr/bin/chippy
+#
+# tests - libstat_test.chp
+# V-1.0.0 (2025-08-13)
+#
+
+load("lib/libstat.chh");
+load("lib/libprint.chh");
+
+Print("\n");
+
+# Test with a regular file (use this test file itself)
+var testFile = "tests/libstat_test.chp";
+
+Println("Testing with file: " + testFile);
+Print("\n");
+
+# Test StatType function
+var info = stat(testFile);
+Println("StatType(stat(\"" + testFile + "\")) = \"" + StatType(info) + "\" (expected: \"file\")");
+
+# Test file type checking functions
+Println("IsFile(\"" + testFile + "\") = " + str(IsFile(testFile)) + " (expected: 1)");
+Println("IsDir(\"" + testFile + "\") = " + str(IsDir(testFile)) + " (expected: 0)");
+Println("PathExists(\"" + testFile + "\") = " + str(PathExists(testFile)) + " (expected: 1)");
+
+Print("\n");
+
+# Test with directory
+var testDir = "tests";
+
+Println("Testing with directory: " + testDir);
+Println("IsFile(\"" + testDir + "\") = " + str(IsFile(testDir)) + " (expected: 0)");
+Println("IsDir(\"" + testDir + "\") = " + str(IsDir(testDir)) + " (expected: 1)");
+Println("PathExists(\"" + testDir + "\") = " + str(PathExists(testDir)) + " (expected: 1)");
+
+Print("\n");
+
+# Test with non-existent path
+var nonExistent = "/does/not/exist";
+
+Println("Testing with non-existent path: " + nonExistent);
+Println("IsFile(\"" + nonExistent + "\") = " + str(IsFile(nonExistent)) + " (expected: 0)");
+Println("IsDir(\"" + nonExistent + "\") = " + str(IsDir(nonExistent)) + " (expected: 0)");
+Println("PathExists(\"" + nonExistent + "\") = " + str(PathExists(nonExistent)) + " (expected: 0)");
+
+Print("\n");
+
+# Test StatInfo function
+Println("StatInfo for test file:");
+Println(StatInfo(testFile));
+
+Print("\n");
+
+Println("StatInfo for test directory:");
+Println(StatInfo(testDir));
+
+Print("\n");
+
+# Test StatType with invalid input
+Println("StatType([]) = \"" + StatType([]) + "\" (expected: \"unknown\")");
+Println("StatType(\"not_a_list\") = \"" + StatType("not_a_list") + "\" (expected: \"unknown\")");
+
+Print("\n");
+
+# Test direct access to stat result using constants
+var fileInfo = stat(testFile);
+if type(fileInfo) == "list"
+{
+    Println("Direct access tests:");
+    Println("get(stat_result, STATSIZE) = " + str(get(fileInfo, STATSIZE)) + " (file size in bytes)");
+    Println("get(stat_result, STATTYPE) = \"" + str(get(fileInfo, STATTYPE)) + "\" (expected: \"file\")");
+    Println("get(stat_result, STATMODE) = " + str(get(fileInfo, STATMODE)) + " (file mode/permissions)");
+}
+
+Print("\n");
+
+# Test error cases
+Println("Error cases:");
+Println("StatInfo(\"" + nonExistent + "\") = " + str(StatInfo(nonExistent)) + " (expected: err)");
+
+Print("\n");

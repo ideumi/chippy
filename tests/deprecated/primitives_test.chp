@@ -1,0 +1,265 @@
+#!/usr/bin/chippy
+#
+# tests - primitives_test.chp
+#
+# Test script for all new system primitives
+# This replaces syscall() with focused, safe primitives
+#
+
+
+load("lib/libprint.chh");
+
+
+Println("Testing New System Primitives");
+Println("============================");
+
+Println("\n1. Core I/O & Process Tests:");
+
+var currentDir = getcwd();
+Println("Current directory: " + currentDir);
+
+var pid = getpid();
+Println("Process ID: " + str(pid));
+
+var uid = getuid(); 
+Println("User ID: " + str(uid));
+
+var timestamp = time();
+Println("Unix timestamp: " + str(timestamp));
+
+Println("\n2. Environment Variable Tests:");
+
+var path = getenv("PATH");
+var pathType = type(path);
+
+if pathType == "string"
+{
+	Println("PATH exists (length: " + str(len(path)) + ")");
+}
+else
+{
+	Println("PATH not found (got type: " + pathType + ")");
+}
+
+setenv("CHIPTEST", "hello_world");
+var testVar = getenv("CHIPTEST");
+
+if testVar == "hello_world"
+{
+	Println("Environment variable set/get works");
+}
+else
+{
+	Println("Environment variable test failed");
+}
+
+Println("\n3. File System Tests:");
+
+var testContent = "Hello from ChipLang primitives!";
+var testFile = fopen("test_primitive.txt", "w");
+fwrite(pack(testContent), testFile);
+fclose(testFile);
+
+var fileInfo = stat("test_primitive.txt");
+var fileInfoType = type(fileInfo);
+
+if fileInfoType == "list"
+{
+	var size = get(fileInfo, 0);
+	var fileType = get(fileInfo, 10);
+	Println("stat() works - size: " + str(size) + ", type: " + fileType);
+}
+else
+{
+	Println("stat() failed");
+}
+
+var lstatInfo = lstat("test_primitive.txt");
+var lstatType = type(lstatInfo);
+
+if lstatType == "list"
+{
+	Println("lstat() works");
+}
+else
+{
+	Println("lstat() failed");
+}
+
+Println("\n4. Directory Operations Tests:");
+
+mkdir("test_dir", 755);
+var dirStat = stat("test_dir");
+var dirStatType = type(dirStat);
+
+if dirStatType == "list"
+{
+	var dirType = get(dirStat, 10);
+
+	if dirType == "dir"
+	{
+		Println("mkdir() works");
+	}
+	else
+	{
+		Println("mkdir() created wrong type: " + dirType);
+	}
+}
+else
+{
+	Println("mkdir() failed");
+}
+
+var dirHandle = dopen(".");
+
+if dirHandle != -1
+{
+	Println("dopen() works - handle: " + str(dirHandle));
+
+	var entryCount = 0;
+	var entry = dread(dirHandle);
+
+	while type(entry) == "string"
+	{
+		var entryCount = entryCount + 1;
+
+		if entryCount <= 3
+		{
+			Println("  Entry: " + entry);
+		}
+
+		var entry = dread(dirHandle);
+	}
+
+	Println("  Total entries: " + str(entryCount));
+
+	dclose(dirHandle);
+	Println("Directory iteration complete");
+}
+else
+{
+	Println("dopen() failed");
+}
+
+Println("\n5. File Operations Tests:");
+
+rename("test_primitive.txt", "renamed_primitive.txt");
+var renamedStat = stat("renamed_primitive.txt");
+
+if type(renamedStat) == "list"
+{
+	Println("rename() works");
+}
+else
+{
+	Println("rename() failed");
+}
+
+chmod("renamed_primitive.txt", 644);
+var chmodStat = stat("renamed_primitive.txt");
+
+if type(chmodStat) == "list"
+{
+	Println("chmod() works");
+}
+else
+{
+	Println("chmod() failed");
+}
+
+Println("\n6. Symbolic Link Tests:");
+
+symlink("renamed_primitive.txt", "test_symlink");
+var symlinkLstat = lstat("test_symlink");
+
+if type(symlinkLstat) == "list"
+{
+	var linkType = get(symlinkLstat, 10);
+
+	if linkType == "symlink"
+	{
+		Println("symlink() works");
+
+		var target = readlink("test_symlink");
+
+		if target == "renamed_primitive.txt"
+		{
+			Println("readlink() works - target: " + target);
+		}
+		else
+		{
+			Println("readlink() failed - got: " + target);
+		}
+	}
+	else
+	{
+		Println("symlink() created wrong type: " + linkType);
+	}
+}
+else
+{
+	Println("symlink() failed");
+}
+
+Println("\n7. File Lock Tests:");
+
+var lockTestFile = fopen("lock_test.txt", "w");
+fwrite(pack("lock test content"), lockTestFile);
+fclose(lockTestFile);
+
+var lockFile = fopen("lock_test.txt", "r");
+
+if lockFile != -1
+{
+	flock(lockFile, 1);  # LOCK_SH = 1 (shared lock)
+	Println("flock() shared lock applied");
+
+	flock(lockFile, 8);  # LOCK_UN = 8 (unlock)
+	Println("flock() unlock applied");
+
+	fclose(lockFile);
+	unlink("lock_test.txt");
+}
+else
+{
+	Println("Could not open file for locking test");
+}
+
+Println("\n8. Directory Navigation Tests:");
+
+var originalDir = getcwd();
+chdir("test_dir");
+var newDir = getcwd();
+
+if newDir != originalDir
+{
+	Println("chdir() works - changed to: " + newDir);
+
+	chdir("..");
+	var backDir = getcwd();
+
+	if backDir == originalDir
+	{
+		Println("chdir('..') works - back to: " + backDir);
+	}
+	else
+	{
+		Println("chdir('..') failed");
+	}
+}
+else
+{
+	Println("chdir() failed");
+}
+
+
+Println("\n9. Cleanup:");
+
+unlink("test_symlink");
+unlink("renamed_primitive.txt");
+unlink("test_dir");
+
+Println("Cleanup complete");
+
+
+Println("\nAll primitive tests completed!");

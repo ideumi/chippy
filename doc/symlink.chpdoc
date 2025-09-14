@@ -1,0 +1,17 @@
+*symlink* | V-$CHIPVR ($CHIPCN)
+
+''symlink(target, linkpath)''
+
+Creates a symbolic link pointing to the target path.
+
+*Parameters:*
+- ''target'': String path that the symbolic link will point to
+- ''linkpath'': String path where the symbolic link will be created
+
+*Returns:*
+- ''ok'' on success
+- ''err'' on failure
+
+*Errors:*
+- Runtime error if target is not a string
+- Runtime error if linkpath is not a string

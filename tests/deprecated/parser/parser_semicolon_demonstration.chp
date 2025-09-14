@@ -1,0 +1,65 @@
+# ChipLang Mandatory Semicolon Implementation Demonstration
+# This file showcases the new C-style semicolon syntax
+
+# Variable declarations require semicolons
+var x = 1;
+var y = 2;
+var name = "ChipLang";
+var list = [1, 2, 3, 4, 5];
+
+# Control structures don't need semicolons after their closing braces
+if x > 0 {
+    var result = x * 2;
+    var message = "Positive number";
+}
+
+# Single-line control structures work perfectly
+if y > 0 { var quick = y + 1; }
+
+# Mixed styles work great
+if x < y {
+    var difference = y - x;
+} else { var difference = x - y; }
+
+# While loops
+var counter = 0;
+while counter < 3 {
+    var counter = counter + 1;
+    var doubled = counter * 2;
+}
+
+# For loops  
+for i = 0 utl 5 {
+    var value = i * 3;
+}
+
+# Functions
+func calculate(a, b) {
+    var sum = a + b;
+    var product = a * b;
+    return sum + product;
+}
+
+# Function calls require semicolons
+var result1 = calculate(x, y);
+var result2 = calculate(10, 20);
+
+# Complex expressions
+var complex = (x + y) * (result1 - result2) + calculate(1, 2);
+
+# Nested control structures work seamlessly
+if result1 > 0 {
+    for j = 0 utl result1 {
+        while j < 10 {
+            var nested = j * result1;
+            var j = j + 1;
+        }
+    }
+}
+
+# Arrow functions and assignments
+var adder = func(a, b) -> a + b;
+var multiplier = func(x) { return x * 2; };
+
+# Final result
+var final = adder(result1, result2) + multiplier(x);

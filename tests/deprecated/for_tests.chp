@@ -1,0 +1,30 @@
+#!/usr/bin/chippy
+#
+# tests - for_tests.chp
+#
+
+
+load("lib/libprint.chh");
+
+
+var testFlag = 1;
+
+
+for x = 0 utl 5
+{
+	Println("Iteration: " + str(x));
+}
+
+
+if testFlag == 1
+{
+	Println("If test works");
+
+	var counter = 1;
+
+	while counter < 5
+	{
+		var counter = counter + 1;
+		Println(str(counter));
+	}
+}

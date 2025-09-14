@@ -1,0 +1,16 @@
+*sclose* | V-$CHIPVR ($CHIPCN)
+
+''sclose(handle)''
+
+Closes a socket connection.
+
+*Parameters:*
+- ''handle'': Socket handle
+
+*Returns:*
+- ''ok'' on success
+- ''err'' on failure
+
+*Errors:*
+- Runtime error if handle is not a number
+- Runtime error if handle is invalid socket handle

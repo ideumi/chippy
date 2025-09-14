@@ -1,0 +1,23 @@
+*popen* | V-$CHIPVR ($CHIPCN)
+
+''popen(command, mode)''
+
+Opens a process with pipes for communication.
+
+*Parameters:*
+- ''command'': String shell command to execute
+- ''mode'': String pipe mode ("r", "w", or "rw")
+
+*Returns:*
+- Number: Process handle
+
+*Modes:*
+- "r": Read from process stdout
+- "w": Write to process stdin  
+- "rw": Both read and write pipes
+
+*Errors:*
+- Runtime error if command is not a string
+- Runtime error if mode is not a string
+- Runtime error if pipe creation fails
+- Runtime error if process start fails

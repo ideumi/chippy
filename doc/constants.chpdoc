@@ -1,0 +1,17 @@
+*Constants* | V-$CHIPVR ($CHIPCN)
+
+*Runtime Constants*
+
+These constants are available at runtime with a clean chippy session:
+
+''null'' - The number 0.
+''false'' - The number 0, standard falsy value.
+''true'' - The number 1, standard truthy value.
+
+''err'' - Error marker string "__~err~__". Used and recommended to indicate operation failure.
+''ok'' - Success marker string "__~ok~__". Used and recommended to indicate operation success.
+
+*Core Constants*
+
+''CHIPVR'' - Chippy version
+''CHIPCN'' - Release codename for CHIPVR

@@ -1,0 +1,13 @@
+*rename* | V-$CHIPVR ($CHIPCN)
+
+''rename(oldpath, newpath)''
+
+Renames or moves a file or directory.
+
+*Parameters:*
+- ''oldpath'': String current path
+- ''newpath'': String new path
+
+*Returns:*
+- ''ok'' on success
+- ''err'' on failure

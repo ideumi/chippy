@@ -1,0 +1,84 @@
+/*
+ *
+ * RR2 - internal/builtins/num.go
+ *
+ */
+
+package builtins
+
+import (
+	"chip-go/internal/builtins/shared"
+	"chip-go/internal/constants"
+	"chip-go/internal/errors"
+	"chip-go/internal/values"
+	"strconv"
+)
+
+func numFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+	res := values.NewRuntimeResult()
+
+	if len(args) != 1 {
+		var posStart, posEnd *errors.Position
+
+		if len(args) > 0 {
+			posStart, posEnd = args[0].GetPos()
+		}
+
+		return res.Failure(errors.NewRTError(
+			posStart, posEnd,
+			shared.Errors.InvalidArgCountWithHint("num", 1, "value"),
+			ctx,
+		))
+	}
+
+	value := args[0]
+
+	switch v := value.(type) {
+
+	case *values.Number:
+		return res.Success(v.Copy().SetContext(ctx))
+
+	case *values.String:
+		if f, err := strconv.ParseFloat(v.Value, 64); err == nil {
+			return res.Success(values.NewNumber(f).SetContext(ctx))
+		} else {
+			posStart, posEnd := args[0].GetPos()
+
+			return res.Failure(errors.NewRTError(
+				posStart, posEnd,
+				shared.Errors.CannotConvert("string to number", ": "+err.Error()),
+				ctx,
+			))
+		}
+
+	case *values.List:
+		// Trying our best
+		if len(v.Elements) == 0 {
+			return res.Success(values.NewNumber(constants.NUM_NUL).SetContext(ctx))
+		} else if len(v.Elements) == 1 {
+			// Try to convert single element
+			if elem := v.Elements[0]; elem != nil {
+				if elemNum, ok := elem.(*values.Number); ok {
+					return res.Success(elemNum.Copy().SetContext(ctx))
+				}
+			}
+		}
+
+		posStart, posEnd := args[0].GetPos()
+
+		return res.Failure(errors.NewRTError(
+			posStart, posEnd,
+			shared.Errors.CannotConvert("list to number", ""),
+			ctx,
+		))
+
+	default:
+		posStart, posEnd := args[0].GetPos()
+
+		return res.Failure(errors.NewRTError(
+			posStart, posEnd,
+			shared.Errors.CannotConvert("value to number", ""),
+			ctx,
+		))
+	}
+}

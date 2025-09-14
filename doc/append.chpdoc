@@ -1,0 +1,17 @@
+*append* | V-$CHIPVR ($CHIPCN)
+
+''append(container, value)''
+
+Appends a value to a list or byte to bytes.
+
+*Parameters:*
+- ''container'': List or bytes to append to
+- ''value'': Any value for lists, number (0-255) for bytes
+
+*Returns:*
+- List: New list with value appended
+- Bytes: New bytes with byte appended
+
+*Errors:*
+- Runtime error if byte value not 0-255
+- Runtime error if container is not list or bytes

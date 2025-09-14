@@ -1,0 +1,14 @@
+*load* | V-$CHIPVR ($CHIPCN)
+
+''load(filename)''
+
+Loads and executes a ChipLang program.
+
+*Parameters:*
+- ''filename'': String path to ChipLang program
+
+*Returns:*
+- ''ok'' on success
+
+*Errors:*
+- Runtime error if program cannot be loaded or executed

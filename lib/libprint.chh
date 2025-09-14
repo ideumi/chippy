@@ -1,0 +1,46 @@
+#!/usr/bin/chippy
+#
+# corelib - libprint.chh
+#
+
+load("libhandles.chh");
+
+# func Print(text)
+# V-1.0.0 (2025-08-13)
+#
+# Prints text to STDOUT.
+
+func Print(text)
+{
+	fwrite(pack(str(text)), STDOUT);
+}
+
+# func Println(text)
+# V-1.0.0 (2025-08-13)
+#
+# Prints text to STDOUT with trailing newline.
+
+func Println(text)
+{
+	fwrite(pack(str(text)) + b[10], STDOUT);
+}
+
+# func Printe(text)
+# V-1.0.0 (2025-08-13)
+#
+# Prints text to STDERR.
+
+func Printe(text)
+{
+	fwrite(pack(str(text)), STDERR);
+}
+
+# func Printeln(text)
+# V-1.0.0 (2025-08-13)
+#
+# Prints text to STDERR with trailing newline.
+
+func Printeln(text)
+{
+	fwrite(pack(str(text)) + b[10], STDERR);
+}

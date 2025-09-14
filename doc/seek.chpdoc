@@ -1,0 +1,18 @@
+*seek* | V-$CHIPVR ($CHIPCN)
+
+''seek(handle, offset, whence)''
+
+Sets the file position for a file handle.
+
+*Parameters:*
+- ''handle'': File handle
+- ''offset'': Number byte offset
+- ''whence'': Number seek origin (0=start, 1=current, 2=end)
+
+*Returns:*
+- Number: New position from start of file
+- ''err'' on failure
+
+*Errors:*
+- Runtime error if handle is invalid
+- Runtime error if whence not 0, 1, or 2

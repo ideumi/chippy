@@ -1,0 +1,26 @@
+*sopen* | V-$CHIPVR ($CHIPCN)
+
+''sopen(address, port, mode)''
+
+Opens a network socket connection.
+
+*Parameters:*
+- ''address'': String IP address or hostname
+- ''port'': Number port number (1-65535)
+- ''mode'': String connection mode
+
+*Modes:*
+- "tcp": TCP client connection
+- "udp": UDP connection
+- "listen": TCP server (bind and listen)
+
+*Returns:*
+- Number: Socket handle
+- ''err'' on failure
+
+*Errors:*
+- Runtime error if address is not a string
+- Runtime error if port is not a number
+- Runtime error if mode is not a string
+- Runtime error if mode is not "tcp", "udp", or "listen"
+- Runtime error if port is not between 1 and 65535

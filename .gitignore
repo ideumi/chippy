@@ -1,0 +1,19 @@
+# Build artifacts
+/chippy
+out/
+
+# Release directory
+rel/
+
+# Go build cache
+*.test
+*.out
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.swp
+*~

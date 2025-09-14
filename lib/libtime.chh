@@ -1,0 +1,136 @@
+#!/usr/bin/chippy
+#
+# corelib - libtime.chh
+#
+
+load("libmath.chh");
+
+# SECONDSPERMINUTE
+# (2025-08-16)
+# Number of seconds in one minute
+
+var SECONDSPERMINUTE = 60;
+
+# MINUTESPERHOUR
+# (2025-08-16)
+# Number of minutes in one hour
+
+var MINUTESPERHOUR = 60;
+
+# HOURSPERDAY
+# (2025-08-16)
+# Number of hours in one day
+
+var HOURSPERDAY = 24;
+
+# SECONDSPERHOUR
+# (2025-08-16)
+# Number of seconds in one hour
+
+var SECONDSPERHOUR = 3600;
+
+# SECONDSPERDAY
+# (2025-08-16)
+# Number of seconds in one day
+
+var SECONDSPERDAY = 86400;
+
+# func SleepSeconds(seconds)
+# V-1.0.0 (2025-08-13)
+#
+# Sleeps for the specified seconds.
+
+func SleepSeconds(seconds)
+{
+	sleep(seconds * 1000);
+}
+
+# func Elapsed(startTime)
+# V-1.0.0 (2025-08-13)
+#
+# Returns the elapsed time in seconds since startTime.
+
+func Elapsed(startTime)
+{
+	return time() - startTime;
+}
+
+# func WaitUntil(targetTime)
+# V-1.0.0 (2025-08-13)
+#
+# Sleeps until the system clock reaches targetTime.
+
+func WaitUntil(targetTime)
+{
+	var remaining = targetTime - time();
+
+	if remaining > 0
+	{
+		# convert seconds to milliseconds
+		sleep(remaining * 1000);
+	}
+}
+
+# func Days(timestamp)
+# V-1.0.0 (2025-08-16)
+#
+# Returns the number of days since Unix epoch at timestamp.
+
+func Days(timestamp)
+{
+	return int(timestamp / SECONDSPERDAY);
+}
+
+# func AddDays(timestamp, days)
+# V-1.0.0 (2025-08-16)
+#
+# Adds the specified number of days to timestamp.
+
+func AddDays(timestamp, days)
+{
+	return timestamp + (days * SECONDSPERDAY);
+}
+
+# func AddHours(timestamp, hours)
+# V-1.0.0 (2025-08-16)
+#
+# Adds the specified number of hours to timestamp.
+
+func AddHours(timestamp, hours)
+{
+	return timestamp + (hours * SECONDSPERHOUR);
+}
+
+# func AddMinutes(timestamp, minutes)
+# V-1.0.0 (2025-08-16)
+#
+# Adds the specified number of minutes to timestamp.
+
+func AddMinutes(timestamp, minutes)
+{
+	return timestamp + (minutes * SECONDSPERMINUTE);
+}
+
+# func StartOfDay(timestamp)
+# V-1.0.0 (2025-08-16)
+#
+# Returns the timestamp for the start of the day which timestamp
+# points to (00:00:00).
+
+func StartOfDay(timestamp)
+{
+	var days = Days(timestamp);
+
+	return days * SECONDSPERDAY;
+}
+
+# func EndOfDay(timestamp)
+# V-1.0.0 (2025-08-16)
+#
+# Returns the timestamp for the end of the day which timestamp
+# points to (23:59:59).
+
+func EndOfDay(timestamp)
+{
+	return StartOfDay(timestamp) + SECONDSPERDAY - 1;
+}

@@ -1,0 +1,46 @@
+#!/usr/bin/chippy
+#
+# corelib - libhandles.chh
+#
+
+# STDIN
+# (2025-08-12)
+# UNIX' standard input handle
+
+var STDIN = 0;
+
+# STDOUT
+# (2025-08-12)
+# UNIX' standard output handle
+
+var STDOUT = 1;
+
+# STDERR
+# (2025-08-12)
+# UNIX' standard error output handle
+
+var STDERR = 2;
+
+# LOCKSH
+# (2025-09-13)
+# Shared file lock for flock()
+
+var LOCKSH = 1;
+
+# LOCKEX
+# (2025-09-13)
+# Exclusive file lock for flock()
+
+var LOCKEX = 2;
+
+# LOCKNB
+# (2025-09-13)
+# Non-blocking flag for flock() (combine with LOCKSH or LOCKEX)
+
+var LOCKNB = 4;
+
+# LOCKUN
+# (2025-09-13)
+# Unlock file for flock()
+
+var LOCKUN = 8;

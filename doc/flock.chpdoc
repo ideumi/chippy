@@ -1,0 +1,20 @@
+*flock* | V-$CHIPVR ($CHIPCN)
+
+''flock(handle, operation)''
+
+Applies file locking operations to a file handle.
+
+*Parameters:*
+- ''handle'': File handle
+- ''operation'': Number lock operation (see ''libhandles.chh'')
+
+*Returns:*
+- ''ok'' on success
+- ''err'' on failure
+
+*Errors:*
+- Runtime error if handle is invalid
+
+*Misc:*
+- Use ''LOCKSH'' (shared), ''LOCKEX'' (exclusive), ''LOCKUN'' (unlock)
+- Add ''LOCKNB'' for non-blocking: ''LOCKSH + LOCKNB'' or ''LOCKEX + LOCKNB''

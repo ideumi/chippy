@@ -1,0 +1,17 @@
+*pclose* | V-$CHIPVR ($CHIPCN)
+
+''pclose(handle)''
+
+Closes a process handle and waits for the process to finish.
+
+*Parameters:*
+- ''handle'': Process handle
+
+*Returns:*
+- Number: Process exit code
+- ''err'' on failure
+
+*Errors:*
+- Runtime error if handle is not a number
+- Runtime error if handle is invalid process handle
+- Runtime error if handle is standard handle (0, 1, 2)

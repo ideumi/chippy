@@ -1,0 +1,29 @@
+#!/usr/bin/chippy
+#
+# tests - hildegard_orgonakkumulator.chp
+#
+# Memory Test - Do not run this on a machine with limited RAM or adjust MEGA
+#
+
+
+load("lib/libinput.chh");
+load("lib/libprint.chh");
+
+
+var MEGA = 9999999;
+
+
+func TreeCallingTest(testVal)
+{
+	var val = ["0"] * MEGA;
+
+	Println("Loaded, check memory usage, hit RETURN to (hopefully) unload.");
+
+	Input();
+
+	return testVal;
+}
+
+var result = TreeCallingTest(1);
+
+Input();

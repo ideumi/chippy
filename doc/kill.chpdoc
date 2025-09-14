@@ -1,0 +1,17 @@
+*kill* | V-$CHIPVR ($CHIPCN)
+
+''kill(pid, signal)''
+
+Sends a signal to a process.
+
+*Parameters:*
+- ''pid'': Number process ID to signal
+- ''signal'': Number signal to send (see ''libsignals.chh'')
+
+*Returns:*
+- ''ok'' on success
+- ''err'' on failure
+
+*Errors:*
+- Runtime error if pid is not a number
+- Runtime error if signal is not a number

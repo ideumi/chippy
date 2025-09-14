@@ -1,0 +1,18 @@
+*get* | V-$CHIPVR ($CHIPCN)
+
+''get(container, index)''
+
+Gets an element from a list or bytes at the specified index.
+
+*Parameters:*
+- ''container'': List or bytes
+- ''index'': Number index position
+
+*Returns:*
+- Any: Element value from list at index
+- Number: Byte value (0-255) from bytes at index
+
+*Errors:*
+- Runtime error if container is not list or bytes
+- Runtime error if index is not a number
+- Runtime error if index is out of bounds

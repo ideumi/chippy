@@ -1,0 +1,15 @@
+*readlink* | V-$CHIPVR ($CHIPCN)
+
+''readlink(path)''
+
+Reads the target of a symbolic link.
+
+*Parameters:*
+- ''path'': String path to symbolic link
+
+*Returns:*
+- String: Target path of the symbolic link
+- ''err'' on failure
+
+*Errors:*
+- Runtime error if path is not a string

@@ -1,0 +1,15 @@
+*fclose* | V-$CHIPVR ($CHIPCN)
+
+''fclose(handle)''
+
+Closes a file handle.
+
+*Parameters:*
+- ''handle'': File handle
+
+*Returns:*
+- ''ok'' on success
+- ''err'' on failure
+
+*Errors:*
+- Runtime error if handle is invalid or standard handle (0, 1, 2)

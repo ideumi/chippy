@@ -1,0 +1,16 @@
+*alarm* | V-$CHIPVR ($CHIPCN)
+
+''alarm(milliseconds)''
+
+Schedules a SIGALRM signal to be delivered after the specified time.
+
+*Parameters:*
+- ''milliseconds'': Time in milliseconds before SIGALRM is sent, or 0 to cancel
+
+*Returns:*
+- Number: Remaining milliseconds from previous alarm, or 0 if none
+- ''err'' on failure
+
+*Misc:*
+- Use ''signal()'' to set SIGALRM handler before calling alarm
+- Setting new alarm cancels previous one and return remaining time

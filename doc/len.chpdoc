@@ -1,0 +1,14 @@
+*len* | V-$CHIPVR ($CHIPCN)
+
+''len(value)''
+
+Returns the length of strings, lists, or bytes.
+
+*Parameters:*
+- ''value'': String, list, or bytes
+
+*Returns:*
+- Number: Length of the value
+
+*Errors:*
+- Runtime error if value is not string, list, or bytes

@@ -1,0 +1,173 @@
+#!/usr/bin/chippy
+#
+# corelib - libpaths.chh
+#
+
+load("libstrings.chh");
+
+# func Basename(path)
+# V-1.0.0 (2025-08-13)
+#
+# Returns the filename portion of path.
+
+func Basename(path)
+{
+	if len(path) == 0 { return ""; }
+
+	if path == "/" { return "/"; }
+
+	var lastSlash = -1;
+	var i = 0;
+
+	while i < len(path)
+	{
+		var currentChar = Substr(path, i, 1);
+
+		if currentChar == "/" { lastSlash = i; }
+
+		i = i + 1;
+	}
+
+	if lastSlash == -1 { return path; }
+
+	return Substr(path, lastSlash + 1, len(path) - lastSlash - 1);
+}
+
+# func Dirname(path)
+# V-1.0.0 (2025-08-13)
+#
+# Returns the directory portion of path or "." if no directory separator
+# found.
+
+func Dirname(path)
+{
+	var lastSlash = -1;
+	var i = 0;
+
+	while i < len(path)
+	{
+		var currentChar = Substr(path, i, 1);
+
+		if currentChar == "/" { lastSlash = i; }
+
+		i = i + 1;
+	}
+
+	if lastSlash == -1 { return "."; }
+
+	if lastSlash == 0 { return "/"; }
+
+	return Substr(path, 0, lastSlash);
+}
+
+# func JoinPath(dir, filename)
+# V-1.0.0 (2025-08-13)
+#
+# Joins a directory path and filename with proper separator handling.
+
+func JoinPath(dir, filename)
+{
+	if len(dir) == 0 { return filename; }
+
+	var lastChar = Substr(dir, len(dir) - 1, 1);
+
+	if lastChar == "/" { return dir + filename; }
+
+	return dir + "/" + filename;
+}
+
+# func JoinPaths(pathList)
+# V-1.0.0 (2025-08-13)
+#
+# Joins multiple path components from an array into a single path.
+
+func JoinPaths(pathList)
+{
+	if len(pathList) == 0 { return ""; }
+
+	var result = get(pathList, 0);
+	var i = 1;
+
+	while i < len(pathList)
+	{
+		result = JoinPath(result, get(pathList, i));
+		i = i + 1;
+	}
+
+	return result;
+}
+
+# func FileExtension(filename)
+# V-1.0.0 (2025-08-13)
+#
+# Returns the file extension of filename without the dot, or empty
+# string if none.
+
+func FileExtension(filename)
+{
+	var parts = Split(filename, ".");
+
+	if len(parts) <= 1 { return ""; }
+
+	if len(get(parts, 0)) == 0 and len(parts) == 2 { return ""; }
+
+	return get(parts, len(parts) - 1);
+}
+
+# func RemoveExtension(filename)
+# V-1.0.0 (2025-08-13)
+#
+# Returns filename with the extension removed.
+
+func RemoveExtension(filename)
+{
+	var parts = Split(filename, ".");
+
+	if len(parts) <= 1 { return filename; }
+
+	if len(get(parts, 0)) == 0 and len(parts) == 2 { return filename; }
+
+	var result = get(parts, 0);
+
+	var i = 1;
+
+	while i < len(parts) - 1
+	{
+		result = result + "." + get(parts, i);
+		i = i + 1;
+	}
+
+	return result;
+}
+
+# func IsAbsolutePath(path)
+# V-1.0.0 (2025-08-13)
+#
+# Returns true if path is an absolute path, false if relative.
+
+func IsAbsolutePath(path)
+{
+	if len(path) == 0 { return false; }
+
+	var firstChar = Substr(path, 0, 1);
+
+	if firstChar == "/" { return true; }
+
+	return false;
+}
+
+# func AbsolutePath(path)
+# V-1.0.0 (2025-08-13)
+#
+# Converts path to an absolute path. Returns path unchanged if
+# already absolute, otherwise joins path with current directory.
+
+func AbsolutePath(path)
+{
+	if IsAbsolutePath(path)
+	{
+		return path;
+	}
+
+	return JoinPath(getcwd(), path);
+}

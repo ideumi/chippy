@@ -1,0 +1,21 @@
+*type* | V-$CHIPVR ($CHIPCN)
+
+''type(value)''
+
+Returns the type name of a value.
+
+*Parameters:*
+- ''value'': Any value to check
+
+*Returns:*
+- String: Type name of the value
+  - "number": Number values
+  - "string": String values  
+  - "list": List values
+  - "bytes": Bytes values
+  - "function": User-defined functions
+  - "builtin": Built-in functions
+  - "unknown": Radiation damage
+
+*Errors:*
+- Runtime error if wrong number of arguments

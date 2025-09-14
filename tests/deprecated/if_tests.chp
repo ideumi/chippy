@@ -1,0 +1,38 @@
+#!/usr/bin/chippy
+#
+# tests - if_tests.chp
+#
+
+
+load("lib/libprint.chh");
+
+
+func TestIfStatements(val)
+{
+	var testValue = "3";
+
+	if testValue == "1"
+	{
+		return "1";
+	}
+	elif testValue == "2"
+	{
+		return "2";
+	}
+	else
+	{
+		return val;
+	}
+
+	if testValue == "1"
+	{
+		Println(TestIfStatements("5"));
+	}
+
+	if testValue == "1"
+	{
+		Println(TestIfStatements("5"));
+	}
+}
+
+Println(TestIfStatements("5"));

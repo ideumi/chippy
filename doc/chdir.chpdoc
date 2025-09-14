@@ -1,0 +1,12 @@
+*chdir* | V-$CHIPVR ($CHIPCN)
+
+''chdir(path)''
+
+Changes the current working directory to the specified path.
+
+*Parameters:*
+- ''path'': String path to the directory to change to
+
+*Returns:*
+- ''ok'' on success
+- ''err'' on failure

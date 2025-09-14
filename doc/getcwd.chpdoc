@@ -1,0 +1,9 @@
+*getcwd* | V-$CHIPVR ($CHIPCN)
+
+''getcwd()''
+
+Returns the current working directory.
+
+*Returns:*
+- String: Current working directory path
+- ''err'' on failure

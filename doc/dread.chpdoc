@@ -1,0 +1,16 @@
+*dread* | V-$CHIPVR ($CHIPCN)
+
+''dread(handle)''
+
+Reads the next entry from a directory handle.
+
+*Parameters:*
+- ''handle'': Directory handle
+
+*Returns:*
+- String: Next directory entry name
+- ''ok'' when end of directory reached
+- ''err'' on failure
+
+*Errors:*
+- Runtime error if handle is invalid

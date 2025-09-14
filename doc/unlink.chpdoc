@@ -1,0 +1,12 @@
+*unlink* | V-$CHIPVR ($CHIPCN)
+
+''unlink(path)''
+
+Removes a file, symbolic link, or empty directory.
+
+*Parameters:*
+- ''path'': String file path
+
+*Returns:*
+- ''ok'' on success
+- ''err'' on failure

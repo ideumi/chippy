@@ -1,0 +1,17 @@
+*setenv* | V-$CHIPVR ($CHIPCN)
+
+''setenv(name, value)''
+
+Sets an environment variable.
+
+*Parameters:*
+- ''name'': String environment variable name
+- ''value'': String value to set
+
+*Returns:*
+- ''ok'' on success
+
+*Errors:*
+- Runtime error if name is not a string
+- Runtime error if value is not a string
+- Runtime error if setting environment variable fails

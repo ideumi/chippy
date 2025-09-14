@@ -1,0 +1,65 @@
+#!/usr/bin/chippy
+#
+# corelib - libinput.chh
+#
+
+load("libhandles.chh");
+
+# STTYOFFECHO
+# (2025-08-13)
+# Command to disable terminal echo for InputPw().
+
+var STTYOFFECHO = "stty -echo < /dev/tty";
+
+# STTYONECHO
+# (2025-08-13)
+# Command to re-enable terminal echo for InputPw().
+
+var STTYONECHO = "stty echo < /dev/tty";
+
+# func Input()
+# V-1.0.0 (2025-08-12)
+#
+# Reads STDIN until a newline byte is encountered and
+# returns the data in UTF-8 text.
+
+func Input()
+{
+	var result = [];
+	var keepReading = true;
+
+	while keepReading
+	{
+		var bytes = fread(STDIN, 1);
+
+		if str(bytes) == err { return err; }
+
+		var byte = get(bytes, 0);
+
+		# 10 = \n
+		if byte == 10 { keepReading = false; }
+		else { result = append(result, byte); }
+	}
+
+	return unpack(pack(result));
+}
+
+# func InputPw()
+# V-1.0.0 (2025-08-13)
+#
+# Reads STDIN until a newline byte is encountered without echoing
+# characters. Returns the data in UTF-8 text.
+
+func InputPw()
+{
+	var sttyDisable = popen(STTYOFFECHO, "r");
+	if str(sttyDisable) == err { return err; }
+	pclose(sttyDisable);
+
+	var result = Input();
+
+	var sttyEnable = popen(STTYONECHO, "r");
+	if str(sttyEnable) != err { pclose(sttyEnable); }
+
+	return result;
+}

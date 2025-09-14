@@ -1,0 +1,10 @@
+#!/usr/bin/chippy
+#
+# tests - simple_args.chp
+#
+
+
+load("lib/libprint.chh");
+
+
+Println(str(args()));

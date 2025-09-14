@@ -1,0 +1,18 @@
+*saccept* | V-$CHIPVR ($CHIPCN)
+
+''saccept(serverHandle)''
+
+Accepts an incoming connection on a listening socket.
+
+*Parameters:*
+- ''serverHandle'': Socket handle
+
+*Returns:*
+- Number: New socket handle for the accepted client connection
+- ''err'' on failure
+
+*Errors:*
+- Runtime error if serverHandle is not a number
+- Runtime error if serverHandle is invalid
+- Runtime error if socket is not in listening mode
+- Runtime error if listening socket is closed

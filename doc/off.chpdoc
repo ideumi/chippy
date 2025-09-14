@@ -1,0 +1,11 @@
+*off* | V-$CHIPVR ($CHIPCN)
+
+''off(exitCode)''
+
+Terminates ''chippy'' with the specified exit code.
+
+*Parameters:*
+- ''exitCode'': Number between 0-255
+
+*Errors:*
+- Runtime error if exitCode not between 0-255

@@ -1,0 +1,19 @@
+*str* | V-$CHIPVR ($CHIPCN)
+
+''str(value)''
+
+Converts a value to its string representation.
+
+*Parameters:*
+- ''value'': Any value to convert
+
+*Returns:*
+- String: String representation of the value
+  - Number: Formatted as decimal (no locale assumptions)
+  - String: Returns the string value unchanged
+  - List: Formatted as "[element1, element2, ...]"
+  - Bytes: Formatted byte representation
+  - Other: Default string representation
+
+*Errors:*
+- Runtime error if wrong number of arguments

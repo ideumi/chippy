@@ -1,0 +1,15 @@
+*sleep* | V-$CHIPVR ($CHIPCN)
+
+''sleep(milliseconds)''
+
+Suspends execution for the specified number of milliseconds.
+
+*Parameters:*
+- ''milliseconds'': Number of milliseconds to sleep
+
+*Returns:*
+- ''ok'' on completion
+
+*Errors:*
+- Runtime error if milliseconds is not a number
+- Runtime error if milliseconds is negative

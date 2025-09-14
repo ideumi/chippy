@@ -1,0 +1,15 @@
+*getenv* | V-$CHIPVR ($CHIPCN)
+
+''getenv(name)''
+
+Gets the value of an environment variable.
+
+*Parameters:*
+- ''name'': String environment variable name
+
+*Returns:*
+- String: Environment variable value
+- ''err'' if variable does not exist
+
+*Errors:*
+- Runtime error if name is not a string

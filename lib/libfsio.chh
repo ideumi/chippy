@@ -1,0 +1,129 @@
+#!/usr/bin/chippy
+#
+# corelib - libfsio.chh
+#
+
+load("libmath.chh");
+
+# func ReadFile(filename, text)
+# V-1.0.0 (2025-08-12)
+#
+# Reads all bytes of the provided file "filename" from start to finish
+# and returns either bytes or UTF-8 text depending on if text == true.
+
+func ReadFile(filename, text)
+{
+	var handle = fopen(filename, "r");
+
+	if str(handle) == err { return err; }
+
+	var allBytes = fread(handle, 0); # Entire file
+
+	fclose(handle);
+
+	if str(allBytes) == err { return err; }
+
+	if text == true { return unpack(allBytes); }
+
+	return allBytes;
+}
+
+# func WriteFile(filename, bytesOrText, text, overwrite)
+# V-1.0.0 (2025-08-12)
+#
+# (Over)Writes the file at filename with either bytes or UTF-8 text.
+# If text == true then bytesOrText must be a UTF-8 text string, if not
+# bytesOrText must be bytes. If overwrite is true, content will be overwritten
+# not appended.
+
+func WriteFile(filename, bytesOrText, text, overwrite)
+{
+	var result = "";
+	var mode = "a";
+
+	if overwrite == true { mode = "w"; }
+
+	var handle = fopen(filename, mode);
+
+	if str(handle) == err { return err; }
+
+	if text == true { result = fwrite(pack(bytesOrText), handle); }
+	else { result = fwrite(bytesOrText, handle); }
+
+	if str(result) == err { return err; }
+
+	return fclose(handle);
+}
+
+# func CreateDir(path)
+# V-1.0.0 (2025-08-12)
+#
+# Creates a new directory with permission 755 (rwxr-xr-x)
+
+func CreateDir(path)
+{
+	var result = mkdir(path, 755);
+
+	if result == err { return err; }
+
+	return ok;
+}
+
+# func ListDir(path)
+# V-1.0.0 (2025-08-12)
+#
+# Opens and reads contents of a directory non-recursively and returns a list
+# of file and directory names as strings.
+
+func ListDir(path)
+{
+	var dir = dopen(path);
+
+	if str(dir) == err { return err; }
+
+	var entries = [];
+	var entry = dread(dir);
+
+	while type(entry) == "string"
+	{
+		if entry == ok { break; } # EOF
+
+		if entry != "." and entry != ".."
+		{
+			entries = append(entries, entry);
+		}
+
+		entry = dread(dir);
+
+	}
+
+	dclose(dir);
+	return entries;
+}
+
+# func SizeToString(bytes)
+# V-1.0.0 (2025-08-13)
+#
+# Formats bytes count as human-readable string with appropriate unit suffix.
+
+func SizeToString(bytes)
+{
+	if bytes < 1024
+	{
+		return str(bytes) + " B";
+	}
+	elif bytes < 1048576
+	{
+		# 1024 * 1024
+		return str(Floor(bytes / 1024)) + " KB";
+	}
+	elif bytes < 1073741824
+	{
+		# 1024 * 1024 * 1024
+		return str(Floor(bytes / 1048576)) + " MB";
+	}
+	else
+	{
+		return str(Floor(bytes / 1073741824)) + " GB";
+	}
+}

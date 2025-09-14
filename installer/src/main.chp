@@ -1,0 +1,302 @@
+#!/usr/bin/chippy
+#
+# installer - main.chp
+#
+
+load("libstat.chh");
+load("libpaths.chh");
+load("libfsio.chh");
+load("libprint.chh");
+
+var CWD = getcwd();
+var LIBDIR = JoinPath(CWD, "content/lib");
+var CHIPPYBIN = JoinPath(CWD, "content/chippy");
+var DOCDIR = JoinPath(CWD, "content/doc");
+
+func GetInstallPaths()
+{
+	return ["/usr/bin/chippy", "/usr/lib/chiplang", "/usr/share/doc/chiplang"];
+}
+
+func CheckPermissions()
+{
+	if getuid() == 0 { return true; }
+
+	return false;
+}
+
+func CheckInstallationBundle()
+{
+	if (IsDir(LIBDIR) == true) and (IsDir(DOCDIR) == true) and (IsFile(CHIPPYBIN) == true)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+func InstallFiles(srcDir, destDir)
+{
+	var createResult = CreateDir(destDir);
+
+	if str(createResult) == err {
+		var creationResult = IsDir(destDir);
+
+		if creationResult == false
+		{
+			return err;
+		}
+	}
+	
+	var files = ListDir(srcDir);
+
+	if str(files) == err
+	{
+		return true; # No files to install
+	}
+	
+	for i = 0 utl len(files)
+	{
+		var fileName = get(files, i);
+		var srcFile = JoinPath(srcDir, fileName);
+		var destFile = JoinPath(destDir, fileName);
+		
+		if IsFile(srcFile) {
+			var copyResult = CopyFile(srcFile, destFile);
+
+			if str(copyResult) == err
+			{
+				return err;
+			}
+		}
+	}
+
+	return true;
+}
+
+func CopyFile(src, dest)
+{
+	var data = ReadFile(src, false);
+	if str(data) == err { return err; }
+
+	var result = WriteFile(dest, data, false, true);
+	if str(result) == err { return err; }
+
+	return true;
+}
+
+func RemoveDirectory(dirPath)
+{
+	if IsDir(dirPath) == false
+	{
+		return true;
+	}
+
+	var files = ListDir(dirPath);
+
+	if str(files) != err
+	{
+		for i = 0 utl len(files)
+		{
+			var filePath = JoinPath(dirPath, get(files, i));
+			var unlinkResult = unlink(filePath);
+
+			if str(unlinkResult) == err
+			{
+				return err;
+			}
+		}
+	}
+
+	var unlinkResult = unlink(dirPath);
+
+	if str(unlinkResult) == err
+	{
+		return err;
+	}
+
+	return true;
+}
+
+func CleanExistingInstallation()
+{
+	var paths = GetInstallPaths();
+	var binaryPath = get(paths, 0);
+	var libPath = get(paths, 1);
+	var docPath = get(paths, 2);
+
+	if IsFile(binaryPath)
+	{
+		var unlinkResult = unlink(binaryPath);
+
+		if str(unlinkResult) == err
+		{
+			return err;
+		}
+	}
+
+	var removeLibResult = RemoveDirectory(libPath);
+
+	if str(removeLibResult) == err
+	{
+		return err;
+	}
+
+	var removeDocResult = RemoveDirectory(docPath);
+
+	if str(removeDocResult) == err
+	{
+		return err;
+	}
+
+	return true;
+}
+
+func InstallBinary()
+{
+	var paths = GetInstallPaths();
+	var binaryPath = get(paths, 0);
+
+	var result = CopyFile(CHIPPYBIN, binaryPath);
+
+	if str(result) == err
+	{
+		return err;
+	}
+
+	var chmodResult = chmod(binaryPath, 0755);
+
+	if str(chmodResult) == err
+	{
+		return err;
+	}
+
+	return true;
+}
+
+func InstallLibraries()
+{
+	var paths = GetInstallPaths();
+	var libPath = get(paths, 1);
+
+	var result = InstallFiles(LIBDIR, libPath);
+
+	return result;
+}
+
+func InstallDocumentation()
+{
+	var paths = GetInstallPaths();
+	var docPath = get(paths, 2);
+
+	var result = InstallFiles(DOCDIR, docPath);
+
+	return result;
+}
+
+func Uninstall()
+{
+	Println("ChipLang Uninstaller");
+
+	if CheckPermissions() == false
+	{
+		Println("Elevated privileges required for uninstallation");
+		Println("Please run this installer as root");
+
+		return;
+	}
+
+	Println("Uninstalling ChipLang...");
+
+	var cleanResult = CleanExistingInstallation();
+
+	if str(cleanResult) == err
+	{
+		Println("Uninstall failed");
+
+		return;
+	}
+
+	Println("ChipLang has been uninstalled successfully.");
+}
+
+func Install()
+{
+	Println("ChipLang Installer");
+
+	if CheckPermissions() == false
+	{
+		Println("Elevated privileges required for installation");
+		Println("Please run this installer as root");
+
+		return;
+	}
+
+	if CheckInstallationBundle() == false
+	{
+		Println("Missing chippy binary or library files");
+
+		return;
+	}
+
+	var cleanResult = CleanExistingInstallation();
+
+	if str(cleanResult) == err
+	{
+		Println("Installation failed during cleanup");
+
+		return;
+	}
+
+	Println("Starting installation...");
+
+	var binaryResult = InstallBinary();
+
+	if str(binaryResult) == err
+	{
+		Println("Installation failed during binary installation");
+
+		return;
+	}
+
+	var libResult = InstallLibraries();
+
+	if str(libResult) == err
+	{
+		Println("Installation failed during library installation");
+
+		return;
+	}
+
+	var docResult = InstallDocumentation();
+
+	if str(docResult) == err
+	{
+		Println("Installation failed during documentation installation");
+
+		return;
+	}
+
+	Println("ChipLang has been installed successfully!");
+}
+
+func Main()
+{
+	var arguments = args();
+
+	if len(arguments) > 0
+	{
+		var firstArg = get(arguments, 0);
+
+		if firstArg == "-u" or firstArg == "--uninstall"
+		{
+			Uninstall();
+
+			return;
+		}
+	}
+
+	Install();
+}
+
+Main();

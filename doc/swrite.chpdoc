@@ -1,0 +1,20 @@
+*swrite* | V-$CHIPVR ($CHIPCN)
+
+''swrite(data, handle)''
+
+Writes data to a socket connection.
+
+*Parameters:*
+- ''data'': Bytes data to write
+- ''handle'': Socket handle
+
+*Returns:*
+- Number: Number of bytes written
+- ''err'' on failure
+
+*Errors:*
+- Runtime error if data is not bytes
+- Runtime error if handle is not a number
+- Runtime error if handle is invalid socket handle
+- Runtime error if socket connection is closed
+- Runtime error if trying to write to listening socket

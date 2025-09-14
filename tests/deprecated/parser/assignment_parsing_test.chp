@@ -1,0 +1,46 @@
+load("lib/libprint.chh");
+
+Print("=== Parser Assignment Tests ===\n");
+
+# Test 1: Simple identifier assignment
+Print("Test 1: Simple assignment\n");
+x = 42;
+Println(x);
+
+# Test 2: Assignment with expressions
+Print("Test 2: Assignment with expressions\n");
+y = 5 + 3 * 2;
+Println(y);
+
+# Test 3: Assignment with function calls
+Print("Test 3: Assignment with function calls\n");
+func getValue(){
+    return 100;
+}
+result = getValue();
+Println(result);
+
+# Test 4: String assignment
+Print("Test 4: String assignment\n");
+message = "Hello, parser!";
+Println(message);
+
+# Test 5: Assignment in expressions (should work)
+Print("Test 5: Assignment in expressions\n");
+a = b = 15;
+Println(a);
+Println(b);
+
+# Test 6: List assignment
+Print("Test 6: List assignment\n");
+myList = [1, 2, 3];
+Println(myList);
+
+# Test 7: Nested expressions with assignment
+Print("Test 7: Nested assignment expressions\n");
+var base = 10;
+computed = base * (factor = 3);
+Println(computed);
+Println(factor);
+
+Print("=== Parser tests completed ===\n");

@@ -1,0 +1,14 @@
+*int* | V-$CHIPVR ($CHIPCN)
+
+''int(value)''
+
+Converts a number to an integer by truncating the decimal part.
+
+*Parameters:*
+- ''value'': Number to convert
+
+*Returns:*
+- Number: Integer value
+
+*Errors:*
+- Runtime error if value is not a number

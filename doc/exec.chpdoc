@@ -1,0 +1,16 @@
+*exec* | V-$CHIPVR ($CHIPCN)
+
+''exec(args)''
+
+Replaces the current process with a new program using the execv system call.
+
+*Parameters:*
+- ''args'': List of strings with program and arguments (first element is program path)
+
+*Returns:*
+- ''err'' on failure
+
+*Errors:*
+- Runtime error if args is not a list
+- Runtime error if any element in args is not a string
+- Runtime error if args list is empty

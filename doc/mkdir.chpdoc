@@ -1,0 +1,16 @@
+*mkdir* | V-$CHIPVR ($CHIPCN)
+
+''mkdir(path, mode)''
+
+Creates a directory with specified permissions.
+
+*Parameters:*
+- ''path'': String directory path
+- ''mode'': Number permissions mode (octal)
+
+*Returns:*
+- ''ok'' on success
+- ''err'' on failure
+
+*Errors:*
+- Runtime error if mode is invalid octal

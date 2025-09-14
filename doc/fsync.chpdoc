@@ -1,0 +1,15 @@
+*fsync* | V-$CHIPVR ($CHIPCN)
+
+''fsync(handle)''
+
+Forces synchronization of file data to disk.
+
+*Parameters:*
+- ''handle'': File handle
+
+*Returns:*
+- ''ok'' on success
+- ''err'' on failure
+
+*Errors:*
+- Runtime error if handle is invalid

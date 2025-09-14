@@ -1,0 +1,8 @@
+*getpid* | V-$CHIPVR ($CHIPCN)
+
+''getpid()''
+
+Gets the process ID of the current process.
+
+*Returns:*
+- Number: Current process ID

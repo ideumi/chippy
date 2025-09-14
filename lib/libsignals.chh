@@ -1,0 +1,184 @@
+#!/usr/bin/chippy
+#
+# corelib - libsignals.chh
+#
+
+# SIGHUP
+# (2025-08-13)
+# Hangup signal - terminal disconnected
+
+var SIGHUP = 1;
+
+# SIGINT
+# (2025-08-13)
+# Interrupt signal - Ctrl+C
+
+var SIGINT = 2;
+
+# SIGQUIT
+# (2025-08-13)
+# Quit signal - Ctrl+\
+
+var SIGQUIT = 3;
+
+# SIGILL
+# (2025-08-13)
+# Illegal instruction signal
+
+var SIGILL = 4;
+
+# SIGTRAP
+# (2025-08-13)
+# Trace trap signal - debugger breakpoint
+
+var SIGTRAP = 5;
+
+# SIGABRT
+# (2025-08-13)
+# Abort signal - program termination
+
+var SIGABRT = 6;
+
+# SIGBUS
+# (2025-08-13)
+# Bus error signal - invalid memory access
+
+var SIGBUS = 7;
+
+# SIGFPE
+# (2025-08-13)
+# Floating point exception signal
+
+var SIGFPE = 8;
+
+# SIGKILL
+# (2025-08-13)
+# Kill signal - cannot be caught or ignored
+
+var SIGKILL = 9;
+
+# SIGUSR1
+# (2025-08-13)
+# User-defined signal 1
+
+var SIGUSR1 = 10;
+
+# SIGSEGV
+# (2025-08-13)
+# Segmentation violation signal - invalid memory reference
+
+var SIGSEGV = 11;
+
+# SIGUSR2
+# (2025-08-13)
+# User-defined signal 2
+
+var SIGUSR2 = 12;
+
+# SIGPIPE
+# (2025-08-13)
+# Broken pipe signal - write to pipe with no readers
+
+var SIGPIPE = 13;
+
+# SIGALRM
+# (2025-08-13)
+# Alarm clock signal - timer expiration
+
+var SIGALRM = 14;
+
+# SIGTERM
+# (2025-08-13)
+# Termination signal - graceful shutdown request
+
+var SIGTERM = 15;
+
+# SIGSTKFLT
+# (2025-08-13)
+# Stack fault signal - coprocessor stack fault
+
+var SIGSTKFLT = 16;
+
+# SIGCHLD
+# (2025-08-13)
+# Child status changed signal - child process terminated or stopped
+
+var SIGCHLD = 17;
+
+# SIGCONT
+# (2025-08-13)
+# Continue signal - resume stopped process
+
+var SIGCONT = 18;
+
+# SIGSTOP
+# (2025-08-13)
+# Stop signal - cannot be caught or ignored
+
+var SIGSTOP = 19;
+
+# SIGTSTP
+# (2025-08-13)
+# Terminal stop signal - Ctrl+Z
+
+var SIGTSTP = 20;
+
+# SIGTTIN
+# (2025-08-13)
+# Background read from TTY signal
+
+var SIGTTIN = 21;
+
+# SIGTTOU
+# (2025-08-13)
+# Background write to TTY signal
+
+var SIGTTOU = 22;
+
+# SIGURG
+# (2025-08-13)
+# Urgent condition on socket signal
+
+var SIGURG = 23;
+
+# SIGXCPU
+# (2025-08-13)
+# CPU time limit exceeded signal
+
+var SIGXCPU = 24;
+
+# SIGXFSZ
+# (2025-08-13)
+# File size limit exceeded signal
+
+var SIGXFSZ = 25;
+
+# SIGVTALRM
+# (2025-08-13)
+# Virtual alarm clock signal
+
+var SIGVTALRM = 26;
+
+# SIGPROF
+# (2025-08-13)
+# Profiling alarm clock signal
+
+var SIGPROF = 27;
+
+# SIGWINCH
+# (2025-08-13)
+# Window size change signal
+
+var SIGWINCH = 28;
+
+# SIGIO
+# (2025-08-13)
+# I/O now possible signal
+
+var SIGIO = 29;
+
+# SIGPWR
+# (2025-08-13)
+# Power failure restart signal
+
+var SIGPWR = 30;

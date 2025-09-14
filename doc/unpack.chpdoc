@@ -1,0 +1,17 @@
+*unpack* | V-$CHIPVR ($CHIPCN)
+
+''unpack(bytes)''
+
+Converts bytes to a string.
+
+*Parameters:*
+- ''bytes'': Bytes to convert
+
+*Returns:*
+- String: String representation of the bytes
+
+*Errors:*
+- Runtime error if argument is not bytes
+
+*Notes:*
+This performs a raw bytes-to-string conversion without UTF-8 validation.

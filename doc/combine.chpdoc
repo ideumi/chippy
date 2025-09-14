@@ -1,0 +1,32 @@
+*combine* | V-$CHIPVR ($CHIPCN)
+
+Chip's build system
+
+Bundles multiple ChipLang source files into a single executable program based on the configuration in ''combine.chp''.
+Programs, properly built using combine have no dependencies outside of the ''chippy'' interpreter itself.
+
+*Usage:*
+- ''chippy combine'' - Process default ''combine.chp'' configuration
+- ''chippy combine path/to/config.chp'' - Process specific configuration file
+- ''chippy combine new'' - Generate new template ''combine.chp'' file
+
+*Configuration:*
+- ''Project'': Output program name
+- ''Version'': Program version string
+- ''Licence'': Path to license file to include
+- ''Output'': Output executable filename
+- ''Source'': Main source file entry point
+- ''Paths'': List of directories to search for dependencies
+- ''StripComments'': Remove comments from bundled output
+- ''StripWhitespace'': Remove excess whitespace from bundled output
+- ''AddShebang'': Add ''#!/usr/bin/chippy'' shebang to output
+
+*What it does:*
+- Automatic dependency resolution via ''load()'' statements
+- Circular dependency prevention
+- Licence header insertion (when configured)
+- Comment/whitespace stripping (when configured)
+
+*Returns:*
+- Creates bundled executable file
+- Exit code 0 on success, non-zero on failure

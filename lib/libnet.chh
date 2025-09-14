@@ -1,0 +1,22 @@
+#!/usr/bin/chippy
+#
+# corelib - libnet.chh
+#
+
+# SOCKTCP
+# (2025-08-13)
+# TCP client connection socket type
+
+var SOCKTCP = "tcp";
+
+# SOCKUDP
+# (2025-08-13)
+# UDP connection socket type
+
+var SOCKUDP = "udp";
+
+# SOCKLISTEN
+# (2025-08-13)
+# TCP server socket type (bind + listen)
+
+var SOCKLISTEN = "listen";

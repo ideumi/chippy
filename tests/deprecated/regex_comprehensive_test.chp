@@ -1,0 +1,106 @@
+load("lib/libregex.chh");
+load("lib/libprint.chh");
+
+Print("=== Comprehensive Regex Tests ===\n");
+
+# Test 1: Basic literal matching
+Print("Test 1: Literal matching\n");
+Print("Match 'hello' against 'hello': ");
+Println(RegexMatch("hello", "hello"));
+Print("Match 'hello' against 'world': ");
+Println(RegexMatch("hello", "world"));
+
+# Test 2: Dot metacharacter
+Print("Test 2: Dot metacharacter\n");
+Print("Match 'cat' against 'c.t': ");
+Println(RegexMatch("cat", "c.t"));
+Print("Match 'cut' against 'c.t': ");
+Println(RegexMatch("cut", "c.t"));
+
+# Test 3: Character classes
+Print("Test 3: Character classes\n");
+Print("Match 'cat' against '[abc]at': ");
+Println(RegexMatch("cat", "[abc]at"));
+Print("Match 'dog' against '[abc]at': ");
+Println(RegexMatch("dog", "[abc]at"));
+Print("Match 'bat' against '[^abc]at': ");
+Println(RegexMatch("bat", "[^abc]at"));
+Print("Match 'rat' against '[^abc]at': ");
+Println(RegexMatch("rat", "[^abc]at"));
+
+# Test 4: Character ranges
+Print("Test 4: Character ranges\n");
+Print("Match 'cat' against '[a-z]at': ");
+Println(RegexMatch("cat", "[a-z]at"));
+Print("Match '3at' against '[0-9]at': ");
+Println(RegexMatch("3at", "[0-9]at"));
+
+# Test 5: Quantifiers - *
+Print("Test 5: Star quantifier\n");
+Print("Match 'ab' against 'a*b': ");
+Println(RegexMatch("ab", "a*b"));
+Print("Match 'aaab' against 'a*b': ");
+Println(RegexMatch("aaab", "a*b"));
+Print("Match 'b' against 'a*b': ");
+Println(RegexMatch("b", "a*b"));
+
+# Test 6: Quantifiers - +
+Print("Test 6: Plus quantifier\n");
+Print("Match 'ab' against 'a+b': ");
+Println(RegexMatch("ab", "a+b"));
+Print("Match 'aaab' against 'a+b': ");
+Println(RegexMatch("aaab", "a+b"));
+Print("Match 'b' against 'a+b': ");
+Println(RegexMatch("b", "a+b"));
+
+# Test 7: Quantifiers - ?
+Print("Test 7: Question quantifier\n");
+Print("Match 'ab' against 'a?b': ");
+Println(RegexMatch("ab", "a?b"));
+Print("Match 'b' against 'a?b': ");
+Println(RegexMatch("b", "a?b"));
+Print("Match 'aab' against 'a?b': ");
+Println(RegexMatch("aab", "a?b"));
+
+# Test 8: Escape sequences
+Print("Test 8: Escape sequences\n");
+Print("Match '123' against '\\d+': ");
+Println(RegexMatch("123", "\\d+"));
+Print("Match 'abc' against '\\d+': ");
+Println(RegexMatch("abc", "\\d+"));
+Print("Match 'hello world' against '\\w+\\s+\\w+': ");
+Println(RegexMatch("hello world", "\\w+\\s+\\w+"));
+
+# Test 9: Anchors
+Print("Test 9: Anchors\n");
+Print("Match 'hello world' against '^hello': ");
+Println(RegexMatch("hello world", "^hello"));
+Print("Match 'say hello' against '^hello': ");
+Println(RegexMatch("say hello", "^hello"));
+Print("Match 'hello world' against 'world$': ");
+Println(RegexMatch("hello world", "world$"));
+
+# Test 10: RegexTest (exact match)
+Print("Test 10: Exact matching\n");
+Print("RegexTest 'hello' against 'hello': ");
+Println(RegexTest("hello", "hello"));
+Print("RegexTest 'hello world' against 'hello': ");
+Println(RegexTest("hello world", "hello"));
+
+# Test 11: RegexReplace
+Print("Test 11: RegexReplace\n");
+Print("Replace 'cat' with 'dog' in 'I have a cat': ");
+Println(RegexReplace("I have a cat", "cat", "dog"));
+
+# Test 12: RegexReplaceAll  
+Print("Test 12: RegexReplaceAll\n");
+Print("Replace all 'a' with 'X' in 'banana': ");
+Println(RegexReplaceAll("banana", "a", "X"));
+
+# Test 13: RegexSplit
+Print("Test 13: RegexSplit\n");
+Print("Split 'a,b,c' by ',': ");
+var parts = RegexSplit("a,b,c", ",");
+Println(parts);
+
+Print("=== All regex tests completed ===\n");
