@@ -4,6 +4,7 @@
 #
 
 load("libhandles.chh");
+load("libstrings.chh");
 
 # ESC
 # (2025-08-20)
