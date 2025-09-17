@@ -42,8 +42,10 @@
       <item>alarm</item>
       <item>append</item>
       <item>args</item>
+      <item>charat</item>
       <item>chdir</item>
       <item>chmod</item>
+      <item>cos</item>
       <item>dclose</item>
       <item>dopen</item>
       <item>dread</item>
@@ -63,11 +65,14 @@
       <item>getpid</item>
       <item>getppid</item>
       <item>getuid</item>
+      <item>indexof</item>
       <item>int</item>
+      <item>join</item>
       <item>kill</item>
       <item>len</item>
       <item>list</item>
       <item>load</item>
+      <item>lower</item>
       <item>lstat</item>
       <item>mkdir</item>
       <item>num</item>
@@ -79,6 +84,7 @@
       <item>rand</item>
       <item>readlink</item>
       <item>rename</item>
+      <item>replace</item>
       <item>saccept</item>
       <item>sclose</item>
       <item>seek</item>
@@ -87,18 +93,24 @@
       <item>setenv</item>
       <item>setsid</item>
       <item>signal</item>
+      <item>sin</item>
       <item>sleep</item>
       <item>sopen</item>
+      <item>sort</item>
+      <item>split</item>
       <item>sread</item>
       <item>stat</item>
       <item>str</item>
+      <item>substr</item>
       <item>swrite</item>
       <item>symlink</item>
+      <item>tan</item>
       <item>time</item>
       <item>type</item>
       <item>unlink</item>
       <item>unpack</item>
       <item>unsignal</item>
+      <item>upper</item>
       <item>wait</item>
       <item>waitpid</item>
     </list>
