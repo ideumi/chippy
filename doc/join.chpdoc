@@ -1,0 +1,16 @@
+*join* | V-$CHIPVR ($CHIPCN)
+
+''join(array, separator)''
+
+Joins all elements of a list into a single string with separator.
+
+*Parameters:*
+- ''array'': List of values to join
+- ''separator'': String to insert between elements
+
+*Returns:*
+- String: Joined string with elements separated by separator
+
+*Errors:*
+- Runtime error if array is not a list
+- Runtime error if separator is not a string

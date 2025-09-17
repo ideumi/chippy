@@ -3,8 +3,6 @@
 # corelib - libtime.chh
 #
 
-load("libmath.chh");
-
 # SECONDSPERMINUTE
 # (2025-08-16)
 # Number of seconds in one minute

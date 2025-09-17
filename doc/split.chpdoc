@@ -1,0 +1,17 @@
+*split* | V-$CHIPVR ($CHIPCN)
+
+''split(string, delimiter)''
+
+Splits a string into a list using a delimiter.
+
+*Parameters:*
+- ''string'': String to split
+- ''delimiter'': String delimiter to split on
+
+*Returns:*
+- List: List of string parts
+
+*Errors:*
+- Runtime error if string is not a string
+- Runtime error if delimiter is not a string
+- Runtime error if delimiter is empty

@@ -3,8 +3,6 @@
 # corelib - libplatform.chh
 #
 
-load("libstrings.chh");
-
 # func DetectPlatform()
 # V-1.0.0 (2025-08-13)
 #
@@ -20,7 +18,7 @@ func DetectPlatform()
 	var unameResult = unpack(fread(unameProc, 256));
 	pclose(unameProc);
 
-	var unameResult = Replace(ToLowerCase(unameResult), "\n", "");
+	var unameResult = replace(lower(unameResult), "\n", "");
 
 	return unameResult;
 }

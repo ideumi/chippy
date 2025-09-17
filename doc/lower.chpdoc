@@ -1,0 +1,14 @@
+*lower* | V-$CHIPVR ($CHIPCN)
+
+''lower(string)''
+
+Converts a string to lowercase.
+
+*Parameters:*
+- ''string'': String to convert
+
+*Returns:*
+- String: Lowercase version of the string
+
+*Errors:*
+- Runtime error if string is not a string

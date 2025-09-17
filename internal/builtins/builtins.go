@@ -63,6 +63,7 @@ func GetBuiltins() map[string]*values.BuiltInFunction {
 		"get":    values.NewBuiltInFunction("get", getFunction),
 		"set":    values.NewBuiltInFunction("set", setFunction),
 		"append": values.NewBuiltInFunction("append", appendFunction),
+		"sort":   values.NewBuiltInFunction("sort", sortFunction),
 
 		// Bytes
 		"pack":   values.NewBuiltInFunction("pack", packFunction),
@@ -94,6 +95,21 @@ func GetBuiltins() map[string]*values.BuiltInFunction {
 
 		// Randomness
 		"rand": values.NewBuiltInFunction("rand", randFunction),
+
+		// String operations
+		"charat":  values.NewBuiltInFunction("charat", charatFunction),
+		"substr":  values.NewBuiltInFunction("substr", substrFunction),
+		"replace": values.NewBuiltInFunction("replace", replaceFunction),
+		"split":   values.NewBuiltInFunction("split", splitFunction),
+		"indexof": values.NewBuiltInFunction("indexof", indexofFunction),
+		"join":    values.NewBuiltInFunction("join", joinFunction),
+		"lower":   values.NewBuiltInFunction("lower", lowerFunction),
+		"upper":   values.NewBuiltInFunction("upper", upperFunction),
+
+		// Math operations
+		"sin": values.NewBuiltInFunction("sin", sinFunction),
+		"cos": values.NewBuiltInFunction("cos", cosFunction),
+		"tan": values.NewBuiltInFunction("tan", tanFunction),
 
 		// Misc
 		"getpid": values.NewBuiltInFunction("getpid", getpidFunction),

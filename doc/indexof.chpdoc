@@ -1,0 +1,18 @@
+*indexof* | V-$CHIPVR ($CHIPCN)
+
+''indexof(haystack, needle)''
+
+Finds the first occurrence of a substring.
+
+*Parameters:*
+- ''haystack'': String to search in
+- ''needle'': String to search for
+
+*Returns:*
+- Number: Index of first occurrence
+- ''err'' if not found
+
+*Errors:*
+- Runtime error if haystack is not a string
+- Runtime error if needle is not a string
+- Runtime error if needle is empty

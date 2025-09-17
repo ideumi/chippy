@@ -1,0 +1,17 @@
+*charat* | V-$CHIPVR ($CHIPCN)
+
+''charat(string, index)''
+
+Gets a character from a string at the specified index.
+
+*Parameters:*
+- ''string'': String to access
+- ''index'': Number index position
+
+*Returns:*
+- String: Single character at the specified index
+
+*Errors:*
+- Runtime error if string is not a string
+- Runtime error if index is not a number
+- Runtime error if index is out of bounds

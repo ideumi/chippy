@@ -1,0 +1,19 @@
+*substr* | V-$CHIPVR ($CHIPCN)
+
+''substr(string, start, length)''
+
+Extracts a substring from a string starting at a specified position.
+
+*Parameters:*
+- ''string'': String to extract from
+- ''start'': Number starting position (0-based)
+- ''length'': Number of characters to extract
+
+*Returns:*
+- String: Substring of specified length starting at start position
+
+*Errors:*
+- Runtime error if string is not a string
+- Runtime error if start is not a number
+- Runtime error if length is not a number
+- Runtime error if start or length is negative

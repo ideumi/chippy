@@ -3,8 +3,6 @@
 # corelib - libpaths.chh
 #
 
-load("libstrings.chh");
-
 # func Basename(path)
 # V-1.0.0 (2025-08-13)
 #
@@ -21,7 +19,7 @@ func Basename(path)
 
 	while i < len(path)
 	{
-		var currentChar = Substr(path, i, 1);
+		var currentChar = substr(path, i, 1);
 
 		if currentChar == "/" { lastSlash = i; }
 
@@ -30,7 +28,7 @@ func Basename(path)
 
 	if lastSlash == -1 { return path; }
 
-	return Substr(path, lastSlash + 1, len(path) - lastSlash - 1);
+	return substr(path, lastSlash + 1, len(path) - lastSlash - 1);
 }
 
 # func Dirname(path)
@@ -46,7 +44,7 @@ func Dirname(path)
 
 	while i < len(path)
 	{
-		var currentChar = Substr(path, i, 1);
+		var currentChar = substr(path, i, 1);
 
 		if currentChar == "/" { lastSlash = i; }
 
@@ -57,7 +55,7 @@ func Dirname(path)
 
 	if lastSlash == 0 { return "/"; }
 
-	return Substr(path, 0, lastSlash);
+	return substr(path, 0, lastSlash);
 }
 
 # func JoinPath(dir, filename)
@@ -69,7 +67,7 @@ func JoinPath(dir, filename)
 {
 	if len(dir) == 0 { return filename; }
 
-	var lastChar = Substr(dir, len(dir) - 1, 1);
+	var lastChar = substr(dir, len(dir) - 1, 1);
 
 	if lastChar == "/" { return dir + filename; }
 
@@ -105,7 +103,7 @@ func JoinPaths(pathList)
 
 func FileExtension(filename)
 {
-	var parts = Split(filename, ".");
+	var parts = split(filename, ".");
 
 	if len(parts) <= 1 { return ""; }
 
@@ -121,7 +119,7 @@ func FileExtension(filename)
 
 func RemoveExtension(filename)
 {
-	var parts = Split(filename, ".");
+	var parts = split(filename, ".");
 
 	if len(parts) <= 1 { return filename; }
 
@@ -149,7 +147,7 @@ func IsAbsolutePath(path)
 {
 	if len(path) == 0 { return false; }
 
-	var firstChar = Substr(path, 0, 1);
+	var firstChar = substr(path, 0, 1);
 
 	if firstChar == "/" { return true; }
 

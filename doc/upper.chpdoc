@@ -1,0 +1,14 @@
+*upper* | V-$CHIPVR ($CHIPCN)
+
+''upper(string)''
+
+Converts a string to uppercase.
+
+*Parameters:*
+- ''string'': String to convert
+
+*Returns:*
+- String: Uppercase version of the string
+
+*Errors:*
+- Runtime error if string is not a string

@@ -4,7 +4,6 @@
 #
 
 load("libhandles.chh");
-load("libstrings.chh");
 
 # ESC
 # (2025-08-20)
@@ -282,7 +281,7 @@ func GetTerminalSize()
 	var sizeStr = Trim(unpack(fread(handle, 1024)));
 	pclose(handle);
 
-	var parts = Split(sizeStr, " ");
+	var parts = split(sizeStr, " ");
 
 	if len(parts) != 2 { return err; }
 

@@ -3,75 +3,6 @@
 # corelib - libstrings.chh
 #
 
-# func Substr(value, start, length)
-# V-1.0.0 (2025-08-13)
-#
-# Returns a substring of value starting at position start with
-# given length, or err if start or length is negative.
-
-func Substr(value, start, length)
-{
-	if start < 0 or length < 0 { return err; }
-
-	var bytes = pack(value);
-
-	if start >= len(bytes) { return ""; }
-
-	var end = start + length;
-
-	if end > len(bytes) { end = len(bytes); }
-
-	var result = [];
-	var i = start;
-
-	while i < end
-	{
-		result = result + [get(bytes, i)];
-		i = i + 1;
-	}
-
-	return unpack(pack(result));
-}
-
-# func CharAt(value, index)
-# V-1.0.0 (2025-08-13)
-#
-# Returns the character at the specified index in value, or
-# err if index is out of bounds.
-
-func CharAt(value, index)
-{
-	if index < 0 or index >= len(value) { return err; }
-
-	return Substr(value, index, 1);
-}
-
-# func IndexOf(value, needle)
-# V-1.0.0 (2025-08-13)
-#
-# Returns the index of the first occurrence of needle in value, or
-# -1 if needle is not found, or an error if needle is empty or longer
-# than value.
-
-func IndexOf(value, needle)
-{
-	if len(needle) == 0 or len(needle) > len(value)
-	{ return err; }
-
-	var i = 0;
-	var maxPos = len(value) - len(needle);
-
-	while i <= maxPos
-	{
-		if Substr(value, i, len(needle)) == needle
-		{ return i; }
-
-		i = i + 1;
-	}
-
-	return -1;
-}
-
 # func Contains(value, needle)
 # V-1.0.0 (2025-08-13)
 #
@@ -79,7 +10,7 @@ func IndexOf(value, needle)
 
 func Contains(value, needle)
 {
-	return IndexOf(value, needle) != -1;
+	return str(indexof(value, needle)) != err;
 }
 
 # func StartsWith(value, prefix)
@@ -91,7 +22,7 @@ func StartsWith(value, prefix)
 {
 	if len(prefix) > len(value) { return false; }
 
-	return Substr(value, 0, len(prefix)) == prefix;
+	return substr(value, 0, len(prefix)) == prefix;
 }
 
 # func EndsWith(value, suffix)
@@ -105,7 +36,7 @@ func EndsWith(value, suffix)
 
 	var start = len(value) - len(suffix);
 
-	return Substr(value, start, len(suffix)) == suffix;
+	return substr(value, start, len(suffix)) == suffix;
 }
 
 # func Left(value, count)
@@ -120,7 +51,7 @@ func Left(value, count)
 
 	if count > len(value) { return value; }
 
-	return Substr(value, 0, count);
+	return substr(value, 0, count);
 }
 
 # func Right(value, count)
@@ -137,95 +68,7 @@ func Right(value, count)
 
 	var start = len(value) - count;
 
-	return Substr(value, start, count);
-}
-
-# func ToLower(char)
-# V-1.0.0 (2025-08-13)
-#
-# Converts char to lowercase. ASCII only.
-
-func ToLower(char)
-{
-	var bytes = pack(char);
-
-	if len(bytes) != 1
-	{
-		return char;
-	}
-
-	var code = get(bytes, 0);
-
-	if code >= 65 and code <= 90
-	{
-		var newBytes = [code + 32];
-		return unpack(pack(newBytes));
-	}
-
-	return char;
-}
-
-# func ToUpper(char)
-# V-1.0.0 (2025-08-13)
-#
-# Converts char to uppercase. ASCII only.
-
-func ToUpper(char)
-{
-	var bytes = pack(char);
-
-	if len(bytes) != 1
-	{
-		return char;
-	}
-
-	var code = get(bytes, 0);
-
-	if code >= 97 and code <= 122
-	{
-		var newBytes = [code - 32];
-		return unpack(pack(newBytes));
-	}
-
-	return char;
-}
-
-# func ToLowerCase(value)
-# V-1.0.0 (2025-08-13)
-#
-# Converts all uppercase letters in value to lowercase.
-
-func ToLowerCase(value)
-{
-	var result = "";
-	var i = 0;
-
-	while i < len(value)
-	{
-		result = result + ToLower(CharAt(value, i));
-		i = i + 1;
-	}
-
-	return result;
-}
-
-# func ToUpperCase(value)
-# V-1.0.0 (2025-08-13)
-#
-# Converts all lowercase letters in value to uppercase.
-
-func ToUpperCase(value)
-{
-	var result = "";
-	var i = 0;
-
-	while i < len(value)
-	{
-		result = result + ToUpper(CharAt(value, i));
-		i = i + 1;
-	}
-
-	return result;
+	return substr(value, start, count);
 }
 
 # func Reverse(value)
@@ -240,38 +83,8 @@ func Reverse(value)
 
 	while i >= 0
 	{
-		result = result + CharAt(value, i);
+		result = result + charat(value, i);
 		i = i - 1;
-	}
-
-	return result;
-}
-
-# func Replace(value, oldValue, newValue)
-# V-1.0.0 (2025-08-13)
-#
-# Replaces all occurrences of oldValue with newValue in value, err is
-# returned if oldValue is empty.
-
-func Replace(value, oldValue, newValue)
-{
-	if len(oldValue) == 0 { return err; }
-
-	var result = "";
-	var i = 0;
-
-	while i < len(value)
-	{
-		if i <= len(value) - len(oldValue) and Substr(value, i, len(oldValue)) == oldValue
-		{
-			result = result + newValue;
-			i = i + len(oldValue);
-		}
-		else
-		{
-			result = result + CharAt(value, i);
-			i = i + 1;
-		}
 	}
 
 	return result;
@@ -288,7 +101,7 @@ func TrimLeft(value)
 
 	while i < len(value)
 	{
-		var ch = CharAt(value, i);
+		var ch = charat(value, i);
 
 		if ch != " " and ch != "\t" and ch != "\n" and ch != "\r"
 		{
@@ -298,7 +111,7 @@ func TrimLeft(value)
 		i = i + 1;
 	}
 
-	return Substr(value, i, len(value) - i);
+	return substr(value, i, len(value) - i);
 }
 
 # func TrimRight(value)
@@ -312,7 +125,7 @@ func TrimRight(value)
 
 	while i >= 0
 	{
-		var ch = CharAt(value, i);
+		var ch = charat(value, i);
 
 		if ch != " " and ch != "\t" and ch != "\n" and ch != "\r"
 		{
@@ -322,42 +135,7 @@ func TrimRight(value)
 		i = i - 1;
 	}
 
-	return Substr(value, 0, i + 1);
-}
-
-# func Split(value, delimiter)
-# V-1.0.0 (2025-08-13)
-#
-# Splits value into a list using the given delimiter character.
-
-func Split(value, delimiter)
-{
-	if len(delimiter) != 1 { return err; }
-
-	var result = [];
-	var current = "";
-	var i = 0;
-
-	while i < len(value)
-	{
-		var ch = CharAt(value, i);
-
-		if ch == delimiter
-		{
-			result = result + [current];
-			current = "";
-		}
-		else
-		{
-			current = current + ch;
-		}
-
-		i = i + 1;
-	}
-
-	result = result + [current];
-
-	return result;
+	return substr(value, 0, i + 1);
 }
 
 # func Trim(value)

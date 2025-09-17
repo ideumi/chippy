@@ -1,0 +1,14 @@
+*sin* | V-$CHIPVR ($CHIPCN)
+
+''sin(radians)''
+
+Calculates the sine of an angle in radians.
+
+*Parameters:*
+- ''radians'': Number angle in radians
+
+*Returns:*
+- Number: Sine of the angle
+
+*Errors:*
+- Runtime error if radians is not a number

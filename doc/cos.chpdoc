@@ -1,0 +1,14 @@
+*cos* | V-$CHIPVR ($CHIPCN)
+
+''cos(radians)''
+
+Calculates the cosine of an angle in radians.
+
+*Parameters:*
+- ''radians'': Number angle in radians
+
+*Returns:*
+- Number: Cosine of the angle
+
+*Errors:*
+- Runtime error if radians is not a number

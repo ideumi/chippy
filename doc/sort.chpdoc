@@ -1,0 +1,21 @@
+*sort* | V-$CHIPVR ($CHIPCN)
+
+''sort(list)''
+
+Sorts a list and returns a new sorted list. The original list is not modified.
+
+*Parameters:*
+- ''list'': List to sort
+
+*Returns:*
+- List: New sorted list with elements in ascending order
+
+*Sorting Rules:*
+- Numbers are sorted numerically (1 < 2 < 10)
+- Strings are sorted alphabetically
+- Lists are sorted element by element
+- Mixed types are sorted by type precedence: Numbers < Strings < Lists < Bytes < Functions
+- Equal elements maintain their relative order (stable sort)
+
+*Errors:*
+- Runtime error if argument is not a list

@@ -1,0 +1,14 @@
+*tan* | V-$CHIPVR ($CHIPCN)
+
+''tan(radians)''
+
+Calculates the tangent of an angle in radians.
+
+*Parameters:*
+- ''radians'': Number angle in radians
+
+*Returns:*
+- Number: Tangent of the angle
+
+*Errors:*
+- Runtime error if radians is not a number

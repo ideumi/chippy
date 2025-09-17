@@ -1,0 +1,19 @@
+*replace* | V-$CHIPVR ($CHIPCN)
+
+''replace(haystack, needle, replacement)''
+
+Replaces all occurrences of a substring with another string.
+
+*Parameters:*
+- ''haystack'': String to search in
+- ''needle'': String to search for
+- ''replacement'': String to replace with
+
+*Returns:*
+- String: String with all occurrences replaced
+
+*Errors:*
+- Runtime error if haystack is not a string
+- Runtime error if needle is not a string
+- Runtime error if replacement is not a string
+- Runtime error if needle is empty

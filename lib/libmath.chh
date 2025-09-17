@@ -3,8 +3,6 @@
 # corelib - libmath.chh
 #
 
-load("libstrings.chh");
-
 # PI
 # (2025-08-12)
 # Constant ratio of the circumference of a circle to
@@ -82,7 +80,6 @@ func Round(x, digits)
 
 	return Floor(x * multiplier + 0.5) / multiplier;
 }
-
 
 # func Max(a, b)
 # V-1.0.0 (2025-08-12)
@@ -269,56 +266,6 @@ func IsOdd(n)
 	return Mod(n, 2) == 1;
 }
 
-# func Sin(x)
-# V-1.0.0 (2025-08-12)
-#
-# Returns the sine of x in radians using Taylor series approximation.
-
-func Sin(x)
-{
-	# Normalize angle to [-PI, PI]
-	x = Mod(x + PI, 2 * PI) - PI;
-
-	var result = 0;
-	var term = x;
-	var i = 1;
-
-	# Calculate first 20 terms
-	while i <= 39
-	{
-		result = result + term;
-		term = -term * x * x / ((i + 1) * (i + 2));
-		i = i + 2;
-	}
-
-	return result;
-}
-
-# func Cos(x)
-# V-1.0.0 (2025-08-12)
-#
-# Returns the cosine of x in radians using Taylor series approximation.
-
-func Cos(x)
-{
-	return Sin(x + PI/2);
-}
-
-# func Tan(x)
-# V-1.0.0 (2025-08-12)
-#
-# Returns the tangent of x in radians, or err if x is near an odd
-# multiple of PI/2 (where cosine ≈ 0).
-
-func Tan(x)
-{
-	var cosVal = Cos(x);
-
-	if Abs(cosVal) < 0.000001 { return err; }
-
-	return Sin(x) / cosVal;
-}
-
 # func Degrees(radians)
 # V-1.0.0 (2025-08-13)
 #
@@ -356,7 +303,7 @@ func Hex(n)
 	while number > 0
 	{
 		var remainder = Mod(number, 16);
-		result = Substr(digits, remainder, 1) + result;
+		result = substr(digits, remainder, 1) + result;
 		number = Floor(number / 16);
 	}
 
