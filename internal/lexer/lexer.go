@@ -101,6 +101,10 @@ func (l *Lexer) MakeTokens() ([]*Token, error) {
 			tokens = append(tokens, NewToken(constants.TT_DIV, nil, l.pos.Copy(), nil))
 			l.advance()
 
+		case l.currentChar == '%':
+			tokens = append(tokens, NewToken(constants.TT_MOD, nil, l.pos.Copy(), nil))
+			l.advance()
+
 		case l.currentChar == '^':
 			tokens = append(tokens, NewToken(constants.TT_POW, nil, l.pos.Copy(), nil))
 			l.advance()

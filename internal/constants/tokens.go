@@ -26,6 +26,7 @@ const (
 	TT_MINUS = "__~mns~__"
 	TT_MUL   = "__~mul~__"
 	TT_DIV   = "__~div~__"
+	TT_MOD   = "__~mod~__" // %
 	TT_POW   = "__~pow~__" // ^
 	TT_EE    = "__~ee~__"  // ==
 	TT_NE    = "__~ne~__"  // !=

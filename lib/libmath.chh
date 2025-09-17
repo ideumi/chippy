@@ -64,7 +64,7 @@ func Mod(a, b)
 {
 	if b == 0 { return err; }
 
-	return a - b * Floor(a / b);
+	return a % b;
 }
 
 # func Round(x, digits)
@@ -204,7 +204,7 @@ func Gcd(a, b)
 
 	while b != 0
 	{
-		var temp = Mod(a, b);
+		var temp = a % b;
 
 		a = b;
 		b = temp;
@@ -253,7 +253,7 @@ func Hypotenuse(a, b)
 
 func IsEven(n)
 {
-	return Mod(n, 2) == 0;
+	return n % 2 == 0;
 }
 
 # func IsOdd(n)
@@ -263,7 +263,7 @@ func IsEven(n)
 
 func IsOdd(n)
 {
-	return Mod(n, 2) == 1;
+	return n % 2 == 1;
 }
 
 # func Degrees(radians)
@@ -302,7 +302,7 @@ func Hex(n)
 
 	while number > 0
 	{
-		var remainder = Mod(number, 16);
+		var remainder = number % 16;
 		result = substr(digits, remainder, 1) + result;
 		number = Floor(number / 16);
 	}
@@ -338,7 +338,7 @@ func Oct(n)
 
 	while number > 0
 	{
-		var remainder = Mod(number, 8);
+		var remainder = number % 8;
 		result = str(remainder) + result;
 		number = Floor(number / 8);
 	}

@@ -289,6 +289,9 @@ func (i *Interpreter) visitBinOpNode(node *ast.BinOpNode, ctx interface{}) *valu
 	case constants.TT_DIV:
 		result, err = left.DivedBy(right)
 
+	case constants.TT_MOD:
+		result, err = left.ModdedBy(right)
+
 	case constants.TT_POW:
 		result, err = left.PowedBy(right)
 

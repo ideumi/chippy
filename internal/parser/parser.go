@@ -270,7 +270,7 @@ func (p *Parser) arithExpr() *ParseResult {
 }
 
 func (p *Parser) term() *ParseResult {
-	return p.binOp(p.factor, []string{constants.TT_MUL, constants.TT_DIV}, nil)
+	return p.binOp(p.factor, []string{constants.TT_MUL, constants.TT_DIV, constants.TT_MOD}, nil)
 }
 
 func (p *Parser) factor() *ParseResult {
