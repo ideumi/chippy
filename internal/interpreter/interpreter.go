@@ -13,7 +13,6 @@ import (
 	"chip-go/internal/errors"
 	"chip-go/internal/values"
 	"fmt"
-	"reflect"
 )
 
 type Interpreter struct{}
@@ -33,63 +32,43 @@ func (i *Interpreter) getContext(ctx interface{}) *context.Context {
 }
 
 func (i *Interpreter) Visit(node ast.Node, ctx interface{}) *values.RuntimeResult {
-	methodName := fmt.Sprintf("visit%s", reflect.TypeOf(node).Elem().Name())
-
-	switch methodName {
-
-	case "visitNumberNode":
-		return i.visitNumberNode(node.(*ast.NumberNode), ctx)
-
-	case "visitStringNode":
-		return i.visitStringNode(node.(*ast.StringNode), ctx)
-
-	case "visitListNode":
-		return i.visitListNode(node.(*ast.ListNode), ctx)
-
-	case "visitByteArrayNode":
-		return i.visitByteArrayNode(node.(*ast.ByteArrayNode), ctx)
-
-	case "visitVarAccessNode":
-		return i.visitVarAccessNode(node.(*ast.VarAccessNode), ctx)
-
-	case "visitVarAssignNode":
-		return i.visitVarAssignNode(node.(*ast.VarAssignNode), ctx)
-
-	case "visitVarUpdateNode":
-		return i.visitVarUpdateNode(node.(*ast.VarUpdateNode), ctx)
-
-	case "visitBinOpNode":
-		return i.visitBinOpNode(node.(*ast.BinOpNode), ctx)
-
-	case "visitUnaryOpNode":
-		return i.visitUnaryOpNode(node.(*ast.UnaryOpNode), ctx)
-
-	case "visitIfNode":
-		return i.visitIfNode(node.(*ast.IfNode), ctx)
-
-	case "visitForNode":
-		return i.visitForNode(node.(*ast.ForNode), ctx)
-
-	case "visitWhileNode":
-		return i.visitWhileNode(node.(*ast.WhileNode), ctx)
-
-	case "visitFuncDefNode":
-		return i.visitFuncDefNode(node.(*ast.FuncDefNode), ctx)
-
-	case "visitCallNode":
-		return i.visitCallNode(node.(*ast.CallNode), ctx)
-
-	case "visitReturnNode":
-		return i.visitReturnNode(node.(*ast.ReturnNode), ctx)
-
-	case "visitContinueNode":
-		return i.visitContinueNode(node.(*ast.ContinueNode), ctx)
-
-	case "visitBreakNode":
-		return i.visitBreakNode(node.(*ast.BreakNode), ctx)
-
+	switch n := node.(type) {
+	case *ast.NumberNode:
+		return i.visitNumberNode(n, ctx)
+	case *ast.StringNode:
+		return i.visitStringNode(n, ctx)
+	case *ast.ListNode:
+		return i.visitListNode(n, ctx)
+	case *ast.ByteArrayNode:
+		return i.visitByteArrayNode(n, ctx)
+	case *ast.VarAccessNode:
+		return i.visitVarAccessNode(n, ctx)
+	case *ast.VarAssignNode:
+		return i.visitVarAssignNode(n, ctx)
+	case *ast.VarUpdateNode:
+		return i.visitVarUpdateNode(n, ctx)
+	case *ast.BinOpNode:
+		return i.visitBinOpNode(n, ctx)
+	case *ast.UnaryOpNode:
+		return i.visitUnaryOpNode(n, ctx)
+	case *ast.IfNode:
+		return i.visitIfNode(n, ctx)
+	case *ast.ForNode:
+		return i.visitForNode(n, ctx)
+	case *ast.WhileNode:
+		return i.visitWhileNode(n, ctx)
+	case *ast.FuncDefNode:
+		return i.visitFuncDefNode(n, ctx)
+	case *ast.CallNode:
+		return i.visitCallNode(n, ctx)
+	case *ast.ReturnNode:
+		return i.visitReturnNode(n, ctx)
+	case *ast.ContinueNode:
+		return i.visitContinueNode(n, ctx)
+	case *ast.BreakNode:
+		return i.visitBreakNode(n, ctx)
 	default:
-		panic(fmt.Sprintf("No visit method defined for %s", methodName))
+		panic(fmt.Sprintf("No visit method defined for node type %T", node))
 	}
 }
 
@@ -185,9 +164,11 @@ func (i *Interpreter) visitByteArrayNode(node *ast.ByteArrayNode, ctx interface{
 func (i *Interpreter) visitVarAccessNode(node *ast.VarAccessNode, ctx interface{}) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 	varName := node.VarNameToken.Value.(string)
-	context := i.getContext(ctx)
 
-	if context == nil {
+	// Direct context cast
+	context, ok := ctx.(*context.Context)
+
+	if !ok || context == nil {
 		return res.Failure(errors.NewRTError(
 			node.PosStart, node.PosEnd,
 			"Invalid context",
@@ -206,7 +187,8 @@ func (i *Interpreter) visitVarAccessNode(node *ast.VarAccessNode, ctx interface{
 	}
 
 	if val, ok := value.(values.Value); ok {
-		val = val.Copy().SetPos(node.PosStart, node.PosEnd).SetContext(ctx)
+		// No unnecessary copying for variable access
+		val.SetPos(node.PosStart, node.PosEnd).SetContext(ctx)
 
 		return res.Success(val)
 	}
@@ -227,9 +209,10 @@ func (i *Interpreter) visitVarAssignNode(node *ast.VarAssignNode, ctx interface{
 		return res
 	}
 
-	context := i.getContext(ctx)
+	// Direct context cast
+	context, ok := ctx.(*context.Context)
 
-	if context == nil {
+	if !ok || context == nil {
 		return res.Failure(errors.NewRTError(
 			node.PosStart, node.PosEnd,
 			"Invalid context",
@@ -250,9 +233,10 @@ func (i *Interpreter) visitVarUpdateNode(node *ast.VarUpdateNode, ctx interface{
 		return res
 	}
 
-	context := i.getContext(ctx)
+	// Direct context cast
+	context, ok := ctx.(*context.Context)
 
-	if context == nil {
+	if !ok || context == nil {
 		return res.Failure(errors.NewRTError(
 			node.PosStart, node.PosEnd,
 			"Invalid context",
@@ -437,6 +421,7 @@ func (i *Interpreter) visitForNode(node *ast.ForNode, ctx interface{}) *values.R
 	}
 
 	startNum, ok := startValue.(*values.Number)
+
 	if !ok {
 		return res.Failure(errors.NewRTError(
 			node.StartValueNode.GetPosStart(), node.StartValueNode.GetPosEnd(),
@@ -446,6 +431,7 @@ func (i *Interpreter) visitForNode(node *ast.ForNode, ctx interface{}) *values.R
 	}
 
 	endNum, ok := endValue.(*values.Number)
+
 	if !ok {
 		return res.Failure(errors.NewRTError(
 			node.EndValueNode.GetPosStart(), node.EndValueNode.GetPosEnd(),
@@ -455,6 +441,7 @@ func (i *Interpreter) visitForNode(node *ast.ForNode, ctx interface{}) *values.R
 	}
 
 	stepNum, ok := stepValue.(*values.Number)
+
 	if !ok {
 		return res.Failure(errors.NewRTError(
 			node.StepValueNode.GetPosStart(), node.StepValueNode.GetPosEnd(),
@@ -466,6 +453,17 @@ func (i *Interpreter) visitForNode(node *ast.ForNode, ctx interface{}) *values.R
 	i_val := startNum.Value
 	varName := node.VarNameToken.Value.(string)
 
+	// Cache context outside loop to avoid repeated lookups
+	context, ok := ctx.(*context.Context)
+
+	if !ok || context == nil {
+		return res.Failure(errors.NewRTError(
+			node.PosStart, node.PosEnd,
+			"Invalid context",
+			ctx,
+		))
+	}
+
 	for {
 		if stepNum.Value >= 0 && i_val >= endNum.Value {
 			break
@@ -475,11 +473,7 @@ func (i *Interpreter) visitForNode(node *ast.ForNode, ctx interface{}) *values.R
 			break
 		}
 
-		context := i.getContext(ctx)
-
-		if context != nil {
-			context.SymbolTable.Set(varName, values.NewNumber(i_val))
-		}
+		context.SymbolTable.Set(varName, values.NewNumber(i_val))
 
 		res.Register(i.Visit(node.BodyNode, ctx))
 
@@ -501,11 +495,7 @@ func (i *Interpreter) visitForNode(node *ast.ForNode, ctx interface{}) *values.R
 		i_val += stepNum.Value
 	}
 
-	context := i.getContext(ctx)
-
-	if context != nil {
-		context.SymbolTable.Remove(varName)
-	}
+	context.SymbolTable.Remove(varName)
 
 	return res.Success(values.NewNumber(constants.NUM_NUL).SetContext(ctx).SetPos(node.PosStart, node.PosEnd))
 }
@@ -549,11 +539,13 @@ func (i *Interpreter) visitFuncDefNode(node *ast.FuncDefNode, ctx interface{}) *
 	res := values.NewRuntimeResult()
 
 	var funcName string
+
 	if node.VarNameToken != nil {
 		funcName = node.VarNameToken.Value.(string)
 	}
 
 	argNames := make([]string, len(node.ArgNameTokens))
+
 	for i, token := range node.ArgNameTokens {
 		argNames[i] = token.Value.(string)
 	}
@@ -562,9 +554,8 @@ func (i *Interpreter) visitFuncDefNode(node *ast.FuncDefNode, ctx interface{}) *
 	funcValue.SetContext(ctx).SetPos(node.PosStart, node.PosEnd)
 
 	if node.VarNameToken != nil {
-		context := i.getContext(ctx)
-
-		if context != nil {
+		// Direct context cast
+		if context, ok := ctx.(*context.Context); ok && context != nil {
 			context.SymbolTable.Set(funcName, funcValue)
 		}
 	}
@@ -577,10 +568,12 @@ func (i *Interpreter) visitCallNode(node *ast.CallNode, ctx interface{}) *values
 	args := []values.Value{}
 
 	valueToCall := res.Register(i.Visit(node.NodeToCall, ctx))
+
 	if res.ShouldReturn() {
 		return res
 	}
-	valueToCall = valueToCall.Copy()
+
+	// Don't copy unless function actually modifies the value
 
 	for _, argNode := range node.ArgNodes {
 		args = append(args, res.Register(i.Visit(argNode, ctx)))
@@ -596,7 +589,8 @@ func (i *Interpreter) visitCallNode(node *ast.CallNode, ctx interface{}) *values
 		return res
 	}
 
-	returnValue = returnValue.Copy().SetPos(node.PosStart, node.PosEnd).SetContext(ctx)
+	// Don't copy return values unnecessarily; Set position and context directly
+	returnValue.SetPos(node.PosStart, node.PosEnd).SetContext(ctx)
 
 	return res.Success(returnValue)
 }

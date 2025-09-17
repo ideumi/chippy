@@ -149,9 +149,6 @@ func runREPL(rr *roadrunner.RoadRunner2) {
 
 			// Clear the result reference immediately after printing
 			result = nil
-
-			// Force garbage collection for unassigned expressions
-			runtime.GC()
 		}
 	}
 }
@@ -196,8 +193,6 @@ func runCommand(rr *roadrunner.RoadRunner2, command string) {
 
 		// Clear the result reference immediately after printing
 		result = nil
-		// Force garbage collection for command results
-		runtime.GC()
 	}
 }
 
