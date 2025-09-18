@@ -16,7 +16,7 @@ func CalcColCoord(maxCol, col)
 	return Scale(col, -2.0, 2.0, 0, maxCol);
 }
 
-# Regular terminal columns to row coordiates
+# Regular terminal rows to cartesian coordiates
 
 func CalcRowCoord(maxRow, row)
 {
