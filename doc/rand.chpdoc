@@ -8,7 +8,7 @@ Generates cryptographically secure random bytes.
 - ''count'': Number of random bytes to generate
 
 *Returns:*
-- List: List of numbers (0-255) representing random bytes
+- Bytes: Random bytes
 - ''err'' on failure
 
 *Errors:*

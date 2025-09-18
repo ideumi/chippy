@@ -62,10 +62,5 @@ func randFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 	}
 
-	var byteValues []values.Value
-	for _, b := range buf {
-		byteValues = append(byteValues, values.NewNumber(float64(b)).SetContext(ctx))
-	}
-
-	return res.Success(values.NewList(byteValues).SetContext(ctx))
+	return res.Success(values.NewBytes(buf).SetContext(ctx))
 }
