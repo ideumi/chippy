@@ -5,6 +5,7 @@
 
 load("libmath.chh");
 load("libgregorian.chh");
+load("libtime.chh");
 
 # DAYSINAVANTMONTH
 # (2025-08-16)
