@@ -7,7 +7,7 @@
 package constants
 
 const (
-	VERSION_DATE = "2025-09-17"
+	VERSION_DATE = "2025-09-18"
 	HIST_FILE    = ".ChipLangHistory"
 
 	RR_CONTEXT_DISPLAY_NAME     = "<ChipLangProgram>"
