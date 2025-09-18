@@ -1,0 +1,95 @@
+#!/usr/bin/chippy
+#
+# mandelbrot - main.chp
+#
+
+# This is a small little demonstration on how to render a mandelbrot set
+# to the terminal using libtermios.
+
+load("libtermios.chh");
+load("libhandles.chh");
+load("libprint.chh");
+
+# Regular terminal columns to cartesian coordiates
+
+func CalcColCoord(maxCol, col)
+{
+	return Scale(col, -2.0, 2.0, 0, maxCol);
+}
+
+# Regular terminal columns to row coordiates
+
+func CalcRowCoord(maxRow, row)
+{
+	return Scale(row, -2.0, 2.0, 0, maxRow);
+}
+
+func Scale(unscaled, minAllowed, maxAllowed, min, max)
+{
+	return (maxAllowed - minAllowed) * (unscaled - min) / (max - min) + minAllowed;
+}
+
+# Determine if a number is part of the set
+
+func CalculateMB(col, row, iter)
+{
+	var cReal = CalcColCoord(SIZECOLS, col);
+	var cImag = -CalcRowCoord(SIZEROWS, row);
+
+	var zReal = 0;
+	var zImag = 0;
+
+	for x = 0 utl iter
+	{
+		var zRealNew = (zReal ^ 2) - (zImag ^ 2) + cReal;
+		var zImagNew = 2 * zReal * zImag + cImag;
+
+		if (zRealNew ^ 2) + (zImagNew ^ 2) > 4
+		{
+			return x;
+		}
+
+		zReal = zRealNew;
+		zImag = zImagNew;
+	}
+
+	return iter;
+}
+
+func Main()
+{
+	var TERMSZE = GetTerminalSize();
+
+	var SIZEROWS = get(TERMSZE, 0);
+	var SIZECOLS = get(TERMSZE, 1);
+
+	HideCursor();
+	ClearScreen();
+
+	SetAttribute(COLORGREEN);
+
+	for row = 0 utl SIZEROWS
+	{
+		for col = 0 utl SIZECOLS
+		{
+			CursorTo(row, col);
+
+			if CalculateMB(col, row, 50) >= 50
+			{
+				fwrite(pack("█"), STDOUT);
+				continue;
+			}
+
+			fwrite(pack(" "), STDOUT);
+		}
+	}
+
+	SetAttribute(COLORRESET);
+
+	fwrite(b[10], STDOUT);
+
+	getch();
+	ShowCursor();
+}
+
+Main();

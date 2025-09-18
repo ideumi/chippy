@@ -3,12 +3,12 @@
 # Combine configuration file
 #
 
-# Project metadata
+# Metadata
 
-var Project = "avant";
+var Project = "mandelbrot";
 var Version = "1.0.0";
 var Licence = "../../LICENCE.txt";
-var Output = "out/avant";
+var Output = "out/mandelbrot";
 
 # Entry point
 
@@ -17,7 +17,7 @@ var Source = "src/main.chp";
 # Search paths for dependencies
 
 var Paths = [];
-Paths = Paths + ["src"];
+Paths = Paths + ["src/lib"];
 
 # Add user-local library path if HOME is available
 
@@ -28,7 +28,6 @@ if homePath != err
     Paths = Paths + [homePath + "/.local/share/chiplang/lib"];
 }
 
-Paths = Paths + ["../../lib"];
 Paths = Paths + ["/usr/lib/chiplang"];
 
 # Options
