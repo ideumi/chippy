@@ -97,7 +97,7 @@ func getDocPaths() []string {
 
 	// Check user local directory
 	if homeDir, err := os.UserHomeDir(); err == nil {
-		userDocPath := filepath.Join(homeDir, ".local", "share", "chiplang", "doc")
+		userDocPath := filepath.Join(homeDir, constants.DOC_DIR_USER)
 
 		if _, err := os.Stat(userDocPath); err == nil {
 			paths = append(paths, userDocPath)

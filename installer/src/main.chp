@@ -47,20 +47,20 @@ func InstallFiles(srcDir, destDir)
 			return err;
 		}
 	}
-	
+
 	var files = ListDir(srcDir);
 
 	if str(files) == err
 	{
 		return true; # No files to install
 	}
-	
+
 	for i = 0 utl len(files)
 	{
 		var fileName = get(files, i);
 		var srcFile = JoinPath(srcDir, fileName);
 		var destFile = JoinPath(destDir, fileName);
-		
+
 		if IsFile(srcFile) {
 			var copyResult = CopyFile(srcFile, destFile);
 
