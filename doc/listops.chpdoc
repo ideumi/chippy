@@ -1,0 +1,10 @@
+*List and Bytes Operators* | V-$CHIPVR ($CHIPCN)
+
+ChipLang's engine redefines arithmetic operators for lists and bytes:
+
+''+'' - Concatenate two lists or two bytes (see ''append(container, value)'')
+''*'' - Repeat list or bytes by number
+''/'' - Access element at index (see ''get(container, index)'')
+''-'' - Remove element at index
+
+Indicies are 0-based.
