@@ -1,0 +1,120 @@
+#!/usr/bin/chippy
+#
+# corelib - librandom.chh
+#
+
+# func RandomInt(min, max)
+# V-1.0.0 (2025-09-25)
+#
+# Returns a random integer in the range min to max, err
+# on failure.
+
+func RandomInt(min, max)
+{
+	if min == max { return min; }
+	if min > max { return err; }
+
+	var range = max - min + 1;
+
+	var maxFair = 256 - (256 % range);
+
+	while true
+	{
+		var randomNum = rand(1) / 0;
+
+		if randomNum < maxFair
+		{
+			return min + (randomNum % range);
+		}
+	}
+}
+
+# func RandomFloat(min, max)
+# V-1.0.0 (2025-09-25)
+#
+# Generates a float using 4 bytes of random data in the
+# range min to max, err on failure.
+
+func RandomFloat(min, max)
+{
+	if min == max { return min; }
+	if min > max { return err; }
+
+	var bytes = rand(4);
+
+	var bigInt = (bytes / 0) + (bytes / 1) * (256 ^ 1) + (bytes / 2) * (256 ^ 2) + (bytes / 3) * (256 ^ 3);
+
+	var fraction = bigInt / (256 ^ 4 - 1);
+
+	return min + fraction * (max - min);
+}
+
+# func RandomElement(elements)
+# V-1.0.0 (2025-09-25)
+#
+# Returns a random element from elements, err on failure.
+
+func RandomElement(elements)
+{
+	if len(elements) == 0 { return err; }
+
+	return elements / RandomInt(0, len(elements) - 1);
+}
+
+# func RandomShuffle(elements)
+# V-1.0.0 (2025-09-28)
+#
+# Shuffles elements in random order and returns it.
+
+func RandomShuffle(elements)
+{
+	if len(elements) == 0 { return elements; }
+
+	for x = len(elements) -1 utl 0 stp -1
+	{
+		var newIndex = RandomInt(0, x);
+
+		var temp = elements / x;
+		var swapValue = elements / newIndex;
+
+		elements = set(elements, x, swapValue);
+		elements = set(elements, newIndex, temp);
+	}
+
+	return elements;
+}
+
+# func RandomString(length, chars)
+# V-1.0.0 (2025-09-28)
+#
+# Creates a random string of length with elements from
+# chars and returns it, err on failure.
+
+func RandomString(length, chars)
+{
+	if type(chars) != "list" { return err; }
+	if length <= 0 { return err; }
+	if len(chars) == 0 { return err; }
+
+	var finalString = "";
+
+	for x = 0 utl length
+	{
+		var char = chars / RandomInt(0, len(chars) - 1);
+
+		finalString = finalString + char;
+
+		if len(finalString) == length
+		{
+			break;
+		}
+
+		if len(finalString) > length
+		{
+			finalString = substr(finalString, 0, length);
+			break;
+		}
+	}
+
+	return finalString;
+}
