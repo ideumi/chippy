@@ -10,6 +10,7 @@ import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/errors"
 	"chip-go/internal/values"
+	"unicode/utf8"
 )
 
 func lenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
@@ -33,7 +34,7 @@ func lenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 	switch v := value.(type) {
 	case *values.String:
-		return res.Success(values.NewNumber(float64(len(v.Value))).SetContext(ctx))
+		return res.Success(values.NewNumber(float64(utf8.RuneCountInString(v.Value))).SetContext(ctx))
 	case *values.List:
 		return res.Success(values.NewNumber(float64(len(v.Elements))).SetContext(ctx))
 	case *values.Bytes:

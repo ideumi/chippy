@@ -68,11 +68,13 @@ func indexofFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 		))
 	}
 
-	index := strings.Index(haystack, needle)
+	byteIndex := strings.Index(haystack, needle)
 
-	if index == -1 {
+	if byteIndex == -1 {
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 	}
 
-	return res.Success(values.NewNumber(float64(index)).SetContext(ctx))
+	runeIndex := len([]rune(haystack[:byteIndex]))
+
+	return res.Success(values.NewNumber(float64(runeIndex)).SetContext(ctx))
 }
