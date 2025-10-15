@@ -7,7 +7,7 @@
 package constants
 
 const (
-	VERSION_DATE = "2025-09-30"
+	VERSION_DATE = "2025-10-15"
 	HIST_FILE    = ".ChipLangHistory"
 
 	RR_CONTEXT_DISPLAY_NAME     = "<ChipLangProgram>"
@@ -18,7 +18,7 @@ const (
 	LETTERS        = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	LETTERS_DIGITS = LETTERS + DIGITS
 
-	STR_LPLVR = "1.0.1"
+	STR_LPLVR = "1.0.2"
 	STR_LPLCN = "pardalote"
 
 	STR_ERR = "__~err~__"

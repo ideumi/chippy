@@ -38,7 +38,6 @@ func GetBuiltins() map[string]*values.BuiltInFunction {
 		"chmod":  values.NewBuiltInFunction("chmod", chmodFunction),
 
 		"seek":   values.NewBuiltInFunction("seek", seekFunction),
-		"pipe":   values.NewBuiltInFunction("pipe", pipeFunction),
 		"fsync":  values.NewBuiltInFunction("fsync", fsyncFunction),
 		"select": values.NewBuiltInFunction("select", selectFunction),
 
@@ -83,15 +82,10 @@ func GetBuiltins() map[string]*values.BuiltInFunction {
 		// Processes
 		"popen":    values.NewBuiltInFunction("popen", popenFunction),
 		"pclose":   values.NewBuiltInFunction("pclose", pcloseFunction),
-		"fork":     values.NewBuiltInFunction("fork", forkFunction),
-		"wait":     values.NewBuiltInFunction("wait", waitFunction),
-		"waitpid":  values.NewBuiltInFunction("waitpid", waitpidFunction),
 		"kill":     values.NewBuiltInFunction("kill", killFunction),
 		"signal":   values.NewBuiltInFunction("signal", signalFunction),
 		"unsignal": values.NewBuiltInFunction("unsignal", unsignalFunction),
 		"exec":     values.NewBuiltInFunction("exec", execFunction),
-		"getppid":  values.NewBuiltInFunction("getppid", getppidFunction),
-		"setsid":   values.NewBuiltInFunction("setsid", setsidFunction),
 
 		// Randomness
 		"rand": values.NewBuiltInFunction("rand", randFunction),
