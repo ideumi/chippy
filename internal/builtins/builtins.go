@@ -120,6 +120,8 @@ func GetConstants() map[string]values.Value {
 
 		"CHIPVR": values.NewString(constants.STR_LPLVR),
 		"CHIPCN": values.NewString(constants.STR_LPLCN),
+		"CHIPOS": values.NewString(constants.STR_LPLOS),
+		"CHIPAR": values.NewString(constants.STR_LPLAR),
 
 		"null":  values.NewNumber(constants.NUM_NUL),
 		"false": values.NewNumber(constants.NUM_FAL),

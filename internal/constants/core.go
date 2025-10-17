@@ -6,8 +6,10 @@
 
 package constants
 
+import "runtime"
+
 const (
-	VERSION_DATE = "2025-10-15"
+	VERSION_DATE = "2025-10-17"
 	HIST_FILE    = ".ChipLangHistory"
 
 	RR_CONTEXT_DISPLAY_NAME     = "<ChipLangProgram>"
@@ -20,6 +22,8 @@ const (
 
 	STR_LPLVR = "1.0.2"
 	STR_LPLCN = "pardalote"
+	STR_LPLOS = runtime.GOOS
+	STR_LPLAR = runtime.GOARCH
 
 	STR_ERR = "__~err~__"
 	STR_OK  = "__~ok~__"
