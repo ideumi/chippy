@@ -28,6 +28,8 @@
       <item>false</item>
       <item>CHIPVR</item>
       <item>CHIPCN</item>
+      <item>CHIPOS</item>
+      <item>CHIPAR</item>
     </list>
 
     <list name="error_constants">
@@ -54,7 +56,6 @@
       <item>fclose</item>
       <item>flock</item>
       <item>fopen</item>
-      <item>fork</item>
       <item>fread</item>
       <item>fsync</item>
       <item>fwrite</item>
@@ -63,7 +64,6 @@
       <item>getcwd</item>
       <item>getenv</item>
       <item>getpid</item>
-      <item>getppid</item>
       <item>getuid</item>
       <item>indexof</item>
       <item>int</item>
@@ -79,7 +79,6 @@
       <item>off</item>
       <item>pack</item>
       <item>pclose</item>
-      <item>pipe</item>
       <item>popen</item>
       <item>rand</item>
       <item>readlink</item>
@@ -91,7 +90,6 @@
       <item>select</item>
       <item>set</item>
       <item>setenv</item>
-      <item>setsid</item>
       <item>signal</item>
       <item>sin</item>
       <item>sleep</item>
@@ -111,8 +109,6 @@
       <item>unpack</item>
       <item>unsignal</item>
       <item>upper</item>
-      <item>wait</item>
-      <item>waitpid</item>
     </list>
 
     <list name="alerts">
