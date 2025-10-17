@@ -1,0 +1,219 @@
+#!/usr/bin/chippy
+#
+# corelib - libmap.chh
+#
+
+# func MapIsValid(map)
+# V-1.0.0 (2025-10-15)
+#
+# Determines if map is a valid map.
+
+func MapIsValid(map)
+{
+	if type(map) != "list" { return false; }
+	if len(map) == 0 { return false; }
+
+	var marker = get(map, 0);
+
+	if type(marker) != "string" { return false; }
+	if marker != "map" { return false; }
+
+	return true;
+}
+
+# func MapNew()
+# V-1.0.0 (2025-10-15)
+#
+# Creates a new empty map.
+
+func MapNew()
+{
+	return ["map"];
+}
+
+# func MapInit(keys)
+# V-1.0.0 (2025-10-15)
+#
+# Creates a new map with all keys initialized to null.
+
+func MapInit(keys)
+{
+	if type(keys) != "list" { return err; }
+
+	var map = MapNew();
+
+	for i = 0 utl len(keys)
+	{
+		var key = get(keys, i);
+
+		map = MapSet(map, key, null);
+	}
+
+	return map;
+}
+
+# func MapSet(map, key, value)
+# V-1.0.0 (2025-10-15)
+#
+# Sets or updates the value for key in map.
+
+func MapSet(map, key, value)
+{
+	if MapIsValid(map) == false { return err; }
+
+	for i = 1 utl len(map)
+	{
+		var pair = get(map, i);
+
+		if get(pair, 0) == key
+		{
+			return set(map, i, [key, value]);
+		}
+	}
+
+	return append(map, [key, value]);
+}
+
+# func MapGet(map, key)
+# V-1.0.0 (2025-10-15)
+#
+# Gets the value with key from map.
+
+func MapGet(map, key)
+{
+	if MapIsValid(map) == false { return err; }
+
+	for i = 1 utl len(map)
+	{
+		var pair = get(map, i);
+
+		if get(pair, 0) == key
+		{
+			return get(pair, 1);
+		}
+	}
+
+	return err;
+}
+
+# func MapHas(map, key)
+# V-1.0.0 (2025-10-15)
+#
+# Checks if map contains key.
+
+func MapHas(map, key)
+{
+	if MapIsValid(map) == false { return err; }
+
+	for i = 1 utl len(map)
+	{
+		var pair = get(map, i);
+
+		if get(pair, 0) == key
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+# func MapRemove(map, key)
+# V-1.0.0 (2025-10-15)
+#
+# Removes the key-value pair with key from map.
+
+func MapRemove(map, key)
+{
+	if MapIsValid(map) == false { return err; }
+
+	for i = 1 utl len(map)
+	{
+		var pair = get(map, i);
+
+		if get(pair, 0) == key
+		{
+			return map - i;
+		}
+	}
+
+	return map;
+}
+
+# func MapKeys(map)
+# V-1.0.0 (2025-10-15)
+#
+# Returns a list of all keys in map.
+
+func MapKeys(map)
+{
+	if MapIsValid(map) == false { return err; }
+
+	var keys = [];
+
+	for i = 1 utl len(map)
+	{
+		var pair = get(map, i);
+
+		keys = append(keys, get(pair, 0));
+	}
+
+	return keys;
+}
+
+# func MapValues(map)
+# V-1.0.0 (2025-10-15)
+#
+# Returns a list of all values in map.
+
+func MapValues(map)
+{
+	if MapIsValid(map) == false { return err; }
+
+	var values = [];
+
+	for i = 1 utl len(map)
+	{
+		var pair = get(map, i);
+
+		values = append(values, get(pair, 1));
+	}
+
+	return values;
+}
+
+# func MapLen(map)
+# V-1.0.0 (2025-10-15)
+#
+# Returns the number of key-value pairs in the map.
+
+func MapLen(map)
+{
+	if MapIsValid(map) == false { return err; }
+
+	return len(map) - 1;
+}
+
+# func MapMerge(map1, map2)
+# V-1.0.0 (2025-10-15)
+#
+# Merges map1 and map2.
+# If both maps contain the same key, the value from
+# map2 takes precedence.
+
+func MapMerge(map1, map2)
+{
+	if MapIsValid(map1) == false { return err; }
+	if MapIsValid(map2) == false { return err; }
+
+	var result = map1;
+
+	for i = 1 utl len(map2)
+	{
+		var pair = get(map2, i);
+
+		result = MapSet(result, get(pair, 0), get(pair, 1));
+	}
+
+	return result;
+}
