@@ -13,13 +13,29 @@ var LIBDIR = JoinPath(CWD, "content/lib");
 var CHIPPYBIN = JoinPath(CWD, "content/chippy");
 var DOCDIR = JoinPath(CWD, "content/doc");
 
+func IsTermux()
+{
+	var termuxVersion = getenv("TERMUX_VERSION");
+
+	if str(termuxVersion) != err { return true; }
+
+	return false;
+}
+
 func GetInstallPaths()
 {
+	if IsTermux() == true
+	{
+		return ["/data/data/com.termux/files/usr/bin/chippy", "/data/data/com.termux/files/usr/lib/chiplang", "/data/data/com.termux/files/usr/share/doc/chiplang"];
+	}
+
 	return ["/usr/bin/chippy", "/usr/lib/chiplang", "/usr/share/doc/chiplang"];
 }
 
 func CheckPermissions()
 {
+	if IsTermux() == true { return true; }
+
 	if getuid() == 0 { return true; }
 
 	return false;
@@ -200,7 +216,7 @@ func Uninstall()
 
 	if CheckPermissions() == false
 	{
-		Println("Elevated privileges required for uninstallation");
+		Println("Insufficient privileges for uninstallation");
 		Println("Please run this installer as root");
 
 		return;
@@ -226,7 +242,7 @@ func Install()
 
 	if CheckPermissions() == false
 	{
-		Println("Elevated privileges required for installation");
+		Println("Insufficient privileges for installation");
 		Println("Please run this installer as root");
 
 		return;

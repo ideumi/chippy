@@ -19,6 +19,7 @@ Println("Hello, World!");
 ## Experimental Platforms
 
 - Some BSDs (macOS, OpenBSD and FreeBSD) - highly experimental for now and not guaranteed to work
+- Android (via Termux)
 
 ## Installation
 

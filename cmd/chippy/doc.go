@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 )
 
@@ -104,7 +105,12 @@ func getDocPaths() []string {
 		}
 	}
 
-	paths = append(paths, constants.DOC_DIR_PRODUCTION)
+	// Add production path based on OS
+	if runtime.GOOS == "android" {
+		paths = append(paths, constants.DOC_DIR_PRODUCTION_TERMUX)
+	} else {
+		paths = append(paths, constants.DOC_DIR_PRODUCTION)
+	}
 
 	return paths
 }

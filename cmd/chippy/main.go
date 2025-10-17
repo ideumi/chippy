@@ -21,7 +21,8 @@ import (
 
 func main() {
 	if runtime.GOOS != "linux" && runtime.GOOS != "darwin" &&
-		runtime.GOOS != "freebsd" && runtime.GOOS != "openbsd" {
+		runtime.GOOS != "freebsd" && runtime.GOOS != "openbsd" &&
+		runtime.GOOS != "android" {
 		fmt.Println("Unsupported operating system")
 		os.Exit(1)
 	}
@@ -68,10 +69,10 @@ func main() {
 }
 
 func runREPL(rr *roadrunner.RoadRunner2) {
-	fmt.Printf("chippy (ChipLang) V-%s '%s' from %s on %s.\n",
-		constants.STR_LPLVR, constants.STR_LPLCN, constants.VERSION_DATE, runtime.GOOS)
+	fmt.Printf("chippy (ChipLang) V-%s '%s' from %s on %s-%s.\n",
+		constants.STR_LPLVR, constants.STR_LPLCN, constants.VERSION_DATE, runtime.GOOS, runtime.GOARCH)
 
-	if runtime.GOOS != "linux" {
+	if runtime.GOOS != "linux" && runtime.GOOS != "android" {
 		// TODO: Remove this, once testing on the other UNIXes is complete.
 		fmt.Printf("WARNING: ChipLang has not been tested on %s, tread lightly.\n", runtime.GOOS)
 	}
