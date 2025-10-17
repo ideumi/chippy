@@ -53,13 +53,9 @@ func CalculateTimezone()
 
 	offset = Trim(str(offset));
 
-	if str(offset) == err
-	{
-		pclose(dateHandle);
-		return 0;
-	}
-
 	pclose(dateHandle);
+
+	if str(offset) == err { return 0; }
 
 	# ---
 
