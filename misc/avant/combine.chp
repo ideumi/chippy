@@ -6,7 +6,7 @@
 # Project metadata
 
 var Project = "avant";
-var Version = "1.0.0";
+var Version = "1.0.1";
 var Licence = "../../LICENCE.txt";
 var Output = "out/avant";
 
