@@ -309,6 +309,12 @@ func (p *Parser) call() *ParseResult {
 		p.advance()
 		argNodes := []ast.Node{}
 
+		// Skip optional newlines after opening parenthesis
+		for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
+			res.RegisterAdvancement()
+			p.advance()
+		}
+
 		if p.currentTok.Type == constants.TT_RPAREN {
 			res.RegisterAdvancement()
 			p.advance()
@@ -325,10 +331,22 @@ func (p *Parser) call() *ParseResult {
 				res.RegisterAdvancement()
 				p.advance()
 
+				// Skip optional newlines after comma
+				for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
+					res.RegisterAdvancement()
+					p.advance()
+				}
+
 				argNodes = append(argNodes, res.Register(p.expr()))
 				if res.error != nil {
 					return res
 				}
+			}
+
+			// Skip optional newlines before closing parenthesis
+			for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
+				res.RegisterAdvancement()
+				p.advance()
 			}
 
 			if p.currentTok.Type != constants.TT_RPAREN {
@@ -491,6 +509,12 @@ func (p *Parser) listExpr() *ParseResult {
 	res.RegisterAdvancement()
 	p.advance()
 
+	// Skip optional newlines after opening bracket
+	for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
+		res.RegisterAdvancement()
+		p.advance()
+	}
+
 	if p.currentTok.Type == constants.TT_RSQUARE {
 		res.RegisterAdvancement()
 		p.advance()
@@ -508,10 +532,22 @@ func (p *Parser) listExpr() *ParseResult {
 			res.RegisterAdvancement()
 			p.advance()
 
+			// Skip optional newlines after comma
+			for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
+				res.RegisterAdvancement()
+				p.advance()
+			}
+
 			elementNodes = append(elementNodes, res.Register(p.expr()))
 			if res.error != nil {
 				return res
 			}
+		}
+
+		// Skip optional newlines before closing bracket
+		for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
+			res.RegisterAdvancement()
+			p.advance()
 		}
 
 		if p.currentTok.Type != constants.TT_RSQUARE {
@@ -550,6 +586,12 @@ func (p *Parser) byteArrayExpr() *ParseResult {
 	res.RegisterAdvancement()
 	p.advance()
 
+	// Skip optional newlines after opening bracket
+	for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
+		res.RegisterAdvancement()
+		p.advance()
+	}
+
 	if p.currentTok.Type == constants.TT_RSQUARE {
 		res.RegisterAdvancement()
 		p.advance()
@@ -566,11 +608,23 @@ func (p *Parser) byteArrayExpr() *ParseResult {
 			res.RegisterAdvancement()
 			p.advance()
 
+			// Skip optional newlines after comma
+			for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
+				res.RegisterAdvancement()
+				p.advance()
+			}
+
 			elementNodes = append(elementNodes, res.Register(p.expr()))
 
 			if res.error != nil {
 				return res
 			}
+		}
+
+		// Skip optional newlines before closing bracket
+		for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
+			res.RegisterAdvancement()
+			p.advance()
 		}
 
 		if p.currentTok.Type != constants.TT_RSQUARE {
@@ -1132,6 +1186,13 @@ func (p *Parser) binOp(leftFunc func() *ParseResult, ops []string, opValues []in
 		opTok := p.currentTok
 		res.RegisterAdvancement()
 		p.advance()
+
+		// Skip optional newlines after operator
+		for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
+			res.RegisterAdvancement()
+			p.advance()
+		}
+
 		right := res.Register(leftFunc())
 
 		if res.error != nil {
