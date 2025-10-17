@@ -8,6 +8,8 @@
 # current day.
 
 load("display.chh");
+load("timezone.chh");
+
 load("libavantjien.chh");
 load("libgregorian.chh");
 load("libhandles.chh");
@@ -15,6 +17,10 @@ load("libhandles.chh");
 func Main()
 {
 	var currentTime = time();
+
+	# Set libgregorian's TIMEZONEOFFSET properly ...
+	TIMEZONEOFFSET = CalculateTimezone();
+
 	var gregorianDate = GregorianFormatTime(currentTime);
 	
 	Println("Avantjien eval for gregorian date " + gregorianDate + ":");

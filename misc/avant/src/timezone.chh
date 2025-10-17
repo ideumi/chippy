@@ -1,0 +1,91 @@
+#!/usr/bin/chippy
+#
+# avant - timezone.chh
+#
+
+load("libstrings.chh");
+
+func CheckIfNumber(number)
+{
+	var numBin = pack(number) / 0;
+
+	return numBin >= 48 and numBin <= 57;
+}
+
+func TimezoneToSeconds(offset, mode)
+{
+	var setMode = "";
+
+	if mode == "-"
+	{
+		setMode = "-";
+	}
+
+	if type(offset) == "string"
+	{
+		if len(offset) == 4
+		{
+			var nums = [charat(offset, 0),
+						charat(offset, 1),
+						charat(offset, 2),
+						charat(offset, 3)];
+
+			for x = 0 utl len(nums) -1 { if CheckIfNumber(nums / x) == false { return 0; } }
+
+			var hours = int(num(join([nums / 0, nums / 1], "")));
+
+			var minutes = int(num(join([nums / 2, nums / 3], "")));
+
+			return int(num(setMode + str((hours * 3600) + (minutes * 60))));
+		}
+	}
+
+	return 0;
+}
+
+func CalculateTimezone()
+{
+	var dateHandle = popen("date +%z", "r");
+
+	if str(dateHandle) == err { return 0; }
+
+	var offset = unpack(fread(dateHandle, 0));
+
+	offset = Trim(str(offset));
+
+	if str(offset) == err
+	{
+		pclose(dateHandle);
+		return 0;
+	}
+
+	pclose(dateHandle);
+
+	# ---
+
+	var firstChar = err;
+
+	if len(offset) > 0
+	{
+		var firstChar = charat(offset, 0);
+	}
+
+	if firstChar != err
+	{
+		if CheckIfNumber(firstChar) == true
+		{
+			return TimezoneToSeconds(offset, "");
+		}
+		else
+		{
+			var offsetNum = substr(offset, 1, len(offset) -1);
+
+			if CheckIfNumber(charat(offsetNum, 0)) == true
+			{
+				return TimezoneToSeconds(offsetNum, firstChar);
+			}
+		}
+	}
+
+	return 0;
+}
