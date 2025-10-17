@@ -1,0 +1,83 @@
+" Vim syntax file
+" Language: ChipLang
+" Maintainer: ideumi
+" Latest Revision: 2025-10-17
+
+if exists("b:current_syntax")
+  finish
+endif
+
+" Keywords
+syn keyword chipKeyword var func return continue break if elif else for while utl stp
+syn keyword chipOperator and or not
+
+" Constants
+syn keyword chipConstant null true false CHIPVR CHIPCN CHIPOS CHIPAR
+syn keyword chipError err
+syn keyword chipSuccess ok
+
+" Built-in functions
+syn keyword chipBuiltin alarm append args charat chdir chmod cos
+syn keyword chipBuiltin dclose dopen dread
+syn keyword chipBuiltin error exec
+syn keyword chipBuiltin fclose flock fopen fread fsync fwrite
+syn keyword chipBuiltin get getch getcwd getenv getpid getuid
+syn keyword chipBuiltin indexof int
+syn keyword chipBuiltin join
+syn keyword chipBuiltin kill
+syn keyword chipBuiltin len list load lower lstat
+syn keyword chipBuiltin mkdir
+syn keyword chipBuiltin num
+syn keyword chipBuiltin off
+syn keyword chipBuiltin pack pclose popen
+syn keyword chipBuiltin rand readlink rename replace
+syn keyword chipBuiltin saccept sclose seek select set setenv signal sin sleep sopen sort split sread stat str substr swrite symlink
+syn keyword chipBuiltin tan time type
+syn keyword chipBuiltin unlink unpack unsignal upper
+
+" Comments
+syn match chipComment "#.*$" contains=chipTodo
+syn keyword chipTodo contained TODO FIXME NOTE WARNING HACK BUG XXX
+
+" Strings
+syn region chipString start='"' end='"' skip='\\"' contains=chipStringEscape
+syn match chipStringEscape contained '\\[nrt"\\]'
+
+" Byte arrays
+syn match chipByteArray 'b\[[^\]]*\]'
+
+" Numbers
+syn match chipNumber '\<\d\+\>'
+syn match chipFloat '\<\d\+\.\d\+\>'
+
+" Operators
+syn match chipOperator '[-+*/^=!<>]'
+syn match chipOperator '=='
+syn match chipOperator '!='
+syn match chipOperator '<='
+syn match chipOperator '>='
+
+" Delimiters
+syn match chipDelimiter '[(){}\[\],;]'
+
+" Shebang
+syn match chipShebang '^#!.*$'
+
+" Highlighting
+hi def link chipKeyword Keyword
+hi def link chipOperator Operator
+hi def link chipConstant Constant
+hi def link chipError Error
+hi def link chipSuccess String
+hi def link chipBuiltin Function
+hi def link chipComment Comment
+hi def link chipTodo Todo
+hi def link chipString String
+hi def link chipStringEscape SpecialChar
+hi def link chipByteArray Type
+hi def link chipNumber Number
+hi def link chipFloat Float
+hi def link chipDelimiter Delimiter
+hi def link chipShebang PreProc
+
+let b:current_syntax = "chiplang"
