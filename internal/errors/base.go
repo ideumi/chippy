@@ -86,6 +86,7 @@ func (e *BaseError) stringWithArrows() string {
 	result += fmt.Sprintf("Line %d: %s\n", lineCount+1, line)
 
 	// Convert byte position to visual position
+	// FIXME: CJK characters occupy 2 terminal columns but are counted as 1 here.
 	visualColStart := 0
 	bytePos := 0
 	lineText := text[idxStart:idxEnd]
