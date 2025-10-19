@@ -9,6 +9,7 @@ package errors
 import (
 	"fmt"
 	"strings"
+	"unicode/utf8"
 )
 
 type BaseError struct {
@@ -70,6 +71,7 @@ func (e *BaseError) stringWithArrows() string {
 	lineCount := strings.Count(text[:idxStart], "\n")
 
 	line := text[idxStart:idxEnd]
+
 	// Replace tabs with 4 spaces for consistent display
 	line = strings.ReplaceAll(line, "\t", "    ")
 
@@ -83,14 +85,21 @@ func (e *BaseError) stringWithArrows() string {
 
 	result += fmt.Sprintf("Line %d: %s\n", lineCount+1, line)
 
-	// Convert character position to visual position accounting for tab replacement
+	// Convert byte position to visual position
 	visualColStart := 0
-	for i := 0; i < colStart && i < len(text[idxStart:idxEnd]); i++ {
-		if text[idxStart+i] == '\t' {
-			visualColStart += 4 // Each tab becomes 4 spaces
+	bytePos := 0
+	lineText := text[idxStart:idxEnd]
+
+	for bytePos < colStart && bytePos < len(lineText) {
+		r, size := utf8.DecodeRuneInString(lineText[bytePos:])
+
+		if r == '\t' {
+			visualColStart += 4
 		} else {
 			visualColStart++
 		}
+
+		bytePos += size
 	}
 
 	if visualColStart < 0 {
@@ -100,15 +109,23 @@ func (e *BaseError) stringWithArrows() string {
 	arrows := strings.Repeat(" ", len(fmt.Sprintf("Line %d: ", lineCount+1))+visualColStart)
 
 	if e.PosEnd != nil && colEnd > colStart {
+
 		// Calculate visual width of the error span
 		visualColEnd := 0
-		for i := 0; i < colEnd && i < len(text[idxStart:idxEnd]); i++ {
-			if text[idxStart+i] == '\t' {
-				visualColEnd += 4 // Each tab becomes 4 spaces
+		bytePos := 0
+
+		for bytePos < colEnd && bytePos < len(lineText) {
+			r, size := utf8.DecodeRuneInString(lineText[bytePos:])
+
+			if r == '\t' {
+				visualColEnd += 4
 			} else {
 				visualColEnd++
 			}
+
+			bytePos += size
 		}
+
 		arrows += strings.Repeat("^", visualColEnd-visualColStart)
 	} else {
 		arrows += "^"

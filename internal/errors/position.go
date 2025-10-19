@@ -6,7 +6,10 @@
 
 package errors
 
-import "fmt"
+import (
+	"fmt"
+	"unicode/utf8"
+)
 
 type Position struct {
 	Index  int
@@ -27,7 +30,7 @@ func NewPosition(index, line, column int, file, text string) *Position {
 }
 
 func (p *Position) Advance(currentChar rune) *Position {
-	p.Index++
+	p.Index += utf8.RuneLen(currentChar)
 	p.Column++
 
 	if currentChar == '\n' {
