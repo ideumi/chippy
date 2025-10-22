@@ -29,10 +29,10 @@ func NewBaseError(posStart, posEnd *Position, errorName, details string) *BaseEr
 }
 
 func (e *BaseError) AsString() string {
-	result := fmt.Sprintf("%s: %s", e.ErrorName, e.Details)
+	result := fmt.Sprintf("\033[1;35m%s\033[0m: %s", e.ErrorName, e.Details)
 
 	if e.PosStart != nil {
-		result += fmt.Sprintf("\nFile %s, line %d", e.PosStart.File, e.PosStart.Line+1)
+		result += fmt.Sprintf("\n\033[1;32mFile %s, line %d\033[0m", e.PosStart.File, e.PosStart.Line+1)
 
 		if e.PosStart.Text != "" {
 			result += "\n\n" + e.stringWithArrows()
@@ -83,7 +83,7 @@ func (e *BaseError) stringWithArrows() string {
 		colEnd = e.PosEnd.Index - idxStart
 	}
 
-	result += fmt.Sprintf("Line %d: %s\n", lineCount+1, line)
+	result += fmt.Sprintf("\033[1mLine %d:\033[0m %s\n", lineCount+1, line)
 
 	// Convert byte position to visual position
 	// FIXME: CJK characters occupy 2 terminal columns but are counted as 1 here.
@@ -127,9 +127,9 @@ func (e *BaseError) stringWithArrows() string {
 			bytePos += size
 		}
 
-		arrows += strings.Repeat("^", visualColEnd-visualColStart)
+		arrows += "\033[1;32m" + strings.Repeat("^", visualColEnd-visualColStart) + "\033[0m"
 	} else {
-		arrows += "^"
+		arrows += "\033[1;32m^\033[0m"
 	}
 
 	result += arrows
