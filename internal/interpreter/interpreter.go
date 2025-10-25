@@ -266,6 +266,41 @@ func (i *Interpreter) visitBinOpNode(node *ast.BinOpNode, ctx interface{}) *valu
 		return res
 	}
 
+	// Short-circuit evaluation
+	if node.OpToken.Type == constants.TT_KEYWORD {
+		if node.OpToken.Value == "and" {
+			// If left is false, don't evaluate right
+			if !left.IsTrue() {
+				return res.Success(left.SetPos(node.PosStart, node.PosEnd))
+			}
+
+			// Left is true, evaluate and return right
+			right := res.Register(i.Visit(node.RightNode, ctx))
+
+			if res.ShouldReturn() {
+				return res
+			}
+
+			return res.Success(right.SetPos(node.PosStart, node.PosEnd))
+
+		} else if node.OpToken.Value == "or" {
+			// If left is true, don't evaluate right
+			if left.IsTrue() {
+				return res.Success(left.SetPos(node.PosStart, node.PosEnd))
+			}
+
+			// Left is false, evaluate and return right
+			right := res.Register(i.Visit(node.RightNode, ctx))
+
+			if res.ShouldReturn() {
+				return res
+			}
+
+			return res.Success(right.SetPos(node.PosStart, node.PosEnd))
+		}
+	}
+
+	// Evaluate right operand for all other operators
 	right := res.Register(i.Visit(node.RightNode, ctx))
 
 	if res.ShouldReturn() {
@@ -312,13 +347,6 @@ func (i *Interpreter) visitBinOpNode(node *ast.BinOpNode, ctx interface{}) *valu
 
 	case constants.TT_GTE:
 		result, err = left.GetComparisonGte(right)
-
-	case constants.TT_KEYWORD:
-		if node.OpToken.Value == "and" {
-			result, err = left.AndedBy(right)
-		} else if node.OpToken.Value == "or" {
-			result, err = left.OredBy(right)
-		}
 	}
 
 	if err != nil {
