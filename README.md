@@ -2,7 +2,7 @@
 
 ChipLang (Chipmunk language) is an interpreted scripting / programming language written in Go, it has the goal of creating a simple, low profile, understandable and hackable programming language.
 
-ChipLang's ideology is to have a clean separation between fundamental interpreter primitives (`builtins`) which provide complex core functionality that cannot be implemented cleanly otherwise, and the native core library (`lib`) which abstracts these primitives for convenience and more, and then have Chip programs be mostly independent (except for the `chippy` interpreter) bundles created via an intelligent and easy to use bundling system (`combine`).
+ChipLang's ideology is to have a clean separation between fundamental interpreter primitives (`builtins`) which provide complex core functionality that cannot be implemented cleanly or with the required performance otherwise, and the native core library (`lib`) which abstracts these primitives for convenience and more, and then have Chip programs be mostly independent (except for the `chippy` interpreter) bundles created via an intelligent and easy to use bundling system (`combine`).
 
 Chip's Interpreter is called `chippy`, from `chip` -> `chipi` (Chip Interpreter) -> `chippy`
 
@@ -14,11 +14,11 @@ Println("Hello, World!");
 
 ## Supported Platforms
 
-- Any reasonably modern Linux distro
+- Any reasonably modern FHS-compliant Linux distro
 
 ## Experimental Platforms
 
-- Some BSDs (macOS, OpenBSD and FreeBSD) - highly experimental for now and not guaranteed to work
+- OpenBSD and FreeBSD - highly experimental for now and not guaranteed to work
 - Android (via Termux)
 
 ## Installation
