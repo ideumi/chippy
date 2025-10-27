@@ -67,6 +67,10 @@ func (i *Interpreter) Visit(node ast.Node, ctx interface{}) *values.RuntimeResul
 		return i.visitContinueNode(n, ctx)
 	case *ast.BreakNode:
 		return i.visitBreakNode(n, ctx)
+	case *ast.IndexAccessNode:
+		return i.visitIndexAccessNode(n, ctx)
+	case *ast.IndexAssignNode:
+		return i.visitIndexAssignNode(n, ctx)
 	default:
 		panic(fmt.Sprintf("No visit method defined for node type %T", node))
 	}
@@ -515,11 +519,13 @@ func (i *Interpreter) visitForNode(node *ast.ForNode, ctx interface{}) *values.R
 		if res.LoopShouldContinue {
 			res.LoopShouldContinue = false
 			i_val += stepNum.Value
+
 			continue
 		}
 
 		if res.LoopShouldBreak {
 			res.LoopShouldBreak = false
+
 			break
 		}
 
@@ -648,4 +654,223 @@ func (i *Interpreter) visitContinueNode(node *ast.ContinueNode, ctx interface{})
 
 func (i *Interpreter) visitBreakNode(node *ast.BreakNode, ctx interface{}) *values.RuntimeResult {
 	return values.NewRuntimeResult().SuccessBreak()
+}
+
+func (i *Interpreter) visitIndexAccessNode(node *ast.IndexAccessNode, ctx interface{}) *values.RuntimeResult {
+	res := values.NewRuntimeResult()
+
+	collection := res.Register(i.Visit(node.CollectionNode, ctx))
+
+	if res.ShouldReturn() {
+		return res
+	}
+
+	index := res.Register(i.Visit(node.IndexNode, ctx))
+
+	if res.ShouldReturn() {
+		return res
+	}
+
+	indexNum, ok := index.(*values.Number)
+
+	if !ok {
+		return res.Failure(errors.NewRTError(
+			node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
+			"Index must be a number",
+			ctx,
+		))
+	}
+
+	// Force integer
+	if indexNum.Value != float64(int(indexNum.Value)) {
+		return res.Failure(errors.NewRTError(
+			node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
+			"Index must be an integer",
+			ctx,
+		))
+	}
+
+	idx := int(indexNum.Value)
+
+	switch coll := collection.(type) {
+	case *values.List:
+		if idx < 0 || idx >= len(coll.Elements) {
+			return res.Failure(errors.NewRTError(
+				node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
+				"Index out of bounds",
+				ctx,
+			))
+		}
+
+		return res.Success(coll.Elements[idx])
+
+	case *values.Bytes:
+		if idx < 0 || idx >= len(coll.Data) {
+			return res.Failure(errors.NewRTError(
+				node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
+				"Index out of bounds",
+				ctx,
+			))
+		}
+
+		return res.Success(values.NewNumber(float64(coll.Data[idx])).SetContext(ctx))
+
+	case *values.String:
+		runes := []rune(coll.Value)
+
+		if idx < 0 || idx >= len(runes) {
+			return res.Failure(errors.NewRTError(
+				node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
+				"Index out of bounds",
+				ctx,
+			))
+		}
+
+		return res.Success(values.NewString(string(runes[idx])).SetContext(ctx))
+
+	default:
+		return res.Failure(errors.NewRTError(
+			node.CollectionNode.GetPosStart(), node.CollectionNode.GetPosEnd(),
+			"Can only index lists, bytes, or strings",
+			ctx,
+		))
+	}
+}
+
+func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx interface{}) *values.RuntimeResult {
+	res := values.NewRuntimeResult()
+
+	collection := res.Register(i.Visit(node.CollectionNode, ctx))
+
+	if res.ShouldReturn() {
+		return res
+	}
+
+	index := res.Register(i.Visit(node.IndexNode, ctx))
+
+	if res.ShouldReturn() {
+		return res
+	}
+
+	value := res.Register(i.Visit(node.ValueNode, ctx))
+
+	if res.ShouldReturn() {
+		return res
+	}
+
+	indexNum, ok := index.(*values.Number)
+
+	if !ok {
+		return res.Failure(errors.NewRTError(
+			node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
+			"Index must be a number",
+			ctx,
+		))
+	}
+
+	// Force integer
+	if indexNum.Value != float64(int(indexNum.Value)) {
+		return res.Failure(errors.NewRTError(
+			node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
+			"Index must be an integer",
+			ctx,
+		))
+	}
+
+	idx := int(indexNum.Value)
+
+	switch coll := collection.(type) {
+	case *values.List:
+		if idx < 0 || idx >= len(coll.Elements) {
+			return res.Failure(errors.NewRTError(
+				node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
+				"Index out of bounds",
+				ctx,
+			))
+		}
+
+		newList := coll.Copy().(*values.List)
+		newList.Elements[idx] = value.SetContext(ctx)
+
+		return res.Success(newList)
+
+	case *values.Bytes:
+		valueNum, ok := value.(*values.Number)
+		if !ok {
+			return res.Failure(errors.NewRTError(
+				node.ValueNode.GetPosStart(), node.ValueNode.GetPosEnd(),
+				"Byte value must be a number",
+				ctx,
+			))
+		}
+
+		byteValue := int(valueNum.Value)
+
+		if byteValue < 0 || byteValue > 255 {
+			return res.Failure(errors.NewRTError(
+				node.ValueNode.GetPosStart(), node.ValueNode.GetPosEnd(),
+				"Byte values must be between 0 and 255",
+				ctx,
+			))
+		}
+
+		if idx < 0 || idx >= len(coll.Data) {
+			return res.Failure(errors.NewRTError(
+				node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
+				"Index out of bounds",
+				ctx,
+			))
+		}
+
+		newBytes := coll.Copy().(*values.Bytes)
+		newBytes.Data[idx] = byte(byteValue)
+
+		return res.Success(newBytes.SetContext(ctx))
+
+	case *values.String:
+		valueStr, ok := value.(*values.String)
+
+		if !ok {
+			return res.Failure(errors.NewRTError(
+				node.ValueNode.GetPosStart(), node.ValueNode.GetPosEnd(),
+				"String character value must be a string",
+				ctx,
+			))
+		}
+
+		// Check if the value is a single character
+		valueRunes := []rune(valueStr.Value)
+
+		if len(valueRunes) != 1 {
+			return res.Failure(errors.NewRTError(
+				node.ValueNode.GetPosStart(), node.ValueNode.GetPosEnd(),
+				"String assignment value must be a single character",
+				ctx,
+			))
+		}
+
+		runes := []rune(coll.Value)
+
+		if idx < 0 || idx >= len(runes) {
+			return res.Failure(errors.NewRTError(
+				node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
+				"Index out of bounds",
+				ctx,
+			))
+		}
+
+		// Create new string with replaced character
+		newRunes := make([]rune, len(runes))
+		copy(newRunes, runes)
+		newRunes[idx] = valueRunes[0]
+
+		return res.Success(values.NewString(string(newRunes)).SetContext(ctx))
+
+	default:
+		return res.Failure(errors.NewRTError(
+			node.CollectionNode.GetPosStart(), node.CollectionNode.GetPosEnd(),
+			"Can only assign to list, bytes, or string indices",
+			ctx,
+		))
+	}
 }

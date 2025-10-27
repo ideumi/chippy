@@ -83,12 +83,12 @@ func JoinPaths(pathList)
 {
 	if len(pathList) == 0 { return ""; }
 
-	var result = get(pathList, 0);
+	var result = pathList[0];
 	var i = 1;
 
 	while i < len(pathList)
 	{
-		result = JoinPath(result, get(pathList, i));
+		result = JoinPath(result, pathList[i]);
 		i = i + 1;
 	}
 
@@ -107,9 +107,9 @@ func FileExtension(filename)
 
 	if len(parts) <= 1 { return ""; }
 
-	if len(get(parts, 0)) == 0 and len(parts) == 2 { return ""; }
+	if len(parts[0]) == 0 and len(parts) == 2 { return ""; }
 
-	return get(parts, len(parts) - 1);
+	return parts[len(parts) - 1];
 }
 
 # func RemoveExtension(filename)
@@ -123,15 +123,15 @@ func RemoveExtension(filename)
 
 	if len(parts) <= 1 { return filename; }
 
-	if len(get(parts, 0)) == 0 and len(parts) == 2 { return filename; }
+	if len(parts[0]) == 0 and len(parts) == 2 { return filename; }
 
-	var result = get(parts, 0);
+	var result = parts[0];
 
 	var i = 1;
 
 	while i < len(parts) - 1
 	{
-		result = result + "." + get(parts, i);
+		result = result + "." + parts[i];
 		i = i + 1;
 	}
 

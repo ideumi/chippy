@@ -13,7 +13,7 @@ func MapIsValid(map)
 	if type(map) != "list" { return false; }
 	if len(map) == 0 { return false; }
 
-	var marker = get(map, 0);
+	var marker = map[0];
 
 	if type(marker) != "string" { return false; }
 	if marker != "map" { return false; }
@@ -44,7 +44,7 @@ func MapInit(keys)
 
 	for i = 0 utl len(keys)
 	{
-		var key = get(keys, i);
+		var key = keys[i];
 
 		map = MapSet(map, key, null);
 	}
@@ -63,11 +63,11 @@ func MapSet(map, key, value)
 
 	for i = 1 utl len(map)
 	{
-		var pair = get(map, i);
+		var pair = map[i];
 
-		if get(pair, 0) == key
+		if pair[0] == key
 		{
-			return set(map, i, [key, value]);
+			return map[i] = [key, value];
 		}
 	}
 
@@ -85,11 +85,11 @@ func MapGet(map, key)
 
 	for i = 1 utl len(map)
 	{
-		var pair = get(map, i);
+		var pair = map[i];
 
-		if get(pair, 0) == key
+		if pair[0] == key
 		{
-			return get(pair, 1);
+			return pair[1];
 		}
 	}
 
@@ -107,9 +107,9 @@ func MapHas(map, key)
 
 	for i = 1 utl len(map)
 	{
-		var pair = get(map, i);
+		var pair = map[i];
 
-		if get(pair, 0) == key
+		if pair[0] == key
 		{
 			return true;
 		}
@@ -129,9 +129,9 @@ func MapRemove(map, key)
 
 	for i = 1 utl len(map)
 	{
-		var pair = get(map, i);
+		var pair = map[i];
 
-		if get(pair, 0) == key
+		if pair[0] == key
 		{
 			return map - i;
 		}
@@ -153,9 +153,9 @@ func MapKeys(map)
 
 	for i = 1 utl len(map)
 	{
-		var pair = get(map, i);
+		var pair = map[i];
 
-		keys = append(keys, get(pair, 0));
+		keys = append(keys, pair[0]);
 	}
 
 	return keys;
@@ -174,9 +174,9 @@ func MapValues(map)
 
 	for i = 1 utl len(map)
 	{
-		var pair = get(map, i);
+		var pair = map[i];
 
-		values = append(values, get(pair, 1));
+		values = append(values, pair[1]);
 	}
 
 	return values;
@@ -210,9 +210,9 @@ func MapMerge(map1, map2)
 
 	for i = 1 utl len(map2)
 	{
-		var pair = get(map2, i);
+		var pair = map2[i];
 
-		result = MapSet(result, get(pair, 0), get(pair, 1));
+		result = MapSet(result, pair[0], pair[1]);
 	}
 
 	return result;

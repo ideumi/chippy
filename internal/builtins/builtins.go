@@ -59,8 +59,6 @@ func GetBuiltins() map[string]*values.BuiltInFunction {
 		"len":  values.NewBuiltInFunction("len", lenFunction),
 
 		// List operations
-		"get":    values.NewBuiltInFunction("get", getFunction),
-		"set":    values.NewBuiltInFunction("set", setFunction),
 		"append": values.NewBuiltInFunction("append", appendFunction),
 		"sort":   values.NewBuiltInFunction("sort", sortFunction),
 

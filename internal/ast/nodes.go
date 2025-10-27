@@ -357,3 +357,41 @@ func NewBreakNode(posStart, posEnd *errors.Position) *BreakNode {
 func (n *BreakNode) String() string {
 	return "BREAK"
 }
+
+type IndexAccessNode struct {
+	*BaseNode
+	CollectionNode Node
+	IndexNode      Node
+}
+
+func NewIndexAccessNode(collectionNode Node, indexNode Node, posEnd *errors.Position) *IndexAccessNode {
+	return &IndexAccessNode{
+		BaseNode:       NewBaseNode(collectionNode.GetPosStart(), posEnd),
+		CollectionNode: collectionNode,
+		IndexNode:      indexNode,
+	}
+}
+
+func (n *IndexAccessNode) String() string {
+	return fmt.Sprintf("%s[%s]", n.CollectionNode.String(), n.IndexNode.String())
+}
+
+type IndexAssignNode struct {
+	*BaseNode
+	CollectionNode Node
+	IndexNode      Node
+	ValueNode      Node
+}
+
+func NewIndexAssignNode(collectionNode Node, indexNode Node, valueNode Node) *IndexAssignNode {
+	return &IndexAssignNode{
+		BaseNode:       NewBaseNode(collectionNode.GetPosStart(), valueNode.GetPosEnd()),
+		CollectionNode: collectionNode,
+		IndexNode:      indexNode,
+		ValueNode:      valueNode,
+	}
+}
+
+func (n *IndexAssignNode) String() string {
+	return fmt.Sprintf("%s[%s] = %s", n.CollectionNode.String(), n.IndexNode.String(), n.ValueNode.String())
+}

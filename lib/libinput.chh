@@ -34,7 +34,7 @@ func Input()
 
 		if str(bytes) == err { return err; }
 
-		var byte = get(bytes, 0);
+		var byte = bytes[0];
 
 		# 10 = \n
 		if byte == 10 { keepReading = false; }

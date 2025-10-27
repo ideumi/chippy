@@ -7,7 +7,7 @@ load("libstrings.chh");
 
 func CheckIfNumber(number)
 {
-	var numBin = pack(number) / 0;
+	var numBin = pack(number)[0];
 
 	return numBin >= 48 and numBin <= 57;
 }
@@ -30,11 +30,11 @@ func TimezoneToSeconds(offset, mode)
 						charat(offset, 2),
 						charat(offset, 3)];
 
-			for x = 0 utl len(nums) { if CheckIfNumber(nums / x) == false { return 0; } }
+			for x = 0 utl len(nums) { if CheckIfNumber(nums[x]) == false { return 0; } }
 
-			var hours = int(num(join([nums / 0, nums / 1], "")));
+			var hours = int(num(join([nums[0], nums[1]], "")));
 
-			var minutes = int(num(join([nums / 2, nums / 3], "")));
+			var minutes = int(num(join([nums[2], nums[3]], "")));
 
 			return int(num(setMode + str((hours * 3600) + (minutes * 60))));
 		}

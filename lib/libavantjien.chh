@@ -100,7 +100,7 @@ func AvantjienDate(timestamp)
 
 func AvantjienDay(timestamp)
 {
-	return get(AvantjienDate(timestamp), 0);
+	return AvantjienDate(timestamp)[0];
 }
 
 # func AvantjienMonth(timestamp)
@@ -110,7 +110,7 @@ func AvantjienDay(timestamp)
 
 func AvantjienMonth(timestamp)
 {
-	return get(AvantjienDate(timestamp), 1);
+	return AvantjienDate(timestamp)[1];
 }
 
 # func AvantjienYear(timestamp)
@@ -120,7 +120,7 @@ func AvantjienMonth(timestamp)
 
 func AvantjienYear(timestamp)
 {
-	return get(AvantjienDate(timestamp), 2);
+	return AvantjienDate(timestamp)[2];
 }
 
 # func AvantjienMonthName(month)
@@ -132,7 +132,7 @@ func AvantjienMonthName(month)
 {
 	if month < 1 or month > MONTHSINAVANTYEAR { return err; }
 
-	return get(AVANTMONTHS, month - 1);
+	return AVANTMONTHS[month - 1];
 }
 
 # func AvantjienMonthShort(month)
@@ -144,7 +144,7 @@ func AvantjienMonthShort(month)
 {
 	if month < 1 or month > MONTHSINAVANTYEAR { return err; }
 
-	return get(AVANTMONTHSSHORT, month - 1);
+	return AVANTMONTHSSHORT[month - 1];
 }
 
 # func AvantjienCycle(timestamp)
@@ -160,7 +160,7 @@ func AvantjienCycle(timestamp)
 
 	if str(timeComponents) == err { return err; }
 
-	var hour = get(timeComponents, 3);
+	var hour = timeComponents[3];
 
 	if hour >= AVANTCYCLESTART and hour <= AVANTCYCLEEND { return 1; }
 
@@ -180,7 +180,7 @@ func AvantjienTime(timestamp)
 
 	if str(timeComponents) == err { return err; }
 
-	var hour = get(timeComponents, 3);
+	var hour = timeComponents[3];
 
 	# Day periods (cycle 1)
 	if hour >= 8 and hour < 11 { return 1; }
@@ -290,9 +290,9 @@ func FormatAvantjienDate(timestamp)
 
 	if str(avantDate) == err { return err; }
 
-	var aDay = get(avantDate, 0);
-	var aMonth = get(avantDate, 1);
-	var aYear = get(avantDate, 2);
+	var aDay = avantDate[0];
+	var aMonth = avantDate[1];
+	var aYear = avantDate[2];
 
 	return str(aDay) + "." + str(aMonth) + "." + str(aYear);
 }

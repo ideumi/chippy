@@ -117,6 +117,7 @@ func (p *Parser) statements() *ParseResult {
 
 		// Check if this is a compound statement, they don't require semicolons after their closing brace
 		isCompoundStatement := false
+
 		switch statement.(type) {
 		case *ast.IfNode, *ast.ForNode, *ast.WhileNode, *ast.FuncDefNode:
 			isCompoundStatement = true
@@ -133,6 +134,12 @@ func (p *Parser) statements() *ParseResult {
 
 			res.RegisterAdvancement()
 			p.advance()
+		} else {
+			// Compound statements don't require semicolons, but allow them optionally
+			if p.currentTok != nil && p.currentTok.Type == constants.TT_SEMICOLON {
+				res.RegisterAdvancement()
+				p.advance()
+			}
 		}
 
 		// Optional newlines
@@ -158,6 +165,7 @@ func (p *Parser) statement() *ParseResult {
 		p.advance()
 
 		expr := res.TryRegister(p.expr())
+
 		if expr == nil {
 			p.reverse(res.GetToReverseCount())
 		}
@@ -218,6 +226,7 @@ func (p *Parser) expr() *ParseResult {
 		res.RegisterAdvancement()
 		p.advance()
 		expr := res.Register(p.expr())
+
 		if res.error != nil {
 			return res
 		}
@@ -304,62 +313,122 @@ func (p *Parser) call() *ParseResult {
 		return res
 	}
 
-	if p.currentTok.Type == constants.TT_LPAREN {
-		res.RegisterAdvancement()
-		p.advance()
-		argNodes := []ast.Node{}
-
-		// Skip optional newlines after opening parenthesis
-		for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
+	// Handle function calls with () and indexing with []
+	for {
+		// Handle function calls with ()
+		if p.currentTok.Type == constants.TT_LPAREN {
 			res.RegisterAdvancement()
 			p.advance()
-		}
+			argNodes := []ast.Node{}
 
-		if p.currentTok.Type == constants.TT_RPAREN {
-			res.RegisterAdvancement()
-			p.advance()
-		} else {
-			argNodes = append(argNodes, res.Register(p.expr()))
-			if res.error != nil {
-				return res.Failure(errors.NewInvalidSyntaxError(
-					p.currentTok.PosStart, p.currentTok.PosEnd,
-					"Expected ')', 'var', 'if', 'for', 'while', 'func', int, float, identifier, '+', '-', '(', '[' or 'not'",
-				))
-			}
-
-			for p.currentTok.Type == constants.TT_COMMA {
-				res.RegisterAdvancement()
-				p.advance()
-
-				// Skip optional newlines after comma
-				for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-					res.RegisterAdvancement()
-					p.advance()
-				}
-
-				argNodes = append(argNodes, res.Register(p.expr()))
-				if res.error != nil {
-					return res
-				}
-			}
-
-			// Skip optional newlines before closing parenthesis
+			// Skip optional newlines after opening parenthesis
 			for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
 				res.RegisterAdvancement()
 				p.advance()
 			}
 
-			if p.currentTok.Type != constants.TT_RPAREN {
+			if p.currentTok.Type == constants.TT_RPAREN {
+				res.RegisterAdvancement()
+				p.advance()
+			} else {
+				argNodes = append(argNodes, res.Register(p.expr()))
+
+				if res.error != nil {
+					return res.Failure(errors.NewInvalidSyntaxError(
+						p.currentTok.PosStart, p.currentTok.PosEnd,
+						"Expected ')', 'var', 'if', 'for', 'while', 'func', int, float, identifier, '+', '-', '(', '[' or 'not'",
+					))
+				}
+
+				for p.currentTok.Type == constants.TT_COMMA {
+					res.RegisterAdvancement()
+					p.advance()
+
+					// Skip optional newlines after comma
+					for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
+						res.RegisterAdvancement()
+						p.advance()
+					}
+
+					argNodes = append(argNodes, res.Register(p.expr()))
+					if res.error != nil {
+						return res
+					}
+				}
+
+				// Skip optional newlines before closing parenthesis
+				for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
+					res.RegisterAdvancement()
+					p.advance()
+				}
+
+				if p.currentTok.Type != constants.TT_RPAREN {
+					return res.Failure(errors.NewInvalidSyntaxError(
+						p.currentTok.PosStart, p.currentTok.PosEnd,
+						"Expected ',' or ')'",
+					))
+				}
+
+				res.RegisterAdvancement()
+				p.advance()
+			}
+
+			atom = ast.NewCallNode(atom, argNodes)
+
+			continue
+		}
+
+		// Handle indexing with []
+		if p.currentTok.Type == constants.TT_LSQUARE {
+			res.RegisterAdvancement()
+			p.advance()
+
+			indexNode := res.Register(p.expr())
+			if res.error != nil {
+				return res
+			}
+
+			if p.currentTok.Type != constants.TT_RSQUARE {
 				return res.Failure(errors.NewInvalidSyntaxError(
 					p.currentTok.PosStart, p.currentTok.PosEnd,
-					"Expected ',' or ')'",
+					"Expected ']'",
 				))
 			}
 
+			posEnd := p.currentTok.PosEnd
 			res.RegisterAdvancement()
 			p.advance()
+
+			atom = ast.NewIndexAccessNode(atom, indexNode, posEnd)
+
+			// Check if this is an index assignment
+			if p.currentTok != nil && p.currentTok.Type == constants.TT_EQ {
+				// We have an index assignment: container[index] = value
+				if indexAccess, ok := atom.(*ast.IndexAccessNode); ok {
+					res.RegisterAdvancement()
+					p.advance()
+
+					value := res.Register(p.expr())
+
+					if res.error != nil {
+						return res
+					}
+
+					atom = ast.NewIndexAssignNode(
+						indexAccess.CollectionNode,
+						indexAccess.IndexNode,
+						value,
+					)
+
+					// Return immediately, assignment should be the end of this expression chain
+					return res.Success(atom)
+				}
+			}
+
+			continue
 		}
-		return res.Success(ast.NewCallNode(atom, argNodes))
+
+		break
 	}
 
 	return res.Success(atom)

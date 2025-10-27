@@ -129,30 +129,6 @@ func (l *List) MultedBy(other Value) (Value, error) {
 	return nil, IllegalOperation(l, other)
 }
 
-func (l *List) DivedBy(other Value) (Value, error) {
-	if otherNum, ok := other.(*Number); ok {
-		index := int(otherNum.Value)
-
-		if index < 0 || index >= len(l.Elements) {
-			return nil, errors.NewRTError(
-				otherNum.posStart, otherNum.posEnd,
-				"Element at this index could not be retrieved from list because index is out of bounds",
-				l.context,
-			)
-		}
-
-		element := l.Elements[index]
-
-		if element != nil {
-			return element, nil
-		}
-
-		return NewNumber(constants.NUM_NUL).SetContext(l.context), nil
-	}
-
-	return nil, IllegalOperation(l, other)
-}
-
 func (l *List) GetComparisonEe(other Value) (Value, error) {
 	if otherList, ok := other.(*List); ok {
 		var result float64 = constants.NUM_TRU

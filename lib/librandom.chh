@@ -20,7 +20,7 @@ func RandomInt(min, max)
 
 	while true
 	{
-		var randomNum = rand(1) / 0;
+		var randomNum = rand(1)[0];
 
 		if randomNum < maxFair
 		{
@@ -42,7 +42,7 @@ func RandomFloat(min, max)
 
 	var bytes = rand(4);
 
-	var bigInt = (bytes / 0) + (bytes / 1) * (256 ^ 1) + (bytes / 2) * (256 ^ 2) + (bytes / 3) * (256 ^ 3);
+	var bigInt = bytes[0] + bytes[1] * (256 ^ 1) + bytes[2] * (256 ^ 2) + bytes[3] * (256 ^ 3);
 
 	var fraction = bigInt / (256 ^ 4 - 1);
 
@@ -58,7 +58,7 @@ func RandomElement(elements)
 {
 	if len(elements) == 0 { return err; }
 
-	return elements / RandomInt(0, len(elements) - 1);
+	return elements[RandomInt(0, len(elements) - 1)];
 }
 
 # func RandomShuffle(elements)
@@ -74,11 +74,11 @@ func RandomShuffle(elements)
 	{
 		var newIndex = RandomInt(0, x);
 
-		var temp = elements / x;
-		var swapValue = elements / newIndex;
+		var temp = elements[x];
+		var swapValue = elements[newIndex];
 
-		elements = set(elements, x, swapValue);
-		elements = set(elements, newIndex, temp);
+		elements = elements[x] = swapValue;
+		elements = elements[newIndex] = temp;
 	}
 
 	return elements;
@@ -100,7 +100,7 @@ func RandomString(length, chars)
 
 	for x = 0 utl length
 	{
-		var char = chars / RandomInt(0, len(chars) - 1);
+		var char = chars[RandomInt(0, len(chars) - 1)];
 
 		finalString = finalString + char;
 

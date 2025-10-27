@@ -59,8 +59,8 @@ func Main()
 {
 	var TERMSZE = GetTerminalSize();
 
-	var SIZEROWS = get(TERMSZE, 0);
-	var SIZECOLS = get(TERMSZE, 1);
+	var SIZEROWS = TERMSZE[0];
+	var SIZECOLS = TERMSZE[1];
 
 	HideCursor();
 	ClearScreen();

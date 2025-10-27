@@ -129,7 +129,7 @@ var TYPEUNKNOWN = "unknown";
 func StatType(statResult)
 {
 	if type(statResult) == "list" and len(statResult) > STATTYPE
-	{ return get(statResult, STATTYPE); }
+	{ return statResult[STATTYPE]; }
 
 	return TYPEUNKNOWN;
 }
@@ -198,12 +198,12 @@ func StatInfo(path)
 	var result = "Path: " + path + "\n";
 
 	result = result + "Type: " + StatType(info) + "\n";
-	result = result + "Size: " + SizeToString(get(info, STATSIZE)) + "\n";
-	result = result + "Modified: " + GregorianFormatTime(get(info, STATMTIME)) + "\n";
-	result = result + "Mode: " + str(get(info, STATMODE)) + "\n";
-	result = result + "UID: " + str(get(info, STATUID)) + "\n";
-	result = result + "GID: " + str(get(info, STATGID)) + "\n";
-	result = result + "Inode: " + str(get(info, STATINODE));
+	result = result + "Size: " + SizeToString(info[STATSIZE]) + "\n";
+	result = result + "Modified: " + GregorianFormatTime(info[STATMTIME]) + "\n";
+	result = result + "Mode: " + str(info[STATMODE]) + "\n";
+	result = result + "UID: " + str(info[STATUID]) + "\n";
+	result = result + "GID: " + str(info[STATGID]) + "\n";
+	result = result + "Inode: " + str(info[STATINODE]);
 
 	return result;
 }

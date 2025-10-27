@@ -220,25 +220,6 @@ func (b *Bytes) SubbedBy(other Value) (Value, error) {
 	return nil, IllegalOperation(b, other)
 }
 
-func (b *Bytes) DivedBy(other Value) (Value, error) {
-	if otherNum, ok := other.(*Number); ok {
-
-		index := int(otherNum.Value)
-
-		if index < 0 || index >= len(b.Data) {
-			return nil, errors.NewRTError(
-				otherNum.posStart, otherNum.posEnd,
-				"Byte at this index could not be retrieved from bytes because index is out of bounds",
-				b.context,
-			)
-		}
-
-		return NewNumber(float64(b.Data[index])).SetContext(b.context), nil
-	}
-
-	return nil, IllegalOperation(b, other)
-}
-
 func (b *Bytes) AddedTo(other Value) (Value, error) {
 
 	if otherBytes, ok := other.(*Bytes); ok {

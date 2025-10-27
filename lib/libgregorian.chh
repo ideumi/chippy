@@ -138,7 +138,7 @@ func GregorianMonthAndDay(year, remainingDays)
 
 	while month <= MONTHSINYEAR
 	{
-		var daysInMonth = get(MONTHDAYS, month - 1);
+		var daysInMonth = MONTHDAYS[month - 1];
 
 		if month == 2 and isLeap { daysInMonth = 29; }
 
@@ -164,12 +164,12 @@ func GregorianFormatTime(timestamp)
 
 	if str(components) == err { return err; }
 
-	var year = get(components, 0);
-	var month = get(components, 1);
-	var day = get(components, 2);
-	var hours = get(components, 3);
-	var minutes = get(components, 4);
-	var seconds = get(components, 5);
+	var year = components[0];
+	var month = components[1];
+	var day = components[2];
+	var hours = components[3];
+	var minutes = components[4];
+	var seconds = components[5];
 
 	var pad = func(val) {
 		if val < 10 { return "0" + str(val); }
@@ -191,7 +191,7 @@ func GregorianDaysInMonth(year, month)
 
 	if month == 2 and IsLeapYear(year) { return 29; }
 
-	return get(MONTHDAYS, month - 1);
+	return MONTHDAYS[month - 1];
 }
 
 # func GregorianDayOfYear(timestamp)
@@ -208,7 +208,7 @@ func GregorianDayOfYear(timestamp)
 
 	var days = int(localTimestamp / SECONDSPERDAY);
 	var yearResult = GregorianYear(days);
-	var remainingDays = get(yearResult, 1);
+	var remainingDays = yearResult[1];
 
 	return remainingDays + 1;
 }
@@ -231,15 +231,15 @@ func GregorianParseTime(timestamp)
 	var seconds = int(Mod(localTimestamp, SECONDSPERMINUTE));
 
 	var yearResult = GregorianYear(days);
-	var year = get(yearResult, 0);
+	var year = yearResult[0];
 
-	var remainingDays = get(yearResult, 1);
+	var remainingDays = yearResult[1];
 
 	var dateResult = GregorianMonthAndDay(year, remainingDays);
 
-	var month = get(dateResult, 0);
+	var month = dateResult[0];
 
-	var day = get(dateResult, 1);
+	var day = dateResult[1];
 
 	return [year, month, day, hours, minutes, seconds];
 }
