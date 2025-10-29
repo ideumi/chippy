@@ -59,7 +59,6 @@
       <item>fread</item>
       <item>fsync</item>
       <item>fwrite</item>
-      <item>get</item>
       <item>getch</item>
       <item>getcwd</item>
       <item>getenv</item>
@@ -88,7 +87,6 @@
       <item>sclose</item>
       <item>seek</item>
       <item>select</item>
-      <item>set</item>
       <item>setenv</item>
       <item>signal</item>
       <item>sin</item>

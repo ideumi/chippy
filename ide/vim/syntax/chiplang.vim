@@ -21,7 +21,7 @@ syn keyword chipBuiltin alarm append args charat chdir chmod cos
 syn keyword chipBuiltin dclose dopen dread
 syn keyword chipBuiltin error exec
 syn keyword chipBuiltin fclose flock fopen fread fsync fwrite
-syn keyword chipBuiltin get getch getcwd getenv getpid getuid
+syn keyword chipBuiltin getch getcwd getenv getpid getuid
 syn keyword chipBuiltin indexof int
 syn keyword chipBuiltin join
 syn keyword chipBuiltin kill
@@ -31,7 +31,7 @@ syn keyword chipBuiltin num
 syn keyword chipBuiltin off
 syn keyword chipBuiltin pack pclose popen
 syn keyword chipBuiltin rand readlink rename replace
-syn keyword chipBuiltin saccept sclose seek select set setenv signal sin sleep sopen sort split sread stat str substr swrite symlink
+syn keyword chipBuiltin saccept sclose seek select setenv signal sin sleep sopen sort split sread stat str substr swrite symlink
 syn keyword chipBuiltin tan time type
 syn keyword chipBuiltin unlink unpack unsignal upper
 

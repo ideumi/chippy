@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<language id="chiplang" name="ChipLang" version="2.0" _section="Script">
+  <metadata>
+    <property name="mimetypes">text/x-chiplang</property>
+    <property name="globs">*.chp;*.chh</property>
+    <property name="line-comment-start">#</property>
+  </metadata>
+
+  <styles>
+    <style id="comment" name="Comment" map-to="def:comment"/>
+    <style id="alert" name="Alert" map-to="def:note"/>
+    <style id="string" name="String" map-to="def:string"/>
+    <style id="escaped-char" name="Escaped Character" map-to="def:special-char"/>
+    <style id="preprocessor" name="Preprocessor" map-to="def:preprocessor"/>
+    <style id="keyword" name="Keyword" map-to="def:keyword"/>
+    <style id="constant" name="Constant" map-to="def:constant"/>
+    <style id="error-constant" name="Error" map-to="def:error"/>
+    <style id="success" name="Success" map-to="def:string"/>
+    <style id="builtin" name="Built-in Function" map-to="def:builtin"/>
+    <style id="function" name="Function" map-to="def:function"/>
+    <style id="variable" name="Variable" map-to="def:identifier"/>
+    <style id="operator" name="Operator" map-to="def:operator"/>
+    <style id="decimal" name="Decimal" map-to="def:decimal"/>
+    <style id="floating-point" name="Floating Point" map-to="def:floating-point"/>
+    <style id="byte-array" name="Byte Array" map-to="def:type"/>
+  </styles>
+
+  <definitions>
+    <context id="chiplang" class="no-spell-check">
+      <include>
+        <!-- Comments -->
+        <context id="comment" style-ref="comment" end-at-line-end="true" class="comment" class-disabled="no-spell-check">
+          <start>#</start>
+          <include>
+            <context id="alert" style-ref="alert" class="no-spell-check">
+              <match>\b(TODO|FIXME|NOTE|WARNING|HACK|BUG|XXX)\b</match>
+            </context>
+          </include>
+        </context>
+
+        <!-- Shebang -->
+        <context id="shebang" style-ref="preprocessor" first-line-only="true" class="no-spell-check">
+          <start>^#!/</start>
+          <end>$</end>
+        </context>
+
+        <!-- Strings -->
+        <context id="string" style-ref="string" end-at-line-end="true" class="string" class-disabled="no-spell-check">
+          <start>"</start>
+          <end>"</end>
+          <include>
+            <context id="escaped-char" style-ref="escaped-char">
+              <match>\\.</match>
+            </context>
+          </include>
+        </context>
+
+        <!-- Keywords -->
+        <context id="keywords" style-ref="keyword" class="no-spell-check">
+          <keyword>var</keyword>
+          <keyword>func</keyword>
+          <keyword>return</keyword>
+          <keyword>continue</keyword>
+          <keyword>break</keyword>
+          <keyword>if</keyword>
+          <keyword>elif</keyword>
+          <keyword>else</keyword>
+          <keyword>for</keyword>
+          <keyword>while</keyword>
+          <keyword>utl</keyword>
+          <keyword>stp</keyword>
+          <keyword>and</keyword>
+          <keyword>or</keyword>
+          <keyword>not</keyword>
+        </context>
+
+        <!-- Constants -->
+        <context id="constants" style-ref="constant" class="no-spell-check">
+          <keyword>null</keyword>
+          <keyword>true</keyword>
+          <keyword>false</keyword>
+          <keyword>CHIPVR</keyword>
+          <keyword>CHIPCN</keyword>
+          <keyword>CHIPOS</keyword>
+          <keyword>CHIPAR</keyword>
+        </context>
+
+        <!-- Error constants -->
+        <context id="error-constants" style-ref="error-constant" class="no-spell-check">
+          <keyword>err</keyword>
+        </context>
+
+        <!-- Success constants -->
+        <context id="success-constants" style-ref="success" class="no-spell-check">
+          <keyword>ok</keyword>
+        </context>
+
+        <!-- Built-in functions -->
+        <context id="builtins" style-ref="builtin" class="no-spell-check">
+          <keyword>alarm</keyword>
+          <keyword>append</keyword>
+          <keyword>args</keyword>
+          <keyword>charat</keyword>
+          <keyword>chdir</keyword>
+          <keyword>chmod</keyword>
+          <keyword>cos</keyword>
+          <keyword>dclose</keyword>
+          <keyword>dopen</keyword>
+          <keyword>dread</keyword>
+          <keyword>error</keyword>
+          <keyword>exec</keyword>
+          <keyword>fclose</keyword>
+          <keyword>flock</keyword>
+          <keyword>fopen</keyword>
+          <keyword>fread</keyword>
+          <keyword>fsync</keyword>
+          <keyword>fwrite</keyword>
+          <keyword>getch</keyword>
+          <keyword>getcwd</keyword>
+          <keyword>getenv</keyword>
+          <keyword>getpid</keyword>
+          <keyword>getuid</keyword>
+          <keyword>indexof</keyword>
+          <keyword>int</keyword>
+          <keyword>join</keyword>
+          <keyword>kill</keyword>
+          <keyword>len</keyword>
+          <keyword>list</keyword>
+          <keyword>load</keyword>
+          <keyword>lower</keyword>
+          <keyword>lstat</keyword>
+          <keyword>mkdir</keyword>
+          <keyword>num</keyword>
+          <keyword>off</keyword>
+          <keyword>pack</keyword>
+          <keyword>pclose</keyword>
+          <keyword>popen</keyword>
+          <keyword>rand</keyword>
+          <keyword>readlink</keyword>
+          <keyword>rename</keyword>
+          <keyword>replace</keyword>
+          <keyword>saccept</keyword>
+          <keyword>sclose</keyword>
+          <keyword>seek</keyword>
+          <keyword>select</keyword>
+          <keyword>setenv</keyword>
+          <keyword>signal</keyword>
+          <keyword>sin</keyword>
+          <keyword>sleep</keyword>
+          <keyword>sopen</keyword>
+          <keyword>sort</keyword>
+          <keyword>split</keyword>
+          <keyword>sread</keyword>
+          <keyword>stat</keyword>
+          <keyword>str</keyword>
+          <keyword>substr</keyword>
+          <keyword>swrite</keyword>
+          <keyword>symlink</keyword>
+          <keyword>tan</keyword>
+          <keyword>time</keyword>
+          <keyword>type</keyword>
+          <keyword>unlink</keyword>
+          <keyword>unpack</keyword>
+          <keyword>unsignal</keyword>
+          <keyword>upper</keyword>
+        </context>
+
+        <!-- Byte arrays -->
+        <context id="byte-array" style-ref="byte-array" class="no-spell-check">
+          <match>b\[[^\]]*\]</match>
+        </context>
+
+        <!-- Numbers -->
+        <context id="float" style-ref="floating-point" class="no-spell-check">
+          <match extended="true">
+            (?&lt;![\w\.])
+            [0-9]+\.[0-9]+([eE][+-]?[0-9]+)?
+            (?![\w\.])
+          </match>
+        </context>
+
+        <context id="decimal" style-ref="decimal" class="no-spell-check">
+          <match extended="true">
+            (?&lt;![\w\.])
+            [0-9]+
+            (?![\w\.])
+          </match>
+        </context>
+
+        <!-- Operators -->
+        <context id="operators" style-ref="operator" class="no-spell-check">
+          <match>[+\-*/^=!&lt;&gt;]|==|!=|&lt;=|&gt;=</match>
+        </context>
+
+        <!-- Function calls -->
+        <context id="function-call" style-ref="function" class="no-spell-check">
+          <match>[a-zA-Z_][a-zA-Z0-9_]*(?=\s*\()</match>
+        </context>
+
+        <!-- Variables and identifiers -->
+        <context id="variable" style-ref="variable" class="no-spell-check">
+          <match>[a-zA-Z_][a-zA-Z0-9_]*</match>
+        </context>
+      </include>
+    </context>
+  </definitions>
+</language>
