@@ -4,9 +4,10 @@
 #
 
 load("libhandles.chh");
+load("libstrings.chh");
 
 # func Print(text)
-# V-1.0.0 (2025-08-13)
+# V-1.0.1 (2025-10-31)
 #
 # Prints text to STDOUT.
 
@@ -16,17 +17,17 @@ func Print(text)
 }
 
 # func Println(text)
-# V-1.0.0 (2025-08-13)
+# V-1.0.1 (2025-10-31)
 #
 # Prints text to STDOUT with trailing newline.
 
 func Println(text)
 {
-	fwrite(pack(str(text)) + b[10], STDOUT);
+	Print(text + "\n");
 }
 
 # func Printe(text)
-# V-1.0.0 (2025-08-13)
+# V-1.0.1 (2025-10-31)
 #
 # Prints text to STDERR.
 
@@ -36,11 +37,62 @@ func Printe(text)
 }
 
 # func Printeln(text)
-# V-1.0.0 (2025-08-13)
+# V-1.0.1 (2025-10-31)
 #
 # Prints text to STDERR with trailing newline.
 
 func Printeln(text)
 {
-	fwrite(pack(str(text)) + b[10], STDERR);
+	Printe(text + "\n");
 }
+
+# func Printf(text, values)
+# V-1.0.0 (2025-10-31)
+#
+# Prints formatted text to STDOUT. See libstrings.chh
+# Format(value, values).
+
+func Printf(text, values)
+{
+	var fmtStr = Format(str(text), values);
+	if fmtStr == err { return err; }
+
+	Print(fmtStr);
+}
+
+# func Printfln(text, values)
+# V-1.0.0 (2025-10-31)
+#
+# Prints formatted text to STDOUT with trailing
+# newline. See libstrings.chh Format(value, values).
+
+func Printfln(text, values)
+{
+	return Printf(text + "\n", values);
+}
+
+# func Printef(text, values)
+# V-1.0.0 (2025-10-31)
+#
+# Prints formatted text to STDERR. See libstrings.chh
+# Format(value, values).
+
+func Printef(text, values)
+{
+	var fmtStr = Format(str(text), values);
+	if fmtStr == err { return err; }
+
+	Printe(fmtStr);
+}
+
+# func Printefln(text, values)
+# V-1.0.0 (2025-10-31)
+#
+# Prints formatted text to STDERR with trailing
+# newline. See libstrings.chh Format(value, values).
+
+func Printefln(text, values)
+{
+	return Printef(text + "\n", values);
+}
+

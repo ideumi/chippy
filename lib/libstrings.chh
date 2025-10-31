@@ -147,3 +147,86 @@ func Trim(value)
 {
 	return TrimLeft(TrimRight(value));
 }
+
+# func Format(value, values)
+# V-1.0.0 (2025-10-31)
+#
+# Formats a string by replacing format specifiers with values in order.
+# %s (string), %i (integer), %n (number), %% (literal %)
+#
+# Returns err if specifiers don't match values count or if format is
+# invalid.
+
+func Format(value, values)
+{
+	if type(values) != "list" { return err; }
+
+	var parts = [];
+	var valIndex = 0;
+	var i = 0;
+
+	while i < len(value)
+	{
+		var ch = charat(value, i);
+
+		if ch == "%"
+		{
+			if i + 1 < len(value)
+			{
+				var next = charat(value, i + 1);
+
+				if next == "%"
+				{
+					parts = append(parts, "%");
+
+					i = i + 2;
+				}
+				elif next == "s"
+				{
+					if valIndex >= len(values) { return err; }
+
+					parts = append(parts, str(values[valIndex]));
+
+					valIndex = valIndex + 1;
+					i = i + 2;
+				}
+				elif next == "i"
+				{
+					if valIndex >= len(values) { return err; }
+
+					parts = append(parts, str(int(values[valIndex])));
+
+					valIndex = valIndex + 1;
+					i = i + 2;
+				}
+				elif next == "n"
+				{
+					if valIndex >= len(values) { return err; }
+
+					parts = append(parts, str(num(values[valIndex])));
+
+					valIndex = valIndex + 1;
+					i = i + 2;
+				}
+				else
+				{
+					return err;
+				}
+			}
+			else
+			{
+				return err;
+			}
+		}
+		else
+		{
+			parts = append(parts, ch);
+
+			i = i + 1;
+		}
+	}
+
+	if valIndex != len(values) { return err; }
+
+	return join(parts, "");
+}
