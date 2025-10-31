@@ -52,6 +52,9 @@ func main() {
 		builtins.SetGlobalArgs([]string{})
 
 		runREPL(rr)
+	} else if len(args) >= 1 && (args[0] == "-v" || args[0] == "--version") {
+		fmt.Printf("%s %s %s\n",
+			constants.STR_LPLVR, constants.VERSION_DATE, constants.STR_LPLCN)
 	} else if len(args) >= 2 && (args[0] == "-r" || args[0] == "--run") {
 		builtins.SetGlobalArgs([]string{}) // No args for -r / --run mode
 
