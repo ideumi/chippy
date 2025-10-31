@@ -7,6 +7,7 @@
 package errors
 
 import (
+	"chip-go/thirdparty/runewidth"
 	"fmt"
 	"strings"
 	"unicode/utf8"
@@ -86,7 +87,6 @@ func (e *BaseError) stringWithArrows() string {
 	result += fmt.Sprintf("\033[1mLine %d:\033[0m %s\n", lineCount+1, line)
 
 	// Convert byte position to visual position
-	// FIXME: CJK characters occupy 2 terminal columns but are counted as 1 here.
 	visualColStart := 0
 	bytePos := 0
 	lineText := text[idxStart:idxEnd]
@@ -97,7 +97,7 @@ func (e *BaseError) stringWithArrows() string {
 		if r == '\t' {
 			visualColStart += 4
 		} else {
-			visualColStart++
+			visualColStart += runewidth.RuneWidth(r)
 		}
 
 		bytePos += size
@@ -121,7 +121,7 @@ func (e *BaseError) stringWithArrows() string {
 			if r == '\t' {
 				visualColEnd += 4
 			} else {
-				visualColEnd++
+				visualColEnd += runewidth.RuneWidth(r)
 			}
 
 			bytePos += size
