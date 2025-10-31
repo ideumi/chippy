@@ -10,7 +10,6 @@ import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/errors"
 	"chip-go/internal/values"
-	"fmt"
 	"strings"
 )
 
@@ -37,10 +36,7 @@ func strFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 	switch v := value.(type) {
 
 	case *values.Number:
-		// TODO: Is it right for us to more or less "dictate" a locale? Probably not
-
-		// Use explicit formatting to avoid locale assumptions
-		resultStr = fmt.Sprintf("%.17g", v.Value)
+		resultStr = v.String()
 
 	case *values.String:
 		resultStr = v.Value // Remove quotes for str() conversion

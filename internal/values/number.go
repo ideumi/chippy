@@ -9,8 +9,8 @@ package values
 import (
 	"chip-go/internal/constants"
 	"chip-go/internal/errors"
-	"fmt"
 	"math"
+	"strconv"
 )
 
 type Number struct {
@@ -26,11 +26,7 @@ func NewNumber(value float64) *Number {
 }
 
 func (n *Number) String() string {
-	if n.Value == float64(int64(n.Value)) {
-		return fmt.Sprintf("%.0f", n.Value)
-	}
-
-	return fmt.Sprintf("%.12f", n.Value)
+	return strconv.FormatFloat(n.Value, 'f', -1, 64)
 }
 
 func (n *Number) SetPos(posStart, posEnd *errors.Position) Value {
