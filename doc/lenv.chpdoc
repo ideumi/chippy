@@ -1,0 +1,14 @@
+*lenv* | V-$CHIPVR ($CHIPCN)
+
+''lenv(string)''
+
+Returns the visual width of a string in terminal columns.
+
+*Parameters:*
+- ''string'': String to measure
+
+*Returns:*
+- Number: Visual width in terminal columns
+
+*Errors:*
+- Runtime error if string is not a string
