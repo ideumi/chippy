@@ -8,6 +8,7 @@ package main
 
 import (
 	"bufio"
+	"chip-go/cmd/chippy/safety"
 	"chip-go/internal/constants"
 	"chip-go/internal/context"
 	"chip-go/internal/roadrunner"
@@ -19,17 +20,40 @@ import (
 	"strings"
 )
 
+// FIXME: This should probably be optimized, three file reads is not optimal, but oh well.
 var (
 	loadRegex     = regexp.MustCompile(`load\s*\(\s*"((?:[^"\\]|\\.)*)"\s*\)`)
 	loadCallRegex = regexp.MustCompile(`^\s*load\s*\(`)
 )
 
+func reportCollisions(collisions []safety.SymbolCollision) {
+	fmt.Println("Symbol collisions detected:")
+
+	for _, collision := range collisions {
+		if collision.IsSameFile() {
+			fmt.Printf("\n  %s '%s' defined multiple times in %s:\n", collision.SymType, collision.Name, collision.GetFirstFile())
+		} else {
+			fmt.Printf("\n  %s '%s' defined in multiple files:\n", collision.SymType, collision.Name)
+		}
+
+		for _, loc := range collision.Locations {
+			if collision.SymType == "symbol" {
+				fmt.Printf("    - %s:%d (%s)\n", loc.File, loc.Line+1, loc.SymType)
+			} else {
+				fmt.Printf("    - %s:%d\n", loc.File, loc.Line+1)
+			}
+		}
+	}
+}
+
 func handleCombineCommand(args []string) {
 	if len(args) > 0 && args[0] == "new" {
 		if err := generateTemplateCombineFile(); err != nil {
 			fmt.Printf("Error: %v\n", err)
+
 			os.Exit(1)
 		}
+
 		return
 	}
 
@@ -41,11 +65,13 @@ func handleCombineCommand(args []string) {
 
 	if _, err := os.Stat(combineFile); os.IsNotExist(err) {
 		fmt.Printf("Error: combine file '%s' not found\n", combineFile)
+
 		os.Exit(1)
 	}
 
 	if err := executeCombine(combineFile); err != nil {
 		fmt.Printf("Error: %v\n", err)
+
 		os.Exit(1)
 	}
 }
@@ -148,6 +174,30 @@ func executeCombine(combineFile string) error {
 
 	if err != nil {
 		return err
+	}
+
+	// Validate files for syntax errors and collisions
+	validation, err := safety.ValidateFiles(deps)
+
+	if err != nil {
+		return fmt.Errorf("validation failed: %w", err)
+	}
+
+	// Report parse errors
+	if len(validation.Errors) > 0 {
+		fmt.Println("Errors detected:")
+
+		for _, verr := range validation.Errors {
+			fmt.Printf("%v\n", verr.Error)
+		}
+
+		return fmt.Errorf("cannot bundle due to errors")
+	}
+
+	// Report symbol collisions
+	if len(validation.Collisions) > 0 {
+		reportCollisions(validation.Collisions)
+		return fmt.Errorf("cannot bundle due to symbol collisions")
 	}
 
 	// Show bundling information

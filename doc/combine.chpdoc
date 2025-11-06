@@ -26,6 +26,9 @@ Programs, properly built using combine have no dependencies outside of the ''chi
 - Circular dependency prevention
 - Licence header insertion (when configured)
 - Comment/whitespace stripping (when configured)
+- Safety checks:
+	- Symbol collision detection in file scope (see ''chippy doc scoping'')
+	- Syntax error detection
 
 *Returns:*
 - Creates bundled executable file

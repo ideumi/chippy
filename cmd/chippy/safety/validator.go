@@ -1,0 +1,211 @@
+/*
+ *
+ * Combine's validator for common issues and
+ * easy to make and hard to spot mistakes (C.V.C.I.A.E.M.H.S.M, for reference)
+ *
+ */
+
+package safety
+
+import (
+	"chip-go/internal/ast"
+	"chip-go/internal/lexer"
+	"chip-go/internal/parser"
+	"fmt"
+	"os"
+)
+
+type SymbolInfo struct {
+	Name    string
+	File    string
+	Line    int
+	SymType string // "function" or "variable"
+}
+
+type ValidationResult struct {
+	Collisions []SymbolCollision
+	Errors     []ValidationError
+}
+
+type SymbolCollision struct {
+	Name      string
+	SymType   string
+	Locations []SymbolInfo
+}
+
+// Determine all collisions are in the same file
+func (c *SymbolCollision) IsSameFile() bool {
+	if len(c.Locations) == 0 {
+		return false
+	}
+
+	firstFile := c.Locations[0].File
+
+	for _, loc := range c.Locations[1:] {
+		if loc.File != firstFile {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (c *SymbolCollision) GetFirstFile() string {
+	if len(c.Locations) > 0 {
+		return c.Locations[0].File
+	}
+
+	return ""
+}
+
+// Parse error
+type ValidationError struct {
+	File  string
+	Error error
+}
+
+func ValidateFiles(files []string) (*ValidationResult, error) {
+	result := &ValidationResult{
+		Collisions: []SymbolCollision{},
+		Errors:     []ValidationError{},
+	}
+
+	// Track all symbols across all files
+	symbolRegistry := make(map[string][]SymbolInfo)
+
+	for _, file := range files {
+		symbols, err := extractSymbols(file)
+
+		if err != nil {
+			result.Errors = append(result.Errors, ValidationError{
+				File:  file,
+				Error: err,
+			})
+
+			continue
+		}
+
+		// Register symbols
+		for _, sym := range symbols {
+			symbolRegistry[sym.Name] = append(symbolRegistry[sym.Name], sym)
+		}
+	}
+
+	// Detect collisions
+	for name, locations := range symbolRegistry {
+		if len(locations) > 1 {
+			// Determine collision type
+			symType := locations[0].SymType
+
+			for _, loc := range locations[1:] {
+				if loc.SymType != symType {
+					symType = "symbol" // Mixed types
+
+					break
+				}
+			}
+
+			result.Collisions = append(result.Collisions, SymbolCollision{
+				Name:      name,
+				SymType:   symType,
+				Locations: locations,
+			})
+		}
+	}
+
+	return result, nil
+}
+
+func extractSymbols(filename string) ([]SymbolInfo, error) {
+	content, err := os.ReadFile(filename)
+
+	if err != nil {
+		return nil, fmt.Errorf("reading file: %w", err)
+	}
+
+	lex := lexer.NewLexer(filename, string(content))
+	tokens, err := lex.MakeTokens()
+
+	if err != nil {
+		return nil, err
+	}
+
+	p := parser.NewParser(tokens)
+	parseResult := p.Parse()
+
+	if parseResult.GetError() != nil {
+		return nil, parseResult.GetError()
+	}
+
+	// Extract symbols
+	node := parseResult.GetNode()
+	symbols := []SymbolInfo{}
+
+	walkAST(node, filename, &symbols)
+
+	return symbols, nil
+}
+
+// Walk the AST and extract file scope symbol idfs.
+// See 'chippy doc scoping' to understand the scoping desicions here better
+func walkAST(node ast.Node, filename string, symbols *[]SymbolInfo) {
+	if node == nil {
+		return
+	}
+
+	switch n := node.(type) {
+	case *ast.FuncDefNode:
+		// Named functions
+		if n.VarNameToken != nil {
+			name, ok := n.VarNameToken.Value.(string)
+
+			if !ok {
+				return
+			}
+
+			*symbols = append(*symbols, SymbolInfo{
+				Name:    name,
+				File:    filename,
+				Line:    n.VarNameToken.PosStart.Line,
+				SymType: "function",
+			})
+		}
+		// Function body has isolated scope, stop
+
+	case *ast.VarAssignNode:
+		// Variable idfs
+		name, ok := n.VarNameToken.Value.(string)
+
+		if !ok {
+			return
+		}
+
+		*symbols = append(*symbols, SymbolInfo{
+			Name:    name,
+			File:    filename,
+			Line:    n.VarNameToken.PosStart.Line,
+			SymType: "variable",
+		})
+
+	// Jump in since we are still in file scope:
+	case *ast.IfNode:
+		for _, c := range n.Cases {
+			walkAST(c.Body, filename, symbols)
+		}
+
+		if n.ElseCase != nil {
+			walkAST(n.ElseCase, filename, symbols)
+		}
+
+	case *ast.ForNode:
+		walkAST(n.BodyNode, filename, symbols)
+
+	case *ast.WhileNode:
+		walkAST(n.BodyNode, filename, symbols)
+
+	case *ast.ListNode:
+		for _, elem := range n.ElementNodes {
+			walkAST(elem, filename, symbols)
+		}
+	}
+}

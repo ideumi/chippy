@@ -1,0 +1,40 @@
+*Scoping* | V-$CHIPVR ($CHIPCN)
+
+RR2 implements a simple two-level scoping model where variables and functions belong to either file scope or function scope.
+
+*Scope Levels*
+
+''File Scope'' - Variables and functions declared at the top level of a file or within ''if'', ''while'', or ''for'' blocks are accessible throughout the entire file after declaration.
+
+''Function Scope'' - Variables declared inside a function body are local to that function and cannot be accessed from outside.
+
+*Block Behavior*
+
+Chip's ''if'', ''while'', and ''for'' blocks do not create new scopes. Variables declared inside these blocks belong to their parent scope:
+
+'''
+var x = 5;
+
+if true
+{
+    var y = 10;  # belongs to file scope
+}
+
+var z = y;  # accessible here
+'''
+
+*Function Isolation*
+
+Only functions create new scopes. Variables declared in a function are isolated and inaccessible outside:
+
+'''
+func MyFunc()
+{
+    var local = 20;
+}
+
+MyFunc();
+var x = local;  # Kaboom
+'''
+
+I'll probably change this behaviour at some point when it annoys me or causes problems.
