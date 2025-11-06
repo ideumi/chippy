@@ -10,6 +10,7 @@ load("libmath.chh");
 #
 # Reads all bytes of the provided file "filename" from start to finish
 # and returns either bytes or UTF-8 text depending on if text == true.
+# Returns err on failure.
 
 func ReadFile(filename, text)
 {
@@ -28,16 +29,41 @@ func ReadFile(filename, text)
 	return allBytes;
 }
 
+# func ReadLines(filename)
+# V-1.0.0 (2025-11-06)
+#
+# Reads all lines from the file and returns them as a list of strings.
+# Returns err on failure.
+
+func ReadLines(filename)
+{
+	var content = ReadFile(filename, true);
+
+	if str(content) == err { return err; }
+
+	return split(content, "\n");
+}
+
 # func WriteFile(filename, bytesOrText, text, overwrite)
-# V-1.0.0 (2025-08-12)
+# V-1.0.1 (2025-11-06)
 #
 # (Over)Writes the file at filename with either bytes or UTF-8 text.
 # If text == true then bytesOrText must be a UTF-8 text string, if not
 # bytesOrText must be bytes. If overwrite is true, content will be overwritten
-# not appended.
+# not appended. Returns err on failure.
 
 func WriteFile(filename, bytesOrText, text, overwrite)
 {
+	if text and type(bytesOrText) != "string"
+	{
+		return err;
+	}
+
+	if not text and type(bytesOrText) != "bytes"
+	{
+		return err;
+	}
+
 	var result = "";
 	var mode = "a";
 
@@ -55,10 +81,27 @@ func WriteFile(filename, bytesOrText, text, overwrite)
 	return fclose(handle);
 }
 
+# func WriteLines(filename, lines, overwrite)
+# V-1.0.0 (2025-11-06)
+#
+# Writes a list of lines to a file. If overwrite is true, content will
+# be overwritten not appended. Returns err on failure or if lines is
+# not a list.
+
+func WriteLines(filename, lines, overwrite)
+{
+	if type(lines) != "list" { return err; }
+
+	var content = join(lines, "\n");
+
+	return WriteFile(filename, content, true, overwrite);
+}
+
 # func CreateDir(path)
 # V-1.0.0 (2025-08-12)
 #
-# Creates a new directory with permission 755 (rwxr-xr-x)
+# Creates a new directory with permission 755 (rwxr-xr-x), returns err on
+# failure.
 
 func CreateDir(path)
 {
@@ -73,7 +116,7 @@ func CreateDir(path)
 # V-1.0.0 (2025-08-12)
 #
 # Opens and reads contents of a directory non-recursively and returns a list
-# of file and directory names as strings.
+# of file and directory names as strings. Returns err on failure.
 
 func ListDir(path)
 {
@@ -94,36 +137,37 @@ func ListDir(path)
 		}
 
 		entry = dread(dir);
-
 	}
 
 	dclose(dir);
 	return entries;
 }
 
-# func SizeToString(bytes)
-# V-1.0.0 (2025-08-13)
+# func SizeToString(bytesCount)
+# V-1.0.1 (2025-11-06)
 #
 # Formats bytes count as human-readable string with appropriate unit suffix.
 
-func SizeToString(bytes)
+func SizeToString(bytesCount)
 {
-	if bytes < 1024
+	if bytesCount < 1024
 	{
-		return str(bytes) + " B";
+		return str(bytesCount) + " B";
 	}
-	elif bytes < 1048576
+	elif bytesCount < 1024 ^ 2
 	{
-		# 1024 * 1024
-		return str(Floor(bytes / 1024)) + " KB";
+		return str(Round(bytesCount / 1024, 2)) + " KB";
 	}
-	elif bytes < 1073741824
+	elif bytesCount < 1024 ^ 3
 	{
-		# 1024 * 1024 * 1024
-		return str(Floor(bytes / 1048576)) + " MB";
+		return str(Round(bytesCount / (1024 ^ 2), 2)) + " MB";
+	}
+	elif bytesCount < 1024 ^ 4
+	{
+		return str(Round(bytesCount / (1024 ^ 3), 2)) + " GB";
 	}
 	else
 	{
-		return str(Floor(bytes / 1073741824)) + " GB";
+		return str(Round(bytesCount / (1024 ^ 4), 2)) + " TB";
 	}
 }
