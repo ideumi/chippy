@@ -4,13 +4,49 @@ ChipLang (Chipmunk language) is an interpreted scripting / programming language 
 
 I aim to make ChipLang maintain a clean separation between builtins and libraries where possible. Builtins provide fundamental primitives for common operations that require performance or cannot be implemented cleanly in Chip itself. The native core library (`lib/`) abstracts these primitives for convenience. The codebase is to stay simple and accessible on both the Go and Chip sides.
 
-Chip's Interpreter is called `chippy`, from `chip` -> `chipi` (Chip Interpreter) -> `chippy`
-
 ### Hello World
 ```chiplang
 load("libprint.chh");
-Println("Hello, World!");
+Println("Hello World");
 ```
+
+## Features
+
+**Language**
+- Dynamically typed, imperative (procedural) interpreted programming / scripting language
+- Clean, readable syntax with familiar C-like control flow (`if`, `elif`, `else`, `while`, `for`)
+- Simple data types: numbers, strings, bytes and lists
+- UTF-8 native
+- Functions with proper scoping
+- Very fast startup time
+
+**Standard Library**
+- File IO operations
+- String manipulation and formatting
+- Mathematical functions and constants
+- Time and calendar operations
+- Path manipulation
+- Terminal control
+- ....
+
+**Built-in Primitives**
+- 60+ built-in functions for core operations
+- Direct file descriptor and socket access
+- File system operations (stat, chmod, symlinks, etc.)
+- Directory traversal and file metadata
+- Environment variable management
+- Process control and signal handling
+- System information and process control
+- Type introspection and conversion
+- Low-level string and byte operations
+- ....
+
+**Developer Tools**
+- Interactive REPL with history for experimentation
+- Syntax files for KDE, GNOME / GTK and Vim in `ide/`
+- Built-in documentation system (`chippy doc`)
+- Build system (`chippy combine`) with dependency resolution and bundling
+    - Syntax validation and symbol collision detection
 
 ## Supported Platforms
 
@@ -38,7 +74,6 @@ Requirements:
 - make
 
 ```bash
-go mod tidy
 make
 ```
 
@@ -70,15 +105,11 @@ chippy doc <topic>
 
 I recommend having a look at `installer`, `misc` and to a lesser extent `lib` for some examples on how Chip is used in practice.
 
-## Why
-
-Chip is a fun, private little project I have chosen to undertake myself over the last few months to learn a bit more about language and systems design and to fix several design issues with Chip's evil cousin Lyra while implementing some new stuff that I personally would love to see more of in modern programming / scripting languages, although I don't recommend anyone study this in any way to learn how to implement an optimized interpreter or primitives, because this isn't that. While fairly advanced, there are probably issues in this that my brain doesn't even conceptualize as problems. This is my little sandbox where I play around a bit with programming and write my own little tools, that's enough for now x)
-
 ## License
 
 ChipLang is licensed under the 2-Clause BSD License. See `LICENCE.txt`.
 
-Third-party components are licensed under their respective licenses. See `LICENCES_THIRDPARTY.txt`.
+Third-party components are licensed under their respective licenses. See `LICENCES_THIRDPARTY.txt` and `thirdparty/`.
 
 ---
 
