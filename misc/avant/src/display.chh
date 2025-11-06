@@ -15,6 +15,12 @@ func PrintHighlighted(text)
 	fwrite(escapeStart + pack(text) + escapeEnd, STDOUT);
 }
 
+func PrintTrueFalse(value)
+{
+	if value { return "Yes"; }
+	return "No";
+}
+
 func PrintDetail(aDay, aMonth, aYear, cycle, timePeriod, isPrime, isNewMonth, isNewYear)
 {
 	var monthName = AvantjienMonthName(aMonth);
@@ -39,10 +45,10 @@ func PrintDetail(aDay, aMonth, aYear, cycle, timePeriod, isPrime, isNewMonth, is
 	Println(str(aDay) + ". " + monthName + " of year " + str(aYear));
 	Println("Current Time: " + str(timePeriod) + " at " + daySymbolVerbose);
 	Println("");
-	Println("New week (prime day):\t" + str(isPrime));
+	Println("New week (falame):\t" + PrintTrueFalse(isPrime));
 	Println("");
-	Println("New month:\t\t" + str(isNewMonth));
-	Println("New year:\t\t" + str(isNewYear));
+	Println("New month:\t\t" + PrintTrueFalse(isNewMonth));
+	Println("New year:\t\t" + PrintTrueFalse(isNewYear));
 	Println("");
 	
 	Println(monthName + ":");
