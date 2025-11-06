@@ -148,10 +148,37 @@ func Trim(value)
 	return TrimLeft(TrimRight(value));
 }
 
+# func SplitCollapse(value, delimiter)
+# V-1.0.0 (2025-11-06)
+#
+# Splits value on delimiter and collapses repeated delimiters.
+# Returns a list of non-empty strings.
+
+func SplitCollapse(value, delimiter)
+{
+	var trimmed = Trim(value);
+	if trimmed == "" { return []; }
+
+	var parts = split(trimmed, delimiter);
+	var result = [];
+
+	for i = 0 utl len(parts)
+	{
+		var part = parts[i];
+
+		if part != ""
+		{
+			result = append(result, part);
+		}
+	}
+
+	return result;
+}
+
 # func Format(value, values)
 # V-1.0.0 (2025-10-31)
 #
-# Formats a string by replacing format specifiers with values in order.
+# Formats value by replacing format specifiers with values in order.
 # %s (string), %i (integer), %n (number), %% (literal %)
 #
 # Returns err if specifiers don't match values count or if format is
