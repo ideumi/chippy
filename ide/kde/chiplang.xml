@@ -11,7 +11,7 @@
       <item>continue</item>
       <item>break</item>
       <item>if</item>
-      <item>elif</item>
+      <item>elseif</item>
       <item>else</item>
       <item>for</item>
       <item>while</item>

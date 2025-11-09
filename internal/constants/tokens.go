@@ -59,7 +59,7 @@ const (
 var Keywords = []string{
 	"var",
 	"and", "or", "not",
-	"if", "elif", "else",
+	"if", "elseif", "else",
 	"for", "to", "step",
 	"while",
 	"func",

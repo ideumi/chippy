@@ -211,7 +211,7 @@ func Format(value, values)
 
 					i = i + 2;
 				}
-				elif next == "s"
+				elseif next == "s"
 				{
 					if valIndex > len(values) { return err; }
 
@@ -220,7 +220,7 @@ func Format(value, values)
 					valIndex = valIndex + 1;
 					i = i + 2;
 				}
-				elif next == "i"
+				elseif next == "i"
 				{
 					if valIndex > len(values) { return err; }
 
@@ -229,7 +229,7 @@ func Format(value, values)
 					valIndex = valIndex + 1;
 					i = i + 2;
 				}
-				elif next == "n"
+				elseif next == "n"
 				{
 					if valIndex > len(values) { return err; }
 

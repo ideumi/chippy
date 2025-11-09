@@ -223,17 +223,17 @@ func AvantjienDateToTimestamp(aYear, aMonth, aDay, cycle, timePeriod)
 	if cycle == 1
 	{
 		if timePeriod == 1 { hour = 8; }
-		elif timePeriod == 2 { hour = 11; }
-		elif timePeriod == 3 { hour = 14; }
-		elif timePeriod == 4 { hour = 17; }
+		elseif timePeriod == 2 { hour = 11; }
+		elseif timePeriod == 3 { hour = 14; }
+		elseif timePeriod == 4 { hour = 17; }
 		else { return err; }
 	}
 	else
 	{
 		if timePeriod == 1 { hour = 20; }
-		elif timePeriod == 2 { hour = 23; }
-		elif timePeriod == 3 { hour = 2; }
-		elif timePeriod == 4 { hour = 5; }
+		elseif timePeriod == 2 { hour = 23; }
+		elseif timePeriod == 3 { hour = 2; }
+		elseif timePeriod == 4 { hour = 5; }
 		else { return err; }
 	}
 

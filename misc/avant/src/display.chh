@@ -85,7 +85,7 @@ func PrintDetail(aDay, aMonth, aYear, cycle, timePeriod, isPrime, isNewMonth, is
 	var specialSuffix = "";
 
 	if isNewYear { specialSuffix = " (NY)"; }
-	elif isNewMonth { specialSuffix = " (NM)"; }
+	elseif isNewMonth { specialSuffix = " (NM)"; }
 	
 	Println("");
 	Println(str(aDay) + "." + str(aMonth) + "." + str(aYear) + " " + monthShort + " ‒ " + daySymbol + str(timePeriod) + specialSuffix);

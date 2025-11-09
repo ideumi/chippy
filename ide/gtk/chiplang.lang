@@ -63,7 +63,7 @@
           <keyword>continue</keyword>
           <keyword>break</keyword>
           <keyword>if</keyword>
-          <keyword>elif</keyword>
+          <keyword>elseif</keyword>
           <keyword>else</keyword>
           <keyword>for</keyword>
           <keyword>while</keyword>

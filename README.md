@@ -14,7 +14,7 @@ Println("Hello World");
 
 **Language**
 - Dynamically typed, imperative (procedural) interpreted programming / scripting language
-- Clean, readable syntax with familiar C-like control flow (`if`, `elif`, `else`, `while`, `for`)
+- Clean, readable syntax with familiar C-like control flow (`if`, `elseif`, `else`, `while`, `for`)
 - Simple data types: numbers, strings, bytes and lists
 - UTF-8 native
 - Functions with proper scoping

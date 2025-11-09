@@ -8,7 +8,7 @@ if exists("b:current_syntax")
 endif
 
 " Keywords
-syn keyword chipKeyword var func return continue break if elif else for while to step
+syn keyword chipKeyword var func return continue break if elseif else for while to step
 syn keyword chipOperator and or not
 
 " Constants

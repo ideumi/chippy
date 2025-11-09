@@ -154,15 +154,15 @@ func SizeToString(bytesCount)
 	{
 		return str(bytesCount) + " B";
 	}
-	elif bytesCount < 1024 ^ 2
+	elseif bytesCount < 1024 ^ 2
 	{
 		return str(Round(bytesCount / 1024, 2)) + " KB";
 	}
-	elif bytesCount < 1024 ^ 3
+	elseif bytesCount < 1024 ^ 3
 	{
 		return str(Round(bytesCount / (1024 ^ 2), 2)) + " MB";
 	}
-	elif bytesCount < 1024 ^ 4
+	elseif bytesCount < 1024 ^ 4
 	{
 		return str(Round(bytesCount / (1024 ^ 3), 2)) + " GB";
 	}

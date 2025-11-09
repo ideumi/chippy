@@ -780,8 +780,8 @@ func (p *Parser) ifExprCases(caseKeyword string) *ParseResult {
 		res.RegisterAdvancement()
 		p.advance()
 
-		// Check for elif/else continuation
-		result := p.tryParseElifElse(res)
+		// Check for elseif/else continuation
+		result := p.tryParseElseifElse(res)
 
 		if result != nil {
 			if result.error != nil {
@@ -814,8 +814,8 @@ func (p *Parser) ifExprCases(caseKeyword string) *ParseResult {
 		res.RegisterAdvancement()
 		p.advance()
 
-		// Check for elif/else continuation
-		result := p.tryParseElifElse(res)
+		// Check for elseif/else continuation
+		result := p.tryParseElseifElse(res)
 		if result != nil {
 			if result.error != nil {
 				return result
@@ -834,7 +834,7 @@ func (p *Parser) ifExprCases(caseKeyword string) *ParseResult {
 	})
 }
 
-func (p *Parser) tryParseElifElse(res *ParseResult) *ParseResult {
+func (p *Parser) tryParseElseifElse(res *ParseResult) *ParseResult {
 	if p.currentTok == nil {
 		return nil
 	}
@@ -847,11 +847,11 @@ func (p *Parser) tryParseElifElse(res *ParseResult) *ParseResult {
 		newlineCount++
 	}
 
-	if p.currentTok != nil && (p.currentTok.Matches(constants.TT_KEYWORD, "elif") || p.currentTok.Matches(constants.TT_KEYWORD, "else")) {
+	if p.currentTok != nil && (p.currentTok.Matches(constants.TT_KEYWORD, "elseif") || p.currentTok.Matches(constants.TT_KEYWORD, "else")) {
 		return p.ifExprBOrC()
 	}
 
-	// If no elif/else, reverse the newline consumption
+	// If no elseif/else, reverse the newline consumption
 	if newlineCount > 0 {
 		p.reverse(newlineCount)
 	}
@@ -871,9 +871,9 @@ func (p *Parser) ifExprBOrC() *ParseResult {
 		p.advance()
 	}
 
-	if p.currentTok != nil && p.currentTok.Matches(constants.TT_KEYWORD, "elif") {
+	if p.currentTok != nil && p.currentTok.Matches(constants.TT_KEYWORD, "elseif") {
 
-		result := p.ifExprCases("elif")
+		result := p.ifExprCases("elseif")
 
 		if result.error != nil {
 			return result
