@@ -60,7 +60,7 @@ var Keywords = []string{
 	"var",
 	"and", "or", "not",
 	"if", "elif", "else",
-	"for", "utl", "stp",
+	"for", "to", "step",
 	"while",
 	"func",
 	"return", "continue", "break",

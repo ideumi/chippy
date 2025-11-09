@@ -15,9 +15,9 @@ func Basename(path)
 	if path == "/" { return "/"; }
 
 	var lastSlash = -1;
-	var i = 0;
+	var i = 1;
 
-	while i < len(path)
+	while i <= len(path)
 	{
 		var currentChar = substr(path, i, 1);
 
@@ -28,7 +28,7 @@ func Basename(path)
 
 	if lastSlash == -1 { return path; }
 
-	return substr(path, lastSlash + 1, len(path) - lastSlash - 1);
+	return substr(path, lastSlash + 1, len(path) - lastSlash);
 }
 
 # func Dirname(path)
@@ -40,9 +40,9 @@ func Basename(path)
 func Dirname(path)
 {
 	var lastSlash = -1;
-	var i = 0;
+	var i = 1;
 
-	while i < len(path)
+	while i <= len(path)
 	{
 		var currentChar = substr(path, i, 1);
 
@@ -53,9 +53,9 @@ func Dirname(path)
 
 	if lastSlash == -1 { return "."; }
 
-	if lastSlash == 0 { return "/"; }
+	if lastSlash == 1 { return "/"; }
 
-	return substr(path, 0, lastSlash);
+	return substr(path, 1, lastSlash - 1);
 }
 
 # func JoinPath(dir, filename)
@@ -67,7 +67,7 @@ func JoinPath(dir, filename)
 {
 	if len(dir) == 0 { return filename; }
 
-	var lastChar = substr(dir, len(dir) - 1, 1);
+	var lastChar = substr(dir, len(dir), 1);
 
 	if lastChar == "/" { return dir + filename; }
 
@@ -83,10 +83,10 @@ func JoinPaths(pathList)
 {
 	if len(pathList) == 0 { return ""; }
 
-	var result = pathList[0];
-	var i = 1;
+	var result = pathList[1];
+	var i = 2;
 
-	while i < len(pathList)
+	while i <= len(pathList)
 	{
 		result = JoinPath(result, pathList[i]);
 		i = i + 1;
@@ -107,9 +107,9 @@ func FileExtension(filename)
 
 	if len(parts) <= 1 { return ""; }
 
-	if len(parts[0]) == 0 and len(parts) == 2 { return ""; }
+	if len(parts[1]) == 0 and len(parts) == 2 { return ""; }
 
-	return parts[len(parts) - 1];
+	return parts[len(parts)];
 }
 
 # func RemoveExtension(filename)
@@ -123,13 +123,13 @@ func RemoveExtension(filename)
 
 	if len(parts) <= 1 { return filename; }
 
-	if len(parts[0]) == 0 and len(parts) == 2 { return filename; }
+	if len(parts[1]) == 0 and len(parts) == 2 { return filename; }
 
-	var result = parts[0];
+	var result = parts[1];
 
-	var i = 1;
+	var i = 2;
 
-	while i < len(parts) - 1
+	while i <= len(parts) - 1
 	{
 		result = result + "." + parts[i];
 		i = i + 1;
@@ -147,7 +147,7 @@ func IsAbsolutePath(path)
 {
 	if len(path) == 0 { return false; }
 
-	var firstChar = substr(path, 0, 1);
+	var firstChar = substr(path, 1, 1);
 
 	if firstChar == "/" { return true; }
 

@@ -995,10 +995,10 @@ func (p *Parser) forExpr() *ParseResult {
 		return res
 	}
 
-	if !p.currentTok.Matches(constants.TT_KEYWORD, "utl") {
+	if !p.currentTok.Matches(constants.TT_KEYWORD, "to") {
 		return res.Failure(errors.NewInvalidSyntaxError(
 			p.currentTok.PosStart, p.currentTok.PosEnd,
-			"Expected 'utl'",
+			"Expected 'to'",
 		))
 	}
 
@@ -1011,7 +1011,7 @@ func (p *Parser) forExpr() *ParseResult {
 	}
 
 	var stepValue ast.Node
-	if p.currentTok.Matches(constants.TT_KEYWORD, "stp") {
+	if p.currentTok.Matches(constants.TT_KEYWORD, "step") {
 		res.RegisterAdvancement()
 		p.advance()
 

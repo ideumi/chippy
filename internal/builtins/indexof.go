@@ -76,5 +76,5 @@ func indexofFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 	runeIndex := len([]rune(haystack[:byteIndex]))
 
-	return res.Success(values.NewNumber(float64(runeIndex)).SetContext(ctx))
+	return res.Success(values.NewNumber(float64(runeIndex + 1)).SetContext(ctx))
 }

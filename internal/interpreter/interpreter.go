@@ -500,11 +500,11 @@ func (i *Interpreter) visitForNode(node *ast.ForNode, ctx interface{}) *values.R
 	}
 
 	for {
-		if stepNum.Value >= 0 && i_val >= endNum.Value {
+		if stepNum.Value >= 0 && i_val > endNum.Value {
 			break
 		}
 
-		if stepNum.Value < 0 && i_val <= endNum.Value {
+		if stepNum.Value < 0 && i_val < endNum.Value {
 			break
 		}
 
@@ -694,7 +694,7 @@ func (i *Interpreter) visitIndexAccessNode(node *ast.IndexAccessNode, ctx interf
 
 	switch coll := collection.(type) {
 	case *values.List:
-		if idx < 0 || idx >= len(coll.Elements) {
+		if idx < 1 || idx > len(coll.Elements) {
 			return res.Failure(errors.NewRTError(
 				node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
 				"Index out of bounds",
@@ -702,10 +702,10 @@ func (i *Interpreter) visitIndexAccessNode(node *ast.IndexAccessNode, ctx interf
 			))
 		}
 
-		return res.Success(coll.Elements[idx])
+		return res.Success(coll.Elements[idx-1])
 
 	case *values.Bytes:
-		if idx < 0 || idx >= len(coll.Data) {
+		if idx < 1 || idx > len(coll.Data) {
 			return res.Failure(errors.NewRTError(
 				node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
 				"Index out of bounds",
@@ -713,12 +713,12 @@ func (i *Interpreter) visitIndexAccessNode(node *ast.IndexAccessNode, ctx interf
 			))
 		}
 
-		return res.Success(values.NewNumber(float64(coll.Data[idx])).SetContext(ctx))
+		return res.Success(values.NewNumber(float64(coll.Data[idx-1])).SetContext(ctx))
 
 	case *values.String:
 		runes := []rune(coll.Value)
 
-		if idx < 0 || idx >= len(runes) {
+		if idx < 1 || idx > len(runes) {
 			return res.Failure(errors.NewRTError(
 				node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
 				"Index out of bounds",
@@ -726,7 +726,7 @@ func (i *Interpreter) visitIndexAccessNode(node *ast.IndexAccessNode, ctx interf
 			))
 		}
 
-		return res.Success(values.NewString(string(runes[idx])).SetContext(ctx))
+		return res.Success(values.NewString(string(runes[idx-1])).SetContext(ctx))
 
 	default:
 		return res.Failure(errors.NewRTError(
@@ -781,7 +781,7 @@ func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx interf
 
 	switch coll := collection.(type) {
 	case *values.List:
-		if idx < 0 || idx >= len(coll.Elements) {
+		if idx < 1 || idx > len(coll.Elements) {
 			return res.Failure(errors.NewRTError(
 				node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
 				"Index out of bounds",
@@ -790,7 +790,7 @@ func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx interf
 		}
 
 		newList := coll.Copy().(*values.List)
-		newList.Elements[idx] = value.SetContext(ctx)
+		newList.Elements[idx-1] = value.SetContext(ctx)
 
 		return res.Success(newList)
 
@@ -814,7 +814,7 @@ func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx interf
 			))
 		}
 
-		if idx < 0 || idx >= len(coll.Data) {
+		if idx < 1 || idx > len(coll.Data) {
 			return res.Failure(errors.NewRTError(
 				node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
 				"Index out of bounds",
@@ -823,7 +823,7 @@ func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx interf
 		}
 
 		newBytes := coll.Copy().(*values.Bytes)
-		newBytes.Data[idx] = byte(byteValue)
+		newBytes.Data[idx-1] = byte(byteValue)
 
 		return res.Success(newBytes.SetContext(ctx))
 
@@ -851,7 +851,7 @@ func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx interf
 
 		runes := []rune(coll.Value)
 
-		if idx < 0 || idx >= len(runes) {
+		if idx < 1 || idx > len(runes) {
 			return res.Failure(errors.NewRTError(
 				node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
 				"Index out of bounds",
@@ -862,7 +862,7 @@ func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx interf
 		// Create new string with replaced character
 		newRunes := make([]rune, len(runes))
 		copy(newRunes, runes)
-		newRunes[idx] = valueRunes[0]
+		newRunes[idx-1] = valueRunes[0]
 
 		return res.Success(values.NewString(string(newRunes)).SetContext(ctx))
 

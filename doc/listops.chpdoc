@@ -7,4 +7,4 @@
 ''container[index]'' - Access element at index (available for lists, bytes and strings)
 ''container[index] = value'' - Assign element at index (returns a new copy)
 
-Indices are 0-based.
+Indices are 1-based.

@@ -71,7 +71,7 @@ func InstallFiles(srcDir, destDir)
 		return true; # No files to install
 	}
 
-	for i = 0 utl len(files)
+	for i = 1 to len(files)
 	{
 		var fileName = files[i];
 		var srcFile = JoinPath(srcDir, fileName);
@@ -112,7 +112,7 @@ func RemoveDirectory(dirPath)
 
 	if str(files) != err
 	{
-		for i = 0 utl len(files)
+		for i = 1 to len(files)
 		{
 			var filePath = JoinPath(dirPath, files[i]);
 			var unlinkResult = unlink(filePath);
@@ -137,9 +137,9 @@ func RemoveDirectory(dirPath)
 func CleanExistingInstallation()
 {
 	var paths = GetInstallPaths();
-	var binaryPath = paths[0];
-	var libPath = paths[1];
-	var docPath = paths[2];
+	var binaryPath = paths[1];
+	var libPath = paths[2];
+	var docPath = paths[3];
 
 	if IsFile(binaryPath)
 	{
@@ -171,7 +171,7 @@ func CleanExistingInstallation()
 func InstallBinary()
 {
 	var paths = GetInstallPaths();
-	var binaryPath = paths[0];
+	var binaryPath = paths[1];
 
 	var result = CopyFile(CHIPPYBIN, binaryPath);
 
@@ -193,7 +193,7 @@ func InstallBinary()
 func InstallLibraries()
 {
 	var paths = GetInstallPaths();
-	var libPath = paths[1];
+	var libPath = paths[2];
 
 	var result = InstallFiles(LIBDIR, libPath);
 
@@ -203,7 +203,7 @@ func InstallLibraries()
 func InstallDocumentation()
 {
 	var paths = GetInstallPaths();
-	var docPath = paths[2];
+	var docPath = paths[3];
 
 	var result = InstallFiles(DOCDIR, docPath);
 
@@ -302,7 +302,7 @@ func Main()
 
 	if len(arguments) > 0
 	{
-		var firstArg = arguments[0];
+		var firstArg = arguments[1];
 
 		if firstArg == "-u" or firstArg == "--uninstall"
 		{

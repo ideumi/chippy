@@ -71,11 +71,11 @@ func (b *Bytes) Length() int {
 }
 
 func (b *Bytes) GetElement(index int) *Number {
-	if index < 0 || index >= len(b.Data) {
+	if index < 1 || index > len(b.Data) {
 		return nil
 	}
 
-	return NewNumber(float64(b.Data[index])).SetContext(b.context).(*Number)
+	return NewNumber(float64(b.Data[index-1])).SetContext(b.context).(*Number)
 }
 
 func (b *Bytes) AppendByte(value int) *Bytes {
@@ -201,7 +201,7 @@ func (b *Bytes) SubbedBy(other Value) (Value, error) {
 
 		index := int(otherNum.Value)
 
-		if index < 0 || index >= len(b.Data) {
+		if index < 1 || index > len(b.Data) {
 			return nil, errors.NewRTError(
 				otherNum.posStart, otherNum.posEnd,
 				"Byte at this index could not be removed from bytes because index is out of bounds",
@@ -211,8 +211,8 @@ func (b *Bytes) SubbedBy(other Value) (Value, error) {
 
 		newData := make([]byte, len(b.Data)-1)
 
-		copy(newData[:index], b.Data[:index])
-		copy(newData[index:], b.Data[index+1:])
+		copy(newData[:index-1], b.Data[:index-1])
+		copy(newData[index-1:], b.Data[index:])
 
 		return NewBytes(newData).SetContext(b.context), nil
 	}

@@ -296,5 +296,5 @@ func GetTerminalSize()
 
 	if len(parts) != 2 { return err; }
 
-	return [num(parts[0]), num(parts[1])];
+	return [num(parts[1]), num(parts[2])];
 }

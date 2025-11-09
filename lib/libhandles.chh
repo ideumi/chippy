@@ -44,3 +44,21 @@ var LOCKNB = 4;
 # Unlock file for flock()
 
 var LOCKUN = 8;
+
+# SEEKSET
+# (2025-11-08)
+# Seek from beginning of file (for seek())
+
+var SEEKSET = 0;
+
+# SEEKCUR
+# (2025-11-08)
+# Seek from current position (for seek())
+
+var SEEKCUR = 1;
+
+# SEEKEND
+# (2025-11-08)
+# Seek from end of file (for seek())
+
+var SEEKEND = 2;

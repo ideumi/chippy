@@ -28,9 +28,9 @@ func Main()
 	Println("");
 	
 	var avantComponents = AvantjienDate(currentTime);
-	var aDay = avantComponents[0];
-	var aMonth = avantComponents[1];
-	var aYear = avantComponents[2];
+	var aDay = avantComponents[1];
+	var aMonth = avantComponents[2];
+	var aYear = avantComponents[3];
 	
 	var cycle = AvantjienCycle(currentTime);
 	var timePeriod = AvantjienTime(currentTime);

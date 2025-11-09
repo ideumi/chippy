@@ -6,7 +6,7 @@ Extracts a substring from a string starting at a specified position.
 
 *Parameters:*
 - ''string'': String to extract from
-- ''start'': Number starting position (0-based)
+- ''start'': Number starting position (1-based)
 - ''length'': Number of characters to extract
 
 *Returns:*
@@ -16,4 +16,4 @@ Extracts a substring from a string starting at a specified position.
 - Runtime error if string is not a string
 - Runtime error if start is not a number
 - Runtime error if length is not a number
-- Runtime error if start or length is negative
+- Runtime error if start is less than 1 or length is negative

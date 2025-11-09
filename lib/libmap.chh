@@ -13,7 +13,7 @@ func MapIsValid(map)
 	if type(map) != "list" { return false; }
 	if len(map) == 0 { return false; }
 
-	var marker = map[0];
+	var marker = map[1];
 
 	if type(marker) != "string" { return false; }
 	if marker != "map" { return false; }
@@ -42,7 +42,7 @@ func MapInit(keys)
 
 	var map = MapNew();
 
-	for i = 0 utl len(keys)
+	for i = 1 to len(keys)
 	{
 		var key = keys[i];
 
@@ -61,11 +61,11 @@ func MapSet(map, key, value)
 {
 	if MapIsValid(map) == false { return err; }
 
-	for i = 1 utl len(map)
+	for i = 2 to len(map)
 	{
 		var pair = map[i];
 
-		if pair[0] == key
+		if pair[1] == key
 		{
 			return map[i] = [key, value];
 		}
@@ -83,13 +83,13 @@ func MapGet(map, key)
 {
 	if MapIsValid(map) == false { return err; }
 
-	for i = 1 utl len(map)
+	for i = 2 to len(map)
 	{
 		var pair = map[i];
 
-		if pair[0] == key
+		if pair[1] == key
 		{
-			return pair[1];
+			return pair[2];
 		}
 	}
 
@@ -105,11 +105,11 @@ func MapHas(map, key)
 {
 	if MapIsValid(map) == false { return err; }
 
-	for i = 1 utl len(map)
+	for i = 2 to len(map)
 	{
 		var pair = map[i];
 
-		if pair[0] == key
+		if pair[1] == key
 		{
 			return true;
 		}
@@ -127,11 +127,11 @@ func MapRemove(map, key)
 {
 	if MapIsValid(map) == false { return err; }
 
-	for i = 1 utl len(map)
+	for i = 2 to len(map)
 	{
 		var pair = map[i];
 
-		if pair[0] == key
+		if pair[1] == key
 		{
 			return map - i;
 		}
@@ -151,11 +151,11 @@ func MapKeys(map)
 
 	var keys = [];
 
-	for i = 1 utl len(map)
+	for i = 2 to len(map)
 	{
 		var pair = map[i];
 
-		keys = append(keys, pair[0]);
+		keys = append(keys, pair[1]);
 	}
 
 	return keys;
@@ -172,11 +172,11 @@ func MapValues(map)
 
 	var values = [];
 
-	for i = 1 utl len(map)
+	for i = 2 to len(map)
 	{
 		var pair = map[i];
 
-		values = append(values, pair[1]);
+		values = append(values, pair[2]);
 	}
 
 	return values;
@@ -208,11 +208,11 @@ func MapMerge(map1, map2)
 
 	var result = map1;
 
-	for i = 1 utl len(map2)
+	for i = 2 to len(map2)
 	{
 		var pair = map2[i];
 
-		result = MapSet(result, pair[0], pair[1]);
+		result = MapSet(result, pair[1], pair[2]);
 	}
 
 	return result;

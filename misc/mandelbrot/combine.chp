@@ -28,6 +28,7 @@ if homePath != err
     Paths = Paths + [homePath + "/.local/share/chiplang/lib"];
 }
 
+Paths = Paths + ["../../lib"];
 Paths = Paths + ["/usr/lib/chiplang"];
 
 # Options

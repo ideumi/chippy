@@ -59,7 +59,7 @@ func charatFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 	// UTF8
 	runes := []rune(str)
 
-	if index < 0 || index >= len(runes) {
+	if index < 1 || index > len(runes) {
 		posStart, posEnd := args[1].GetPos()
 
 		return res.Failure(errors.NewRTError(
@@ -69,7 +69,7 @@ func charatFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 		))
 	}
 
-	char := string(runes[index])
+	char := string(runes[index-1])
 
 	return res.Success(values.NewString(char).SetContext(ctx))
 }

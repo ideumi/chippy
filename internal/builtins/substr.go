@@ -69,12 +69,12 @@ func substrFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 	start := int(startNum.Value)
 	length := int(lengthNum.Value)
 
-	if start < 0 {
+	if start < 1 {
 		posStart, posEnd := args[1].GetPos()
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			"Start must be non-negative",
+			"Start must be >= 1",
 			ctx,
 		))
 	}
@@ -91,17 +91,17 @@ func substrFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 	runes := []rune(str)
 
-	if start >= len(runes) {
+	if start > len(runes) {
 		return res.Success(values.NewString("").SetContext(ctx))
 	}
 
-	end := start + length
+	end := start - 1 + length
 
 	if end > len(runes) {
 		end = len(runes)
 	}
 
-	result := string(runes[start:end])
+	result := string(runes[start-1 : end])
 
 	return res.Success(values.NewString(result).SetContext(ctx))
 }

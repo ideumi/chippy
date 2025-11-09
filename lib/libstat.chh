@@ -10,67 +10,67 @@ load("libfsio.chh");
 # (2025-08-13)
 # File size in bytes
 
-var STATSIZE = 0;
+var STATSIZE = 1;
 
 # STATMTIME
 # (2025-08-13)
 # Last modified time (Unix timestamp)
 
-var STATMTIME = 1;
+var STATMTIME = 2;
 
 # STATATIME
 # (2025-08-13)
 # Last access time (Unix timestamp)
 
-var STATATIME = 2;
+var STATATIME = 3;
 
 # STATCTIME
 # (2025-08-13)
 # Creation/change time (Unix timestamp)
 
-var STATCTIME = 3;
+var STATCTIME = 4;
 
 # STATMODE
 # (2025-08-13)
 # File permissions/mode bits
 
-var STATMODE = 4;
+var STATMODE = 5;
 
 # STATUID
 # (2025-08-13)
 # Owner user ID
 
-var STATUID = 5;
+var STATUID = 6;
 
 # STATGID
 # (2025-08-13)
 # Owner group ID
 
-var STATGID = 6;
+var STATGID = 7;
 
 # STATNLINK
 # (2025-08-13)
 # Number of hard links
 
-var STATNLINK = 7;
+var STATNLINK = 8;
 
 # STATINODE
 # (2025-08-13)
 # Inode number
 
-var STATINODE = 8;
+var STATINODE = 9;
 
 # STATDEVICE
 # (2025-08-13)
 # Device ID
 
-var STATDEVICE = 9;
+var STATDEVICE = 10;
 
 # STATTYPE
 # (2025-08-13)
 # File type string
 
-var STATTYPE = 10;
+var STATTYPE = 11;
 
 
 # TYPEFILE
@@ -128,7 +128,7 @@ var TYPEUNKNOWN = "unknown";
 
 func StatType(statResult)
 {
-	if type(statResult) == "list" and len(statResult) > STATTYPE
+	if type(statResult) == "list" and len(statResult) >= STATTYPE
 	{ return statResult[STATTYPE]; }
 
 	return TYPEUNKNOWN;

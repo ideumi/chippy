@@ -83,7 +83,7 @@ func (l *List) SubbedBy(other Value) (Value, error) {
 		newList := l.Copy().(*List)
 		index := int(otherNum.Value)
 
-		if index < 0 || index >= len(newList.Elements) {
+		if index < 1 || index > len(newList.Elements) {
 			return nil, errors.NewRTError(
 				otherNum.posStart, otherNum.posEnd,
 				"Element at this index could not be removed from list because index is out of bounds",
@@ -91,7 +91,7 @@ func (l *List) SubbedBy(other Value) (Value, error) {
 			)
 		}
 
-		newList.Elements = append(newList.Elements[:index], newList.Elements[index+1:]...)
+		newList.Elements = append(newList.Elements[:index-1], newList.Elements[index:]...)
 
 		return newList, nil
 	}
