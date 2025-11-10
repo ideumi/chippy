@@ -54,7 +54,6 @@
       <item>error</item>
       <item>exec</item>
       <item>fclose</item>
-      <item>flock</item>
       <item>fopen</item>
       <item>fread</item>
       <item>fsync</item>

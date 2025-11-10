@@ -26,7 +26,6 @@ func GetBuiltins() map[string]*values.BuiltInFunction {
 		"fclose": values.NewBuiltInFunction("fclose", fcloseFunction),
 		"fwrite": values.NewBuiltInFunction("fwrite", fwriteFunction),
 		"fread":  values.NewBuiltInFunction("fread", freadFunction),
-		"flock":  values.NewBuiltInFunction("flock", flockFunction),
 
 		"getcwd": values.NewBuiltInFunction("getcwd", getcwdFunction),
 		"chdir":  values.NewBuiltInFunction("chdir", chdirFunction),

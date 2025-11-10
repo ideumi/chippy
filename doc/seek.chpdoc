@@ -7,7 +7,7 @@ Sets the file position for a file handle.
 *Parameters:*
 - ''handle'': File handle
 - ''offset'': Number byte offset
-- ''whence'': Number seek origin (0=start, 1=current, 2=end)
+- ''whence'': Number seek origin (0=start, 1=current, 2=end) (see ''libhandles.chh'')
 
 *Returns:*
 - Number: New position from start of file

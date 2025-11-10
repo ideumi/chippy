@@ -21,44 +21,20 @@ var STDOUT = 1;
 
 var STDERR = 2;
 
-# LOCKSH
-# (2025-09-13)
-# Shared file lock for flock()
-
-var LOCKSH = 1;
-
-# LOCKEX
-# (2025-09-13)
-# Exclusive file lock for flock()
-
-var LOCKEX = 2;
-
-# LOCKNB
-# (2025-09-13)
-# Non-blocking flag for flock() (combine with LOCKSH or LOCKEX)
-
-var LOCKNB = 4;
-
-# LOCKUN
-# (2025-09-13)
-# Unlock file for flock()
-
-var LOCKUN = 8;
-
 # SEEKSET
 # (2025-11-08)
-# Seek from beginning of file (for seek())
+# Seek from beginning of file
 
 var SEEKSET = 0;
 
 # SEEKCUR
 # (2025-11-08)
-# Seek from current position (for seek())
+# Seek from current position
 
 var SEEKCUR = 1;
 
 # SEEKEND
 # (2025-11-08)
-# Seek from end of file (for seek())
+# Seek from end of file
 
 var SEEKEND = 2;

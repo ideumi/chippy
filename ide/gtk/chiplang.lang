@@ -110,7 +110,6 @@
           <keyword>error</keyword>
           <keyword>exec</keyword>
           <keyword>fclose</keyword>
-          <keyword>flock</keyword>
           <keyword>fopen</keyword>
           <keyword>fread</keyword>
           <keyword>fsync</keyword>
