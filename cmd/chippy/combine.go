@@ -30,16 +30,20 @@ func reportCollisions(collisions []safety.SymbolCollision) {
 	fmt.Println("Symbol collisions detected:")
 
 	for _, collision := range collisions {
-		if collision.IsSameFile() {
+		// Handle builtin collisions differently
+		if collision.IsBuiltinCollision() {
+			fmt.Printf("\n  %s '%s' collides with %s:\n", collision.Locations[0].SymType, collision.Name, collision.SymType)
+			for _, loc := range collision.Locations {
+				fmt.Printf("    - %s:%d\n", loc.File, loc.Line+1)
+			}
+		} else if collision.IsSameFile() {
 			fmt.Printf("\n  %s '%s' defined multiple times in %s:\n", collision.SymType, collision.Name, collision.GetFirstFile())
+			for _, loc := range collision.Locations {
+				fmt.Printf("    - %s:%d\n", loc.File, loc.Line+1)
+			}
 		} else {
 			fmt.Printf("\n  %s '%s' defined in multiple files:\n", collision.SymType, collision.Name)
-		}
-
-		for _, loc := range collision.Locations {
-			if collision.SymType == "symbol" {
-				fmt.Printf("    - %s:%d (%s)\n", loc.File, loc.Line+1, loc.SymType)
-			} else {
+			for _, loc := range collision.Locations {
 				fmt.Printf("    - %s:%d\n", loc.File, loc.Line+1)
 			}
 		}

@@ -9,6 +9,7 @@ package safety
 
 import (
 	"chip-go/internal/ast"
+	"chip-go/internal/builtins"
 	"chip-go/internal/lexer"
 	"chip-go/internal/parser"
 	"fmt"
@@ -64,6 +65,28 @@ type ValidationError struct {
 	Error error
 }
 
+var builtinNames = initBuiltinNames()
+
+func initBuiltinNames() map[string]string {
+	names := make(map[string]string)
+
+	// Get all builtin functions
+	for name := range builtins.GetBuiltins() {
+		names[name] = "builtin function"
+	}
+
+	// Get all builtin constants
+	for name := range builtins.GetConstants() {
+		names[name] = "builtin constant"
+	}
+
+	return names
+}
+
+func (c *SymbolCollision) IsBuiltinCollision() bool {
+	return c.SymType == "builtin function" || c.SymType == "builtin constant"
+}
+
 func ValidateFiles(files []string) (*ValidationResult, error) {
 	result := &ValidationResult{
 		Collisions: []SymbolCollision{},
@@ -93,6 +116,17 @@ func ValidateFiles(files []string) (*ValidationResult, error) {
 
 	// Detect collisions
 	for name, locations := range symbolRegistry {
+		// Check for builtin collisions first
+		if builtinType, isBuiltin := builtinNames[name]; isBuiltin {
+			result.Collisions = append(result.Collisions, SymbolCollision{
+				Name:      name,
+				SymType:   builtinType,
+				Locations: locations,
+			})
+			continue
+		}
+
+		// Check for multi-definition collisions
 		if len(locations) > 1 {
 			// Determine collision type
 			symType := locations[0].SymType
