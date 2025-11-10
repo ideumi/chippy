@@ -35,13 +35,6 @@ func PrintDetail(aDay, aMonth, aYear, cycle, timePeriod, isPrime, isNewMonth, is
 		daySymbolVerbose = "Daytime";
 	}
 	
-	# Handle transitional period 4 (16:00-19:59) per HERA's 60.2.5
-	if timePeriod == 4
-	{
-		daySymbol = "N/D";
-		daySymbolVerbose = "Transitional Night/Day";
-	}
-	
 	Println(str(aDay) + ". " + monthName + " of year " + str(aYear));
 	Println("Current Time: " + str(timePeriod) + " at " + daySymbolVerbose);
 	Println("");
