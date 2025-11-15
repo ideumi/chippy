@@ -29,6 +29,12 @@ func main() {
 
 	args := os.Args[1:]
 
+	// Handle help flag
+	if len(args) > 0 && (args[0] == "-h" || args[0] == "--help") {
+		showHelp("chippy")
+		return
+	}
+
 	// Handle doc command
 	if len(args) > 0 && args[0] == "doc" {
 		if len(args) == 1 {
@@ -42,6 +48,12 @@ func main() {
 	// Handle combine command
 	if len(args) > 0 && args[0] == "combine" {
 		handleCombineCommand(args[1:])
+		return
+	}
+
+	// Handle check command
+	if len(args) > 0 && args[0] == "check" {
+		handleCheckCommand(args[1:])
 		return
 	}
 

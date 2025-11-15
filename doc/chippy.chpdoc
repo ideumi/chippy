@@ -1,0 +1,28 @@
+*chippy* | V-$CHIPVR ($CHIPCN)
+
+ChipLang interpreter and toolchain
+
+*Usage:*
+
+  ''chippy''                     Start the REPL
+  ''chippy <program>''           Run a program
+
+  ''chippy -r "code"''           Execute code directly
+  ''chippy --run "code"''        Execute code directly
+
+  ''chippy -v''                  Show version information
+  ''chippy --version''           Show version information
+
+  ''chippy -h''                  Show this help message
+  ''chippy --help''              Show this help message
+
+*Commands:*
+
+  ''chippy doc [topic]''         View documentation
+  ''chippy doc list''            List all documentation topics
+
+  ''chippy combine [config]''    Bundle a project
+  ''chippy combine new''         Create a new combine.chp file
+
+  ''chippy check <files...>''    Check files for errors
+  ''chippy check all [dir]''     Check ''.chp'' and ''.chh'' files recursively
