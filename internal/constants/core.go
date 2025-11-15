@@ -9,7 +9,7 @@ package constants
 import "runtime"
 
 const (
-	VERSION_DATE = "2025-11-10"
+	VERSION_DATE = "2025-11-15"
 	HIST_FILE    = ".ChipLangHistory"
 
 	RR_CONTEXT_DISPLAY_NAME     = "<ChipLangProgram>"
