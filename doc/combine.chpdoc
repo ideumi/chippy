@@ -17,6 +17,7 @@ Programs, properly built using combine have no dependencies outside of the ''chi
 - ''Output'': Output executable filename
 - ''Source'': Main source file entry point
 - ''Paths'': List of directories to search for dependencies
+- ''External'': List of dependencies combine shouldn't bundle and just keep as loads
 - ''StripComments'': Remove comments from bundled output
 - ''StripWhitespace'': Remove excess whitespace from bundled output
 - ''AddShebang'': Add ''#!/usr/bin/chippy'' shebang to output

@@ -17,6 +17,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -31,18 +32,22 @@ func reportCollisions(collisions []safety.SymbolCollision) {
 
 	for _, collision := range collisions {
 		// Handle builtin collisions differently
+
 		if collision.IsBuiltinCollision() {
 			fmt.Printf("\n  %s '%s' collides with %s:\n", collision.Locations[0].SymType, collision.Name, collision.SymType)
+
 			for _, loc := range collision.Locations {
 				fmt.Printf("    - %s:%d\n", loc.File, loc.Line+1)
 			}
 		} else if collision.IsSameFile() {
 			fmt.Printf("\n  %s '%s' defined multiple times in %s:\n", collision.SymType, collision.Name, collision.GetFirstFile())
+
 			for _, loc := range collision.Locations {
 				fmt.Printf("    - %s:%d\n", loc.File, loc.Line+1)
 			}
 		} else {
 			fmt.Printf("\n  %s '%s' defined in multiple files:\n", collision.SymType, collision.Name)
+
 			for _, loc := range collision.Locations {
 				fmt.Printf("    - %s:%d\n", loc.File, loc.Line+1)
 			}
@@ -118,6 +123,10 @@ if homePath != err
 
 Paths = Paths + ["/usr/lib/chiplang"];
 
+# Dependencies combine shouldn't bundle and just keep as loads
+
+var External = [];
+
 # Options
 
 var StripComments = true;
@@ -174,7 +183,7 @@ func executeCombine(combineFile string) error {
 	}
 
 	// Build dependency graph from entry point
-	deps, err := buildDependencyGraph(config.Source, config.Paths)
+	deps, skipped, err := buildDependencyGraph(config.Source, config.Paths, config.External)
 
 	if err != nil {
 		return err
@@ -201,6 +210,7 @@ func executeCombine(combineFile string) error {
 	// Report symbol collisions
 	if len(validation.Collisions) > 0 {
 		reportCollisions(validation.Collisions)
+
 		return fmt.Errorf("cannot bundle due to symbol collisions")
 	}
 
@@ -213,8 +223,19 @@ func executeCombine(combineFile string) error {
 		fmt.Printf("  %d. %s\n", i+1, file)
 	}
 
-	fmt.Printf("\nTotal: %d source(s)\n", len(deps))
-	fmt.Println()
+	if len(skipped) > 0 {
+		fmt.Printf("\nExternal dependencies skipped:\n")
+
+		for i, file := range skipped {
+			fmt.Printf("  %d. %s\n", i+1, file)
+		}
+	}
+
+	if len(skipped) > 0 {
+		fmt.Printf("\nTotal: %d source(s), %d external\n", len(deps), len(skipped))
+	} else {
+		fmt.Printf("\nTotal: %d source(s)\n", len(deps))
+	}
 
 	// Generate combined output
 	if err := generateCombinedFile(config, deps); err != nil {
@@ -233,6 +254,7 @@ type CombineConfig struct {
 	Output          string
 	Source          string
 	Paths           []string
+	External        []string
 	StripComments   bool
 	StripWhitespace bool
 	AddShebang      bool
@@ -284,6 +306,17 @@ func extractCombineConfig(ctx *context.Context) CombineConfig {
 		}
 	}
 
+	// Extract external dependencies
+	if val := ctx.SymbolTable.Get(constants.CONFIG_EXTERNAL); val != nil {
+		if list, ok := val.(*values.List); ok {
+			for _, elem := range list.Elements {
+				if str, ok := elem.(*values.String); ok {
+					config.External = append(config.External, str.Value)
+				}
+			}
+		}
+	}
+
 	// Flags
 	if val := ctx.SymbolTable.Get(constants.CONFIG_STRIP_COMMENTS); val != nil {
 		if num, ok := val.(*values.Number); ok {
@@ -306,19 +339,36 @@ func extractCombineConfig(ctx *context.Context) CombineConfig {
 	return config
 }
 
-func buildDependencyGraph(source string, paths []string) ([]string, error) {
+func buildDependencyGraph(source string, paths []string, external []string) ([]string, []string, error) {
 	seen := make(map[string]bool)
+	skippedMap := make(map[string]bool)
 	var result []string
 
-	// Process dependencies starting from entry point
-	if err := processDependencies(source, paths, seen, &result); err != nil {
-		return nil, fmt.Errorf("processing dependencies: %w", err)
+	// Build external lookup map
+	externalMap := make(map[string]bool)
+
+	for _, ext := range external {
+		externalMap[ext] = true
 	}
 
-	return result, nil
+	// Process dependencies starting from entry point
+	if err := processDependencies(source, paths, externalMap, seen, skippedMap, &result); err != nil {
+		return nil, nil, fmt.Errorf("processing dependencies: %w", err)
+	}
+
+	// Convert skipped map to slice
+	var skipped []string
+
+	for name := range skippedMap {
+		skipped = append(skipped, name)
+	}
+
+	sort.Strings(skipped)
+
+	return result, skipped, nil
 }
 
-func processDependencies(filename string, paths []string, seen map[string]bool, result *[]string) error {
+func processDependencies(filename string, paths []string, external map[string]bool, seen map[string]bool, skipped map[string]bool, result *[]string) error {
 	if seen[filename] {
 		return nil
 	}
@@ -341,6 +391,13 @@ func processDependencies(filename string, paths []string, seen map[string]bool, 
 		if len(match) > 1 {
 			depPath := match[1]
 
+			// Check if dependency is external
+			if external[depPath] {
+				skipped[depPath] = true
+
+				continue
+			}
+
 			// Resolve dependency through search paths
 			resolvedPath := resolvePath(depPath, paths)
 
@@ -349,7 +406,7 @@ func processDependencies(filename string, paths []string, seen map[string]bool, 
 			}
 
 			if !seen[resolvedPath] {
-				if err := processDependencies(resolvedPath, paths, seen, result); err != nil {
+				if err := processDependencies(resolvedPath, paths, external, seen, skipped, result); err != nil {
 					return err
 				}
 			}
@@ -432,6 +489,7 @@ func generateCombinedFile(config CombineConfig, files []string) error {
 
 		if processedContent != "" {
 			combined.WriteString(processedContent)
+
 			if !config.StripWhitespace {
 				combined.WriteString("\n")
 			}
@@ -482,6 +540,13 @@ func processFileContent(content string, config CombineConfig) string {
 	scanner := bufio.NewScanner(strings.NewReader(content))
 	var builder strings.Builder
 
+	// Build external lookup map
+	externalMap := make(map[string]bool)
+
+	for _, ext := range config.External {
+		externalMap[ext] = true
+	}
+
 	for scanner.Scan() {
 		line := scanner.Text()
 
@@ -490,9 +555,20 @@ func processFileContent(content string, config CombineConfig) string {
 			continue
 		}
 
-		// Remove load() calls
+		// Keep external, remove bundled
 		if loadCallRegex.MatchString(line) {
-			continue
+			matches := loadRegex.FindStringSubmatch(line)
+
+			if len(matches) > 1 {
+				depPath := matches[1]
+
+				// Keep load() for external dependencies
+				if !externalMap[depPath] {
+					continue
+				}
+			} else {
+				continue
+			}
 		}
 
 		// Strip comments if requested but not inside string literals

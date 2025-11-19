@@ -28,4 +28,5 @@ const (
 	CONFIG_STRIP_COMMENTS   = "StripComments"
 	CONFIG_STRIP_WHITESPACE = "StripWhitespace"
 	CONFIG_ADD_SHEBANG      = "AddShebang"
+	CONFIG_EXTERNAL         = "External"
 )
