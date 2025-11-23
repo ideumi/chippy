@@ -11,6 +11,7 @@ import (
 	"chip-go/internal/constants"
 	"chip-go/internal/errors"
 	"chip-go/internal/values"
+	"os"
 	"syscall"
 )
 
@@ -69,9 +70,8 @@ func execFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 		))
 	}
 
-	// Use execv syscall to replace current process
 	program := execArgs[0]
-	err := syscall.Exec(program, execArgs, nil)
+	err := syscall.Exec(program, execArgs, os.Environ())
 
 	if err != nil {
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
