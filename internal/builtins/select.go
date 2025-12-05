@@ -17,6 +17,250 @@ import (
 	"time"
 )
 
+type fdInfo struct {
+	fd     int
+	handle int
+}
+
+func extractFD(handle int, forRead bool, dupFiles *[]*os.File, posStart, posEnd *errors.Position, ctx interface{}) (int, error) {
+	// Try regular file handle first
+	file, exists := shared.GetFileHandle(handle)
+
+	if exists {
+		fd := int(file.Fd())
+
+		if fd >= unix.FD_SETSIZE {
+			return -1, errors.NewRTError(
+				posStart, posEnd,
+				shared.Errors.InvalidValue("File descriptor exceeds system limit"),
+				ctx,
+			)
+		}
+
+		return fd, nil
+	}
+
+	// Try socket handle
+	socket, socketExists := shared.GetSocketHandle(handle)
+
+	if socketExists {
+		fd, dupFile, err := extractSocketFD(socket, forRead, posStart, posEnd, ctx)
+
+		if err != nil {
+			return -1, err
+		}
+
+		if dupFile != nil {
+			*dupFiles = append(*dupFiles, dupFile)
+		}
+
+		if fd >= unix.FD_SETSIZE {
+			return -1, errors.NewRTError(
+				posStart, posEnd,
+				shared.Errors.InvalidValue("File descriptor exceeds system limit"),
+				ctx,
+			)
+		}
+
+		return fd, nil
+	}
+
+	// Try process handle
+	proc, procExists := shared.GetProcessHandle(handle)
+
+	if procExists {
+		fd, err := extractProcessFD(proc, forRead, posStart, posEnd, ctx)
+
+		if err != nil {
+			return -1, err
+		}
+
+		if fd >= unix.FD_SETSIZE {
+			return -1, errors.NewRTError(
+				posStart, posEnd,
+				shared.Errors.InvalidValue("File descriptor exceeds system limit"),
+				ctx,
+			)
+		}
+
+		return fd, nil
+	}
+
+	// No valid handle found
+	return -1, errors.NewRTError(
+		posStart, posEnd,
+		shared.Errors.InvalidValue("Invalid file, socket, or process handle"),
+		ctx,
+	)
+}
+
+func extractSocketFD(socket *shared.SocketHandle, forRead bool, posStart, posEnd *errors.Position, ctx interface{}) (int, *os.File, error) {
+	// TCP connection
+	if socket.Conn != nil {
+		tcpConn, ok := socket.Conn.(*net.TCPConn)
+
+		if !ok {
+			return -1, nil, errors.NewRTError(
+				posStart, posEnd,
+				shared.Errors.InvalidValue("Socket connection is not TCP"),
+				ctx,
+			)
+		}
+
+		file, err := tcpConn.File()
+
+		if err != nil {
+			return -1, nil, errors.NewRTError(
+				posStart, posEnd,
+				shared.Errors.InvalidValue("Cannot get file descriptor from TCP connection"),
+				ctx,
+			)
+		}
+
+		return int(file.Fd()), file, nil
+	}
+
+	// UDP connection
+	if socket.UdpConn != nil {
+		file, err := socket.UdpConn.File()
+
+		if err != nil {
+			return -1, nil, errors.NewRTError(
+				posStart, posEnd,
+				shared.Errors.InvalidValue("Cannot get file descriptor from UDP connection"),
+				ctx,
+			)
+		}
+
+		return int(file.Fd()), file, nil
+	}
+
+	// TCP listener
+	if socket.Listener != nil {
+		if !forRead {
+			// Cannot write to listener
+			return -1, nil, errors.NewRTError(
+				posStart, posEnd,
+				shared.Errors.InvalidValue("Cannot write to TCP listener socket"),
+				ctx,
+			)
+		}
+
+		tcpListener, ok := socket.Listener.(*net.TCPListener)
+
+		if !ok {
+			return -1, nil, errors.NewRTError(
+				posStart, posEnd,
+				shared.Errors.InvalidValue("Listener is not TCP"),
+				ctx,
+			)
+		}
+
+		file, err := tcpListener.File()
+
+		if err != nil {
+			return -1, nil, errors.NewRTError(
+				posStart, posEnd,
+				shared.Errors.InvalidValue("Cannot get file descriptor from TCP listener"),
+				ctx,
+			)
+		}
+
+		return int(file.Fd()), file, nil
+	}
+
+	// No valid connection
+	return -1, nil, errors.NewRTError(
+		posStart, posEnd,
+		shared.Errors.InvalidValue("Socket handle has no valid connection"),
+		ctx,
+	)
+}
+
+func extractProcessFD(proc *shared.ProcessHandle, forRead bool, posStart, posEnd *errors.Position, ctx interface{}) (int, error) {
+	if forRead {
+		// For reading, use stdout
+		if proc.Stdout == nil {
+			return -1, errors.NewRTError(
+				posStart, posEnd,
+				shared.Errors.InvalidValue("Process handle has no stdout"),
+				ctx,
+			)
+		}
+
+		stdoutFile, ok := proc.Stdout.(*os.File)
+
+		if !ok {
+			return -1, errors.NewRTError(
+				posStart, posEnd,
+				shared.Errors.InvalidValue("Process handle stdout is not a file"),
+				ctx,
+			)
+		}
+
+		return int(stdoutFile.Fd()), nil
+	} else {
+		// For writing, use stdin
+		if proc.Stdin == nil {
+			return -1, errors.NewRTError(
+				posStart, posEnd,
+				shared.Errors.InvalidValue("Process handle has no stdin"),
+				ctx,
+			)
+		}
+
+		stdinFile, ok := proc.Stdin.(*os.File)
+
+		if !ok {
+			return -1, errors.NewRTError(
+				posStart, posEnd,
+				shared.Errors.InvalidValue("Process handle stdin is not a file"),
+				ctx,
+			)
+		}
+
+		return int(stdinFile.Fd()), nil
+	}
+}
+
+func processFdList(handlesList *values.List, forRead bool, argPos int, dupFiles *[]*os.File, args []values.Value, ctx interface{}) ([]fdInfo, *values.RuntimeResult) {
+	res := values.NewRuntimeResult()
+	var fdInfos []fdInfo
+
+	for _, elem := range handlesList.Elements {
+
+		handleNum, ok := elem.(*values.Number)
+
+		if !ok {
+			posStart, posEnd := args[argPos].GetPos()
+			errorMsg := "All readFds must be numbers (file handles)"
+
+			if !forRead {
+				errorMsg = "All writeFds must be numbers (file handles)"
+			}
+
+			return nil, res.Failure(errors.NewRTError(
+				posStart, posEnd,
+				shared.Errors.InvalidValue(errorMsg),
+				ctx,
+			))
+		}
+
+		handle := int(handleNum.Value)
+		posStart, posEnd := args[argPos].GetPos()
+
+		fd, err := extractFD(handle, forRead, dupFiles, posStart, posEnd, ctx)
+
+		if err != nil {
+			return nil, res.Failure(err)
+		}
+
+		fdInfos = append(fdInfos, fdInfo{fd: fd, handle: handle})
+	}
+
+	return fdInfos, res.Success(nil)
+}
+
 func selectFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
@@ -72,8 +316,6 @@ func selectFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 	timeout := time.Duration(timeoutNum.Value) * time.Millisecond
 
-	var readFds []int
-	var readHandles []int
 	var dupFiles []*os.File // Track duplicated files to close after select
 
 	// Ensure duplicated files are closed at function exit
@@ -83,311 +325,18 @@ func selectFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 		}
 	}()
 
-	for _, elem := range readFdsList.Elements {
-		handleNum, ok := elem.(*values.Number)
+	// Process read FDs
+	readFdInfos, result := processFdList(readFdsList, true, 0, &dupFiles, args, ctx)
 
-		if !ok {
-			posStart, posEnd := args[0].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.InvalidValue("All readFds must be numbers (file handles)"),
-				ctx,
-			))
-		}
-
-		handle := int(handleNum.Value)
-
-		// Try regular file handle first
-		file, exists := shared.GetFileHandle(handle)
-
-		if exists {
-			fd := int(file.Fd())
-			if fd >= unix.FD_SETSIZE {
-				posStart, posEnd := args[0].GetPos()
-
-				return res.Failure(errors.NewRTError(
-					posStart, posEnd,
-					shared.Errors.InvalidValue("File descriptor exceeds system limit"),
-					ctx,
-				))
-			}
-
-			readFds = append(readFds, fd)
-			readHandles = append(readHandles, handle)
-		} else {
-			// Try socket handle
-			socket, socketExists := shared.GetSocketHandle(handle)
-			if socketExists {
-				var fd int
-				if socket.Conn != nil {
-					// TCP connection
-					if tcpConn, ok := socket.Conn.(*net.TCPConn); ok {
-						if file, err := tcpConn.File(); err == nil {
-							dupFiles = append(dupFiles, file) // Track for later cleanup
-							fd = int(file.Fd())
-						} else {
-							posStart, posEnd := args[0].GetPos()
-
-							return res.Failure(errors.NewRTError(
-								posStart, posEnd,
-								shared.Errors.InvalidValue("Cannot get file descriptor from TCP connection"),
-								ctx,
-							))
-						}
-					} else {
-						posStart, posEnd := args[0].GetPos()
-
-						return res.Failure(errors.NewRTError(
-							posStart, posEnd,
-							shared.Errors.InvalidValue("Socket connection is not TCP"),
-							ctx,
-						))
-					}
-				} else if socket.UdpConn != nil {
-					// UDP connection
-					if file, err := socket.UdpConn.File(); err == nil {
-						dupFiles = append(dupFiles, file) // Track for later cleanup
-						fd = int(file.Fd())
-					} else {
-						posStart, posEnd := args[0].GetPos()
-
-						return res.Failure(errors.NewRTError(
-							posStart, posEnd,
-							shared.Errors.InvalidValue("Cannot get file descriptor from UDP connection"),
-							ctx,
-						))
-					}
-				} else if socket.Listener != nil {
-					// TCP listener
-					if tcpListener, ok := socket.Listener.(*net.TCPListener); ok {
-						if file, err := tcpListener.File(); err == nil {
-							dupFiles = append(dupFiles, file) // Track for later cleanup
-							fd = int(file.Fd())
-						} else {
-							posStart, posEnd := args[0].GetPos()
-
-							return res.Failure(errors.NewRTError(
-								posStart, posEnd,
-								shared.Errors.InvalidValue("Cannot get file descriptor from TCP listener"),
-								ctx,
-							))
-						}
-					} else {
-						posStart, posEnd := args[0].GetPos()
-
-						return res.Failure(errors.NewRTError(
-							posStart, posEnd,
-							shared.Errors.InvalidValue("Listener is not TCP"),
-							ctx,
-						))
-					}
-				} else {
-					posStart, posEnd := args[0].GetPos()
-
-					return res.Failure(errors.NewRTError(
-						posStart, posEnd,
-						shared.Errors.InvalidValue("Socket handle has no valid connection"),
-						ctx,
-					))
-				}
-
-				if fd >= unix.FD_SETSIZE {
-					posStart, posEnd := args[0].GetPos()
-
-					return res.Failure(errors.NewRTError(
-						posStart, posEnd,
-						shared.Errors.InvalidValue("File descriptor exceeds system limit"),
-						ctx,
-					))
-				}
-
-				readFds = append(readFds, fd)
-				readHandles = append(readHandles, handle)
-			} else {
-				// Try process handle
-				proc, procExists := shared.GetProcessHandle(handle)
-
-				if procExists && proc.Stdout != nil {
-					// For process handles, we want to read from stdout
-					if stdoutFile, ok := proc.Stdout.(*os.File); ok {
-						fd := int(stdoutFile.Fd())
-
-						if fd >= unix.FD_SETSIZE {
-							posStart, posEnd := args[0].GetPos()
-
-							return res.Failure(errors.NewRTError(
-								posStart, posEnd,
-								shared.Errors.InvalidValue("File descriptor exceeds system limit"),
-								ctx,
-							))
-						}
-
-						readFds = append(readFds, fd)
-						readHandles = append(readHandles, handle)
-					} else {
-						posStart, posEnd := args[0].GetPos()
-
-						return res.Failure(errors.NewRTError(
-							posStart, posEnd,
-							shared.Errors.InvalidValue("Process handle stdout is not a file"),
-							ctx,
-						))
-					}
-				} else {
-					posStart, posEnd := args[0].GetPos()
-
-					return res.Failure(errors.NewRTError(
-						posStart, posEnd,
-						shared.Errors.InvalidValue("Invalid file, socket, or process handle in readFds"),
-						ctx,
-					))
-				}
-			}
-		}
+	if result.Error != nil {
+		return result
 	}
 
-	var writeFds []int
-	var writeHandles []int
+	// Process write FDs
+	writeFdInfos, result := processFdList(writeFdsList, false, 1, &dupFiles, args, ctx)
 
-	for _, elem := range writeFdsList.Elements {
-		handleNum, ok := elem.(*values.Number)
-		if !ok {
-			posStart, posEnd := args[1].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.InvalidValue("All writeFds must be numbers (file handles)"),
-				ctx,
-			))
-		}
-
-		handle := int(handleNum.Value)
-
-		// Try regular file handle first
-		file, exists := shared.GetFileHandle(handle)
-
-		if exists {
-			fd := int(file.Fd())
-			if fd >= unix.FD_SETSIZE {
-				posStart, posEnd := args[1].GetPos()
-
-				return res.Failure(errors.NewRTError(
-					posStart, posEnd,
-					shared.Errors.InvalidValue("File descriptor exceeds system limit"),
-					ctx,
-				))
-			}
-
-			writeFds = append(writeFds, fd)
-			writeHandles = append(writeHandles, handle)
-		} else {
-			// Try socket handle
-			socket, socketExists := shared.GetSocketHandle(handle)
-
-			if socketExists {
-				var fd int
-				if socket.Conn != nil {
-					// TCP connection
-					if tcpConn, ok := socket.Conn.(*net.TCPConn); ok {
-						if file, err := tcpConn.File(); err == nil {
-							dupFiles = append(dupFiles, file) // Track for later cleanup
-							fd = int(file.Fd())
-						} else {
-							posStart, posEnd := args[1].GetPos()
-
-							return res.Failure(errors.NewRTError(
-								posStart, posEnd,
-								shared.Errors.InvalidValue("Cannot get file descriptor from TCP connection"),
-								ctx,
-							))
-						}
-					} else {
-						posStart, posEnd := args[1].GetPos()
-
-						return res.Failure(errors.NewRTError(
-							posStart, posEnd,
-							shared.Errors.InvalidValue("Socket connection is not TCP"),
-							ctx,
-						))
-					}
-				} else if socket.UdpConn != nil {
-					// UDP connection
-					if file, err := socket.UdpConn.File(); err == nil {
-						dupFiles = append(dupFiles, file) // Track for later cleanup
-						fd = int(file.Fd())
-					} else {
-						posStart, posEnd := args[1].GetPos()
-
-						return res.Failure(errors.NewRTError(
-							posStart, posEnd,
-							shared.Errors.InvalidValue("Cannot get file descriptor from UDP connection"),
-							ctx,
-						))
-					}
-				} else {
-					// TCP listeners cannot be written to
-					posStart, posEnd := args[1].GetPos()
-
-					return res.Failure(errors.NewRTError(
-						posStart, posEnd,
-						shared.Errors.InvalidValue("Cannot write to TCP listener socket"),
-						ctx,
-					))
-				}
-
-				if fd >= unix.FD_SETSIZE {
-					posStart, posEnd := args[1].GetPos()
-
-					return res.Failure(errors.NewRTError(
-						posStart, posEnd,
-						shared.Errors.InvalidValue("File descriptor exceeds system limit"),
-						ctx,
-					))
-				}
-
-				writeFds = append(writeFds, fd)
-				writeHandles = append(writeHandles, handle)
-			} else {
-				// Try process handle
-				proc, procExists := shared.GetProcessHandle(handle)
-
-				if procExists && proc.Stdin != nil {
-					// For process handles, we want to write to stdin
-					if stdinFile, ok := proc.Stdin.(*os.File); ok {
-						fd := int(stdinFile.Fd())
-
-						if fd >= unix.FD_SETSIZE {
-							posStart, posEnd := args[1].GetPos()
-							return res.Failure(errors.NewRTError(
-								posStart, posEnd,
-								shared.Errors.InvalidValue("File descriptor exceeds system limit"),
-								ctx,
-							))
-						}
-
-						writeFds = append(writeFds, fd)
-						writeHandles = append(writeHandles, handle)
-					} else {
-						posStart, posEnd := args[1].GetPos()
-
-						return res.Failure(errors.NewRTError(
-							posStart, posEnd,
-							shared.Errors.InvalidValue("Process handle stdin is not a file"),
-							ctx,
-						))
-					}
-				} else {
-					posStart, posEnd := args[1].GetPos()
-
-					return res.Failure(errors.NewRTError(
-						posStart, posEnd,
-						shared.Errors.InvalidValue("Invalid file, socket, or process handle in writeFds"),
-						ctx,
-					))
-				}
-			}
-		}
+	if result.Error != nil {
+		return result
 	}
 
 	// Build fd_sets using proper system calls
@@ -398,19 +347,19 @@ func selectFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 	readFdSet.Zero()
 	writeFdSet.Zero()
 
-	for _, fd := range readFds {
-		readFdSet.Set(fd)
+	for _, info := range readFdInfos {
+		readFdSet.Set(info.fd)
 
-		if fd > maxFd {
-			maxFd = fd
+		if info.fd > maxFd {
+			maxFd = info.fd
 		}
 	}
 
-	for _, fd := range writeFds {
-		writeFdSet.Set(fd)
+	for _, info := range writeFdInfos {
+		writeFdSet.Set(info.fd)
 
-		if fd > maxFd {
-			maxFd = fd
+		if info.fd > maxFd {
+			maxFd = info.fd
 		}
 	}
 
@@ -424,7 +373,7 @@ func selectFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 		}
 	}
 
-	// Call select syscall using unix package
+	// Call select
 	n, err := unix.Select(maxFd+1, &readFdSet, &writeFdSet, nil, tv)
 
 	if err != nil {
@@ -439,15 +388,15 @@ func selectFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 	// Check which handles are ready
 	var readyHandles []values.Value
 
-	for i, fd := range readFds {
-		if readFdSet.IsSet(fd) {
-			readyHandles = append(readyHandles, values.NewNumber(float64(readHandles[i])))
+	for _, info := range readFdInfos {
+		if readFdSet.IsSet(info.fd) {
+			readyHandles = append(readyHandles, values.NewNumber(float64(info.handle)).SetContext(ctx))
 		}
 	}
 
-	for i, fd := range writeFds {
-		if writeFdSet.IsSet(fd) {
-			readyHandles = append(readyHandles, values.NewNumber(float64(writeHandles[i])))
+	for _, info := range writeFdInfos {
+		if writeFdSet.IsSet(info.fd) {
+			readyHandles = append(readyHandles, values.NewNumber(float64(info.handle)).SetContext(ctx))
 		}
 	}
 
