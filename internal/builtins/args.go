@@ -14,7 +14,6 @@ import (
 
 var globalArgs []string
 
-// SetGlobalArgs sets the command line arguments for the args() function
 func SetGlobalArgs(arguments []string) {
 	globalArgs = arguments
 }

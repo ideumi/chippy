@@ -96,17 +96,17 @@ func statFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 	}
 
 	statElements := []values.Value{
-		values.NewNumber(float64(fileInfo.Size())),           // size
-		values.NewNumber(float64(fileInfo.ModTime().Unix())), // mtime
-		values.NewNumber(float64(fileInfo.ModTime().Unix())), // atime (Go doesn't expose separately)
-		values.NewNumber(float64(fileInfo.ModTime().Unix())), // ctime (Go doesn't expose separately)
-		values.NewNumber(float64(fileInfo.Mode())),           // mode (permissions)
-		values.NewNumber(uid),                                // uid
-		values.NewNumber(gid),                                // gid
-		values.NewNumber(nlink),                              // nlink
-		values.NewNumber(ino),                                // inode
-		values.NewNumber(dev),                                // device
-		values.NewString(fileType),                           // type
+		values.NewNumber(float64(fileInfo.Size())).SetContext(ctx),           // size
+		values.NewNumber(float64(fileInfo.ModTime().Unix())).SetContext(ctx), // mtime
+		values.NewNumber(float64(fileInfo.ModTime().Unix())).SetContext(ctx), // atime (Go doesn't expose separately)
+		values.NewNumber(float64(fileInfo.ModTime().Unix())).SetContext(ctx), // ctime (Go doesn't expose separately)
+		values.NewNumber(float64(fileInfo.Mode())).SetContext(ctx),           // mode (permissions)
+		values.NewNumber(uid).SetContext(ctx),                                // uid
+		values.NewNumber(gid).SetContext(ctx),                                // gid
+		values.NewNumber(nlink).SetContext(ctx),                              // nlink
+		values.NewNumber(ino).SetContext(ctx),                                // inode
+		values.NewNumber(dev).SetContext(ctx),                                // device
+		values.NewString(fileType).SetContext(ctx),                           // type
 	}
 
 	result := values.NewList(statElements)

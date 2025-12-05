@@ -20,7 +20,7 @@ const (
 	LETTERS        = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	LETTERS_DIGITS = LETTERS + DIGITS
 
-	FILE_EXT_PROG = ".chp"
+	FILE_EXT_PROG   = ".chp"
 	FILE_EXT_HEADER = ".chh"
 
 	STR_LPLVR = "1.0.5"

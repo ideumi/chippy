@@ -72,7 +72,7 @@ func splitFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 	elements := make([]values.Value, len(parts))
 
 	for i, part := range parts {
-		elements[i] = values.NewString(part)
+		elements[i] = values.NewString(part).SetContext(ctx)
 	}
 
 	result := values.NewList(elements)
