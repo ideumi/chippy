@@ -78,12 +78,10 @@ func GetBuiltins() map[string]*values.BuiltInFunction {
 		"saccept": values.NewBuiltInFunction("saccept", sacceptFunction),
 
 		// Processes
-		"popen":    values.NewBuiltInFunction("popen", popenFunction),
-		"pclose":   values.NewBuiltInFunction("pclose", pcloseFunction),
-		"kill":     values.NewBuiltInFunction("kill", killFunction),
-		"signal":   values.NewBuiltInFunction("signal", signalFunction),
-		"unsignal": values.NewBuiltInFunction("unsignal", unsignalFunction),
-		"exec":     values.NewBuiltInFunction("exec", execFunction),
+		"popen":  values.NewBuiltInFunction("popen", popenFunction),
+		"pclose": values.NewBuiltInFunction("pclose", pcloseFunction),
+		"kill":   values.NewBuiltInFunction("kill", killFunction),
+		"exec":   values.NewBuiltInFunction("exec", execFunction),
 
 		// Randomness
 		"rand": values.NewBuiltInFunction("rand", randFunction),
@@ -108,7 +106,6 @@ func GetBuiltins() map[string]*values.BuiltInFunction {
 		"getuid": values.NewBuiltInFunction("getuid", getuidFunction),
 		"time":   values.NewBuiltInFunction("time", timeFunction),
 		"sleep":  values.NewBuiltInFunction("sleep", sleepFunction),
-		"alarm":  values.NewBuiltInFunction("alarm", alarmFunction),
 		"getch":  values.NewBuiltInFunction("getch", getchFunction),
 	}
 }

@@ -1,6 +1,6 @@
 # ChipLang
 
-ChipLang (Chipmunk language) is an interpreted scripting / programming language project written in Go, it has the goal of creating a simple, modular, low profile, understandable and hackable programming language for UNIX system scripting and tooling that would be hard to write, maintain, architect and deploy in shell.
+ChipLang (Chipmunk language) is an interpreted scripting / programming language project written in Go, it has the goal of creating a simple, modular, low profile, understandable and hackable programming language for scripting and tooling that would be hard to write, maintain, architect and deploy in shell.
 
 I aim to make ChipLang maintain a clean separation between builtins and libraries where possible. Builtins provide fundamental primitives for common operations that require performance or cannot be implemented cleanly in Chip itself. The native core library (`lib/`) abstracts these primitives for convenience. The codebase is to stay simple and accessible on both the Go and Chip sides.
 
@@ -38,8 +38,7 @@ Println("Hello World");
 - File system operations (stat, chmod, symlinks, etc.)
 - Directory traversal and file metadata
 - Environment variable management
-- Process control and signal handling
-- System information and process control
+- Process control
 - Type introspection and conversion
 - Low-level string and byte operations
 - ....
