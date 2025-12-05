@@ -31,16 +31,18 @@ func main() {
 
 	// Handle help flag
 	if len(args) > 0 && (args[0] == "-h" || args[0] == "--help") {
-		showHelp("chippy")
+		showHelp("chippy", "")
 		return
 	}
 
 	// Handle doc command
 	if len(args) > 0 && args[0] == "doc" {
 		if len(args) == 1 {
-			showHelp("")
+			showHelp("", "")
+		} else if len(args) == 2 {
+			showHelp(args[1], "")
 		} else {
-			showHelp(args[1])
+			showHelp(args[1], args[2])
 		}
 		return
 	}

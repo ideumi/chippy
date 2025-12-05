@@ -9,7 +9,7 @@ package constants
 import "runtime"
 
 const (
-	VERSION_DATE = "2025-11-23"
+	VERSION_DATE = "2025-12-05"
 	HIST_FILE    = ".ChipLangHistory"
 
 	RR_CONTEXT_DISPLAY_NAME     = "<ChipLangProgram>"
@@ -20,7 +20,10 @@ const (
 	LETTERS        = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	LETTERS_DIGITS = LETTERS + DIGITS
 
-	STR_LPLVR = "1.0.4"
+	FILE_EXT_PROG = ".chp"
+	FILE_EXT_HEADER = ".chh"
+
+	STR_LPLVR = "1.0.5"
 	STR_LPLCN = "pardalote"
 	STR_LPLOS = runtime.GOOS
 	STR_LPLAR = runtime.GOARCH

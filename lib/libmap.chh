@@ -3,10 +3,10 @@
 # corelib - libmap.chh
 #
 
-# func MapIsValid(map)
-# V-1.0.0 (2025-10-15)
-#
-# Determines if map is a valid map.
+#@ <MapIsValid(map)>
+#@ V-1.0.0 (2025-10-15)
+#@
+#@ Determines if ''map'' is a valid map.
 
 func MapIsValid(map)
 {
@@ -21,20 +21,20 @@ func MapIsValid(map)
 	return true;
 }
 
-# func MapNew()
-# V-1.0.0 (2025-10-15)
-#
-# Creates a new empty map.
+#@ <MapNew()>
+#@ V-1.0.0 (2025-10-15)
+#@
+#@ Creates a new empty map.
 
 func MapNew()
 {
 	return ["map"];
 }
 
-# func MapInit(keys)
-# V-1.0.0 (2025-10-15)
-#
-# Creates a new map with all keys initialized to null.
+#@ <MapInit(keys)>
+#@ V-1.0.0 (2025-10-15)
+#@
+#@ Creates a new map with all ''keys'' initialized to ''null''.
 
 func MapInit(keys)
 {
@@ -52,10 +52,10 @@ func MapInit(keys)
 	return map;
 }
 
-# func MapSet(map, key, value)
-# V-1.0.0 (2025-10-15)
-#
-# Sets or updates the value for key in map.
+#@ <MapSet(map, key, value)>
+#@ V-1.0.0 (2025-10-15)
+#@
+#@ Sets or updates the ''value'' for ''key'' in ''map''.
 
 func MapSet(map, key, value)
 {
@@ -74,10 +74,10 @@ func MapSet(map, key, value)
 	return append(map, [key, value]);
 }
 
-# func MapGet(map, key)
-# V-1.0.0 (2025-10-15)
-#
-# Gets the value with key from map.
+#@ <MapGet(map, key)>
+#@ V-1.0.0 (2025-10-15)
+#@
+#@ Gets the value with ''key'' from ''map''.
 
 func MapGet(map, key)
 {
@@ -96,10 +96,10 @@ func MapGet(map, key)
 	return err;
 }
 
-# func MapHas(map, key)
-# V-1.0.0 (2025-10-15)
-#
-# Checks if map contains key.
+#@ <MapHas(map, key)>
+#@ V-1.0.0 (2025-10-15)
+#@
+#@ Checks if ''map'' contains ''key''.
 
 func MapHas(map, key)
 {
@@ -118,10 +118,10 @@ func MapHas(map, key)
 	return false;
 }
 
-# func MapRemove(map, key)
-# V-1.0.0 (2025-10-15)
-#
-# Removes the key-value pair with key from map.
+#@ <MapRemove(map, key)>
+#@ V-1.0.0 (2025-10-15)
+#@
+#@ Removes the key-value pair with ''key'' from ''map''.
 
 func MapRemove(map, key)
 {
@@ -140,10 +140,10 @@ func MapRemove(map, key)
 	return map;
 }
 
-# func MapKeys(map)
-# V-1.0.0 (2025-10-15)
-#
-# Returns a list of all keys in map.
+#@ <MapKeys(map)>
+#@ V-1.0.0 (2025-10-15)
+#@
+#@ Returns a list of all keys in ''map''.
 
 func MapKeys(map)
 {
@@ -161,10 +161,10 @@ func MapKeys(map)
 	return keys;
 }
 
-# func MapValues(map)
-# V-1.0.0 (2025-10-15)
-#
-# Returns a list of all values in map.
+#@ <MapValues(map)>
+#@ V-1.0.0 (2025-10-15)
+#@
+#@ Returns a list of all values in ''map''.
 
 func MapValues(map)
 {
@@ -182,10 +182,10 @@ func MapValues(map)
 	return values;
 }
 
-# func MapLen(map)
-# V-1.0.0 (2025-10-15)
-#
-# Returns the number of key-value pairs in the map.
+#@ <MapLen(map)>
+#@ V-1.0.0 (2025-10-15)
+#@
+#@ Returns the number of key-value pairs in the map.
 
 func MapLen(map)
 {
@@ -194,12 +194,12 @@ func MapLen(map)
 	return len(map) - 1;
 }
 
-# func MapMerge(map1, map2)
-# V-1.0.0 (2025-10-15)
-#
-# Merges map1 and map2.
-# If both maps contain the same key, the value from
-# map2 takes precedence.
+#@ <MapMerge(map1, map2)>
+#@ V-1.0.0 (2025-10-15)
+#@
+#@ Merges ''map1'' and ''map2''.
+#@ If both maps contain the same key, the value from
+#@ ''map2'' takes precedence.
 
 func MapMerge(map1, map2)
 {

@@ -3,11 +3,11 @@
 # corelib - librandom.chh
 #
 
-# func RandomInt(min, max)
-# V-1.0.0 (2025-09-25)
-#
-# Returns a random integer in the range min to max, err
-# on failure.
+#@ <RandomInt(min, max)>
+#@ V-1.0.0 (2025-09-25)
+#@
+#@ Returns a random integer in the range ''min'' to ''max'', ''err''
+#@ on failure.
 
 func RandomInt(min, max)
 {
@@ -29,11 +29,11 @@ func RandomInt(min, max)
 	}
 }
 
-# func RandomFloat(min, max)
-# V-1.0.0 (2025-09-25)
-#
-# Generates a float using 4 bytes of random data in the
-# range min to max, err on failure.
+#@ <RandomFloat(min, max)>
+#@ V-1.0.0 (2025-09-25)
+#@
+#@ Generates a float using 4 bytes of random data in the
+#@ range ''min'' to ''max'', ''err'' on failure.
 
 func RandomFloat(min, max)
 {
@@ -49,10 +49,10 @@ func RandomFloat(min, max)
 	return min + fraction * (max - min);
 }
 
-# func RandomElement(elements)
-# V-1.0.0 (2025-09-25)
-#
-# Returns a random element from elements, err on failure.
+#@ <RandomElement(elements)>
+#@ V-1.0.0 (2025-09-25)
+#@
+#@ Returns a random element from ''elements'', ''err'' on failure.
 
 func RandomElement(elements)
 {
@@ -61,10 +61,10 @@ func RandomElement(elements)
 	return elements[RandomInt(1, len(elements))];
 }
 
-# func RandomShuffle(elements)
-# V-1.0.0 (2025-09-28)
-#
-# Shuffles elements in random order and returns it.
+#@ <RandomShuffle(elements)>
+#@ V-1.0.0 (2025-09-28)
+#@
+#@ Shuffles ''elements'' in random order and returns it.
 
 func RandomShuffle(elements)
 {
@@ -84,11 +84,11 @@ func RandomShuffle(elements)
 	return elements;
 }
 
-# func RandomString(length, chars)
-# V-1.0.0 (2025-09-28)
-#
-# Creates a random string of length with elements from
-# chars and returns it, err on failure.
+#@ <RandomString(length, chars)>
+#@ V-1.0.0 (2025-09-28)
+#@
+#@ Creates a random string of ''length'' with elements from
+#@ ''chars'' and returns it, ''err'' on failure.
 
 func RandomString(length, chars)
 {

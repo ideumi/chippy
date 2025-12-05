@@ -18,7 +18,19 @@ const (
 
 	// Renderer constants
 
+	CODE_BLOCK_DELIMITER = "'''"
+	INLINE_CODE_MARKER   = "''"
+	BOLD_MARKER          = "*"
+
 	CODE_LINE_START = 1
 	COLUMN_WIDTH    = 20
 	NUM_COLUMNS     = 3
+
+	// Symbol documentation constants
+
+	DOC_COMMENT_PREFIX = "#@"
+	SYMBOL_DECL_OPEN   = "<"
+	SYMBOL_DECL_CLOSE  = ">"
+
+	SYMBOL_FILTER_ALL = "all"
 )

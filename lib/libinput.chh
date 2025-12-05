@@ -5,23 +5,23 @@
 
 load("libhandles.chh");
 
-# STTYOFFECHO
-# (2025-08-13)
-# Command to disable terminal echo for InputPw().
+#@ <STTYOFFECHO>
+#@ (2025-08-13)
+#@ Command to disable terminal echo for ''InputPw()''.
 
 var STTYOFFECHO = "stty -echo < /dev/tty";
 
-# STTYONECHO
-# (2025-08-13)
-# Command to re-enable terminal echo for InputPw().
+#@ <STTYONECHO>
+#@ (2025-08-13)
+#@ Command to re-enable terminal echo for ''InputPw()''.
 
 var STTYONECHO = "stty echo < /dev/tty";
 
-# func Input()
-# V-1.0.0 (2025-08-12)
-#
-# Reads STDIN until a newline byte is encountered and
-# returns the data in UTF-8 text.
+#@ <Input()>
+#@ V-1.0.0 (2025-08-12)
+#@
+#@ Reads STDIN until a newline byte is encountered and
+#@ returns the data in UTF-8 text.
 
 func Input()
 {
@@ -44,11 +44,11 @@ func Input()
 	return unpack(pack(result));
 }
 
-# func InputPw()
-# V-1.0.0 (2025-08-13)
-#
-# Reads STDIN until a newline byte is encountered without echoing
-# characters. Returns the data in UTF-8 text.
+#@ <InputPw()>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Reads STDIN until a newline byte is encountered without echoing
+#@ characters. Returns the data in UTF-8 text.
 
 func InputPw()
 {

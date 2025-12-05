@@ -16,10 +16,10 @@ Some things i plan to still accomplish in 1.0.x:
   - Default plugins:
     - Move some existing specialized builtins to plugins
 
-- `chippy check` to parse a file for syntax errors
-  - Integrated in the makefile for `lib/` and `misc/`
+- ~~`chippy check` to parse a file for syntax errors~~
+  - ~~Integrated in the makefile for `lib/` and `misc/`~~
 
-- Expand `chippy doc` to also be able to be ran on `.chp` and `.chh` files to get an overview via comments.
+- ~~Expand `chippy doc` to also be able to be ran on `.chp` and `.chh` files to get an overview via comments.~~
   
 - Expand the corelib
 

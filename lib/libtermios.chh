@@ -6,282 +6,282 @@
 load("libhandles.chh");
 load("libstrings.chh");
 
-# ESC
-# (2025-08-20)
-# Escape
+#@ <ESC>
+#@ (2025-08-20)
+#@ Escape
 
 var ESC = b[27];
 
-# CSI
-# (2025-08-20)
-# Control Sequence Introducer
+#@ <CSI>
+#@ (2025-08-20)
+#@ Control Sequence Introducer
 
 var CSI = ESC + b[91];
 
-# OSC
-# (2025-08-20)
-# Operating System Command
+#@ <OSC>
+#@ (2025-08-20)
+#@ Operating System Command
 
 var OSC = ESC + b[93];
 
-# BEL
-# (2025-08-20)
-# Bell
+#@ <BEL>
+#@ (2025-08-20)
+#@ Bell
 
 var BEL = b[7];
 
-# COLORRESET
-# (2025-08-20)
-# Reset all text attributes
+#@ <COLORRESET>
+#@ (2025-08-20)
+#@ Reset all text attributes
 
 var COLORRESET = 0;
 
-# COLORBOLD
-# (2025-08-20)
-# Bold text attribute
+#@ <COLORBOLD>
+#@ (2025-08-20)
+#@ Bold text attribute
 
 var COLORBOLD = 1;
 
-# COLORBLACK
-# (2025-08-20)
-# Black foreground color
+#@ <COLORBLACK>
+#@ (2025-08-20)
+#@ Black foreground color
 
 var COLORBLACK = 30;
 
-# COLORRED
-# (2025-08-20)
-# Red foreground color
+#@ <COLORRED>
+#@ (2025-08-20)
+#@ Red foreground color
 
 var COLORRED = 31;
 
-# COLORGREEN
-# (2025-08-20)
-# Green foreground color
+#@ <COLORGREEN>
+#@ (2025-08-20)
+#@ Green foreground color
 
 var COLORGREEN = 32;
 
-# COLORYELLOW
-# (2025-08-20)
-# Yellow foreground color
+#@ <COLORYELLOW>
+#@ (2025-08-20)
+#@ Yellow foreground color
 
 var COLORYELLOW = 33;
 
-# COLORBLUE
-# (2025-08-20)
-# Blue foreground color
+#@ <COLORBLUE>
+#@ (2025-08-20)
+#@ Blue foreground color
 
 var COLORBLUE = 34;
 
-# COLORMAGENTA
-# (2025-08-20)
-# Magenta foreground color
+#@ <COLORMAGENTA>
+#@ (2025-08-20)
+#@ Magenta foreground color
 
 var COLORMAGENTA = 35;
 
-# COLORCYAN
-# (2025-08-20)
-# Cyan foreground color
+#@ <COLORCYAN>
+#@ (2025-08-20)
+#@ Cyan foreground color
 
 var COLORCYAN = 36;
 
-# COLORWHITE
-# (2025-08-20)
-# White foreground color
+#@ <COLORWHITE>
+#@ (2025-08-20)
+#@ White foreground color
 
 var COLORWHITE = 37;
 
-# COLORBGBLACK
-# (2025-08-20)
-# Black background color
+#@ <COLORBGBLACK>
+#@ (2025-08-20)
+#@ Black background color
 
 var COLORBGBLACK = 40;
 
-# COLORBGRED
-# (2025-08-20)
-# Red background color
+#@ <COLORBGRED>
+#@ (2025-08-20)
+#@ Red background color
 
 var COLORBGRED = 41;
 
-# COLORBGGREEN
-# (2025-08-20)
-# Green background color
+#@ <COLORBGGREEN>
+#@ (2025-08-20)
+#@ Green background color
 
 var COLORBGGREEN = 42;
 
-# COLORBGYELLOW
-# (2025-08-20)
-# Yellow background color
+#@ <COLORBGYELLOW>
+#@ (2025-08-20)
+#@ Yellow background color
 
 var COLORBGYELLOW = 43;
 
-# COLORBGBLUE
-# (2025-08-20)
-# Blue background color
+#@ <COLORBGBLUE>
+#@ (2025-08-20)
+#@ Blue background color
 
 var COLORBGBLUE = 44;
 
-# COLORBGMAGENTA
-# (2025-08-20)
-# Magenta background color
+#@ <COLORBGMAGENTA>
+#@ (2025-08-20)
+#@ Magenta background color
 
 var COLORBGMAGENTA = 45;
 
-# COLORBGCYAN
-# (2025-08-20)
-# Cyan background color
+#@ <COLORBGCYAN>
+#@ (2025-08-20)
+#@ Cyan background color
 
 var COLORBGCYAN = 46;
 
-# COLORBGWHITE
-# (2025-08-20)
-# White background color
+#@ <COLORBGWHITE>
+#@ (2025-08-20)
+#@ White background color
 
 var COLORBGWHITE = 47;
 
-# func SetTitle(title)
-# V-1.0.0 (2025-08-20)
-#
-# Changes the terminal session title.
+#@ <SetTitle(title)>
+#@ V-1.0.0 (2025-08-20)
+#@
+#@ Changes the terminal session title.
 
 func SetTitle(title)
 {
 	fwrite(OSC + pack(str(title)) + BEL, STDOUT);
 }
 
-# func CursorUp(n)
-# V-1.0.0 (2025-08-20)
-#
-# Moves cursor up n lines.
+#@ <CursorUp(n)>
+#@ V-1.0.0 (2025-08-20)
+#@
+#@ Moves cursor up ''n'' lines.
 
 func CursorUp(n)
 {
 	fwrite(CSI + pack(str(num(n))) + b[65], STDOUT);
 }
 
-# func CursorDown(n)
-# V-1.0.0 (2025-08-20)
-#
-# Moves cursor down n lines.
+#@ <CursorDown(n)>
+#@ V-1.0.0 (2025-08-20)
+#@
+#@ Moves cursor down ''n'' lines.
 
 func CursorDown(n)
 {
 	fwrite(CSI + pack(str(num(n))) + b[66], STDOUT);
 }
 
-# func CursorRight(n)
-# V-1.0.0 (2025-08-20)
-#
-# Moves cursor right n columns.
+#@ <CursorRight(n)>
+#@ V-1.0.0 (2025-08-20)
+#@
+#@ Moves cursor right ''n'' columns.
 
 func CursorRight(n)
 {
 	fwrite(CSI + pack(str(num(n))) + b[67], STDOUT);
 }
 
-# func CursorLeft(n)
-# V-1.0.0 (2025-08-20)
-#
-# Moves cursor left n columns.
+#@ <CursorLeft(n)>
+#@ V-1.0.0 (2025-08-20)
+#@
+#@ Moves cursor left ''n'' columns.
 
 func CursorLeft(n)
 {
 	fwrite(CSI + pack(str(num(n))) + b[68], STDOUT);
 }
 
-# func CursorTo(row, col)
-# V-1.0.1 (2025-09-28)
-#
-# Moves cursor to position row, col.
+#@ <CursorTo(row, col)>
+#@ V-1.0.1 (2025-09-28)
+#@
+#@ Moves cursor to position ''row'', ''col''.
 
 func CursorTo(row, col)
 {
 	fwrite(CSI + pack(str(num(row))) + b[59] + pack(str(num(col))) + b[72], STDOUT);
 }
 
-# func CursorToXY(x, y)
-# V-1.0.1 (2025-09-28)
-#
-# Moves cursor to position x, y.
+#@ <CursorToXY(x, y)>
+#@ V-1.0.1 (2025-09-28)
+#@
+#@ Moves cursor to position ''x'', ''y''.
 
 func CursorToXY(x, y)
 {
 	CursorTo(y, x);
 }
 
-# func SaveCursor()
-# V-1.0.0 (2025-08-20)
-#
-# Saves current cursor position.
+#@ <SaveCursor()>
+#@ V-1.0.0 (2025-08-20)
+#@
+#@ Saves current cursor position.
 
 func SaveCursor()
 {
 	fwrite(CSI + b[115], STDOUT);
 }
 
-# func RestoreCursor()
-# V-1.0.0 (2025-08-20)
-#
-# Restores saved cursor position.
+#@ <RestoreCursor()>
+#@ V-1.0.0 (2025-08-20)
+#@
+#@ Restores saved cursor position.
 
 func RestoreCursor()
 {
 	fwrite(CSI + b[117], STDOUT);
 }
 
-# func ClearScreen()
-# V-1.0.0 (2025-08-20)
-#
-# Clears the screen.
+#@ <ClearScreen()>
+#@ V-1.0.0 (2025-08-20)
+#@
+#@ Clears the screen.
 
 func ClearScreen()
 {
 	fwrite(CSI + b[50, 74], STDOUT);
 }
 
-# func ClearToEOL()
-# V-1.0.0 (2025-08-20)
-#
-# Erases from cursor to end of line.
+#@ <ClearToEOL()>
+#@ V-1.0.0 (2025-08-20)
+#@
+#@ Erases from cursor to end of line.
 
 func ClearToEOL()
 {
 	fwrite(CSI + b[75], STDOUT);
 }
 
-# func SetAttribute(mode)
-# V-1.0.0 (2025-08-20)
-#
-# Sets text attribute / color mode.
+#@ <SetAttribute(mode)>
+#@ V-1.0.0 (2025-08-20)
+#@
+#@ Sets text attribute / color mode.
 
 func SetAttribute(mode)
 {
 	fwrite(CSI + pack(str(mode)) + b[109], STDOUT);
 }
 
-# func ShowCursor()
-# V-1.0.0 (2025-08-20)
-#
-# Makes cursor visible.
+#@ <ShowCursor()>
+#@ V-1.0.0 (2025-08-20)
+#@
+#@ Makes cursor visible.
 
 func ShowCursor()
 {
 	fwrite(CSI + b[63, 50, 53, 104], STDOUT);
 }
 
-# func HideCursor()
-# V-1.0.0 (2025-08-20)
-#
-# Makes cursor invisible.
+#@ <HideCursor()>
+#@ V-1.0.0 (2025-08-20)
+#@
+#@ Makes cursor invisible.
 
 func HideCursor()
 {
 	fwrite(CSI + b[63, 50, 53, 108], STDOUT);
 }
 
-# func GetTerminalSize()
-# V-1.0.0 (2025-08-20)
-#
-# Returns terminal size [rows, columns] via stty.
+#@ <GetTerminalSize()>
+#@ V-1.0.0 (2025-08-20)
+#@
+#@ Returns terminal size ''[rows, columns]'' via stty.
 
 func GetTerminalSize()
 {

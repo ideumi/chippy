@@ -6,74 +6,74 @@
 load("libmath.chh");
 load("libtime.chh");
 
-# UNIXEPOCHYEAR
-# (2025-08-13)
-# UNIX epoch start year
+#@ <UNIXEPOCHYEAR>
+#@ (2025-08-13)
+#@ UNIX epoch start year
 
 var UNIXEPOCHYEAR = 1970;
 
-# DAYSINYEAR
-# (2025-08-13)
-# Number of days in a regular year
+#@ <DAYSINYEAR>
+#@ (2025-08-13)
+#@ Number of days in a regular year
 
 var DAYSINYEAR = 365;
 
-# DAYSINLEAPYEAR
-# (2025-08-13)
-# Number of days in a leap year
+#@ <DAYSINLEAPYEAR>
+#@ (2025-08-13)
+#@ Number of days in a leap year
 
 var DAYSINLEAPYEAR = 366;
 
-# MONTHSINYEAR
-# (2025-08-13)
-# Number of months in a year
+#@ <MONTHSINYEAR>
+#@ (2025-08-13)
+#@ Number of months in a year
 
 var MONTHSINYEAR = 12;
 
-# WEEKDAYS
-# (2025-08-13)
-# Weekday names in English
+#@ <WEEKDAYS>
+#@ (2025-08-13)
+#@ Weekday names in English
 
 var WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-# MONTHS
-# (2025-08-13)
-# Month names in English
+#@ <MONTHS>
+#@ (2025-08-13)
+#@ Month names in English
 
 var MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-# MONTHDAYS
-# (2025-08-13)
-# Days in each month (non-leap year)
+#@ <MONTHDAYS>
+#@ (2025-08-13)
+#@ Days in each month (non-leap year)
 
 var MONTHDAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
-# UNIXEPOCHWEEKDAY
-# (2025-08-16)
-# UNIX start day of week
+#@ <UNIXEPOCHWEEKDAY>
+#@ (2025-08-16)
+#@ UNIX start day of week
 
 var UNIXEPOCHWEEKDAY = 3;
 
-# TIMEZONEOFFSET
-# (2025-08-16)
-# Timezone offset in seconds from UTC
+#@ <TIMEZONEOFFSET>
+#@ (2025-08-16)
+#@ Timezone offset in seconds from UTC
 
 var TIMEZONEOFFSET = 0;
 
-# func IsLeapYear(year)
-# V-1.0.0 (2025-08-13)
-#
-# If year is a leap year, true is returned, otherwise false.
+#@ <IsLeapYear(year)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ If ''year'' is a leap year, ''true'' is returned, otherwise ''false''.
 
 func IsLeapYear(year)
 {
 	return (Mod(year, 4) == 0 and Mod(year, 100) != 0) or (Mod(year, 400) == 0);
 }
 
-# func GregorianYear(days)
-# V-1.0.0 (2025-08-13)
-#
-# Calculates year and remaining days from days.
+#@ <GregorianYear(days)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Calculates year and remaining days from ''days''.
 
 func GregorianYear(days)
 {
@@ -125,10 +125,10 @@ func GregorianYear(days)
 	return [year, remainingDays];
 }
 
-# func GregorianMonthAndDay(year, remainingDays)
-# V-1.0.0 (2025-08-13)
-#
-# Calculates month and day from remainingDays in year.
+#@ <GregorianMonthAndDay(year, remainingDays)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Calculates month and day from ''remainingDays'' in ''year''.
 
 func GregorianMonthAndDay(year, remainingDays)
 {
@@ -153,10 +153,10 @@ func GregorianMonthAndDay(year, remainingDays)
 	return [month, daysLeft + 1];
 }
 
-# func GregorianFormatTime(timestamp)
-# V-1.0.0 (2025-08-13)
-#
-# UNIX timestamp to "YYYY-MM-DD HH:MM:SS" string.
+#@ <GregorianFormatTime(timestamp)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ UNIX ''timestamp'' to "YYYY-MM-DD HH:MM:SS" string.
 
 func GregorianFormatTime(timestamp)
 {
@@ -180,10 +180,10 @@ func GregorianFormatTime(timestamp)
 	return str(year) + "-" + pad(month) + "-" + pad(day) + " " + pad(hours) + ":" + pad(minutes) + ":" + pad(seconds);
 }
 
-# func GregorianDaysInMonth(year, month)
-# V-1.0.0 (2025-08-13)
-#
-# Returns the number of days in month and year.
+#@ <GregorianDaysInMonth(year, month)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Returns the number of days in ''month'' and ''year''.
 
 func GregorianDaysInMonth(year, month)
 {
@@ -194,10 +194,10 @@ func GregorianDaysInMonth(year, month)
 	return MONTHDAYS[month];
 }
 
-# func GregorianDayOfYear(timestamp)
-# V-1.0.0 (2025-08-13)
-#
-# Returns the day of year.
+#@ <GregorianDayOfYear(timestamp)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Returns the day of year from ''timestamp''.
 
 func GregorianDayOfYear(timestamp)
 {
@@ -213,10 +213,10 @@ func GregorianDayOfYear(timestamp)
 	return remainingDays + 1;
 }
 
-# func GregorianParseTime(timestamp)
-# V-1.0.0 (2025-08-13)
-#
-# Parses timestamp to [year, month, day, hour, minute, second].
+#@ <GregorianParseTime(timestamp)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Parses ''timestamp'' to ''[year, month, day, hour, minute, second]''.
 
 func GregorianParseTime(timestamp)
 {
@@ -244,10 +244,10 @@ func GregorianParseTime(timestamp)
 	return [year, month, day, hours, minutes, seconds];
 }
 
-# func GregorianDayOfWeek(timestamp)
-# V-1.0.0 (2025-08-16)
-#
-# Returns the day of week (0 = Monday, 6 = Sunday).
+#@ <GregorianDayOfWeek(timestamp)>
+#@ V-1.0.0 (2025-08-16)
+#@
+#@ Returns the day of week from ''timestamp'' (0 = Monday, 6 = Sunday).
 
 func GregorianDayOfWeek(timestamp)
 {
@@ -260,10 +260,10 @@ func GregorianDayOfWeek(timestamp)
 	return Mod(days + UNIXEPOCHWEEKDAY, 7);
 }
 
-# func GregorianDateToTimestamp(year, month, day, hour, minute, second)
-# V-1.0.0 (2025-08-16)
-#
-# Converts Gregorian date/time to UNIX timestamp.
+#@ <GregorianDateToTimestamp(year, month, day, hour, minute, second)>
+#@ V-1.0.0 (2025-08-16)
+#@
+#@ Converts Gregorian date/time to UNIX timestamp.
 
 func GregorianDateToTimestamp(year, month, day, hour, minute, second)
 {

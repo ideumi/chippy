@@ -6,125 +6,125 @@
 load("libgregorian.chh");
 load("libfsio.chh");
 
-# STATSIZE
-# (2025-08-13)
-# File size in bytes
+#@ <STATSIZE>
+#@ (2025-08-13)
+#@ File size in bytes
 
 var STATSIZE = 1;
 
-# STATMTIME
-# (2025-08-13)
-# Last modified time (Unix timestamp)
+#@ <STATMTIME>
+#@ (2025-08-13)
+#@ Last modified time (Unix timestamp)
 
 var STATMTIME = 2;
 
-# STATATIME
-# (2025-08-13)
-# Last access time (Unix timestamp)
+#@ <STATATIME>
+#@ (2025-08-13)
+#@ Last access time (Unix timestamp)
 
 var STATATIME = 3;
 
-# STATCTIME
-# (2025-08-13)
-# Creation/change time (Unix timestamp)
+#@ <STATCTIME>
+#@ (2025-08-13)
+#@ Creation/change time (Unix timestamp)
 
 var STATCTIME = 4;
 
-# STATMODE
-# (2025-08-13)
-# File permissions/mode bits
+#@ <STATMODE>
+#@ (2025-08-13)
+#@ File permissions/mode bits
 
 var STATMODE = 5;
 
-# STATUID
-# (2025-08-13)
-# Owner user ID
+#@ <STATUID>
+#@ (2025-08-13)
+#@ Owner user ID
 
 var STATUID = 6;
 
-# STATGID
-# (2025-08-13)
-# Owner group ID
+#@ <STATGID>
+#@ (2025-08-13)
+#@ Owner group ID
 
 var STATGID = 7;
 
-# STATNLINK
-# (2025-08-13)
-# Number of hard links
+#@ <STATNLINK>
+#@ (2025-08-13)
+#@ Number of hard links
 
 var STATNLINK = 8;
 
-# STATINODE
-# (2025-08-13)
-# Inode number
+#@ <STATINODE>
+#@ (2025-08-13)
+#@ Inode number
 
 var STATINODE = 9;
 
-# STATDEVICE
-# (2025-08-13)
-# Device ID
+#@ <STATDEVICE>
+#@ (2025-08-13)
+#@ Device ID
 
 var STATDEVICE = 10;
 
-# STATTYPE
-# (2025-08-13)
-# File type string
+#@ <STATTYPE>
+#@ (2025-08-13)
+#@ File type string
 
 var STATTYPE = 11;
 
 
-# TYPEFILE
-# (2025-08-13)
-# Regular file type
+#@ <TYPEFILE>
+#@ (2025-08-13)
+#@ Regular file type
 
 var TYPEFILE = "file";
 
-# TYPEDIR
-# (2025-08-13)
-# Directory type
+#@ <TYPEDIR>
+#@ (2025-08-13)
+#@ Directory type
 
 var TYPEDIR = "dir";
 
-# TYPESYMLINK
-# (2025-08-13)
-# Symbolic link type
+#@ <TYPESYMLINK>
+#@ (2025-08-13)
+#@ Symbolic link type
 
 var TYPESYMLINK = "symlink";
 
-# TYPECHAR
-# (2025-08-13)
-# Character device type
+#@ <TYPECHAR>
+#@ (2025-08-13)
+#@ Character device type
 
 var TYPECHAR = "char";
 
-# TYPEBLOCK
-# (2025-08-13)
-# Block device type
+#@ <TYPEBLOCK>
+#@ (2025-08-13)
+#@ Block device type
 
 var TYPEBLOCK = "block";
 
-# TYPEFIFO
-# (2025-08-13)
-# Named pipe (FIFO) type
+#@ <TYPEFIFO>
+#@ (2025-08-13)
+#@ Named pipe (FIFO) type
 
 var TYPEFIFO = "fifo";
 
-# TYPESOCKET
-# (2025-08-13)
-# Socket type
+#@ <TYPESOCKET>
+#@ (2025-08-13)
+#@ Socket type
 
 var TYPESOCKET = "socket";
 
-# TYPEUNKNOWN
-# (2025-08-13)
-# Unknown file type
+#@ <TYPEUNKNOWN>
+#@ (2025-08-13)
+#@ Unknown file type
 
 var TYPEUNKNOWN = "unknown";
 
-# func StatType(statResult)
-# V-1.0.0 (2025-08-13)
-#
-# Extracts the file type from stat() result list statResult.
+#@ <StatType(statResult)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Extracts the file type from ''stat()'' result list ''statResult''.
 
 func StatType(statResult)
 {
@@ -134,11 +134,11 @@ func StatType(statResult)
 	return TYPEUNKNOWN;
 }
 
-# func PathExists(path)
-# V-1.0.0 (2025-08-13)
-#
-# Returns true if path exists (file, directory, or any other
-# type), false otherwise.
+#@ <PathExists(path)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Returns ''true'' if ''path'' exists (file, directory, or any other
+#@ type), ''false'' otherwise.
 
 func PathExists(path)
 {
@@ -147,10 +147,10 @@ func PathExists(path)
 	return type(info) == "list";
 }
 
-# func IsFile(path)
-# V-1.0.0 (2025-08-13)
-#
-# Returns true if file at path exists, false otherwise.
+#@ <IsFile(path)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Returns ''true'' if file at ''path'' exists, ''false'' otherwise.
 
 func IsFile(path)
 {
@@ -159,10 +159,10 @@ func IsFile(path)
 	return StatType(info) == TYPEFILE;
 }
 
-# func IsDir(path)
-# V-1.0.0 (2025-08-13)
-#
-# Returns true if directory at path exists, false otherwise.
+#@ <IsDir(path)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Returns ''true'' if directory at ''path'' exists, ''false'' otherwise.
 
 func IsDir(path)
 {
@@ -171,10 +171,10 @@ func IsDir(path)
 	return StatType(info) == TYPEDIR;
 }
 
-# func IsSymlink(path)
-# V-1.0.0 (2025-08-13)
-#
-# Returns true if symlink at path exists, false otherwise.
+#@ <IsSymlink(path)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Returns ''true'' if symlink at ''path'' exists, ''false'' otherwise.
 
 func IsSymlink(path)
 {
@@ -183,11 +183,11 @@ func IsSymlink(path)
 	return StatType(info) == TYPESYMLINK;
 }
 
-# func StatInfo(path)
-# V-1.0.0 (2025-08-13)
-#
-# Returns a formatted string with detailed filesystem object information
-# of the object at path, or err if path is invalid.
+#@ <StatInfo(path)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Returns a formatted string with detailed filesystem object information
+#@ of the object at ''path'', or ''err'' if ''path'' is invalid.
 
 func StatInfo(path)
 {

@@ -5,12 +5,12 @@
 
 load("libmath.chh");
 
-# func ReadFile(filename, text)
-# V-1.0.0 (2025-08-12)
-#
-# Reads all bytes of the provided file "filename" from start to finish
-# and returns either bytes or UTF-8 text depending on if text == true.
-# Returns err on failure.
+#@ <ReadFile(filename, text)>
+#@ V-1.0.0 (2025-08-12)
+#@
+#@ Reads all bytes of the provided file ''filename'' from start to finish
+#@ and returns either bytes or UTF-8 text depending on if ''text == true''.
+#@ Returns ''err'' on failure.
 
 func ReadFile(filename, text)
 {
@@ -29,11 +29,11 @@ func ReadFile(filename, text)
 	return allBytes;
 }
 
-# func ReadLines(filename)
-# V-1.0.0 (2025-11-06)
-#
-# Reads all lines from the file and returns them as a list of strings.
-# Returns err on failure.
+#@ <ReadLines(filename)>
+#@ V-1.0.0 (2025-11-06)
+#@
+#@ Reads all lines from the file and returns them as a list of strings.
+#@ Returns ''err'' on failure.
 
 func ReadLines(filename)
 {
@@ -44,13 +44,13 @@ func ReadLines(filename)
 	return split(content, "\n");
 }
 
-# func WriteFile(filename, bytesOrText, text, overwrite)
-# V-1.0.1 (2025-11-06)
-#
-# (Over)Writes the file at filename with either bytes or UTF-8 text.
-# If text == true then bytesOrText must be a UTF-8 text string, if not
-# bytesOrText must be bytes. If overwrite is true, content will be overwritten
-# not appended. Returns err on failure.
+#@ <WriteFile(filename, bytesOrText, text, overwrite)>
+#@ V-1.0.1 (2025-11-06)
+#@
+#@ (Over)Writes the file at ''filename'' with either bytes or UTF-8 text.
+#@ If ''text == true'' then ''bytesOrText'' must be a UTF-8 text string, if not
+#@ ''bytesOrText'' must be bytes. If ''overwrite'' is ''true'', content will be overwritten
+#@ not appended. Returns ''err'' on failure.
 
 func WriteFile(filename, bytesOrText, text, overwrite)
 {
@@ -81,12 +81,12 @@ func WriteFile(filename, bytesOrText, text, overwrite)
 	return fclose(handle);
 }
 
-# func WriteLines(filename, lines, overwrite)
-# V-1.0.0 (2025-11-06)
-#
-# Writes a list of lines to a file. If overwrite is true, content will
-# be overwritten not appended. Returns err on failure or if lines is
-# not a list.
+#@ <WriteLines(filename, lines, overwrite)>
+#@ V-1.0.0 (2025-11-06)
+#@
+#@ Writes a list of ''lines'' to a file. If ''overwrite'' is ''true'', content will
+#@ be overwritten not appended. Returns ''err'' on failure or if ''lines'' is
+#@ not a list.
 
 func WriteLines(filename, lines, overwrite)
 {
@@ -97,11 +97,11 @@ func WriteLines(filename, lines, overwrite)
 	return WriteFile(filename, content, true, overwrite);
 }
 
-# func CreateDir(path)
-# V-1.0.0 (2025-08-12)
-#
-# Creates a new directory with permission 755 (rwxr-xr-x), returns err on
-# failure.
+#@ <CreateDir(path)>
+#@ V-1.0.0 (2025-08-12)
+#@
+#@ Creates a new directory with permission 755 (rwxr-xr-x), returns ''err'' on
+#@ failure.
 
 func CreateDir(path)
 {
@@ -112,11 +112,11 @@ func CreateDir(path)
 	return ok;
 }
 
-# func ListDir(path)
-# V-1.0.0 (2025-08-12)
-#
-# Opens and reads contents of a directory non-recursively and returns a list
-# of file and directory names as strings. Returns err on failure.
+#@ <ListDir(path)>
+#@ V-1.0.0 (2025-08-12)
+#@
+#@ Opens and reads contents of a directory non-recursively and returns a list
+#@ of file and directory names as strings. Returns ''err'' on failure.
 
 func ListDir(path)
 {
@@ -143,10 +143,10 @@ func ListDir(path)
 	return entries;
 }
 
-# func SizeToString(bytesCount)
-# V-1.0.1 (2025-11-06)
-#
-# Formats bytes count as human-readable string with appropriate unit suffix.
+#@ <SizeToString(bytesCount)>
+#@ V-1.0.1 (2025-11-06)
+#@
+#@ Formats bytes count as human-readable string with appropriate unit suffix.
 
 func SizeToString(bytesCount)
 {

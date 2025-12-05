@@ -3,10 +3,10 @@
 # corelib - libpaths.chh
 #
 
-# func Basename(path)
-# V-1.0.0 (2025-08-13)
-#
-# Returns the filename portion of path.
+#@ <Basename(path)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Returns the filename portion of ''path''.
 
 func Basename(path)
 {
@@ -31,11 +31,11 @@ func Basename(path)
 	return substr(path, lastSlash + 1, len(path) - lastSlash);
 }
 
-# func Dirname(path)
-# V-1.0.0 (2025-08-13)
-#
-# Returns the directory portion of path or "." if no directory separator
-# found.
+#@ <Dirname(path)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Returns the directory portion of ''path'' or ''"."'' if no directory separator
+#@ found.
 
 func Dirname(path)
 {
@@ -58,10 +58,10 @@ func Dirname(path)
 	return substr(path, 1, lastSlash - 1);
 }
 
-# func JoinPath(dir, filename)
-# V-1.0.0 (2025-08-13)
-#
-# Joins a directory path and filename with proper separator handling.
+#@ <JoinPath(dir, filename)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Joins a directory path and filename with proper separator handling.
 
 func JoinPath(dir, filename)
 {
@@ -74,10 +74,10 @@ func JoinPath(dir, filename)
 	return dir + "/" + filename;
 }
 
-# func JoinPaths(pathList)
-# V-1.0.0 (2025-08-13)
-#
-# Joins multiple path components from an array into a single path.
+#@ <JoinPaths(pathList)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Joins multiple path components from an array into a single path.
 
 func JoinPaths(pathList)
 {
@@ -95,11 +95,11 @@ func JoinPaths(pathList)
 	return result;
 }
 
-# func FileExtension(filename)
-# V-1.0.0 (2025-08-13)
-#
-# Returns the file extension of filename without the dot, or empty
-# string if none.
+#@ <FileExtension(filename)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Returns the file extension of ''filename'' without the dot, or empty
+#@ string if none.
 
 func FileExtension(filename)
 {
@@ -112,10 +112,10 @@ func FileExtension(filename)
 	return parts[len(parts)];
 }
 
-# func RemoveExtension(filename)
-# V-1.0.0 (2025-08-13)
-#
-# Returns filename with the extension removed.
+#@ <RemoveExtension(filename)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Returns ''filename'' with the extension removed.
 
 func RemoveExtension(filename)
 {
@@ -138,10 +138,10 @@ func RemoveExtension(filename)
 	return result;
 }
 
-# func IsAbsolutePath(path)
-# V-1.0.0 (2025-08-13)
-#
-# Returns true if path is an absolute path, false if relative.
+#@ <IsAbsolutePath(path)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Returns ''true'' if ''path'' is an absolute path, ''false'' if relative.
 
 func IsAbsolutePath(path)
 {
@@ -154,11 +154,11 @@ func IsAbsolutePath(path)
 	return false;
 }
 
-# func AbsolutePath(path)
-# V-1.0.0 (2025-08-13)
-#
-# Converts path to an absolute path. Returns path unchanged if
-# already absolute, otherwise joins path with current directory.
+#@ <AbsolutePath(path)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Converts ''path'' to an absolute path. Returns ''path'' unchanged if
+#@ already absolute, otherwise joins ''path'' with current directory.
 
 func AbsolutePath(path)
 {

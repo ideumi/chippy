@@ -3,60 +3,60 @@
 # corelib - libtime.chh
 #
 
-# SECONDSPERMINUTE
-# (2025-08-16)
-# Number of seconds in one minute
+#@ <SECONDSPERMINUTE>
+#@ (2025-08-16)
+#@ Number of seconds in one minute
 
 var SECONDSPERMINUTE = 60;
 
-# MINUTESPERHOUR
-# (2025-08-16)
-# Number of minutes in one hour
+#@ <MINUTESPERHOUR>
+#@ (2025-08-16)
+#@ Number of minutes in one hour
 
 var MINUTESPERHOUR = 60;
 
-# HOURSPERDAY
-# (2025-08-16)
-# Number of hours in one day
+#@ <HOURSPERDAY>
+#@ (2025-08-16)
+#@ Number of hours in one day
 
 var HOURSPERDAY = 24;
 
-# SECONDSPERHOUR
-# (2025-08-16)
-# Number of seconds in one hour
+#@ <SECONDSPERHOUR>
+#@ (2025-08-16)
+#@ Number of seconds in one hour
 
 var SECONDSPERHOUR = 3600;
 
-# SECONDSPERDAY
-# (2025-08-16)
-# Number of seconds in one day
+#@ <SECONDSPERDAY>
+#@ (2025-08-16)
+#@ Number of seconds in one day
 
 var SECONDSPERDAY = 86400;
 
-# func SleepSeconds(seconds)
-# V-1.0.0 (2025-08-13)
-#
-# Sleeps for the specified seconds.
+#@ <SleepSeconds(seconds)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Sleeps for the specified ''seconds''.
 
 func SleepSeconds(seconds)
 {
 	sleep(seconds * 1000);
 }
 
-# func Elapsed(startTime)
-# V-1.0.0 (2025-08-13)
-#
-# Returns the elapsed time in seconds since startTime.
+#@ <Elapsed(startTime)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Returns the elapsed time in seconds since ''startTime''.
 
 func Elapsed(startTime)
 {
 	return time() - startTime;
 }
 
-# func WaitUntil(targetTime)
-# V-1.0.0 (2025-08-13)
-#
-# Sleeps until the system clock reaches targetTime.
+#@ <WaitUntil(targetTime)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Sleeps until the system clock reaches ''targetTime''.
 
 func WaitUntil(targetTime)
 {
@@ -69,51 +69,51 @@ func WaitUntil(targetTime)
 	}
 }
 
-# func Days(timestamp)
-# V-1.0.0 (2025-08-16)
-#
-# Returns the number of days since Unix epoch at timestamp.
+#@ <Days(timestamp)>
+#@ V-1.0.0 (2025-08-16)
+#@
+#@ Returns the number of days since Unix epoch at ''timestamp''.
 
 func Days(timestamp)
 {
 	return int(timestamp / SECONDSPERDAY);
 }
 
-# func AddDays(timestamp, days)
-# V-1.0.0 (2025-08-16)
-#
-# Adds the specified number of days to timestamp.
+#@ <AddDays(timestamp, days)>
+#@ V-1.0.0 (2025-08-16)
+#@
+#@ Adds the specified number of ''days'' to ''timestamp''.
 
 func AddDays(timestamp, days)
 {
 	return timestamp + (days * SECONDSPERDAY);
 }
 
-# func AddHours(timestamp, hours)
-# V-1.0.0 (2025-08-16)
-#
-# Adds the specified number of hours to timestamp.
+#@ <AddHours(timestamp, hours)>
+#@ V-1.0.0 (2025-08-16)
+#@
+#@ Adds the specified number of ''hours'' to ''timestamp''.
 
 func AddHours(timestamp, hours)
 {
 	return timestamp + (hours * SECONDSPERHOUR);
 }
 
-# func AddMinutes(timestamp, minutes)
-# V-1.0.0 (2025-08-16)
-#
-# Adds the specified number of minutes to timestamp.
+#@ <AddMinutes(timestamp, minutes)>
+#@ V-1.0.0 (2025-08-16)
+#@
+#@ Adds the specified number of ''minutes'' to ''timestamp''.
 
 func AddMinutes(timestamp, minutes)
 {
 	return timestamp + (minutes * SECONDSPERMINUTE);
 }
 
-# func StartOfDay(timestamp)
-# V-1.0.0 (2025-08-16)
-#
-# Returns the timestamp for the start of the day which timestamp
-# points to (00:00:00).
+#@ <StartOfDay(timestamp)>
+#@ V-1.0.0 (2025-08-16)
+#@
+#@ Returns the timestamp for the start of the day which ''timestamp''
+#@ points to (00:00:00).
 
 func StartOfDay(timestamp)
 {
@@ -122,11 +122,11 @@ func StartOfDay(timestamp)
 	return days * SECONDSPERDAY;
 }
 
-# func EndOfDay(timestamp)
-# V-1.0.0 (2025-08-16)
-#
-# Returns the timestamp for the end of the day which timestamp
-# points to (23:59:59).
+#@ <EndOfDay(timestamp)>
+#@ V-1.0.0 (2025-08-16)
+#@
+#@ Returns the timestamp for the end of the day which ''timestamp''
+#@ points to (23:59:59).
 
 func EndOfDay(timestamp)
 {

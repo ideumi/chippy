@@ -3,10 +3,10 @@
 # corelib - libstrings.chh
 #
 
-# func Contains(value, needle)
-# V-1.0.0 (2025-08-13)
-#
-# Returns true if value contains needle, false otherwise.
+#@ <Contains(value, needle)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Returns ''true'' if ''value'' contains ''needle'', ''false'' otherwise.
 
 func Contains(value, needle)
 {
@@ -14,10 +14,10 @@ func Contains(value, needle)
 	return str(indexof(value, needle)) != err;
 }
 
-# func StartsWith(value, prefix)
-# V-1.0.0 (2025-08-13)
-#
-# Returns true if value starts with the given prefix, false otherwise.
+#@ <StartsWith(value, prefix)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Returns ''true'' if ''value'' starts with the given ''prefix'', ''false'' otherwise.
 
 func StartsWith(value, prefix)
 {
@@ -26,10 +26,10 @@ func StartsWith(value, prefix)
 	return substr(value, 1, len(prefix)) == prefix;
 }
 
-# func EndsWith(value, suffix)
-# V-1.0.0 (2025-08-13)
-#
-# Returns true if value ends with the given suffix, false otherwise.
+#@ <EndsWith(value, suffix)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Returns ''true'' if ''value'' ends with the given ''suffix'', ''false'' otherwise.
 
 func EndsWith(value, suffix)
 {
@@ -40,11 +40,11 @@ func EndsWith(value, suffix)
 	return substr(value, start, len(suffix)) == suffix;
 }
 
-# func Left(value, count)
-# V-1.0.0 (2025-08-13)
-#
-# Returns the leftmost count characters from value, or
-# err if count is negative.
+#@ <Left(value, count)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Returns the leftmost ''count'' characters from ''value'', or
+#@ ''err'' if ''count'' is negative.
 
 func Left(value, count)
 {
@@ -55,11 +55,11 @@ func Left(value, count)
 	return substr(value, 1, count);
 }
 
-# func Right(value, count)
-# V-1.0.0 (2025-08-13)
-#
-# Returns the rightmost count characters from value, or
-# err if count is negative.
+#@ <Right(value, count)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Returns the rightmost ''count'' characters from ''value'', or
+#@ ''err'' if ''count'' is negative.
 
 func Right(value, count)
 {
@@ -72,10 +72,10 @@ func Right(value, count)
 	return substr(value, start, count);
 }
 
-# func Reverse(value)
-# V-1.0.0 (2025-08-13)
-#
-# Returns value with characters in reverse order.
+#@ <Reverse(value)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Returns ''value'' with characters in reverse order.
 
 func Reverse(value)
 {
@@ -91,10 +91,10 @@ func Reverse(value)
 	return result;
 }
 
-# func TrimLeft(value)
-# V-1.0.0 (2025-08-13)
-#
-# Removes whitespace characters from the beginning of value.
+#@ <TrimLeft(value)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Removes whitespace characters from the beginning of ''value''.
 
 func TrimLeft(value)
 {
@@ -115,10 +115,10 @@ func TrimLeft(value)
 	return substr(value, i, len(value) - i + 1);
 }
 
-# func TrimRight(value)
-# V-1.0.0 (2025-08-13)
-#
-# Removes whitespace characters from the end of value.
+#@ <TrimRight(value)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Removes whitespace characters from the end of ''value''.
 
 func TrimRight(value)
 {
@@ -139,21 +139,21 @@ func TrimRight(value)
 	return substr(value, 1, i);
 }
 
-# func Trim(value)
-# V-1.0.0 (2025-08-13)
-#
-# Removes whitespace characters from the beginning and end of value.
+#@ <Trim(value)>
+#@ V-1.0.0 (2025-08-13)
+#@
+#@ Removes whitespace characters from the beginning and end of ''value''.
 
 func Trim(value)
 {
 	return TrimLeft(TrimRight(value));
 }
 
-# func SplitCollapse(value, delimiter)
-# V-1.0.0 (2025-11-06)
-#
-# Splits value on delimiter and collapses repeated delimiters.
-# Returns a list of non-empty strings.
+#@ <SplitCollapse(value, delimiter)>
+#@ V-1.0.0 (2025-11-06)
+#@
+#@ Splits ''value'' on ''delimiter'' and collapses repeated delimiters.
+#@ Returns a list of non-empty strings.
 
 func SplitCollapse(value, delimiter)
 {
@@ -178,14 +178,14 @@ func SplitCollapse(value, delimiter)
 	return result;
 }
 
-# func Format(value, values)
-# V-1.0.0 (2025-10-31)
-#
-# Formats value by replacing format specifiers with values in order.
-# %s (string), %i (integer), %n (number), %% (literal %)
-#
-# Returns err if specifiers don't match values count or if format is
-# invalid.
+#@ <Format(value, values)>
+#@ V-1.0.0 (2025-10-31)
+#@
+#@ Formats ''value'' by replacing format specifiers with ''values'' in order.
+#@ ''%s'' (string), ''%i'' (integer), ''%n'' (number), ''%%'' (literal %)
+#@
+#@ Returns ''err'' if specifiers don't match values count or if format is
+#@ invalid.
 
 func Format(value, values)
 {

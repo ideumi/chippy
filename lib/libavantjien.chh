@@ -7,58 +7,58 @@ load("libmath.chh");
 load("libgregorian.chh");
 load("libtime.chh");
 
-# DAYSINAVANTMONTH
-# (2025-08-16)
-# Number of days in a month
+#@ <DAYSINAVANTMONTH>
+#@ (2025-08-16)
+#@ Number of days in a month
 
 var DAYSINAVANTMONTH = 90;
 
-# MONTHSINAVANTYEAR
-# (2025-08-16)
-# Number of months in a year
+#@ <MONTHSINAVANTYEAR>
+#@ (2025-08-16)
+#@ Number of months in a year
 
 var MONTHSINAVANTYEAR = 6;
 
-# DAYSINAVANTYEAR
-# (2025-08-16)
-# Number of days in a year
+#@ <DAYSINAVANTYEAR>
+#@ (2025-08-16)
+#@ Number of days in a year
 
 var DAYSINAVANTYEAR = 540;
 
-# AVANTMONTHS
-# (2025-08-16)
-# Month names
+#@ <AVANTMONTHS>
+#@ (2025-08-16)
+#@ Month names
 
 var AVANTMONTHS = ["Caljistjien", "Catjia", "Laureljia", "Clastobjia", "Ljiterjian", "Rnifersale"];
 
-# AVANTMONTHSSHORT
-# (2025-08-16)
-# Short month names
+#@ <AVANTMONTHSSHORT>
+#@ (2025-08-16)
+#@ Short month names
 
 var AVANTMONTHSSHORT = ["Cal", "Cat", "Lau", "Cla", "Ljit", "Rni"];
 
-# AVANTCYCLESTART
-# (2025-08-16)
-# Hour when day cycle starts
+#@ <AVANTCYCLESTART>
+#@ (2025-08-16)
+#@ Hour when day cycle starts
 
 var AVANTCYCLESTART = 8;
 
-# AVANTCYCLEEND
-# (2025-08-16)
-# Hour when day cycle ends
+#@ <AVANTCYCLEEND>
+#@ (2025-08-16)
+#@ Hour when day cycle ends
 
 var AVANTCYCLEEND = 20;
 
-# AVANTJIENPOCHTIMESTAMP
-# (2025-08-16)
-# UNIX timestamp for the Avantjien epoch
+#@ <AVANTJIENPOCHTIMESTAMP>
+#@ (2025-08-16)
+#@ UNIX timestamp for the Avantjien epoch
 
 var AVANTJIENPOCHTIMESTAMP = 1545350400;
 
-# func DaysSinceAvantjienEpoch(timestamp)
-# V-1.0.0 (2025-08-16)
-#
-# Calculates days since epoch from timestamp.
+#@ <DaysSinceAvantjienEpoch(timestamp)>
+#@ V-1.0.0 (2025-08-16)
+#@
+#@ Calculates days since epoch from ''timestamp''.
 
 func DaysSinceAvantjienEpoch(timestamp)
 {
@@ -70,10 +70,10 @@ func DaysSinceAvantjienEpoch(timestamp)
 	return int(secondsDelta / SECONDSPERDAY);
 }
 
-# func AvantjienDate(timestamp)
-# V-1.0.0 (2025-08-16)
-#
-# Calculates date [day, month, year] from timestamp.
+#@ <AvantjienDate(timestamp)>
+#@ V-1.0.0 (2025-08-16)
+#@
+#@ Calculates date ''[day, month, year]'' from ''timestamp''.
 
 func AvantjienDate(timestamp)
 {
@@ -93,40 +93,40 @@ func AvantjienDate(timestamp)
 	return [avantDay, avantMonth, avantYear];
 }
 
-# func AvantjienDay(timestamp)
-# V-1.0.0 (2025-08-16)
-#
-# Returns the current day from timestamp.
+#@ <AvantjienDay(timestamp)>
+#@ V-1.0.0 (2025-08-16)
+#@
+#@ Returns the current day from ''timestamp''.
 
 func AvantjienDay(timestamp)
 {
 	return AvantjienDate(timestamp)[1];
 }
 
-# func AvantjienMonth(timestamp)
-# V-1.0.0 (2025-08-16)
-#
-# Returns the current month from timestamp.
+#@ <AvantjienMonth(timestamp)>
+#@ V-1.0.0 (2025-08-16)
+#@
+#@ Returns the current month from ''timestamp''.
 
 func AvantjienMonth(timestamp)
 {
 	return AvantjienDate(timestamp)[2];
 }
 
-# func AvantjienYear(timestamp)
-# V-1.0.0 (2025-08-16)
-#
-# Returns the current year from timestamp.
+#@ <AvantjienYear(timestamp)>
+#@ V-1.0.0 (2025-08-16)
+#@
+#@ Returns the current year from ''timestamp''.
 
 func AvantjienYear(timestamp)
 {
 	return AvantjienDate(timestamp)[3];
 }
 
-# func AvantjienMonthName(month)
-# V-1.0.0 (2025-08-16)
-#
-# Returns the long name of month.
+#@ <AvantjienMonthName(month)>
+#@ V-1.0.0 (2025-08-16)
+#@
+#@ Returns the long name of ''month''.
 
 func AvantjienMonthName(month)
 {
@@ -135,10 +135,10 @@ func AvantjienMonthName(month)
 	return AVANTMONTHS[month];
 }
 
-# func AvantjienMonthShort(month)
-# V-1.0.0 (2025-08-16)
-#
-# Returns the short name of month.
+#@ <AvantjienMonthShort(month)>
+#@ V-1.0.0 (2025-08-16)
+#@
+#@ Returns the short name of ''month''.
 
 func AvantjienMonthShort(month)
 {
@@ -147,10 +147,10 @@ func AvantjienMonthShort(month)
 	return AVANTMONTHSSHORT[month];
 }
 
-# func AvantjienCycle(timestamp)
-# V-1.0.0 (2025-08-16)
-#
-# Returns current cycle at timestamp (1 = day, 0 = night).
+#@ <AvantjienCycle(timestamp)>
+#@ V-1.0.0 (2025-08-16)
+#@
+#@ Returns current cycle at ''timestamp'' (1 = day, 0 = night).
 
 func AvantjienCycle(timestamp)
 {
@@ -167,10 +167,10 @@ func AvantjienCycle(timestamp)
 	return 0;
 }
 
-# func AvantjienTime(timestamp)
-# V-1.0.0 (2025-08-16)
-#
-# Returns time period at timestamp. See HERA's 60.2.5, Page 3.
+#@ <AvantjienTime(timestamp)>
+#@ V-1.0.0 (2025-08-16)
+#@
+#@ Returns time period at ''timestamp''. See HERA's 60.2.5, Page 3.
 
 func AvantjienTime(timestamp)
 {
@@ -197,11 +197,11 @@ func AvantjienTime(timestamp)
 	return err;
 }
 
-# func AvantjienDateToTimestamp(aYear, aMonth, aDay, cycle, timePeriod)
-# V-1.0.0 (2025-08-16)
-#
-# Converts Avantjien date and cycle to UNIX timestamp. Normal time is
-# returned as the start time of the relevant cycle according to 60.2.5.
+#@ <AvantjienDateToTimestamp(aYear, aMonth, aDay, cycle, timePeriod)>
+#@ V-1.0.0 (2025-08-16)
+#@
+#@ Converts Avantjien date and cycle to UNIX timestamp. Normal time is
+#@ returned as the start time of the relevant cycle according to 60.2.5.
 
 func AvantjienDateToTimestamp(aYear, aMonth, aDay, cycle, timePeriod)
 {
@@ -240,10 +240,10 @@ func AvantjienDateToTimestamp(aYear, aMonth, aDay, cycle, timePeriod)
 	return baseTimestamp + (hour * SECONDSPERHOUR);
 }
 
-# func IsAvantjienPrime(day, month)
-# V-1.0.0 (2025-08-16)
-#
-# Checks if day and month constitute prime (falame) day.
+#@ <IsAvantjienPrime(day, month)>
+#@ V-1.0.0 (2025-08-16)
+#@
+#@ Checks if ''day'' and ''month'' constitute prime (falame) day.
 
 func IsAvantjienPrime(day, month)
 {
@@ -254,10 +254,10 @@ func IsAvantjienPrime(day, month)
 	return (Mod(day, 10) == 0 and day != 1);
 }
 
-# func IsAvantjienNewMonth(day, month)
-# V-1.0.0 (2025-08-16)
-#
-# Checks if day and month constitute a new month.
+#@ <IsAvantjienNewMonth(day, month)>
+#@ V-1.0.0 (2025-08-16)
+#@
+#@ Checks if ''day'' and ''month'' constitute a new month.
 
 func IsAvantjienNewMonth(day, month)
 {
@@ -268,10 +268,10 @@ func IsAvantjienNewMonth(day, month)
 	return (day == 1 and month != 1);
 }
 
-# func IsAvantjienNewYear(day, month)
-# V-1.0.0 (2025-08-16)
-#
-# Checks if day and month constitute an new year.
+#@ <IsAvantjienNewYear(day, month)>
+#@ V-1.0.0 (2025-08-16)
+#@
+#@ Checks if ''day'' and ''month'' constitute an new year.
 
 func IsAvantjienNewYear(day, month)
 {
@@ -282,10 +282,10 @@ func IsAvantjienNewYear(day, month)
 	return (day == 1 and month == 1);
 }
 
-# func FormatAvantjienDate(timestamp)
-# V-1.0.0 (2025-08-16)
-#
-# Returns timestamp as date string "D.M.Y".
+#@ <FormatAvantjienDate(timestamp)>
+#@ V-1.0.0 (2025-08-16)
+#@
+#@ Returns ''timestamp'' as date string "D.M.Y".
 
 func FormatAvantjienDate(timestamp)
 {

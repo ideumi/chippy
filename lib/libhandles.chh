@@ -3,38 +3,38 @@
 # corelib - libhandles.chh
 #
 
-# STDIN
-# (2025-08-12)
-# UNIX' standard input handle
+#@ <STDIN>
+#@ (2025-08-12)
+#@ UNIX' standard input handle
 
 var STDIN = 0;
 
-# STDOUT
-# (2025-08-12)
-# UNIX' standard output handle
+#@ <STDOUT>
+#@ (2025-08-12)
+#@ UNIX' standard output handle
 
 var STDOUT = 1;
 
-# STDERR
-# (2025-08-12)
-# UNIX' standard error output handle
+#@ <STDERR>
+#@ (2025-08-12)
+#@ UNIX' standard error output handle
 
 var STDERR = 2;
 
-# SEEKSET
-# (2025-11-08)
-# Seek from beginning of file
+#@ <SEEKSET>
+#@ (2025-11-08)
+#@ Seek from beginning of file
 
 var SEEKSET = 0;
 
-# SEEKCUR
-# (2025-11-08)
-# Seek from current position
+#@ <SEEKCUR>
+#@ (2025-11-08)
+#@ Seek from current position
 
 var SEEKCUR = 1;
 
-# SEEKEND
-# (2025-11-08)
-# Seek from end of file
+#@ <SEEKEND>
+#@ (2025-11-08)
+#@ Seek from end of file
 
 var SEEKEND = 2;

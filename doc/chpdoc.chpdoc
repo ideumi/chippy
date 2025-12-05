@@ -1,6 +1,6 @@
 *Documentation System* | V-$CHIPVR ($CHIPCN)
 
-The ChipLang documentation system searches for ''.chpdoc'' files in multiple locations.
+The ChipLang documentation system supports both static ''.chpdoc'' files and symbol extraction from source files.
 
 *Search Order*
 
@@ -13,10 +13,22 @@ The documentation system searches paths in the following priority order:
 *Usage*
 
 '''
-chippy doc                  # Show index page
-chippy doc <document>       # Show specific document
-chippy doc list             # List all available documents
+chippy doc                        # Show index page
+chippy doc <document>             # Show specific document
+chippy doc list                   # List all available documents
+chippy doc <file.chpdoc>          # Render .chpdoc file directly
+chippy doc <file>                 # List symbols in source file
+chippy doc <file> <signature>     # Show specific symbol documentation
+chippy doc <file> all             # Show all symbol documentation
 '''
+
+*Document Types*
+
+The system handles three types of documentation:
+
+1. *Static documents* - ''.chpdoc'' files searched by name in the documentation paths
+2. *Direct files* - ''.chpdoc'' files are opened by path
+3. *Source files* - ''.chp'' and ''.chh'' files with extractable ''#@'' documentation blocks
 
 *Document Format*
 
@@ -30,7 +42,30 @@ Documentation files use the ''.chpdoc'' extension, which is custom. It is design
 Like
 this
 '''
+
 I recommend you look at ''/usr/share/doc/chiplang'' for practical examples on how to use ''chpdoc'', it really is very simple.
+
+*Symbol Documentation*
+
+Source files can include inline documentation using the ''#@'' comment prefix:
+
+'''
+# Functions
+
+#@ <FunctionName(param1, param2)>
+#@ V-1.0.0 (2025-08-12)
+#@
+#@ Description text with ''inline code'' for parameters
+#@ and *bold* for emphasis.
+
+# Constants
+
+#@ <CONSTANTNAME>
+#@ (2025-08-12)
+#@ Description of the constant.
+'''
+
+Generally there is no fixed format for how these comments are to be structured, the only thing required is the symbol definition ''<symbol>'' at the top of the comment. The examples above show how we do it in the corelib. See ''chippy doc chpdoc''.
 
 *Third-party Integration*
 
