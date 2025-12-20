@@ -4,24 +4,24 @@ ChipLang interpreter and toolchain
 
 *Usage:*
 
-  ''chippy''                     Start the REPL
-  ''chippy <program>''           Run a program
+  ''chippy''                          Start the REPL
+  ''chippy <program>''                Run a program
 
-  ''chippy -r "code"''           Execute code directly
-  ''chippy --run "code"''        Execute code directly
+  ''chippy -r "code"''                Execute code directly
+  ''chippy --run "code"''             Execute code directly
 
-  ''chippy -v''                  Show version information
-  ''chippy --version''           Show version information
+  ''chippy -v''                       Show version information
+  ''chippy --version''                Show version information
 
-  ''chippy -h''                  Show this help message
-  ''chippy --help''              Show this help message
+  ''chippy -h''                       Show this help message
+  ''chippy --help''                   Show this help message
 
 *Commands:*
 
   ''chippy doc [topic]''              View documentation
   ''chippy doc list''                 List all documentation topics
 
-  ''chippy doc <file.chpdoc>''             Render chpdoc to terminal
+  ''chippy doc <file.chpdoc>''        Render chpdoc to terminal
 
   ''chippy doc <file>''               List symbols in source file
   ''chippy doc <file> <signature>''   Show symbol documentation

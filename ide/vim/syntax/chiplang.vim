@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: ChipLang
 " Maintainer: ideumi
-" Latest Revision: 2025-10-17
+" Latest Revision: 2025-12-20
 
 if exists("b:current_syntax")
   finish
@@ -17,7 +17,7 @@ syn keyword chipError err
 syn keyword chipSuccess ok
 
 " Built-in functions
-syn keyword chipBuiltin alarm append args charat chdir chmod cos
+syn keyword chipBuiltin append args charat chdir chmod cos
 syn keyword chipBuiltin dclose dopen dread
 syn keyword chipBuiltin error exec
 syn keyword chipBuiltin fclose fopen fread fsync fwrite
@@ -25,15 +25,15 @@ syn keyword chipBuiltin getch getcwd getenv getpid getuid
 syn keyword chipBuiltin indexof int
 syn keyword chipBuiltin join
 syn keyword chipBuiltin kill
-syn keyword chipBuiltin len list load lower lstat
+syn keyword chipBuiltin len lenv list load lower lstat
 syn keyword chipBuiltin mkdir
 syn keyword chipBuiltin num
 syn keyword chipBuiltin off
 syn keyword chipBuiltin pack pclose popen
 syn keyword chipBuiltin rand readlink rename replace
-syn keyword chipBuiltin saccept sclose seek select setenv signal sin sleep sopen sort split sread stat str substr swrite symlink
+syn keyword chipBuiltin saccept sclose seek select setenv sin sleep sopen sort split sread stat str substr swrite symlink
 syn keyword chipBuiltin tan time type
-syn keyword chipBuiltin unlink unpack unsignal upper
+syn keyword chipBuiltin unlink unpack upper
 
 " Comments
 syn match chipComment "#.*$" contains=chipTodo

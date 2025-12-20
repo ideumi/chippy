@@ -41,7 +41,6 @@
     </list>
 
     <list name="builtins">
-      <item>alarm</item>
       <item>append</item>
       <item>args</item>
       <item>charat</item>
@@ -68,6 +67,7 @@
       <item>join</item>
       <item>kill</item>
       <item>len</item>
+      <item>lenv</item>
       <item>list</item>
       <item>load</item>
       <item>lower</item>
@@ -87,7 +87,6 @@
       <item>seek</item>
       <item>select</item>
       <item>setenv</item>
-      <item>signal</item>
       <item>sin</item>
       <item>sleep</item>
       <item>sopen</item>
@@ -104,7 +103,6 @@
       <item>type</item>
       <item>unlink</item>
       <item>unpack</item>
-      <item>unsignal</item>
       <item>upper</item>
     </list>
 
