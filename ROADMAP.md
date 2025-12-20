@@ -8,20 +8,17 @@ I would not recommend writing anything important in Chip as of yet, as there is 
 
 Some things i plan to still accomplish in 1.0.x:
 
-- `eval()` builtin for dynamic string execution
-
 - ~~`chippy check` to parse a file for syntax errors~~
   - ~~Integrated in the makefile for `lib/` and `misc/`~~
 
 - ~~Expand `chippy doc` to also be able to be ran on `.chp` and `.chh` files to get an overview via comments.~~
   
 - Expand the corelib
+  - JSON
 
 - Expand syntax support to more `ide/`s
 
 - Perhaps create a logo or mascot
-
-While I have worked a great deal on the previous plugin concept, I realized that it would fundamentally back Chip's development into a corner, not only in terms of future expansion to other platforms, but also in terms of developer experience. That is the reason why I have decided to go a different route here.
 
 **Enthusiastic:**
 
