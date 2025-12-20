@@ -1,0 +1,24 @@
+*pload* | V-$CHIPVR ($CHIPCN)
+
+''pload(filename)''
+
+Loads a native plugin shared object.
+
+*Parameters:*
+- ''filename'': String path to plugin shared object (''.chipso'')
+
+*Returns:*
+- ''ok'' on success
+
+*Behavior:*
+- Plugin functions and constants are namespaced: ''_pluginname_symbolname_''
+- Plugin version must match ChipLang version exactly
+- Loading same plugin twice returns ''ok'' immediately (no-op)
+- All symbols registered atomically (on error, no partial registration)
+
+*Errors:*
+- Runtime error if plugin file not found
+- Runtime error if plugin missing ''GetPlugin()'' function
+- Runtime error if version mismatch
+- Runtime error if symbol already exists in global context
+- Runtime error if plugin exports duplicate symbols

@@ -11,117 +11,123 @@ import (
 	"chip-go/internal/values"
 )
 
-func GetBuiltins() map[string]*values.BuiltInFunction {
+func GetBuiltins() map[string]*values.NativeFunction {
 
-	return map[string]*values.BuiltInFunction{
-
+	return map[string]*values.NativeFunction{
 		// System functions
-		"off":   values.NewBuiltInFunction("off", offFunction),
-		"error": values.NewBuiltInFunction("error", errorFunction),
-		"args":  values.NewBuiltInFunction("args", argsFunction),
-		"load":  values.NewBuiltInFunction("load", loadFunction),
+		"off":   values.NewNativeFunction("off", offFunction, values.BuiltIn),
+		"error": values.NewNativeFunction("error", errorFunction, values.BuiltIn),
+		"args":  values.NewNativeFunction("args", argsFunction, values.BuiltIn),
+		"load":  values.NewNativeFunction("load", loadFunction, values.BuiltIn),
+
+		// Plugins
+		"pload": values.NewNativeFunction("pload", ploadFunction, values.BuiltIn),
+		"plist": values.NewNativeFunction("plist", plistFunction, values.BuiltIn),
 
 		// FSIO
-		"fopen":  values.NewBuiltInFunction("fopen", fopenFunction),
-		"fclose": values.NewBuiltInFunction("fclose", fcloseFunction),
-		"fwrite": values.NewBuiltInFunction("fwrite", fwriteFunction),
-		"fread":  values.NewBuiltInFunction("fread", freadFunction),
+		"fopen":  values.NewNativeFunction("fopen", fopenFunction, values.BuiltIn),
+		"fclose": values.NewNativeFunction("fclose", fcloseFunction, values.BuiltIn),
+		"fwrite": values.NewNativeFunction("fwrite", fwriteFunction, values.BuiltIn),
+		"fread":  values.NewNativeFunction("fread", freadFunction, values.BuiltIn),
 
-		"getcwd": values.NewBuiltInFunction("getcwd", getcwdFunction),
-		"chdir":  values.NewBuiltInFunction("chdir", chdirFunction),
-		"stat":   values.NewBuiltInFunction("stat", statFunction),
-		"lstat":  values.NewBuiltInFunction("lstat", lstatFunction),
-		"unlink": values.NewBuiltInFunction("unlink", unlinkFunction),
-		"mkdir":  values.NewBuiltInFunction("mkdir", mkdirFunction),
-		"rename": values.NewBuiltInFunction("rename", renameFunction),
-		"chmod":  values.NewBuiltInFunction("chmod", chmodFunction),
+		"getcwd": values.NewNativeFunction("getcwd", getcwdFunction, values.BuiltIn),
+		"chdir":  values.NewNativeFunction("chdir", chdirFunction, values.BuiltIn),
+		"stat":   values.NewNativeFunction("stat", statFunction, values.BuiltIn),
+		"lstat":  values.NewNativeFunction("lstat", lstatFunction, values.BuiltIn),
+		"unlink": values.NewNativeFunction("unlink", unlinkFunction, values.BuiltIn),
+		"mkdir":  values.NewNativeFunction("mkdir", mkdirFunction, values.BuiltIn),
+		"rename": values.NewNativeFunction("rename", renameFunction, values.BuiltIn),
+		"chmod":  values.NewNativeFunction("chmod", chmodFunction, values.BuiltIn),
 
-		"seek":   values.NewBuiltInFunction("seek", seekFunction),
-		"fsync":  values.NewBuiltInFunction("fsync", fsyncFunction),
-		"select": values.NewBuiltInFunction("select", selectFunction),
+		"seek":   values.NewNativeFunction("seek", seekFunction, values.BuiltIn),
+		"fsync":  values.NewNativeFunction("fsync", fsyncFunction, values.BuiltIn),
+		"select": values.NewNativeFunction("select", selectFunction, values.BuiltIn),
 
 		// Directory handling
-		"dopen":  values.NewBuiltInFunction("dopen", dopenFunction),
-		"dread":  values.NewBuiltInFunction("dread", dreadFunction),
-		"dclose": values.NewBuiltInFunction("dclose", dcloseFunction),
+		"dopen":  values.NewNativeFunction("dopen", dopenFunction, values.BuiltIn),
+		"dread":  values.NewNativeFunction("dread", dreadFunction, values.BuiltIn),
+		"dclose": values.NewNativeFunction("dclose", dcloseFunction, values.BuiltIn),
 
 		// Symlinks
-		"symlink":  values.NewBuiltInFunction("symlink", symlinkFunction),
-		"readlink": values.NewBuiltInFunction("readlink", readlinkFunction),
+		"symlink":  values.NewNativeFunction("symlink", symlinkFunction, values.BuiltIn),
+		"readlink": values.NewNativeFunction("readlink", readlinkFunction, values.BuiltIn),
 
 		// Type conversions
-		"str":  values.NewBuiltInFunction("str", strFunction),
-		"num":  values.NewBuiltInFunction("num", numFunction),
-		"int":  values.NewBuiltInFunction("int", intFunction),
-		"list": values.NewBuiltInFunction("list", listFunction),
-		"type": values.NewBuiltInFunction("type", typeFunction),
-		"len":  values.NewBuiltInFunction("len", lenFunction),
-		"lenv": values.NewBuiltInFunction("lenv", lenvFunction),
+		"str":  values.NewNativeFunction("str", strFunction, values.BuiltIn),
+		"num":  values.NewNativeFunction("num", numFunction, values.BuiltIn),
+		"int":  values.NewNativeFunction("int", intFunction, values.BuiltIn),
+		"list": values.NewNativeFunction("list", listFunction, values.BuiltIn),
+		"type": values.NewNativeFunction("type", typeFunction, values.BuiltIn),
+		"len":  values.NewNativeFunction("len", lenFunction, values.BuiltIn),
+		"lenv": values.NewNativeFunction("lenv", lenvFunction, values.BuiltIn),
 
 		// List operations
-		"append": values.NewBuiltInFunction("append", appendFunction),
-		"sort":   values.NewBuiltInFunction("sort", sortFunction),
+		"append": values.NewNativeFunction("append", appendFunction, values.BuiltIn),
+		"sort":   values.NewNativeFunction("sort", sortFunction, values.BuiltIn),
 
 		// Bytes
-		"pack":   values.NewBuiltInFunction("pack", packFunction),
-		"unpack": values.NewBuiltInFunction("unpack", unpackFunction),
+		"pack":   values.NewNativeFunction("pack", packFunction, values.BuiltIn),
+		"unpack": values.NewNativeFunction("unpack", unpackFunction, values.BuiltIn),
 
 		// Env
-		"getenv": values.NewBuiltInFunction("getenv", getenvFunction),
-		"setenv": values.NewBuiltInFunction("setenv", setenvFunction),
+		"getenv": values.NewNativeFunction("getenv", getenvFunction, values.BuiltIn),
+		"setenv": values.NewNativeFunction("setenv", setenvFunction, values.BuiltIn),
 
 		// Sockets
-		"sopen":   values.NewBuiltInFunction("sopen", sopenFunction),
-		"sread":   values.NewBuiltInFunction("sread", sreadFunction),
-		"swrite":  values.NewBuiltInFunction("swrite", swriteFunction),
-		"sclose":  values.NewBuiltInFunction("sclose", scloseFunction),
-		"saccept": values.NewBuiltInFunction("saccept", sacceptFunction),
+		"sopen":   values.NewNativeFunction("sopen", sopenFunction, values.BuiltIn),
+		"sread":   values.NewNativeFunction("sread", sreadFunction, values.BuiltIn),
+		"swrite":  values.NewNativeFunction("swrite", swriteFunction, values.BuiltIn),
+		"sclose":  values.NewNativeFunction("sclose", scloseFunction, values.BuiltIn),
+		"saccept": values.NewNativeFunction("saccept", sacceptFunction, values.BuiltIn),
 
 		// Processes
-		"popen":  values.NewBuiltInFunction("popen", popenFunction),
-		"pclose": values.NewBuiltInFunction("pclose", pcloseFunction),
-		"kill":   values.NewBuiltInFunction("kill", killFunction),
-		"exec":   values.NewBuiltInFunction("exec", execFunction),
+		"popen":  values.NewNativeFunction("popen", popenFunction, values.BuiltIn),
+		"pclose": values.NewNativeFunction("pclose", pcloseFunction, values.BuiltIn),
+		"kill":   values.NewNativeFunction("kill", killFunction, values.BuiltIn),
+		"exec":   values.NewNativeFunction("exec", execFunction, values.BuiltIn),
 
 		// Randomness
-		"rand": values.NewBuiltInFunction("rand", randFunction),
+		"rand": values.NewNativeFunction("rand", randFunction, values.BuiltIn),
 
 		// String operations
-		"charat":  values.NewBuiltInFunction("charat", charatFunction),
-		"substr":  values.NewBuiltInFunction("substr", substrFunction),
-		"replace": values.NewBuiltInFunction("replace", replaceFunction),
-		"split":   values.NewBuiltInFunction("split", splitFunction),
-		"indexof": values.NewBuiltInFunction("indexof", indexofFunction),
-		"join":    values.NewBuiltInFunction("join", joinFunction),
-		"lower":   values.NewBuiltInFunction("lower", lowerFunction),
-		"upper":   values.NewBuiltInFunction("upper", upperFunction),
+		"charat":  values.NewNativeFunction("charat", charatFunction, values.BuiltIn),
+		"substr":  values.NewNativeFunction("substr", substrFunction, values.BuiltIn),
+		"replace": values.NewNativeFunction("replace", replaceFunction, values.BuiltIn),
+		"split":   values.NewNativeFunction("split", splitFunction, values.BuiltIn),
+		"indexof": values.NewNativeFunction("indexof", indexofFunction, values.BuiltIn),
+		"join":    values.NewNativeFunction("join", joinFunction, values.BuiltIn),
+		"lower":   values.NewNativeFunction("lower", lowerFunction, values.BuiltIn),
+		"upper":   values.NewNativeFunction("upper", upperFunction, values.BuiltIn),
 
 		// Math operations
-		"sin": values.NewBuiltInFunction("sin", sinFunction),
-		"cos": values.NewBuiltInFunction("cos", cosFunction),
-		"tan": values.NewBuiltInFunction("tan", tanFunction),
+		"sin": values.NewNativeFunction("sin", sinFunction, values.BuiltIn),
+		"cos": values.NewNativeFunction("cos", cosFunction, values.BuiltIn),
+		"tan": values.NewNativeFunction("tan", tanFunction, values.BuiltIn),
 
 		// Misc
-		"getpid": values.NewBuiltInFunction("getpid", getpidFunction),
-		"getuid": values.NewBuiltInFunction("getuid", getuidFunction),
-		"time":   values.NewBuiltInFunction("time", timeFunction),
-		"sleep":  values.NewBuiltInFunction("sleep", sleepFunction),
-		"getch":  values.NewBuiltInFunction("getch", getchFunction),
+		"getpid": values.NewNativeFunction("getpid", getpidFunction, values.BuiltIn),
+		"getuid": values.NewNativeFunction("getuid", getuidFunction, values.BuiltIn),
+		"time":   values.NewNativeFunction("time", timeFunction, values.BuiltIn),
+		"sleep":  values.NewNativeFunction("sleep", sleepFunction, values.BuiltIn),
+		"getch":  values.NewNativeFunction("getch", getchFunction, values.BuiltIn),
 	}
 }
 
 func GetConstants() map[string]values.Value {
 	return map[string]values.Value{
+		"null":  values.NewNumber(constants.NUM_NUL),
+		"false": values.NewNumber(constants.NUM_FAL),
+		"true":  values.NewNumber(constants.NUM_TRU),
+		"err":   values.NewString(constants.STR_ERR),
+		"ok":    values.NewString(constants.STR_OK),
 
 		"CHIPVR": values.NewString(constants.STR_LPLVR),
 		"CHIPCN": values.NewString(constants.STR_LPLCN),
 		"CHIPOS": values.NewString(constants.STR_LPLOS),
 		"CHIPAR": values.NewString(constants.STR_LPLAR),
 
-		"null":  values.NewNumber(constants.NUM_NUL),
-		"false": values.NewNumber(constants.NUM_FAL),
-		"true":  values.NewNumber(constants.NUM_TRU),
-		"err":   values.NewString(constants.STR_ERR),
-		"ok":    values.NewString(constants.STR_OK),
+		"BUNDLERUN": values.NewNumber(constants.NUM_NUL),
+		"BUNDLEDIR": values.NewString(constants.STR_ERR),
+		"BUNDLEID":  values.NewNumber(constants.NUM_NUL),
 	}
 }

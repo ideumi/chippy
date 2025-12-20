@@ -1,0 +1,44 @@
+#!/usr/bin/chippy
+#
+# corelib - libbundle.chh
+#
+
+#@ <IsBundle()>
+#@ V-1.0.0 (2025-12-09)
+#@
+#@ Returns ''true'' if running from a bundle, ''false'' otherwise.
+
+func IsBundle()
+{
+	return BUNDLERUN == 1;
+}
+
+#@ <GetBundleDir()>
+#@ V-1.0.0 (2025-12-09)
+#@
+#@ Returns the bundle extraction directory path or ''err'' if not running from a bundle.
+
+func GetBundleDir()
+{
+	if IsBundle() == true
+	{
+		return BUNDLEDIR;
+	}
+
+	return err;
+}
+
+#@ <GetBundleID()>
+#@ V-1.0.0 (2025-12-09)
+#@
+#@ Returns the bundle ID or ''err'' if not running from a bundle.
+
+func GetBundleID()
+{
+	if IsBundle() == true
+	{
+		return BUNDLEID;
+	}
+
+	return err;
+}

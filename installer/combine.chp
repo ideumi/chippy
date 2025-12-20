@@ -6,7 +6,7 @@
 # Metadata
 
 var Project = "ChipLang Installer";
-var Version = "1.0.1";
+var Version = "1.0.2";
 var Licence = "../LICENCE.txt";
 var Output = "out/installer";
 
@@ -14,10 +14,23 @@ var Output = "out/installer";
 
 var Source = "src/main.chp";
 
+# Create the program as a CHIPBIN bundle
+# This must be true if you are using plugins
+
+var ProduceBundle = false;
+
+# if ProduceBundle == true
+# {
+#	Output = Output + "-" + CHIPOS + "-" + CHIPAR;
+# }
+
 # Search paths for dependencies
 
 var Paths = [];
 Paths = Paths + ["src/lib"];
+
+var PluginPaths = [];
+PluginPaths = PluginPaths + ["src/lib/plugins"];
 
 # Add user-local library path if HOME is available
 
@@ -26,15 +39,30 @@ var homePath = getenv("HOME");
 if homePath != err
 {
     Paths = Paths + [homePath + "/.local/share/chiplang/lib"];
+    PluginPaths = PluginPaths + [homePath + "/.local/share/chiplang/lib/plugins"];
 }
 
 Paths = Paths + ["../lib/"];
+Paths = Paths + ["/usr/lib/chiplang"];
+PluginPaths = PluginPaths + ["/usr/lib/chiplang/plugins"];
 
-# Options
+# Assets to bundle, requires ProduceBundle be true
+
+var Assets = [];
+
+# Dependencies combine shouldn't bundle and just keep as loads
+
+var External = [];
+
+# Plugins combine shouldn't bundle and just keep as ploads
+# If you wish to produce a text bundle that retains pload calls, use this
+
+var ExternalPlugins = [];
+
+# Stylistic Options
 
 # Keep this intentionally human readable
 # so users know what they run.
 
 var StripComments = false;
 var StripWhitespace = false;
-var AddShebang = true;

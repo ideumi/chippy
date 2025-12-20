@@ -5,32 +5,32 @@
 
 # Metadata
 
-var Project = "mandelbrot";
+var Project = "testplugin";
 var Version = "1.0.0";
 var Licence = "../../LICENCE.txt";
-var Output = "out/mandelbrot";
+var Output = "out/testplugin";
 
 # Entry point
 
-var Source = "src/main.chp";
+var Source = "testplugin.chp";
 
 # Create the program as a CHIPBIN bundle
 # This must be true if you are using plugins
 
-var ProduceBundle = false;
+var ProduceBundle = true;
 
-# if ProduceBundle == true
-# {
-#	Output = Output + "-" + CHIPOS + "-" + CHIPAR;
-# }
+if ProduceBundle == true
+{
+	Output = Output + "-" + CHIPOS + "-" + CHIPAR;
+}
 
 # Search paths for dependencies
 
 var Paths = [];
-Paths = Paths + ["src/lib"];
+Paths = Paths + ["../../lib"];
 
 var PluginPaths = [];
-PluginPaths = PluginPaths + ["src/lib/plugins"];
+PluginPaths = PluginPaths + ["."];
 
 # Add user-local library path if HOME is available
 
@@ -42,13 +42,12 @@ if homePath != err
     PluginPaths = PluginPaths + [homePath + "/.local/share/chiplang/lib/plugins"];
 }
 
-Paths = Paths + ["../../lib"];
 Paths = Paths + ["/usr/lib/chiplang"];
 PluginPaths = PluginPaths + ["/usr/lib/chiplang/plugins"];
 
 # Assets to bundle, requires ProduceBundle be true
 
-var Assets = [];
+var Assets = ["pixel.png"];
 
 # Dependencies combine shouldn't bundle and just keep as loads
 

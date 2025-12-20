@@ -1,0 +1,35 @@
+*plist* | V-$CHIPVR ($CHIPCN)
+
+''plist()''
+
+Returns information about all loaded plugins.
+
+*Returns:*
+- List of plugin information lists
+- ''err'' on failure
+
+*Format:*
+Each plugin entry is a list containing:
+
+'''
+[name, version, path, [function_names...], [constant_names...]]
+'''
+
+Function and constant lists are empty ''[]'' if the plugin exports none.
+
+*Example:*
+
+'''
+var plugins = plist();
+
+for i = 1 to len(plugins) 
+{
+    var plugin = plugins[i];
+
+    var pName = plugin[1];
+    var pVersion = plugin[2];
+    var pPath = plugin[3];
+    var pFuncs = plugin[4];
+    var pConsts = plugin[5];
+}
+'''

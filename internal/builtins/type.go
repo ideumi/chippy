@@ -48,8 +48,13 @@ func typeFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 	case *values.Function:
 		typeName = "function"
 
-	case *values.BuiltInFunction:
-		typeName = "builtin"
+	case *values.NativeFunction:
+		nf := value.(*values.NativeFunction)
+		if nf.Plugin {
+			typeName = "plugin"
+		} else {
+			typeName = "builtin"
+		}
 
 	default:
 		typeName = "unknown"

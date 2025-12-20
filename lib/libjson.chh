@@ -1,0 +1,64 @@
+#!/usr/bin/chippy
+#
+# corelib - libjson.chh
+#
+
+pload("libjson.chipso");
+
+#@ <JSONTRUE>
+#@ (2025-12-16)
+#@ Represents ''true'' in JSON
+
+var JSONTRUE = _libjson_TRUE_;
+
+#@ <JSONFALSE>
+#@ (2025-12-16)
+#@ Represents ''false'' in JSON
+
+var JSONFALSE = _libjson_FALSE_;
+
+#@ <JSONNULL>
+#@ (2025-12-16)
+#@ Represents ''null'' in JSON
+
+var JSONNULL = _libjson_NULL_;
+
+#@ <JsonParse(jsonStr)>
+#@ V-1.0.0 (2025-12-16)
+#@
+#@ Parses a JSON string and returns the corresponding map.
+#@ Returns ''err'' if the JSON is invalid.
+#@
+#@ See ''libmap.chh''
+#@
+#@ JSON objects become maps: ''["map", [key, val], ...]''
+#@ JSON arrays become lists.
+#@ JSON numbers become numbers.
+#@ JSON strings become strings.
+#@ JSON booleans become ''JSONTRUE'' or ''JSONFALSE''.
+#@ JSON null becomes ''JSONNULL''.
+
+func JsonParse(jsonStr)
+{
+	return _libjson_parse_(jsonStr);
+}
+
+#@ <JsonStringify(value)>
+#@ V-1.0.0 (2025-12-16)
+#@
+#@ Converts a map to a JSON string.
+#@ Returns ''err'' if the value cannot be converted to JSON.
+#@
+#@ See ''libmap.chh''
+#@
+#@ Maps (''["map", [key, val], ...]'') become JSON objects.
+#@ Lists become JSON arrays.
+#@ Numbers become JSON numbers.
+#@ Strings become JSON strings.
+#@ ''JSONTRUE''/''JSONFALSE'' become JSON booleans.
+#@ ''JSONNULL'' becomes JSON null.
+
+func JsonStringify(value)
+{
+	return _libjson_stringify_(value);
+}

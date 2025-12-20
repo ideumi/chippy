@@ -1,0 +1,31 @@
+*CHIPBIN* | V-$CHIPVR ($CHIPCN)
+
+ChipLang binary bundle format specification
+
+All multi-byte integers are little-endian.
+Strings are length-prefixed: uint32 length + UTF-8 bytes.
+
+
+*Offset   Size       Type            Description*
+------   ----       ----            -----------
+0        16         bytes           Shebang (#!/usr/bin/chippy\n)
+16       7          bytes           Magic bytes (CHIPBIN)
+23       1          uint8           Format version (currently 1)
+24       4+N        string          Project name
+         4+N        string          Version
+         4+N        string          ChipLang version
+         8          uint64          Bundle ID
+         1          uint8           Has plugins (0=no, 1=yes)
+         [4+N]      string          Target OS (only if has plugins)
+         [4+N]      string          Target arch (only if has plugins)
+         8+N        bytes           Program (uint64 size + bytes)
+         4          uint32          Number of files
+         varies     table           File table (see below)
+         varies     bytes           File data (concatenated)
+
+File Table Entry (repeated for each file):
+         4+N        string          Filename
+         1          uint8           Type (1=plugin, 2=asset)
+         8          uint64          File size in bytes
+
+See ''chippy doc bundles'' for bundle usage.

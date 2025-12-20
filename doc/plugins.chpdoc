@@ -1,0 +1,111 @@
+*plugins* | V-$CHIPVR ($CHIPCN)
+
+Native plugins for ChipLang
+
+Plugins are Go shared objects that extend ChipLang (or more specifically the RR2 engine) with native functions and constants.
+
+*When to use a plugin:*
+
+Plugins are intended to substitute native ChipLang code in areas where the interpreter simply can't match machine code in terms of performance or interoperability with other software. That is also when they should be used. Plugins are intended to be small and functional, and handle a specific issue that has come up, similar to Chips existing builtins. The idea is not to build a train in Go and slap Chip as the horn on the roof (at least for me).
+
+*Loading Plugins in Chip Code:*
+
+Direct loading for standalone programs:
+'''
+pload("path/to/plugin.chipso");
+'''
+
+When using ''combine'':
+'''
+# Binary bundles (ProduceBundle = true) embed plugins automatically
+# Text bundles (ProduceBundle = false) require ExternalPlugins
+
+pload("plugin.chipso");
+'''
+
+Functions and constants are namespaced:
+'''
+_pluginname_functionname_();
+var value = _pluginname_CONSTANTNAME_;
+'''
+
+See ''chippy doc pload'' and ''chippy doc plist''.
+
+*Creating Plugins:*
+
+Plugins are Go packages built with ''-buildmode=plugin''.
+Create plugins in the ''plugins/'' subdirectory of the ChipLang source tree.
+
+Obtain the source tree from:
+	<''https://codeberg.org/ideumi/chip-go''>
+
+Plugins use the ChipLang source tree's ''go.mod'' and do not need their own.
+The same Go version as ChipLang must be used.
+
+Required exports:
+- Package must be ''main''
+- Must export ''GetPlugin()'' function with this signature:
+
+'''
+func GetPlugin() (
+    name string,
+    version string,
+    chipLangVersion string,
+    builtins map[string]*values.NativeFunction,
+    constants map[string]values.Value
+)
+'''
+
+*Building:*
+
+'''
+go build -buildmode=plugin -o myplugin.chipso plugin.go
+'''
+
+See ''plugins/example/'' in the source tree for a complete reference implementation with a sample ''Makefile''.
+
+*Requirements:*
+- The plugin's Chip version must match the Chip version where it is used exactly
+- All functions must have ''values.Plugin'' flag set
+- Constants and function return values should call ''.SetContext(ctx)''
+
+*Best Practices:*
+
+*Abstract plugin calls in a separate ''.chh'' file with friendly names:*
+
+'''
+# libmystuff.chh
+
+func DoSomething(arg) 
+{
+    return _pluginname_functionname_(arg);
+}
+'''
+
+This way end users never touch the plugin directly and get clean function names.
+
+*When building plugins, always statically link dependencies.*
+
+Dynamically linked libraries will cause runtime errors if not present on the target system.
+
+*Distribution:*
+
+*Binary bundles (ProduceBundle = true):*
+Plugins are embedded in the bundle and extracted at runtime.
+'''
+# combine.chp
+var ProduceBundle = true;
+var PluginPaths = ["plugins"];
+'''
+
+*Text bundles (ProduceBundle = false):*
+Plugins cannot be embedded, but ''pload()'' calls can be preserved:
+'''
+# combine.chp
+var ProduceBundle = false;
+var ExternalPlugins = ["plugin.chipso"];  # Keep pload() in output
+'''
+
+This allows libraries to reference plugins that users must provide separately.
+
+See ''chippy doc bundles'' and ''chippy doc combine''.

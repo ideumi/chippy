@@ -17,3 +17,11 @@ These constants are available at runtime with a clean chippy session:
 ''CHIPCN'' - Release codename for CHIPVR
 ''CHIPOS'' - Host operating system
 ''CHIPAR'' - Host architecture
+
+*Bundle Constants*
+
+''BUNDLERUN'' - Set to ''true'' when running from a bundle, ''false'' otherwise
+''BUNDLEDIR'' - String path to extraction directory, ''err'' if not running in a bundle
+''BUNDLEID'' - Bundle ID, ''null'' if not running in a bundle
+
+See ''chippy doc bundles''

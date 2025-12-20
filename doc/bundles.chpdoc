@@ -1,0 +1,30 @@
+*bundles* | V-$CHIPVR ($CHIPCN)
+
+''combine'' can create bundles containing program code, plugins, and assets.
+These bundles execute like normal programs with automatic extraction at runtime.
+
+The binary bundle format is specific to ChipLang and is called ''CHIPBIN''.
+
+''combine'' can also produce text bundles that are not encased in a binary.
+See ''chippy doc combine'', specifically ''ProduceBundle''.
+
+*Bundle Commands:*
+- ''chippy bundle show <file>'' - Display bundle metadata
+- ''chippy bundle extract <file>'' - Extract bundle to directory
+
+See ''chippy doc combine'' for bundle creation.
+
+*In Your Program:*
+
+''libbundle.chh'' helps with common bundle related tasks in your programs (such as accessing files)
+See ''chippy doc /usr/lib/chiplang/libbundle.chh''.
+
+*Bundle Constants:*
+
+These are always available.
+
+- ''BUNDLERUN'': Set to ''true'' when running from a bundle, ''false'' otherwise
+- ''BUNDLEDIR'': String path to extraction directory, ''err'' if not running in a bundle
+- ''BUNDLEID'': Bundle ID, ''null'' if not running in a bundle
+
+See ''chippy doc chipbin'' for the binary format specification.

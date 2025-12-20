@@ -2,6 +2,9 @@
 /chippy
 out/
 
+# Plugins
+*.chipso
+
 # Release directory
 rel/
 
