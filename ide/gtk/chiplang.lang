@@ -83,6 +83,9 @@
           <keyword>CHIPCN</keyword>
           <keyword>CHIPOS</keyword>
           <keyword>CHIPAR</keyword>
+          <keyword>BUNDLERUN</keyword>
+          <keyword>BUNDLEDIR</keyword>
+          <keyword>BUNDLEID</keyword>
         </context>
 
         <!-- Error constants -->
@@ -97,7 +100,6 @@
 
         <!-- Built-in functions -->
         <context id="builtins" style-ref="builtin" class="no-spell-check">
-          <keyword>alarm</keyword>
           <keyword>append</keyword>
           <keyword>args</keyword>
           <keyword>charat</keyword>
@@ -124,6 +126,7 @@
           <keyword>join</keyword>
           <keyword>kill</keyword>
           <keyword>len</keyword>
+          <keyword>lenv</keyword>
           <keyword>list</keyword>
           <keyword>load</keyword>
           <keyword>lower</keyword>
@@ -133,6 +136,8 @@
           <keyword>off</keyword>
           <keyword>pack</keyword>
           <keyword>pclose</keyword>
+          <keyword>plist</keyword>
+          <keyword>pload</keyword>
           <keyword>popen</keyword>
           <keyword>rand</keyword>
           <keyword>readlink</keyword>
@@ -143,7 +148,6 @@
           <keyword>seek</keyword>
           <keyword>select</keyword>
           <keyword>setenv</keyword>
-          <keyword>signal</keyword>
           <keyword>sin</keyword>
           <keyword>sleep</keyword>
           <keyword>sopen</keyword>
@@ -160,7 +164,6 @@
           <keyword>type</keyword>
           <keyword>unlink</keyword>
           <keyword>unpack</keyword>
-          <keyword>unsignal</keyword>
           <keyword>upper</keyword>
         </context>
 
