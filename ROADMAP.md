@@ -8,13 +8,13 @@ I would not recommend writing anything important in Chip as of yet, as there is 
 
 Some things i plan to still accomplish in 1.0.x:
 
-- ~~Plugin Support~~
-  - ~~The ability to `pload` shared objects that extend RR2 with new builtins and constants.~~
-  - ~~`combine` support for creating full bundles including these `.so`s~~
-  - ~~Support for RR2 to execute these bundles~~
-  - ~~A template plugin~~
-  - ~~Default plugins:~~
-    - ~~Move some existing specialized builtins to plugins~~
+- Plugin Support
+  - The ability to `pload` shared objects that extend RR2 with new builtins and constants.
+  - `combine` support for creating full bundles including these `.so`s
+  - Support for RR2 to execute these bundles
+  - A template plugin
+  - Default plugins:
+    - Move some existing specialized builtins to plugins
 
 - ~~`chippy check` to parse a file for syntax errors~~
   - ~~Integrated in the makefile for `lib/` and `misc/`~~

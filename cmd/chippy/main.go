@@ -7,15 +7,12 @@
 package main
 
 import (
-	"chip-go/cmd/chippy/combine"
 	"chip-go/internal/builtins"
-	"chip-go/internal/bundle"
 	"chip-go/internal/constants"
 	"chip-go/internal/roadrunner"
 	"chip-go/internal/values"
 	"chip-go/thirdparty/readline"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -52,13 +49,7 @@ func main() {
 
 	// Handle combine command
 	if len(args) > 0 && args[0] == "combine" {
-		combine.HandleCombineCommand(args[1:])
-		return
-	}
-
-	// Handle bundle command
-	if len(args) > 0 && args[0] == "bundle" {
-		handleBundleCommand(args[1:])
+		handleCombineCommand(args[1:])
 		return
 	}
 
@@ -83,14 +74,14 @@ func main() {
 
 		runCommand(rr, args[1])
 	} else {
-		programArgs := []string{}
+		scriptArgs := []string{}
 
 		if len(args) > 1 {
-			programArgs = args[1:]
+			scriptArgs = args[1:]
 		}
 
-		builtins.SetGlobalArgs(programArgs)
-		runProgram(rr, args[0])
+		builtins.SetGlobalArgs(scriptArgs)
+		runScript(rr, args[0])
 	}
 }
 
@@ -223,16 +214,7 @@ func runCommand(rr *roadrunner.RoadRunner2, command string) {
 	}
 }
 
-func runProgram(rr *roadrunner.RoadRunner2, filename string) {
-	if isBundle(filename) {
-		if err := runBundle(filename); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
-		return
-	}
-
-	// Normal program execution
+func runScript(rr *roadrunner.RoadRunner2, filename string) {
 	chpCode := fmt.Sprintf("load(\"%s\");", filename)
 
 	_, err := rr.Run("<"+filename+">", chpCode)
@@ -241,58 +223,4 @@ func runProgram(rr *roadrunner.RoadRunner2, filename string) {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-}
-
-func isBundle(path string) bool {
-	f, err := os.Open(path)
-
-	if err != nil {
-		return false
-	}
-
-	defer f.Close()
-
-	f.Seek(int64(len(bundle.ShebangLine)), io.SeekStart)
-
-	// Check for CHIPBIN magic bytes
-	magic := make([]byte, 7)
-
-	if _, err := f.Read(magic); err != nil {
-		return false
-	}
-
-	return string(magic) == bundle.MagicBytes
-}
-
-func runBundle(bundlePath string) error {
-	b, err := bundle.ReadBundle(bundlePath)
-
-	if err != nil {
-		return fmt.Errorf("reading bundle: %w", err)
-	}
-
-	extractDir, err := os.MkdirTemp(os.TempDir(), fmt.Sprintf("chipbin-%d-", b.BundleID))
-
-	if err != nil {
-		return fmt.Errorf("creating extraction directory: %w", err)
-	}
-
-	defer os.RemoveAll(extractDir)
-
-	if err := b.Validate(); err != nil {
-		return err
-	}
-
-	if err := b.Extract(extractDir); err != nil {
-		return fmt.Errorf("extracting bundle: %w", err)
-	}
-
-	actualProgram := b.GetProgram(extractDir)
-
-	rr := roadrunner.NewRoadRunner2()
-	rr.SetBundleConstants(extractDir, b.BundleID)
-
-	_, err = rr.Run(bundlePath, actualProgram)
-
-	return err
 }

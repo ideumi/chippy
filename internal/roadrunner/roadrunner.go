@@ -92,14 +92,3 @@ func (rr *RoadRunner2) Run(filename, text string) (values.Value, error) {
 func (rr *RoadRunner2) GetGlobalContext() *context.Context {
 	return rr.globalContext
 }
-
-func (rr *RoadRunner2) SetBundleConstants(extractDir string, bundleID uint64) {
-	rr.globalContext.SymbolTable.Set(constants.STR_BUNDLERUN,
-		values.NewNumber(constants.NUM_TRU).SetContext(rr.globalContext))
-
-	rr.globalContext.SymbolTable.Set(constants.STR_BUNDLEDIR,
-		values.NewString(extractDir).SetContext(rr.globalContext))
-
-	rr.globalContext.SymbolTable.Set(constants.STR_BUNDLEID,
-		values.NewNumber(float64(bundleID)).SetContext(rr.globalContext))
-}

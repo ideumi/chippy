@@ -9,7 +9,7 @@ package constants
 import "runtime"
 
 const (
-	VERSION_DATE = "2025-12-20"
+	VERSION_DATE = "2025-12-05"
 	HIST_FILE    = ".ChipLangHistory"
 
 	RR_CONTEXT_DISPLAY_NAME     = "<ChipLangProgram>"
@@ -23,7 +23,7 @@ const (
 	FILE_EXT_PROG   = ".chp"
 	FILE_EXT_HEADER = ".chh"
 
-	STR_LPLVR = "1.0.6"
+	STR_LPLVR = "1.0.5"
 	STR_LPLCN = "pardalote"
 	STR_LPLOS = runtime.GOOS
 	STR_LPLAR = runtime.GOARCH
@@ -34,10 +34,6 @@ const (
 	NUM_NUL = 0
 	NUM_FAL = 0
 	NUM_TRU = 1
-
-	STR_BUNDLERUN = "BUNDLERUN"
-	STR_BUNDLEDIR = "BUNDLEDIR"
-	STR_BUNDLEID  = "BUNDLEID"
 
 	RT_ERROR_TITLE           = "Runtime Error"
 	RT_ERROR_DEBUGGER_PREFIX = "ChipLang Debugger (Trace):"

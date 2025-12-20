@@ -2,9 +2,8 @@
 
 Chip's build system
 
-Bundles multiple ChipLang source files into a single program based on the configuration in ''combine.chp''.
-Binary bundles (''.chipbin'') are standalone executables with embedded files and plugins.
-Text bundles (''.chh'') are libraries that can be loaded by other programs.
+Bundles multiple ChipLang source files into a single executable program based on the configuration in ''combine.chp''.
+Programs, properly built using combine have no dependencies outside of the ''chippy'' interpreter itself.
 
 *Usage:*
 - ''chippy combine'' - Process default ''combine.chp'' configuration
@@ -18,18 +17,13 @@ Text bundles (''.chh'') are libraries that can be loaded by other programs.
 - ''Output'': Output executable filename
 - ''Source'': Main source file entry point
 - ''Paths'': List of directories to search for dependencies
-- ''PluginPaths'': List of directories to search for plugins
-- ''Assets'': List of asset files to bundle
 - ''External'': List of dependencies combine shouldn't bundle and just keep as loads
-- ''ExternalPlugins'': List of plugins combine shouldn't bundle and just keep as ploads
 - ''StripComments'': Remove comments from bundled output
 - ''StripWhitespace'': Remove excess whitespace from bundled output
-- ''ProduceBundle'': Create binary bundle (''true'') or text bundle (''false'')
+- ''AddShebang'': Add ''#!/usr/bin/chippy'' shebang to output
 
-*Features:*
+*What it does:*
 - Automatic dependency resolution via ''load()'' statements
-- Automatic plugin collection via ''pload()'' statements
-	- only with ''ProduceBundle == true''
 - Circular dependency prevention
 - Licence header insertion (when configured)
 - Comment/whitespace stripping (when configured)
@@ -37,12 +31,6 @@ Text bundles (''.chh'') are libraries that can be loaded by other programs.
 	- Symbol collision detection in file scope (see ''chippy doc scoping'')
 	- Syntax error detection
 
-*Bundle Types:*
-- *Binary bundle*: Standalone executable with embedded assets and plugins.
-  This is recommended when using plugins or bundled assets in your program.
-
-- *Text bundle*: Multiple Chip source files combined into one text-file
-  This is recommended when your program uses no plugins or relies on no bundled assets.
-
 *Returns:*
+- Creates bundled executable file
 - Exit code 0 on success, non-zero on failure

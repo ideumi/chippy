@@ -3,7 +3,7 @@
 # Combine configuration file
 #
 
-# Metadata
+# Project metadata
 
 var Project = "avant";
 var Version = "1.0.1";
@@ -14,23 +14,10 @@ var Output = "out/avant";
 
 var Source = "src/main.chp";
 
-# Create the program as a CHIPBIN bundle
-# This must be true if you are using plugins
-
-var ProduceBundle = false;
-
-# if ProduceBundle == true
-# {
-#	Output = Output + "-" + CHIPOS + "-" + CHIPAR;
-# }
-
 # Search paths for dependencies
 
 var Paths = [];
 Paths = Paths + ["src"];
-
-var PluginPaths = [];
-PluginPaths = PluginPaths + ["src/lib/plugins"];
 
 # Add user-local library path if HOME is available
 
@@ -39,27 +26,13 @@ var homePath = getenv("HOME");
 if homePath != err
 {
     Paths = Paths + [homePath + "/.local/share/chiplang/lib"];
-    PluginPaths = PluginPaths + [homePath + "/.local/share/chiplang/lib/plugins"];
 }
 
 Paths = Paths + ["../../lib"];
 Paths = Paths + ["/usr/lib/chiplang"];
-PluginPaths = PluginPaths + ["/usr/lib/chiplang/plugins"];
 
-# Assets to bundle, requires ProduceBundle be true
-
-var Assets = [];
-
-# Dependencies combine shouldn't bundle and just keep as loads
-
-var External = [];
-
-# Plugins combine shouldn't bundle and just keep as ploads
-# If you wish to produce a text bundle that retains pload calls, use this
-
-var ExternalPlugins = [];
-
-# Stylistic Options
+# Options
 
 var StripComments = true;
 var StripWhitespace = true;
+var AddShebang = true;

@@ -114,7 +114,7 @@ func getTypePrecedence(v values.Value) int {
 		return 2
 	case *values.Bytes:
 		return 3
-	case *values.NativeFunction, *values.Function:
+	case *values.BuiltInFunction, *values.Function:
 		return 4
 	default:
 		return 5

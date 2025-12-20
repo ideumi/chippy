@@ -133,62 +133,52 @@ func SetGlobalInterpreter(interpreter InterpreterInterface) {
 	globalInterpreter = interpreter
 }
 
-type NativeFunction struct {
+type BuiltInFunction struct {
 	*BaseValue
-	Name   string
-	Plugin bool
-	Fn     func([]Value, interface{}) *RuntimeResult
+	Name string
+	Fn   func([]Value, interface{}) *RuntimeResult
 }
 
-const (
-	Plugin  = true
-	BuiltIn = false
-)
-
-func NewNativeFunction(name string, fn func([]Value, interface{}) *RuntimeResult, plugin bool) *NativeFunction {
-	return &NativeFunction{
+func NewBuiltInFunction(name string, fn func([]Value, interface{}) *RuntimeResult) *BuiltInFunction {
+	return &BuiltInFunction{
 		BaseValue: NewBaseValue(),
 		Name:      name,
 		Fn:        fn,
-		Plugin:    plugin,
 	}
 }
 
-func (bf *NativeFunction) String() string {
-	if bf.Plugin {
-		return fmt.Sprintf("<plugin function %s>", bf.Name)
-	}
+func (bf *BuiltInFunction) String() string {
 	return fmt.Sprintf("<built-in function %s>", bf.Name)
 }
 
-func (bf *NativeFunction) SetPos(posStart, posEnd *errors.Position) Value {
+func (bf *BuiltInFunction) SetPos(posStart, posEnd *errors.Position) Value {
 	bf.BaseValue.SetPos(posStart, posEnd)
 	return bf
 }
 
-func (bf *NativeFunction) SetContext(context interface{}) Value {
+func (bf *BuiltInFunction) SetContext(context interface{}) Value {
 	bf.BaseValue.SetContext(context)
 	return bf
 }
 
-func (bf *NativeFunction) Copy() Value {
-	copy := NewNativeFunction(bf.Name, bf.Fn, bf.Plugin)
+func (bf *BuiltInFunction) Copy() Value {
+	copy := NewBuiltInFunction(bf.Name, bf.Fn)
 	copy.SetPos(bf.posStart, bf.posEnd)
 	copy.SetContext(bf.context)
 	return copy
 }
 
-func (bf *NativeFunction) IsTrue() bool {
+func (bf *BuiltInFunction) IsTrue() bool {
 	return true
 }
 
-func (bf *NativeFunction) Execute(args []Value) *RuntimeResult {
+func (bf *BuiltInFunction) Execute(args []Value) *RuntimeResult {
 	res := NewRuntimeResult()
 
 	if bf.context == nil {
 		return res.Failure(errors.NewRTError(
 			bf.posStart, bf.posEnd,
-			"Built-in or plugin function context is nil",
+			"Built-in function context is nil",
 			nil,
 		))
 	}

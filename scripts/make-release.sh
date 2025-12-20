@@ -3,7 +3,7 @@ set -e
 
 # Configuration
 RELEASE_NAME="chiplang"
-VERSION="1.0.6"
+VERSION="1.0.5"
 ARCH=$(uname -m)
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 RELEASE_DIR="${RELEASE_NAME}-${VERSION}-${OS}-${ARCH}"
@@ -17,7 +17,7 @@ run_cmd() { echo "$1"; eval "$1"; }
 
 # Setup
 [ -d "${RELEASE_DIR}" ] && rm -rf "${RELEASE_DIR}"
-mkdir -p "${RELEASE_DIR}/content/lib" "${RELEASE_DIR}/content/lib/plugins" "${RELEASE_DIR}/content/doc"
+mkdir -p "${RELEASE_DIR}/content/lib" "${RELEASE_DIR}/content/doc"
 
 # Build
 [ -f "../Makefile" ] || die "Makefile not found."
@@ -29,18 +29,6 @@ cp ../chippy "${RELEASE_DIR}/content/"
 [ -d "../lib" ] || die "lib directory not found"
 cp ../lib/*.chh "${RELEASE_DIR}/content/lib/"
 [ -d "../doc" ] && cp -r ../doc/* "${RELEASE_DIR}/content/doc/"
-
-# Copy plugins
-if [ -d "../plugins" ]; then
-    for plugin_dir in ../plugins/*/; do
-        [ -d "$plugin_dir" ] || continue
-        plugin_name=$(basename "$plugin_dir")
-        [ "$plugin_name" = "example" ] && continue
-        for plugin_file in "$plugin_dir"*.chipso; do
-            [ -f "$plugin_file" ] && cp "$plugin_file" "${RELEASE_DIR}/content/lib/plugins/"
-        done
-    done
-fi
 
 # Build installer
 run_cmd "cd ../installer && ../chippy combine && cd ../rel"
@@ -57,7 +45,7 @@ chmod +x "${RELEASE_DIR}/uninstall.sh"
 
 # Package
 echo "Creating archive..."
-tar -cJf "${ARCHIVE_NAME}" --owner=0 --group=0 "${RELEASE_DIR}"
+tar -cJf "${ARCHIVE_NAME}" "${RELEASE_DIR}"
 rm -rf "${RELEASE_DIR}"
 
 # Results

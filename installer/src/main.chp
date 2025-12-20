@@ -10,7 +10,6 @@ load("libprint.chh");
 
 var CWD = getcwd();
 var LIBDIR = JoinPath(CWD, "content/lib");
-var PLUGINDIR = JoinPath(LIBDIR, "plugins");
 var CHIPPYBIN = JoinPath(CWD, "content/chippy");
 var DOCDIR = JoinPath(CWD, "content/doc");
 
@@ -201,22 +200,6 @@ func InstallLibraries()
 	return result;
 }
 
-func InstallPlugins()
-{
-	var paths = GetInstallPaths();
-	var libPath = paths[2];
-	var pluginPath = JoinPath(libPath, "plugins");
-
-	if IsDir(PLUGINDIR) == false
-	{
-		return true;
-	}
-
-	var result = InstallFiles(PLUGINDIR, pluginPath);
-
-	return result;
-}
-
 func InstallDocumentation()
 {
 	var paths = GetInstallPaths();
@@ -297,15 +280,6 @@ func Install()
 	if str(libResult) == err
 	{
 		Println("Installation failed during library installation");
-
-		return;
-	}
-
-	var pluginResult = InstallPlugins();
-
-	if str(pluginResult) == err
-	{
-		Println("Installation failed during plugin installation");
 
 		return;
 	}
