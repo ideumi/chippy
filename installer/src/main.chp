@@ -116,34 +116,11 @@ func RemoveDirectory(dirPath)
 		for i = 1 to len(files)
 		{
 			var filePath = JoinPath(dirPath, files[i]);
+			var unlinkResult = unlink(filePath);
 
-			# Safety: Don't under any circumstance follow links, just remove the link.
-			if IsSymlink(filePath)
+			if str(unlinkResult) == err
 			{
-				var unlinkResult = unlink(filePath);
-
-				if str(unlinkResult) == err
-				{
-					return err;
-				}
-			}
-			elseif IsDir(filePath)
-			{
-				var removeResult = RemoveDirectory(filePath);
-
-				if str(removeResult) == err
-				{
-					return err;
-				}
-			}
-			else
-			{
-				var unlinkResult = unlink(filePath);
-
-				if str(unlinkResult) == err
-				{
-					return err;
-				}
+				return err;
 			}
 		}
 	}
