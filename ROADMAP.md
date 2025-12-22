@@ -2,7 +2,7 @@
 
 ## Lay of the Land
 
-ChipLang is a personal, open‑source side‑project. All development is performed and financed by a single maintainer on a volunteer basis. The direction, timing, and scope of work are therefore guided by personal interest and availability rather than a formal schedule. Users are encouraged to explore the language, but should keep in mind that there is no formal guarantee of long‑term stability, security‑patch prioritisation, backward compatibility or anything actually being correct.
+ChipLang is a personal, open-source side-project. All development is performed and financed by a single maintainer on a volunteer basis. The direction, timing, and scope of work are therefore guided by personal interest and availability rather than a formal schedule. Users are encouraged to explore the language, but should keep in mind that there is no formal guarantee of long-term stability, security-patch prioritisation, backward compatibility or anything actually being correct.
 
 ## 1.0.x / Current
 
@@ -17,13 +17,13 @@ Some things i plan to still accomplish in 1.0.x:
 
 - ~~Expand `chippy doc` to also be able to be ran on `.chp` and `.chh` files to get an overview via comments.~~
 
-- Create the infrastructure to maintain optional built‑ins outside the `builtins/` language core (perhaps in `internal/optional`). Specific sections of this optional package should be activatable (exposed to the GST) via a new `activate(section)` builtin.
+- Create the infrastructure to maintain optional built-ins outside the `builtins/` language core (perhaps in `internal/optional`). Specific sections of this optional package should be activatable (exposed to the GST) via a new `activate(section)` builtin.
   - Optional section may export multiple functions and constants to the GST
     - Sections are namespaced with `_section_function_` or `_section_constant_`
     - Every section must be backed / abstracted by a `.chh` in `lib/`
-  - All Go code that runs inside Chip is compiled into `chippy` at interpreter‑compile time.
+  - All Go code that runs inside Chip is compiled into `chippy` at interpreter-compile time.
   - Give users the option to compile `chippy` with particular sections enabled or disabled.
-  - This cannot be achieved through plugins in a way where i don't drive the language against a wall (I’ve tried extensively) because Go's plugin system is very fragile.
+  - This cannot be achieved through plugins in a way where i don't drive the language against a wall (I've tried extensively) because Go's plugin system is very fragile.
 
 - Expand the corelib
   - JSON
