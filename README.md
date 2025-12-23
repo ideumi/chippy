@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="media/ChipLogo.svg" alt="ChipLang Logo" width="200"/>
+</p>
+
 # ChipLang
 
 ChipLang (Chipmunk language) is an interpreted scripting / programming language project written in Go, it has the goal of creating a simple, modular, low profile, understandable and hackable programming language for scripting and tooling that would be hard to write, maintain, architect and deploy in shell.

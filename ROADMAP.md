@@ -35,7 +35,7 @@ Some things i plan to still accomplish in 1.0.x:
   - Jetbrains?
   - VSCode?
 
-- Create a logo or mascot
+- ~~Create a logo or mascot~~
 
 ## Version 1.1.x
 
