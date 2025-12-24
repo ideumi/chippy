@@ -1,0 +1,16 @@
+*loadopt* | V-$CHIPVR ($CHIPCN)
+
+''loadopt(optional)''
+
+Loads functions and constants of an optional language builtin into the current session.
+
+See ''chippy doc optionals''
+
+*Parameters:*
+- ''optional'': String name of the optional to load
+
+*Returns:*
+- ''ok'' on success
+
+*Errors:*
+- Runtime error if optional does not exist

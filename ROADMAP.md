@@ -17,16 +17,11 @@ Some things i plan to still accomplish in 1.0.x:
 
 - ~~Expand `chippy doc` to also be able to be ran on `.chp` and `.chh` files to get an overview via comments.~~
 
-- Create the infrastructure to maintain optional built-ins outside the `builtins/` language core (perhaps in `internal/optional`). Specific sections of this optional package should be activatable (exposed to the GST) via a new `activate(section)` builtin.
-  - Optional section may export multiple functions and constants to the GST
-    - Sections are namespaced with `_section_function_` or `_section_constant_`
-    - Every section must be backed / abstracted by a `.chh` in `lib/`
-  - All Go code that runs inside Chip is compiled into `chippy` at interpreter-compile time.
-  - Give users the option to compile `chippy` with particular sections enabled or disabled.
-  - This cannot be achieved through plugins in a way where i don't drive the language against a wall (I've tried extensively) because Go's plugin system is very fragile.
+- ~~Create the infrastructure to maintain optional built-ins outside the `builtins/` language core.~~
+  - ~~JSON~~
 
 - Expand the corelib
-  - JSON
+  - ~~JSON~~
   - ....
 
 - Create a CI pipeline for automatic release generation (if Codeberg supports it, i haven't researched this yet)

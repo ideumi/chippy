@@ -14,16 +14,6 @@ import (
 	"os"
 )
 
-type RoadRunner2Interface interface {
-	Run(filename, text string) (values.Value, error)
-}
-
-var globalRoadRunner2 RoadRunner2Interface
-
-func SetGlobalRoadRunner2(rr RoadRunner2Interface) {
-	globalRoadRunner2 = rr
-}
-
 func loadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
@@ -65,7 +55,9 @@ func loadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 		))
 	}
 
-	if globalRoadRunner2 == nil {
+	roadRunner := shared.GetGlobalRoadRunner2()
+
+	if roadRunner == nil {
 		posStart, posEnd := args[0].GetPos()
 
 		return res.Failure(errors.NewRTError(
@@ -75,7 +67,7 @@ func loadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 		))
 	}
 
-	_, err = globalRoadRunner2.Run(filename.Value, string(content))
+	_, err = roadRunner.Run(filename.Value, string(content))
 
 	if err != nil {
 		posStart, posEnd := args[0].GetPos()

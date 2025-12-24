@@ -1,0 +1,15 @@
+*Optionals* | V-$CHIPVR ($CHIPCN)
+
+*What are optionals?*
+
+Optionals are optional builtins and constant values that can be activated via the ''loadopt(optional)'' call at runtime. Optionals are always backed by a corresponding ''.chh'' library in the corelib.
+
+*Why do optionals exist?*
+
+Optionals are built into ''chippy'' similarly to ''builtins'', making them very fast for tight loops and other types of algorithms where pure Chip code cannot match their performance. They also enable interoperation between existing systems and Chip code.
+
+See ''chippy doc loadopt'', ''chippy doc builtins'' and ''chippy doc corelib''.
+
+*Currently available optionals:*
+
+''json'' - Abstracted by ''libjson.chh''

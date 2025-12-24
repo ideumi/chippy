@@ -16,10 +16,11 @@ func GetBuiltins() map[string]*values.BuiltInFunction {
 	return map[string]*values.BuiltInFunction{
 
 		// System functions
-		"off":   values.NewBuiltInFunction("off", offFunction),
-		"error": values.NewBuiltInFunction("error", errorFunction),
-		"args":  values.NewBuiltInFunction("args", argsFunction),
-		"load":  values.NewBuiltInFunction("load", loadFunction),
+		"off":     values.NewBuiltInFunction("off", offFunction),
+		"error":   values.NewBuiltInFunction("error", errorFunction),
+		"args":    values.NewBuiltInFunction("args", argsFunction),
+		"load":    values.NewBuiltInFunction("load", loadFunction),
+		"loadopt": values.NewBuiltInFunction("loadopt", loadoptFunction),
 
 		// FSIO
 		"fopen":  values.NewBuiltInFunction("fopen", fopenFunction),

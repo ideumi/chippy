@@ -20,6 +20,7 @@ package roadrunner
 
 import (
 	"chip-go/internal/builtins"
+	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
 	"chip-go/internal/context"
 	"chip-go/internal/interpreter"
@@ -43,9 +44,12 @@ func NewRoadRunner2() *RoadRunner2 {
 		globalContext: globalCtx,
 	}
 
+	// Set interp for values package so functions can create function context
+	// chippy doc scoping
 	values.SetGlobalInterpreter(interp)
 
-	builtins.SetGlobalRoadRunner2(roadRunner2)
+	// Set RR2 for the shared package so load, loadopt etc. have proper access.
+	shared.SetGlobalRoadRunner2(roadRunner2)
 
 	builtinFuncs := builtins.GetBuiltins()
 
