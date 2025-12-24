@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: ChipLang
 " Maintainer: ideumi
-" Latest Revision: 2025-12-20
+" Latest Revision: 2025-12-24
 
 if exists("b:current_syntax")
   finish
@@ -25,7 +25,7 @@ syn keyword chipBuiltin getch getcwd getenv getpid getuid
 syn keyword chipBuiltin indexof int
 syn keyword chipBuiltin join
 syn keyword chipBuiltin kill
-syn keyword chipBuiltin len lenv list load lower lstat
+syn keyword chipBuiltin len lenv list load loadopt lower lstat
 syn keyword chipBuiltin mkdir
 syn keyword chipBuiltin num
 syn keyword chipBuiltin off

@@ -126,6 +126,7 @@
           <keyword>lenv</keyword>
           <keyword>list</keyword>
           <keyword>load</keyword>
+          <keyword>loadopt</keyword>
           <keyword>lower</keyword>
           <keyword>lstat</keyword>
           <keyword>mkdir</keyword>

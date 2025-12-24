@@ -70,6 +70,7 @@
       <item>lenv</item>
       <item>list</item>
       <item>load</item>
+      <item>loadopt</item>
       <item>lower</item>
       <item>lstat</item>
       <item>mkdir</item>
