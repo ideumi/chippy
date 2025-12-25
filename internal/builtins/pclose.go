@@ -11,6 +11,7 @@ import (
 	"chip-go/internal/constants"
 	"chip-go/internal/errors"
 	"chip-go/internal/values"
+	"os/exec"
 )
 
 func pcloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
@@ -94,7 +95,13 @@ func pcloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 	exitCode := 0
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		// Check if non-zero exit
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			exitCode = exitErr.ExitCode()
+		} else {
+			// Some other error (process could not run etc.)
+			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		}
 	}
 
 	return res.Success(values.NewNumber(float64(exitCode)).SetContext(ctx))
