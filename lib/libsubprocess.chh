@@ -1,0 +1,110 @@
+#!/usr/bin/chippy
+#
+# corelib - libsubprocess.chh
+#
+
+load("libstrings.chh");
+
+#@ <Run(command)>
+#@ V-1.0.0 (2025-12-25)
+#@
+#@ Executes a shell command and returns the result as a list
+#@ ''[exitcode, output]'' where ''exitcode'' is the process exit
+#@ code or ''err'', and ''output'' is the command's STDOUT as a
+#@ string. Returns ''err'' in case of severe failure.
+
+func Run(command)
+{
+	var handle = popen(command, "r");
+
+	if str(handle) == err { return err; }
+
+	var rawOutput = fread(handle, 0);
+
+	if str(rawOutput) == err
+	{
+		pclose(handle);
+		return err;
+	}
+
+	var output = unpack(rawOutput);
+	var exitcode = pclose(handle);
+
+	return [exitcode, output];
+}
+
+#@ <RunCapture(command)>
+#@ V-1.0.0 (2025-12-25)
+#@
+#@ Executes a shell command and returns STDOUT on success.
+#@ Returns ''err'' if the command fails or cannot be started.
+
+func RunCapture(command)
+{
+	var result = Run(command);
+
+	if str(result) == err { return err; }
+
+	var exitcode = result[1];
+
+	if str(exitcode) == err { return err; }
+	if exitcode != 0 { return err; }
+
+	return result[2];
+}
+
+#@ <RunCheck(command)>
+#@ V-1.0.0 (2025-12-25)
+#@
+#@ Executes a shell command and returns ''ok'' or ''err'' based
+#@ on exit status.
+
+func RunCheck(command)
+{
+	var result = Run(command);
+
+	if str(result) == err { return err; }
+
+	var exitcode = result[1];
+
+	if str(exitcode) == err { return err; }
+	if exitcode == 0 { return ok; }
+
+	return err;
+}
+
+#@ <Spawn(command)>
+#@ V-1.0.0 (2025-12-25)
+#@
+#@ Starts a background process and returns its PID.
+#@
+#@ The process will continue running in the background independently
+#@ of the parent. Output to STDOUT or STDERR is discarded. Use
+#@ ''kill(pid, signal)'' to terminate it when no longer needed.
+
+func Spawn(command)
+{
+	# The shell's & operator backgrounds the command
+	# Redirect output to /dev/null to prevent pipe inheritance
+	# $! expands to the PID of the last backgrounded process
+	var handle = popen(command + " > /dev/null 2>&1 & echo $!", "r");
+
+	if str(handle) == err { return err; }
+
+	var rawOutput = fread(handle, 0);
+
+	if str(rawOutput) == err
+	{
+		pclose(handle);
+		return err;
+	}
+
+	var output = Trim(unpack(rawOutput));
+	pclose(handle);
+
+	var pid = num(output);
+
+	if pid == 0 { return err; }
+
+	return pid;
+}
