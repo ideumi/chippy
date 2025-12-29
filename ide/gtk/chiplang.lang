@@ -120,6 +120,8 @@
           <keyword>getuid</keyword>
           <keyword>indexof</keyword>
           <keyword>int</keyword>
+          <keyword>iserr</keyword>
+          <keyword>isok</keyword>
           <keyword>join</keyword>
           <keyword>kill</keyword>
           <keyword>len</keyword>

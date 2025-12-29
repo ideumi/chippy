@@ -64,6 +64,8 @@
       <item>getuid</item>
       <item>indexof</item>
       <item>int</item>
+      <item>iserr</item>
+      <item>isok</item>
       <item>join</item>
       <item>kill</item>
       <item>len</item>
