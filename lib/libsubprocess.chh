@@ -17,11 +17,11 @@ func Run(command)
 {
 	var handle = popen(command, "r");
 
-	if str(handle) == err { return err; }
+	if iserr(handle) { return err; }
 
 	var rawOutput = fread(handle, 0);
 
-	if str(rawOutput) == err
+	if iserr(rawOutput)
 	{
 		pclose(handle);
 		return err;
@@ -43,11 +43,11 @@ func RunCapture(command)
 {
 	var result = Run(command);
 
-	if str(result) == err { return err; }
+	if iserr(result) { return err; }
 
 	var exitcode = result[1];
 
-	if str(exitcode) == err { return err; }
+	if iserr(exitcode) { return err; }
 	if exitcode != 0 { return err; }
 
 	return result[2];
@@ -63,11 +63,11 @@ func RunCheck(command)
 {
 	var result = Run(command);
 
-	if str(result) == err { return err; }
+	if iserr(result) { return err; }
 
 	var exitcode = result[1];
 
-	if str(exitcode) == err { return err; }
+	if iserr(exitcode) { return err; }
 	if exitcode == 0 { return ok; }
 
 	return err;
@@ -89,11 +89,11 @@ func Spawn(command)
 	# $! expands to the PID of the last backgrounded process
 	var handle = popen(command + " > /dev/null 2>&1 & echo $!", "r");
 
-	if str(handle) == err { return err; }
+	if iserr(handle) { return err; }
 
 	var rawOutput = fread(handle, 0);
 
-	if str(rawOutput) == err
+	if iserr(rawOutput)
 	{
 		pclose(handle);
 		return err;

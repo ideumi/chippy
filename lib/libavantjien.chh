@@ -79,7 +79,7 @@ func AvantjienDate(timestamp)
 {
 	var daysDelta = DaysSinceAvantjienEpoch(timestamp);
 
-	if str(daysDelta) == err { return err; }
+	if iserr(daysDelta) { return err; }
 
 	var avantYear = int(daysDelta / DAYSINAVANTYEAR) + 1;
 	var avantMonth = int((daysDelta / DAYSINAVANTMONTH) + 1);
@@ -158,7 +158,7 @@ func AvantjienCycle(timestamp)
 
 	var timeComponents = GregorianParseTime(timestamp);
 
-	if str(timeComponents) == err { return err; }
+	if iserr(timeComponents) { return err; }
 
 	var hour = timeComponents[4];
 
@@ -178,7 +178,7 @@ func AvantjienTime(timestamp)
 
 	var timeComponents = GregorianParseTime(timestamp);
 
-	if str(timeComponents) == err { return err; }
+	if iserr(timeComponents) { return err; }
 
 	var hour = timeComponents[4];
 
@@ -291,7 +291,7 @@ func FormatAvantjienDate(timestamp)
 {
 	var avantDate = AvantjienDate(timestamp);
 
-	if str(avantDate) == err { return err; }
+	if iserr(avantDate) { return err; }
 
 	var aDay = avantDate[1];
 	var aMonth = avantDate[2];

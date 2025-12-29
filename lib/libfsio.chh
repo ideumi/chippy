@@ -16,13 +16,13 @@ func ReadFile(filename, text)
 {
 	var handle = fopen(filename, "r");
 
-	if str(handle) == err { return err; }
+	if iserr(handle) { return err; }
 
 	var allBytes = fread(handle, 0); # Entire file
 
 	fclose(handle);
 
-	if str(allBytes) == err { return err; }
+	if iserr(allBytes) { return err; }
 
 	if text == true { return unpack(allBytes); }
 
@@ -39,7 +39,7 @@ func ReadLines(filename)
 {
 	var content = ReadFile(filename, true);
 
-	if str(content) == err { return err; }
+	if iserr(content) { return err; }
 
 	return split(content, "\n");
 }
@@ -71,12 +71,12 @@ func WriteFile(filename, bytesOrText, text, overwrite)
 
 	var handle = fopen(filename, mode);
 
-	if str(handle) == err { return err; }
+	if iserr(handle) { return err; }
 
 	if text == true { result = fwrite(pack(bytesOrText), handle); }
 	else { result = fwrite(bytesOrText, handle); }
 
-	if str(result) == err { return err; }
+	if iserr(result) { return err; }
 
 	return fclose(handle);
 }
@@ -107,7 +107,7 @@ func CreateDir(path)
 {
 	var result = mkdir(path, 755);
 
-	if result == err { return err; }
+	if iserr(result) { return err; }
 
 	return ok;
 }
@@ -122,14 +122,14 @@ func ListDir(path)
 {
 	var dir = dopen(path);
 
-	if str(dir) == err { return err; }
+	if iserr(dir) { return err; }
 
 	var entries = [];
 	var entry = dread(dir);
 
 	while type(entry) == "string"
 	{
-		if entry == ok { break; } # EOF
+		if isok(entry) { break; } # EOF
 
 		if entry != "." and entry != ".."
 		{

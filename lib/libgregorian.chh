@@ -162,7 +162,7 @@ func GregorianFormatTime(timestamp)
 {
 	var components = GregorianParseTime(timestamp);
 
-	if str(components) == err { return err; }
+	if iserr(components) { return err; }
 
 	var year = components[1];
 	var month = components[2];

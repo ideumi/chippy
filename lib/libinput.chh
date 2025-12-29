@@ -32,7 +32,7 @@ func Input()
 	{
 		var bytes = fread(STDIN, 1);
 
-		if str(bytes) == err { return err; }
+		if iserr(bytes) { return err; }
 
 		var byte = bytes[1];
 
@@ -53,13 +53,13 @@ func Input()
 func InputPw()
 {
 	var sttyDisable = popen(STTYOFFECHO, "r");
-	if str(sttyDisable) == err { return err; }
+	if iserr(sttyDisable) { return err; }
 	pclose(sttyDisable);
 
 	var result = Input();
 
 	var sttyEnable = popen(STTYONECHO, "r");
-	if str(sttyEnable) != err { pclose(sttyEnable); }
+	if not iserr(sttyEnable) { pclose(sttyEnable); }
 
 	return result;
 }

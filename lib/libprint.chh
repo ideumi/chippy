@@ -55,7 +55,7 @@ func Printeln(text)
 func Printf(text, values)
 {
 	var fmtStr = Format(str(text), values);
-	if fmtStr == err { return err; }
+	if iserr(fmtStr) { return err; }
 
 	Print(fmtStr);
 }
@@ -81,7 +81,7 @@ func Printfln(text, values)
 func Printef(text, values)
 {
 	var fmtStr = Format(str(text), values);
-	if fmtStr == err { return err; }
+	if iserr(fmtStr) { return err; }
 
 	Printe(fmtStr);
 }
