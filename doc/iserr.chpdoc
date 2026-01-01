@@ -1,0 +1,14 @@
+*iserr* | V-$CHIPVR ($CHIPCN)
+
+''iserr(value)''
+
+Checks if a value is the ''err'' constant.
+
+*Parameters:*
+- ''value'': Any value to check
+
+*Returns:*
+- Number: ''true'' if value is ''err'', ''false'' otherwise
+
+*Errors:*
+- Runtime error if wrong number of arguments

@@ -17,7 +17,7 @@ func IsTermux()
 {
 	var termuxVersion = getenv("TERMUX_VERSION");
 
-	if str(termuxVersion) != err { return true; }
+	if not iserr(termuxVersion) { return true; }
 
 	return false;
 }
@@ -55,7 +55,7 @@ func InstallFiles(srcDir, destDir)
 {
 	var createResult = CreateDir(destDir);
 
-	if str(createResult) == err {
+	if iserr(createResult) {
 		var creationResult = IsDir(destDir);
 
 		if creationResult == false
@@ -66,7 +66,7 @@ func InstallFiles(srcDir, destDir)
 
 	var files = ListDir(srcDir);
 
-	if str(files) == err
+	if iserr(files)
 	{
 		return true; # No files to install
 	}
@@ -80,7 +80,7 @@ func InstallFiles(srcDir, destDir)
 		if IsFile(srcFile) {
 			var copyResult = CopyFile(srcFile, destFile);
 
-			if str(copyResult) == err
+			if iserr(copyResult)
 			{
 				return err;
 			}
@@ -93,10 +93,10 @@ func InstallFiles(srcDir, destDir)
 func CopyFile(src, dest)
 {
 	var data = ReadFile(src, false);
-	if str(data) == err { return err; }
+	if iserr(data) { return err; }
 
 	var result = WriteFile(dest, data, false, true);
-	if str(result) == err { return err; }
+	if iserr(result) { return err; }
 
 	return true;
 }
@@ -110,14 +110,14 @@ func RemoveDirectory(dirPath)
 
 	var files = ListDir(dirPath);
 
-	if str(files) != err
+	if not iserr(files)
 	{
 		for i = 1 to len(files)
 		{
 			var filePath = JoinPath(dirPath, files[i]);
 			var unlinkResult = unlink(filePath);
 
-			if str(unlinkResult) == err
+			if iserr(unlinkResult)
 			{
 				return err;
 			}
@@ -126,7 +126,7 @@ func RemoveDirectory(dirPath)
 
 	var unlinkResult = unlink(dirPath);
 
-	if str(unlinkResult) == err
+	if iserr(unlinkResult)
 	{
 		return err;
 	}
@@ -145,7 +145,7 @@ func CleanExistingInstallation()
 	{
 		var unlinkResult = unlink(binaryPath);
 
-		if str(unlinkResult) == err
+		if iserr(unlinkResult)
 		{
 			return err;
 		}
@@ -153,14 +153,14 @@ func CleanExistingInstallation()
 
 	var removeLibResult = RemoveDirectory(libPath);
 
-	if str(removeLibResult) == err
+	if iserr(removeLibResult)
 	{
 		return err;
 	}
 
 	var removeDocResult = RemoveDirectory(docPath);
 
-	if str(removeDocResult) == err
+	if iserr(removeDocResult)
 	{
 		return err;
 	}
@@ -175,14 +175,14 @@ func InstallBinary()
 
 	var result = CopyFile(CHIPPYBIN, binaryPath);
 
-	if str(result) == err
+	if iserr(result)
 	{
 		return err;
 	}
 
 	var chmodResult = chmod(binaryPath, 0755);
 
-	if str(chmodResult) == err
+	if iserr(chmodResult)
 	{
 		return err;
 	}
@@ -226,7 +226,7 @@ func Uninstall()
 
 	var cleanResult = CleanExistingInstallation();
 
-	if str(cleanResult) == err
+	if iserr(cleanResult)
 	{
 		Println("Uninstall failed");
 
@@ -257,7 +257,7 @@ func Install()
 
 	var cleanResult = CleanExistingInstallation();
 
-	if str(cleanResult) == err
+	if iserr(cleanResult)
 	{
 		Println("Installation failed during cleanup");
 
@@ -268,7 +268,7 @@ func Install()
 
 	var binaryResult = InstallBinary();
 
-	if str(binaryResult) == err
+	if iserr(binaryResult)
 	{
 		Println("Installation failed during binary installation");
 
@@ -277,7 +277,7 @@ func Install()
 
 	var libResult = InstallLibraries();
 
-	if str(libResult) == err
+	if iserr(libResult)
 	{
 		Println("Installation failed during library installation");
 
@@ -286,7 +286,7 @@ func Install()
 
 	var docResult = InstallDocumentation();
 
-	if str(docResult) == err
+	if iserr(docResult)
 	{
 		Println("Installation failed during documentation installation");
 

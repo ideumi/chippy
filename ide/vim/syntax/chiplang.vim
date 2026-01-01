@@ -22,7 +22,7 @@ syn keyword chipBuiltin dclose dopen dread
 syn keyword chipBuiltin error exec
 syn keyword chipBuiltin fclose fopen fread fsync fwrite
 syn keyword chipBuiltin getch getcwd getenv getpid getuid
-syn keyword chipBuiltin indexof int
+syn keyword chipBuiltin indexof int iserr isok
 syn keyword chipBuiltin join
 syn keyword chipBuiltin kill
 syn keyword chipBuiltin len lenv list load loadopt lower lstat

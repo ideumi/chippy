@@ -3,7 +3,7 @@ set -e
 
 # Configuration
 RELEASE_NAME="chiplang"
-VERSION="1.0.6"
+VERSION="1.0.7"
 ARCH=$(uname -m)
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 RELEASE_DIR="${RELEASE_NAME}-${VERSION}-${OS}-${ARCH}"
@@ -45,7 +45,7 @@ chmod +x "${RELEASE_DIR}/uninstall.sh"
 
 # Package
 echo "Creating archive..."
-tar -cJf "${ARCHIVE_NAME}" "${RELEASE_DIR}"
+tar -cJf "${ARCHIVE_NAME}" --owner=0 --group=0 "${RELEASE_DIR}"
 rm -rf "${RELEASE_DIR}"
 
 # Results

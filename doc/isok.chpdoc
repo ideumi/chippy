@@ -1,0 +1,14 @@
+*isok* | V-$CHIPVR ($CHIPCN)
+
+''isok(value)''
+
+Checks if a value is the ''ok'' constant.
+
+*Parameters:*
+- ''value'': Any value to check
+
+*Returns:*
+- Number: ''true'' if value is ''ok'', ''false'' otherwise
+
+*Errors:*
+- Runtime error if wrong number of arguments
