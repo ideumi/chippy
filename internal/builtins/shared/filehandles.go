@@ -7,25 +7,15 @@
 package shared
 
 import (
-	"io"
 	"os"
-	"os/exec"
 	"sync"
 )
 
-type ProcessHandle struct {
-	Cmd    *exec.Cmd
-	Stdin  io.WriteCloser
-	Stdout io.ReadCloser
-	Stderr io.ReadCloser
-}
-
 var (
-	fileHandles    = make(map[int]*os.File)
-	processHandles = make(map[int]*ProcessHandle)
-	nextHandle     = 3
-	freedHandles   = make([]int, 0) // Pool of freed handle IDs for reuse
-	handleMutex    sync.RWMutex
+	fileHandles  = make(map[int]*os.File)
+	nextHandle   = 3
+	freedHandles = make([]int, 0) // Pool of freed handle IDs for reuse
+	handleMutex  sync.RWMutex
 )
 
 func init() {
@@ -84,26 +74,4 @@ func RemoveFileHandle(handle int) {
 	handleMutex.Lock()
 	defer handleMutex.Unlock()
 	delete(fileHandles, handle)
-}
-
-// GetProcessHandle gets a process handle
-func GetProcessHandle(handle int) (*ProcessHandle, bool) {
-	handleMutex.RLock()
-	defer handleMutex.RUnlock()
-	proc, exists := processHandles[handle]
-	return proc, exists
-}
-
-// StoreProcessHandle stores a process handle
-func StoreProcessHandle(handle int, proc *ProcessHandle) {
-	handleMutex.Lock()
-	defer handleMutex.Unlock()
-	processHandles[handle] = proc
-}
-
-// RemoveProcessHandle removes a process handle
-func RemoveProcessHandle(handle int) {
-	handleMutex.Lock()
-	defer handleMutex.Unlock()
-	delete(processHandles, handle)
 }

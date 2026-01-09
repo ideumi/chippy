@@ -13,3 +13,7 @@ See ''chippy doc loadopt'', ''chippy doc builtins'' and ''chippy doc corelib''.
 *Currently available optionals:*
 
 ''json'' - Abstracted by ''libjson.chh''
+
+''http'' - Abstracted by ''libhttp.chh''
+
+''tls'' - Abstracted by ''libtls.chh''

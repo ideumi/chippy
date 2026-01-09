@@ -1,0 +1,118 @@
+/*
+ *
+ * RR2 - internal/optional/http/parseurl.go
+ *
+ */
+
+package http
+
+import (
+	"chip-go/internal/builtins/shared"
+	"chip-go/internal/constants"
+	"chip-go/internal/errors"
+	"chip-go/internal/optional"
+	"chip-go/internal/values"
+	"net/url"
+	"strconv"
+)
+
+func parseurlFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+	res := values.NewRuntimeResult()
+
+	if len(args) != 1 {
+		var posStart, posEnd *errors.Position
+
+		if len(args) > 0 {
+			posStart, posEnd = args[0].GetPos()
+		}
+
+		return res.Failure(errors.NewRTError(
+			posStart, posEnd,
+			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "parseurl"), 1, "url"),
+			ctx,
+		))
+	}
+
+	urlStr, ok := args[0].(*values.String)
+
+	if !ok {
+		posStart, posEnd := args[0].GetPos()
+
+		return res.Failure(errors.NewRTError(
+			posStart, posEnd,
+			shared.Errors.InvalidArgTypeWithHint(
+				optional.Prefixed(OptionalName, "parseurl"), shared.TypeString, "url"),
+			ctx,
+		))
+	}
+
+	parsedURL, err := url.Parse(urlStr.Value)
+
+	if err != nil {
+		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+	}
+
+	// Require scheme and host for absolute URLs
+	// Empty URLs or URLs without scheme/host should return error
+	if urlStr.Value == "" || (parsedURL.Scheme == "" && parsedURL.Host == "") {
+		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+	}
+
+	// Determine port
+	port := parsedURL.Port()
+
+	if port == "" {
+		if parsedURL.Scheme == "https" {
+			port = "443"
+		} else if parsedURL.Scheme == "http" {
+			port = "80"
+		} else {
+			port = "0"
+		}
+	}
+
+	portNum, _ := strconv.Atoi(port)
+
+	// Build path with query
+	path := parsedURL.Path
+
+	if path == "" {
+		path = "/"
+	}
+
+	mapElements := []values.Value{
+		values.NewString("map").SetContext(ctx),
+	}
+
+	// Add scheme
+	mapElements = append(mapElements, values.NewList([]values.Value{
+		values.NewString("scheme").SetContext(ctx),
+		values.NewString(parsedURL.Scheme).SetContext(ctx),
+	}).SetContext(ctx))
+
+	// Add host
+	mapElements = append(mapElements, values.NewList([]values.Value{
+		values.NewString("host").SetContext(ctx),
+		values.NewString(parsedURL.Hostname()).SetContext(ctx),
+	}).SetContext(ctx))
+
+	// Add port
+	mapElements = append(mapElements, values.NewList([]values.Value{
+		values.NewString("port").SetContext(ctx),
+		values.NewNumber(float64(portNum)).SetContext(ctx),
+	}).SetContext(ctx))
+
+	// Add path
+	mapElements = append(mapElements, values.NewList([]values.Value{
+		values.NewString("path").SetContext(ctx),
+		values.NewString(path).SetContext(ctx),
+	}).SetContext(ctx))
+
+	// Add query
+	mapElements = append(mapElements, values.NewList([]values.Value{
+		values.NewString("query").SetContext(ctx),
+		values.NewString(parsedURL.RawQuery).SetContext(ctx),
+	}).SetContext(ctx))
+
+	return res.Success(values.NewList(mapElements).SetContext(ctx))
+}
