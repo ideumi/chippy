@@ -91,36 +91,10 @@ make release
 
 ## Quick Start
 
-```bash
-# Start the REPL
-chippy
-
-# Run commands via shell
-chippy -r "fwrite(pack(\"Hello World\") + b[10], 1);"
-chippy --run "fwrite(pack(\"Hello World\") + b[10], 1);"
-
-# View available documentation
-chippy doc list
-
-# View build-system documentation
-chippy doc combine
-
-# View documentation for specific topic
-chippy doc <topic>
-```
-
-I recommend having a look at `installer`, `misc` and to a lesser extent `lib` for some examples on how Chip is used in practice.
+Please read the [Quickstart Guide](QUICKSTART.md)
 
 ## License
 
 ChipLang is licensed under the 2-Clause BSD License. See `LICENCE.txt`.
 
 Third-party components are licensed under their respective licenses. See `LICENCES_THIRDPARTY.txt` and `thirdparty/`.
-
----
-
-> Zwei mal drei macht vier,
-widewidewitt und drei macht neune,
-ich mach mir die Welt,
-widewide wie sie mir gefällt.
-- Hey, Pippi Langstrumpf (1969)
