@@ -51,7 +51,7 @@ syn match chipNumber '\<\d\+\>'
 syn match chipFloat '\<\d\+\.\d\+\>'
 
 " Operators
-syn match chipOperator '[-+*/^=!<>]'
+syn match chipOperator '[-+*/%^=!<>]'
 syn match chipOperator '=='
 syn match chipOperator '!='
 syn match chipOperator '<='

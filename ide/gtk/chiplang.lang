@@ -189,7 +189,7 @@
 
         <!-- Operators -->
         <context id="operators" style-ref="operator" class="no-spell-check">
-          <match>[+\-*/^=!&lt;&gt;]|==|!=|&lt;=|&gt;=</match>
+          <match>[+\-*/%^=!&lt;&gt;]|==|!=|&lt;=|&gt;=</match>
         </context>
 
         <!-- Function calls -->
