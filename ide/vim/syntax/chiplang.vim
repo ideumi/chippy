@@ -31,7 +31,7 @@ syn keyword chipBuiltin num
 syn keyword chipBuiltin off
 syn keyword chipBuiltin pack pclose popen
 syn keyword chipBuiltin rand readlink rename replace
-syn keyword chipBuiltin saccept sclose seek select setenv sin sleep sopen sort split sread stat str substr swrite symlink
+syn keyword chipBuiltin saccept sclose seek setenv sin sleep sopen sort split sread stat str substr swrite symlink
 syn keyword chipBuiltin tan time type
 syn keyword chipBuiltin unlink unpack upper
 

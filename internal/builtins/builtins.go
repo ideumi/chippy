@@ -39,7 +39,6 @@ func GetBuiltins() map[string]*values.BuiltInFunction {
 
 		"seek":   values.NewBuiltInFunction("seek", seekFunction),
 		"fsync":  values.NewBuiltInFunction("fsync", fsyncFunction),
-		"select": values.NewBuiltInFunction("select", selectFunction),
 
 		// Directory handling
 		"dopen":  values.NewBuiltInFunction("dopen", dopenFunction),
