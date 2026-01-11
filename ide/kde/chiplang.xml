@@ -88,7 +88,6 @@
       <item>saccept</item>
       <item>sclose</item>
       <item>seek</item>
-      <item>select</item>
       <item>setenv</item>
       <item>sin</item>
       <item>sleep</item>
@@ -153,7 +152,7 @@
         <Int attribute="Decimal" context="#stay"/>
         
         <!-- Operators -->
-        <AnyChar attribute="Operator" context="#stay" String="+-*/^=!&lt;&gt;"/>
+        <AnyChar attribute="Operator" context="#stay" String="+-*/%^=!&lt;&gt;"/>
         <StringDetect attribute="Operator" context="#stay" String="=="/>
         <StringDetect attribute="Operator" context="#stay" String="!="/>
         <StringDetect attribute="Operator" context="#stay" String="&lt;="/>

@@ -86,4 +86,5 @@ const (
 	PositionFirst  = "first"
 	PositionSecond = "second"
 	PositionThird  = "third"
+	PositionFourth = "fourth"
 )

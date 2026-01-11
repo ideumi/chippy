@@ -1,0 +1,63 @@
+#!/usr/bin/chippy
+#
+# corelib - libtls.chh
+#
+
+loadopt("tls");
+
+#@ <TlsOpen(host, port, verify)>
+#@ V-1.0.0 (2026-01-08)
+#@
+#@ Opens a TLS connection to ''host'' on ''port''. Set ''verify'' to ''false''
+#@ to skip certificate verification. Returns a TLS handle on success, ''err''
+#@ on failure.
+
+func TlsOpen(host, port, verify)
+{
+	return _tls_open_(host, port, verify);
+}
+
+#@ <TlsRead(handle, maxBytes)>
+#@ V-1.0.0 (2026-01-08)
+#@
+#@ Reads up to ''maxBytes'' from TLS connection ''handle''. Returns the read
+#@ bytes on success, ''err'' on failure.
+
+func TlsRead(handle, maxBytes)
+{
+	return _tls_read_(handle, maxBytes);
+}
+
+#@ <TlsWrite(data, handle)>
+#@ V-1.0.0 (2026-01-08)
+#@
+#@ Writes ''data'' (bytes) to TLS connection ''handle''. Returns the number of
+#@ bytes written on success, ''err'' on failure.
+
+func TlsWrite(data, handle)
+{
+	return _tls_write_(data, handle);
+}
+
+#@ <TlsClose(handle)>
+#@ V-1.0.0 (2026-01-08)
+#@
+#@ Closes TLS connection ''handle''. Returns ''ok'' on success, ''err'' on
+#@ failure.
+
+func TlsClose(handle)
+{
+	return _tls_close_(handle);
+}
+
+#@ <TlsAccept(socketHandle, certPath, keyPath)>
+#@ V-1.0.0 (2026-01-08)
+#@
+#@ Accepts a TLS connection on server ''socketHandle'' using certificates at
+#@ ''certPath'' and ''keyPath''. Returns a TLS client handle on success, ''err''
+#@ on failure.
+
+func TlsAccept(socketHandle, certPath, keyPath)
+{
+	return _tls_accept_(socketHandle, certPath, keyPath);
+}

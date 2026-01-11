@@ -182,6 +182,11 @@ func executeCombine(combineFile string) error {
 		return fmt.Errorf("source file '%s' not found", config.Source)
 	}
 
+	// Validate configuration
+	if config.StripWhitespace && !config.StripComments {
+		return fmt.Errorf("invalid configuration: StripWhitespace requires StripComments")
+	}
+
 	// Build dependency graph from entry point
 	deps, skipped, err := buildDependencyGraph(config.Source, config.Paths, config.External)
 
@@ -470,6 +475,8 @@ func generateCombinedFile(config CombineConfig, files []string) error {
 			for _, line := range strings.Split(string(licenceContent), "\n") {
 				if strings.TrimSpace(line) != "" {
 					combined.WriteString("# " + line + "\n")
+				} else {
+					combined.WriteString("#\n")
 				}
 			}
 
@@ -571,7 +578,11 @@ func processFileContent(content string, config CombineConfig) string {
 			}
 		}
 
-		// Strip comments if requested but not inside string literals
+		// Check if line is comment only before stripping
+		trimmedLine := strings.TrimSpace(line)
+		isCommentOnly := trimmedLine != "" && strings.HasPrefix(trimmedLine, "#")
+
+		// Strip comments if requested
 		if config.StripComments {
 			line = stripComments(line)
 		}
@@ -586,9 +597,11 @@ func processFileContent(content string, config CombineConfig) string {
 
 			builder.WriteString(line)
 		} else {
-			if line != "" || !config.StripWhitespace {
-				builder.WriteString(line + "\n")
+			if config.StripComments && isCommentOnly {
+				continue
 			}
+
+			builder.WriteString(line + "\n")
 		}
 	}
 

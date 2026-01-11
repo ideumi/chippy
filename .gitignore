@@ -17,3 +17,8 @@ Thumbs.db
 *.tmp
 *.swp
 *~
+
+# Test certs and keys
+*.key
+*.crt
+*.pem

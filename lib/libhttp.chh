@@ -1,0 +1,696 @@
+#!/usr/bin/chippy
+#
+# corelib - libhttp.chh
+#
+
+loadopt("http");
+
+load("libmap.chh");
+load("libnet.chh");
+load("libtls.chh");
+
+#@ <HttpGet(url, headers)>
+#@ V-1.0.0 (2026-01-08)
+#@
+#@ Performs an HTTP GET request to ''url'' with ''headers''. Supports
+#@ HTTP/1.0 and HTTP/1.1 only. Returns a response map with ''statusCode'',
+#@ ''statusText'', ''headers'', and ''body''. Returns ''err'' on failure.
+
+func HttpGet(url, headers)
+{
+	return HttpRequest("GET", url, headers, b[]);
+}
+
+#@ <HttpPost(url, headers, body)>
+#@ V-1.0.0 (2026-01-08)
+#@
+#@ Performs an HTTP POST request to ''url'' with ''headers'' and ''body''.
+#@ The ''body'' can be a string or bytes. Supports HTTP/1.0 and HTTP/1.1
+#@ only. Returns a response map with ''statusCode'', ''statusText'',
+#@ ''headers'', and ''body''. Returns ''err'' on failure.
+
+func HttpPost(url, headers, body)
+{
+	var bodyBytes = b[];
+
+	if type(body) == "string"
+	{
+		bodyBytes = pack(body);
+	}
+	elseif type(body) == "bytes"
+	{
+		bodyBytes = body;
+	}
+
+	return HttpRequest("POST", url, headers, bodyBytes);
+}
+
+#@ <HttpRequest(method, url, headers, body)>
+#@ V-1.0.0 (2026-01-08)
+#@
+#@ Performs an HTTP request with specified ''method'', ''url'', ''headers'',
+#@ and ''body''. Supports both HTTP and HTTPS. Supports HTTP/1.0 and
+#@ HTTP/1.1 only. Returns a response map with ''statusCode'', ''statusText'',
+#@ ''headers'', and ''body''. Returns ''err'' on failure.
+
+func HttpRequest(method, url, headers, body)
+{
+	var urlParts = _http_parseurl_(url);
+
+	if iserr(urlParts) { return err; }
+
+	var scheme = MapGet(urlParts, "scheme");
+	var host = MapGet(urlParts, "host");
+	var port = MapGet(urlParts, "port");
+	var path = MapGet(urlParts, "path");
+	var query = MapGet(urlParts, "query");
+
+	# Build full path with query
+	var fullPath = path;
+
+	if type(query) == "string" and query != ""
+	{
+		fullPath = fullPath + "?" + query;
+	}
+
+	# Add Host header if not present
+	var hasHost = false;
+
+	for i = 1 to len(headers)
+	{
+		var pair = headers[i];
+
+		if lower(pair[1]) == "host"
+		{
+			hasHost = true;
+		}
+	}
+
+	if not hasHost
+	{
+		headers = append(headers, ["Host", host]);
+	}
+
+	var requestBytes = _http_formatrequest_(method, fullPath, headers, body);
+
+	if iserr(requestBytes) { return err; }
+
+	# Open connection
+	var conn = 0;
+	var isTLS = (scheme == "https");
+
+	if isTLS
+	{
+		# Always verify certificates
+		conn = TlsOpen(host, port, true);
+	}
+	else
+	{
+		conn = sopen(host, port, SOCKTCP);
+	}
+
+	if iserr(conn) { return err; }
+
+	# Send request
+	var writeResult = 0;
+
+	if isTLS
+	{
+		writeResult = TlsWrite(requestBytes, conn);
+	}
+	else
+	{
+		writeResult = swrite(requestBytes, conn);
+	}
+
+	if iserr(writeResult)
+	{
+		if isTLS
+		{
+			TlsClose(conn);
+		}
+		else
+		{
+			sclose(conn);
+		}
+
+		return err;
+	}
+
+	# Read response headers first
+	var responseBytes = b[];
+	var headerComplete = false;
+
+	while not headerComplete
+	{
+		var chunk = b[];
+
+		if isTLS
+		{
+			chunk = TlsRead(conn, 1024);
+		}
+		else
+		{
+			chunk = sread(conn, 1024);
+		}
+
+		if iserr(chunk) or len(chunk) == 0
+		{
+			break;
+		}
+
+		responseBytes = responseBytes + chunk;
+
+		# Check for header end
+		var asStr = unpack(responseBytes);
+
+		if not iserr(indexof(asStr, "\r\n\r\n"))
+		{
+			headerComplete = true;
+		}
+	}
+
+	# Parse headers to get content length
+	var parsedResp = _http_parseresponse_(responseBytes);
+
+	if iserr(parsedResp)
+	{
+		if isTLS
+		{
+			TlsClose(conn);
+		}
+		else
+		{
+			sclose(conn);
+		}
+
+		return err;
+	}
+
+	var respHeaders = MapGet(parsedResp, "headers");
+	var contentLength = -1;
+	var isChunked = false;
+
+	for i = 1 to len(respHeaders)
+	{
+		var hPair = respHeaders[i];
+		var keyLower = lower(hPair[1]);
+
+		if keyLower == "content-length"
+		{
+			contentLength = int(num(hPair[2]));
+		}
+
+		if keyLower == "transfer-encoding"
+		{
+			if not iserr(indexof(lower(hPair[2]), "chunked"))
+			{
+				isChunked = true;
+			}
+		}
+	}
+
+	# Calculate how much body we already have
+	var currentBody = MapGet(parsedResp, "body");
+	var bodyBytesNeeded = 0;
+
+	if contentLength >= 0
+	{
+		bodyBytesNeeded = contentLength - len(currentBody);
+	}
+
+	# Read remaining body if needed
+	while bodyBytesNeeded > 0
+	{
+		var chunk = b[];
+
+		if isTLS
+		{
+			chunk = TlsRead(conn, bodyBytesNeeded);
+		}
+		else
+		{
+			chunk = sread(conn, bodyBytesNeeded);
+		}
+
+		if iserr(chunk) or len(chunk) == 0
+		{
+			break;
+		}
+
+		responseBytes = responseBytes + chunk;
+		bodyBytesNeeded = bodyBytesNeeded - len(chunk);
+	}
+
+	if isTLS
+	{
+		TlsClose(conn);
+	}
+	else
+	{
+		sclose(conn);
+	}
+
+	var response = _http_parseresponse_(responseBytes);
+
+	if iserr(response) { return err; }
+
+	# Chunked encoding
+	var chunked = MapGet(response, "chunked");
+
+	if chunked == true
+	{
+		var body = MapGet(response, "body");
+		var decodedBody = _http_dechunk_(body);
+
+		if iserr(decodedBody) { return err; }
+
+		response = MapSet(response, "body", decodedBody);
+	}
+
+	return response;
+}
+
+#@ <HttpDownloadToFile(url, filename)>
+#@ V-1.0.0 (2026-01-08)
+#@
+#@ Downloads content from ''url'' and saves it to ''filename''. Returns ''ok''
+#@ on success, ''err'' on failure.
+
+func HttpDownloadToFile(url, filename)
+{
+	var response = HttpGet(url, []);
+
+	if iserr(response) { return err; }
+
+	var body = MapGet(response, "body");
+	var file = fopen(filename, "w");
+
+	if iserr(file) { return err; }
+
+	var writeResult = fwrite(body, file);
+
+	fclose(file);
+
+	if iserr(writeResult) { return err; }
+
+	return ok;
+}
+
+#@ <HttpStatusText(statusCode)>
+#@ V-1.0.0 (2026-01-08)
+#@
+#@ Returns the standard HTTP status text for the given ''statusCode''. Returns
+#@ "Unknown" for unrecognized status codes.
+#@
+#@ See: https://datatracker.ietf.org/doc/html/rfc9110 (15.).
+
+func HttpStatusText(statusCode)
+{
+	if statusCode == 200 { return "OK"; }
+	if statusCode == 201 { return "Created"; }
+	if statusCode == 204 { return "No Content"; }
+	if statusCode == 301 { return "Moved Permanently"; }
+	if statusCode == 302 { return "Found"; }
+	if statusCode == 304 { return "Not Modified"; }
+	if statusCode == 400 { return "Bad Request"; }
+	if statusCode == 401 { return "Unauthorized"; }
+	if statusCode == 403 { return "Forbidden"; }
+	if statusCode == 404 { return "Not Found"; }
+	if statusCode == 405 { return "Method Not Allowed"; }
+	if statusCode == 500 { return "Internal Server Error"; }
+	if statusCode == 502 { return "Bad Gateway"; }
+	if statusCode == 503 { return "Service Unavailable"; }
+
+	return "Unknown";
+}
+
+#@ <ParseHttpRequestLine(requestBytes)>
+#@ V-1.0.0 (2026-01-08)
+#@
+#@ Parses the first line of an HTTP request from ''requestBytes''.
+#@ Returns a request map with ''method'', ''path'', ''headers'' (empty list),
+#@ and ''body'' (empty bytes). Used internally by HttpServe and HttpServeTLS.
+#@ Returns ''err'' if the request line is malformed.
+
+func ParseHttpRequestLine(requestBytes)
+{
+	var requestStr = unpack(requestBytes);
+	var crlfPos = indexof(requestStr, "\r\n");
+
+	if iserr(crlfPos) { return err; }
+
+	var firstLine = substr(requestStr, 1, crlfPos - 1);
+	var methodEnd = indexof(firstLine, " ");
+
+	if iserr(methodEnd) { return err; }
+
+	var method = substr(firstLine, 1, methodEnd - 1);
+	var pathStart = methodEnd + 1;
+	var restOfLine = substr(firstLine, pathStart, len(firstLine));
+	var spacePos = indexof(restOfLine, " ");
+
+	if iserr(spacePos) { return err; }
+
+	var path = substr(restOfLine, 1, spacePos - 1);
+
+	var request = MapNew();
+	request = MapSet(request, "method", method);
+	request = MapSet(request, "path", path);
+	request = MapSet(request, "headers", []);
+	request = MapSet(request, "body", b[]);
+
+	return request;
+}
+
+#@ <HttpServe(port, handler)>
+#@ V-1.0.0 (2026-01-08)
+#@
+#@ *!!WARNING!!: This is a single-threaded, blocking server intended for LOCAL*
+#@ *USAGE IN TRUSTED NETWORKS, DEVELOPMENT AND TESTING ONLY. DO NOT expose this*
+#@ *to the public internet EVER. Use a proper web server!!!*
+#@
+#@ Starts an HTTP server on ''port'' with the specified ''handler'' function.
+#@ The ''handler'' receives a request map and must return a response map.
+#@ This function does not return unless an error occurs.
+
+func HttpServe(port, handler)
+{
+	if getuid() == 0 { return error("Will NOT run HTTP server as root, are you insane?"); }
+
+	var server = sopen("0.0.0.0", port, SOCKLISTEN);
+
+	if iserr(server) { return err; }
+
+	while true
+	{
+		var client = saccept(server);
+
+		if iserr(client) { continue; }
+
+		var requestBytes = sread(client, 4096);
+
+		if iserr(requestBytes)
+		{
+			sclose(client);
+			continue;
+		}
+
+		var request = ParseHttpRequestLine(requestBytes);
+
+		if iserr(request)
+		{
+			sclose(client);
+			continue;
+		}
+
+		# Call handler
+		var response = handler(request);
+
+		# Handler returned error
+		if iserr(response)
+		{
+			var errorBody = "Handler returned err.";
+			var errorResponse = "HTTP/1.1 500 Internal Server Error\r\n";
+
+			errorResponse = errorResponse + "Server: libhttp.chh (HttpServe) on chippy V-" + CHIPVR + "\r\n";
+			errorResponse = errorResponse + "Content-Length: " + str(len(errorBody)) + "\r\n\r\n" + errorBody;
+
+			swrite(pack(errorResponse), client);
+			sclose(client);
+			continue;
+		}
+
+		# Get response fields
+		var statusCode = MapGet(response, "statusCode");
+		var headers = MapGet(response, "headers");
+		var body = MapGet(response, "body");
+
+		# Format HTTP response
+		var statusText = HttpStatusText(statusCode);
+		var statusLine = "HTTP/1.1 " + str(statusCode) + " " + statusText + "\r\n";
+		var responseStr = statusLine;
+		responseStr = responseStr + "Server: libhttp.chh (HttpServe) on chippy V-" + CHIPVR + "\r\n";
+
+		for i = 1 to len(headers)
+		{
+			var hPair = headers[i];
+
+			responseStr = responseStr + hPair[1] + ": " + hPair[2] + "\r\n";
+		}
+
+		responseStr = responseStr + "Content-Length: " + str(len(body)) + "\r\n";
+		responseStr = responseStr + "\r\n";
+
+		var responseBytes = pack(responseStr) + body;
+
+		swrite(responseBytes, client);
+		sclose(client);
+	}
+
+	sclose(server);
+	return ok;
+}
+
+#@ <HttpServeTLS(port, certPath, keyPath, handler)>
+#@ V-1.0.0 (2026-01-08)
+#@
+#@ *!!WARNING!!: This is a single-threaded, blocking server intended for LOCAL*
+#@ *USAGE IN TRUSTED NETWORKS, DEVELOPMENT AND TESTING ONLY. DO NOT expose this*
+#@ *to the public internet EVER. Use a proper web server!!!*
+#@
+#@ Starts an HTTPS server on ''port'' using TLS certificates at ''certPath''
+#@ and ''keyPath''. The ''handler'' function receives a request map and must
+#@ return a response map. This function does not return unless an error occurs.
+
+func HttpServeTLS(port, certPath, keyPath, handler)
+{
+	if getuid() == 0 { return error("Will NOT run HTTP server as root, are you insane?"); }
+
+	var server = sopen("0.0.0.0", port, SOCKLISTEN);
+
+	if iserr(server) { return err; }
+
+	while true
+	{
+		# TlsAccept does accept + TLS upgrade internally
+		var tlsClient = TlsAccept(server, certPath, keyPath);
+
+		if iserr(tlsClient) { continue; }
+
+		var requestBytes = TlsRead(tlsClient, 4096);
+
+		if iserr(requestBytes)
+		{
+			TlsClose(tlsClient);
+
+			continue;
+		}
+
+		var request = ParseHttpRequestLine(requestBytes);
+
+		if iserr(request)
+		{
+			TlsClose(tlsClient);
+
+			continue;
+		}
+
+		# Call handler
+		var response = handler(request);
+
+		# Handler returned error
+		if iserr(response)
+		{
+			var errorBody = "Handler returned err.";
+			var errorResponse = "HTTP/1.1 500 Internal Server Error\r\n";
+
+			errorResponse = errorResponse + "Server: libhttp.chh (HttpServeTLS) on chippy V-" + CHIPVR + "\r\n";
+			errorResponse = errorResponse + "Content-Length: " + str(len(errorBody)) + "\r\n\r\n" + errorBody;
+
+			TlsWrite(pack(errorResponse), tlsClient);
+			TlsClose(tlsClient);
+			continue;
+		}
+
+		# Get response fields
+		var statusCode = MapGet(response, "statusCode");
+		var headers = MapGet(response, "headers");
+		var body = MapGet(response, "body");
+
+		# Format HTTP response
+		var statusText = HttpStatusText(statusCode);
+		var statusLine = "HTTP/1.1 " + str(statusCode) + " " + statusText + "\r\n";
+		var responseStr = statusLine;
+		responseStr = responseStr + "Server: libhttp.chh (HttpServeTLS) on chippy V-" + CHIPVR + "\r\n";
+
+		for i = 1 to len(headers)
+		{
+			var hPair = headers[i];
+
+			responseStr = responseStr + hPair[1] + ": " + hPair[2] + "\r\n";
+		}
+
+		responseStr = responseStr + "Content-Length: " + str(len(body)) + "\r\n";
+		responseStr = responseStr + "\r\n";
+
+		var responseBytes = pack(responseStr) + body;
+
+		TlsWrite(responseBytes, tlsClient);
+		TlsClose(tlsClient);
+	}
+
+	sclose(server);
+	return ok;
+}
+
+#@ <HttpResponse(statusCode, body)>
+#@ V-1.0.0 (2026-01-08)
+#@
+#@ Creates an HTTP response map with ''statusCode'' and ''body''. The ''body''
+#@ can be a string or bytes. Returns a map with ''statusCode'', ''headers''
+#@ (empty list), and ''body'' (as bytes).
+
+func HttpResponse(statusCode, body)
+{
+	var bodyBytes = b[];
+
+	if type(body) == "string"
+	{
+		bodyBytes = pack(body);
+	}
+	elseif type(body) == "bytes"
+	{
+		bodyBytes = body;
+	}
+
+	var response = MapNew();
+	response = MapSet(response, "statusCode", statusCode);
+	response = MapSet(response, "headers", []);
+	response = MapSet(response, "body", bodyBytes);
+
+	return response;
+}
+
+#@ <HttpResponseWithHeaders(statusCode, headers, body)>
+#@ V-1.0.0 (2026-01-08)
+#@
+#@ Creates an HTTP response map with ''statusCode'', ''headers'', and ''body''.
+#@ The ''body'' can be a string or bytes. Returns a map with ''statusCode'',
+#@ ''headers'', and ''body'' (as bytes).
+
+func HttpResponseWithHeaders(statusCode, headers, body)
+{
+	var bodyBytes = b[];
+
+	if type(body) == "string"
+	{
+		bodyBytes = pack(body);
+	}
+	elseif type(body) == "bytes"
+	{
+		bodyBytes = body;
+	}
+
+	var response = MapNew();
+	response = MapSet(response, "statusCode", statusCode);
+	response = MapSet(response, "headers", headers);
+	response = MapSet(response, "body", bodyBytes);
+
+	return response;
+}
+
+#@ <HttpParseUrl(url)>
+#@ V-1.0.0 (2026-01-08)
+#@
+#@ Parses ''url'' into components. Returns a map with ''scheme'', ''host'',
+#@ ''port'', ''path'', and ''query''. Returns ''err'' if the URL is invalid.
+
+func HttpParseUrl(url)
+{
+	return _http_parseurl_(url);
+}
+
+#@ <HttpFormatRequest(method, path, headers, body)>
+#@ V-1.0.0 (2026-01-08)
+#@
+#@ Formats an HTTP request with ''method'', ''path'', ''headers'', and ''body''
+#@ into raw bytes. Returns HTTP/1.1 request bytes ready to send over a socket.
+#@ Returns ''err'' on failure.
+
+func HttpFormatRequest(method, path, headers, body)
+{
+	return _http_formatrequest_(method, path, headers, body);
+}
+
+#@ <HttpParseResponse(responseBytes)>
+#@ V-1.0.0 (2026-01-08)
+#@
+#@ Parses HTTP response from ''responseBytes''. Returns a map with
+#@ ''statusCode'', ''statusText'', ''headers'', ''body'', and ''chunked''.
+#@ The ''chunked'' field is ''true'' if Transfer-Encoding: chunked, ''false''
+#@ otherwise. Returns ''err'' if the response is malformed.
+#@
+#@ See: https://datatracker.ietf.org/doc/html/rfc9110 (15.).
+#@ See: https://datatracker.ietf.org/doc/html/rfc9112 (4.).
+
+func HttpParseResponse(responseBytes)
+{
+	return _http_parseresponse_(responseBytes);
+}
+
+#@ <HttpDechunk(chunkedBytes)>
+#@ V-1.0.0 (2026-01-08)
+#@
+#@ Decodes HTTP chunked transfer encoding from ''chunkedBytes''. Returns the
+#@ decoded bytes. Returns ''err'' if the chunked data is malformed.
+
+func HttpDechunk(chunkedBytes)
+{
+	return _http_dechunk_(chunkedBytes);
+}
+
+#@ <HttpUrlEncode(text)>
+#@ V-1.0.0 (2026-01-08)
+#@
+#@ URL-encodes ''text'' for safe use in URLs. Converts special characters
+#@ to percent-encoded format. Returns the encoded string.
+
+func HttpUrlEncode(text)
+{
+	return _http_urlencode_(text);
+}
+
+#@ <HttpUrlDecode(text)>
+#@ V-1.0.0 (2026-01-08)
+#@
+#@ URL-decodes ''text'' by converting percent-encoded characters back to their
+#@ original form. Returns the decoded string on success, ''err'' if the
+#@ encoding is malformed.
+
+func HttpUrlDecode(text)
+{
+	return _http_urldecode_(text);
+}
+
+#@ <HttpBase64Encode(bytes)>
+#@ V-1.0.0 (2026-01-08)
+#@
+#@ Base64-encodes ''bytes'' using standard Base64 encoding. Returns the encoded
+#@ string.
+
+func HttpBase64Encode(bytes)
+{
+	return _http_base64encode_(bytes);
+}
+
+#@ <HttpBase64Decode(text)>
+#@ V-1.0.0 (2026-01-08)
+#@
+#@ Base64-decodes ''text'' using standard Base64 decoding. Returns the decoded
+#@ bytes on success, ''err'' if the encoding is invalid.
+
+func HttpBase64Decode(text)
+{
+	return _http_base64decode_(text);
+}

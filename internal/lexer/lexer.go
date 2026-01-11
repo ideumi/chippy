@@ -240,7 +240,7 @@ func (l *Lexer) makeString() (*Token, error) {
 		'"':  '"',
 	}
 
-	for l.currentChar != 0 && l.currentChar != '"' {
+	for l.currentChar != 0 && l.currentChar != '"' && l.currentChar != '\n' {
 		if l.currentChar == '\\' {
 			l.advance()
 			if escapeChar, exists := escapeChars[l.currentChar]; exists {

@@ -1,0 +1,38 @@
+#!/usr/bin/chippy
+#
+# server/tls - servertls.chp
+#
+
+load("libhttp.chh");
+load("libprint.chh");
+load("libstat.chh");
+
+var CERTPATH = "../certs/server.crt";
+var KEYPATH = "../certs/server.key";
+var PORT = 8443;
+
+if not IsFile(CERTPATH) { error("Cannot find cert"); }
+if not IsFile(KEYPATH) { error("Cannot find key"); }
+
+func Handler(request)
+{
+	var method = MapGet(request, "method");
+	var path = MapGet(request, "path");
+
+	Println("Request: " + method + " " + path);
+
+	var html = "<html><body>";
+	html = html + "<h1>libhttp.chh HTTPS Server</h1>";
+	html = html + "<p>Method: " + method + "</p>";
+	html = html + "<p>Path: " + path + "</p>";
+	html = html + "<p>Time: " + str(time()) + "</p>";
+	html = html + "</body></html>";
+
+	return HttpResponse(200, html);
+}
+
+Println("!!! You'll probably need to accept some kind of self-signed certificate warning !!!");
+Println("Visit: https://localhost:" + str(PORT) + "/");
+Println("Ctrl+C to stop");
+
+HttpServeTLS(PORT, CERTPATH, KEYPATH, Handler);
