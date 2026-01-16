@@ -7,61 +7,71 @@ load("libhandles.chh");
 load("libstrings.chh");
 
 #@ <Print(text)>
-#@ V-1.0.1 (2025-10-31)
+#@ V-1.0.2 (2026-01-15)
 #@
 #@ Prints ''text'' to STDOUT.
 
 func Print(text)
 {
-	fwrite(pack(str(text)), STDOUT);
+	if type(text) != "string" { text = str(text); }
+
+	fwrite(pack(text), STDOUT);
 }
 
 #@ <Println(text)>
-#@ V-1.0.1 (2025-10-31)
+#@ V-1.0.2 (2026-01-15)
 #@
 #@ Prints ''text'' to STDOUT with trailing newline.
 
 func Println(text)
 {
+	if type(text) != "string" { text = str(text); }
+
 	Print(text + "\n");
 }
 
 #@ <Printe(text)>
-#@ V-1.0.1 (2025-10-31)
+#@ V-1.0.2 (2026-01-15)
 #@
 #@ Prints ''text'' to STDERR.
 
 func Printe(text)
 {
-	fwrite(pack(str(text)), STDERR);
+	if type(text) != "string" { text = str(text); }
+
+	fwrite(pack(text), STDERR);
 }
 
 #@ <Printeln(text)>
-#@ V-1.0.1 (2025-10-31)
+#@ V-1.0.2 (2026-01-15)
 #@
 #@ Prints ''text'' to STDERR with trailing newline.
 
 func Printeln(text)
 {
+	if type(text) != "string" { text = str(text); }
+
 	Printe(text + "\n");
 }
 
 #@ <Printf(text, values)>
-#@ V-1.0.0 (2025-10-31)
+#@ V-1.0.1 (2026-01-15)
 #@
 #@ Prints ''text'' formatted with ''values'' to STDOUT.
 #@ See libstrings.chh ''Format(value, values)''.
 
 func Printf(text, values)
 {
-	var fmtStr = Format(str(text), values);
+	if type(text) != "string" { text = str(text); }
+
+	var fmtStr = Format(text, values);
 	if iserr(fmtStr) { return err; }
 
 	Print(fmtStr);
 }
 
 #@ <Printfln(text, values)>
-#@ V-1.0.0 (2025-10-31)
+#@ V-1.0.1 (2026-01-15)
 #@
 #@ Prints ''text'' formatted with ''values'' to STDOUT with
 #@ trailing newline.
@@ -69,25 +79,29 @@ func Printf(text, values)
 
 func Printfln(text, values)
 {
+	if type(text) != "string" { text = str(text); }
+
 	return Printf(text + "\n", values);
 }
 
 #@ <Printef(text, values)>
-#@ V-1.0.0 (2025-10-31)
+#@ V-1.0.1 (2026-01-15)
 #@
 #@ Prints ''text'' formatted with ''values'' to STDERR.
 #@ See libstrings.chh ''Format(value, values)''.
 
 func Printef(text, values)
 {
-	var fmtStr = Format(str(text), values);
+	if type(text) != "string" { text = str(text); }
+
+	var fmtStr = Format(text, values);
 	if iserr(fmtStr) { return err; }
 
 	Printe(fmtStr);
 }
 
 #@ <Printefln(text, values)>
-#@ V-1.0.0 (2025-10-31)
+#@ V-1.0.1 (2026-01-15)
 #@
 #@ Prints ''text'' formatted with ''values'' to STDERR with
 #@ trailing newline.
@@ -95,6 +109,8 @@ func Printef(text, values)
 
 func Printefln(text, values)
 {
+	if type(text) != "string" { text = str(text); }
+
 	return Printef(text + "\n", values);
 }
 
