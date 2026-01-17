@@ -37,6 +37,9 @@ var JSONNULL = _json_NULL_;
 #@ JSON strings become strings.
 #@ JSON booleans become ''JSONTRUE'' or ''JSONFALSE''.
 #@ JSON null becomes ''JSONNULL''.
+#@
+#@ This function is deterministic, object keys are sorted 
+#@ alphabetically.
 
 func JsonParse(jsonStr)
 {
@@ -57,6 +60,9 @@ func JsonParse(jsonStr)
 #@ Strings become JSON strings.
 #@ ''JSONTRUE''/''JSONFALSE'' become JSON booleans.
 #@ ''JSONNULL'' becomes JSON null.
+#@
+#@ This function is deterministic, object keys are sorted 
+#@ alphabetically.
 
 func JsonStringify(value)
 {

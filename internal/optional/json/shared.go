@@ -10,6 +10,7 @@ import (
 	"chip-go/internal/constants"
 	"chip-go/internal/values"
 	"fmt"
+	"sort"
 )
 
 const (
@@ -46,10 +47,23 @@ func goToLibMap(val interface{}, ctx interface{}) values.Value {
 		// ["map", [key1, val1], [key2, val2], ...] (libmap.chh)
 		list := values.NewList([]values.Value{values.NewString(mapMarker).SetContext(ctx)})
 
-		for key, value := range v {
+		/* NOTE:
+		 * Sort keys for repeatable output.
+		 * Work around https://go.dev/doc/go1#iteration instead of silently
+		 * breaking things...
+		 */
+		keys := make([]string, 0, len(v))
+
+		for key := range v {
+			keys = append(keys, key)
+		}
+
+		sort.Strings(keys)
+
+		for _, key := range keys {
 			pair := values.NewList([]values.Value{
 				values.NewString(key).SetContext(ctx),
-				goToLibMap(value, ctx),
+				goToLibMap(v[key], ctx),
 			})
 
 			list.Elements = append(list.Elements, pair.SetContext(ctx))
