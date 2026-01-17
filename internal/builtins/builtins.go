@@ -37,8 +37,8 @@ func GetBuiltins() map[string]*values.BuiltInFunction {
 		"rename": values.NewBuiltInFunction("rename", renameFunction),
 		"chmod":  values.NewBuiltInFunction("chmod", chmodFunction),
 
-		"seek":   values.NewBuiltInFunction("seek", seekFunction),
-		"fsync":  values.NewBuiltInFunction("fsync", fsyncFunction),
+		"seek":  values.NewBuiltInFunction("seek", seekFunction),
+		"fsync": values.NewBuiltInFunction("fsync", fsyncFunction),
 
 		// Directory handling
 		"dopen":  values.NewBuiltInFunction("dopen", dopenFunction),

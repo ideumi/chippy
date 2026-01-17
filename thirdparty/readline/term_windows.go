@@ -3,7 +3,6 @@
 // license that can be found in the LICENSE file.
 
 //go:build windows
-// +build windows
 
 // Package terminal provides support functions for dealing with terminals, as
 // commonly found on UNIX systems.
