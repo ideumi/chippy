@@ -53,8 +53,8 @@ Println("Hello World");
 **Developer Tools**
 - Interactive REPL with history for experimentation
 - Syntax files in `ide/` for:
-  - KDE, 
-  - GNOME / GTK,
+  - KDE
+  - GNOME / GTK
   - Vim
   - VSCodium / VSCode
 - Built-in documentation system (`chippy doc`)
