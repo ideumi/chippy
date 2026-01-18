@@ -19,3 +19,8 @@
 # GTK-4
 
 `~/.local/share/gtksourceview-5/language-specs/chiplang.lang`
+
+# VSCode / VSCodium
+
+`~/.vscode/extensions/ideumi.chiplang-1.0.0`
+`~/.vscode-oss/extensions/ideumi.chiplang-1.0.0`

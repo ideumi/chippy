@@ -1,0 +1,97 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "ChipLang",
+  "scopeName": "source.chiplang",
+  "patterns": [
+    { "include": "#shebang" },
+    { "include": "#comment" },
+    { "include": "#string" },
+    { "include": "#byte-array" },
+    { "include": "#number" },
+    { "include": "#keywords" },
+    { "include": "#constants" },
+    { "include": "#builtins" },
+    { "include": "#function-call" },
+    { "include": "#operators" },
+    { "include": "#variable" }
+  ],
+  "repository": {
+    "shebang": {
+      "match": "^#!/.*$",
+      "name": "comment.line.shebang.chiplang"
+    },
+    "comment": {
+      "match": "#.*$",
+      "name": "comment.line.number-sign.chiplang",
+      "patterns": [
+        {
+          "match": "\\b(TODO|FIXME|NOTE|WARNING|HACK|BUG|XXX)\\b",
+          "name": "keyword.codetag.notation.chiplang"
+        }
+      ]
+    },
+    "string": {
+      "begin": "\"",
+      "end": "\"",
+      "name": "string.quoted.double.chiplang",
+      "patterns": [
+        {
+          "match": "\\\\[nrt\"\\\\]",
+          "name": "constant.character.escape.chiplang"
+        }
+      ]
+    },
+    "byte-array": {
+      "match": "b\\[[^\\]]*\\]",
+      "name": "storage.type.chiplang"
+    },
+    "number": {
+      "patterns": [
+        {
+          "match": "\\b\\d+\\.\\d+\\b",
+          "name": "constant.numeric.float.chiplang"
+        },
+        {
+          "match": "\\b\\d+\\b",
+          "name": "constant.numeric.integer.chiplang"
+        }
+      ]
+    },
+    "keywords": {
+      "match": "\\b(var|func|return|continue|break|if|elseif|else|for|while|to|step|and|or|not)\\b",
+      "name": "keyword.control.chiplang"
+    },
+    "constants": {
+      "patterns": [
+        {
+          "match": "\\b(null|true|false|CHIPVR|CHIPCN|CHIPOS|CHIPAR)\\b",
+          "name": "constant.language.chiplang"
+        },
+        {
+          "match": "\\berr\\b",
+          "name": "invalid.illegal.chiplang"
+        },
+        {
+          "match": "\\bok\\b",
+          "name": "string.unquoted.chiplang"
+        }
+      ]
+    },
+    "builtins": {
+      "match": "\\b(append|args|charat|chdir|chmod|cos|dclose|dopen|dread|error|exec|fclose|fopen|fread|fsync|fwrite|getch|getcwd|getenv|getpid|getuid|indexof|int|iserr|isok|join|kill|len|lenv|list|load|loadopt|lower|lstat|mkdir|num|off|pack|pclose|popen|rand|readlink|rename|replace|saccept|sclose|seek|setenv|sin|sleep|sopen|sort|split|sread|stat|str|substr|swrite|symlink|tan|time|type|unlink|unpack|upper)\\b",
+      "name": "support.function.builtin.chiplang"
+    },
+    "function-call": {
+      "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)(?=\\s*\\()",
+      "name": "entity.name.function.chiplang"
+    },
+    "operators": {
+      "match": "(==|!=|<=|>=|[+\\-*/%^=!<>])",
+      "name": "keyword.operator.chiplang"
+    },
+    "variable": {
+      "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b",
+      "name": "variable.other.chiplang"
+    }
+  }
+}

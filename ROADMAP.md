@@ -24,11 +24,9 @@ Some things i plan to still accomplish in 1.0.x:
   - ~~JSON~~
   - ....
 
-- Create a CI pipeline for automatic release generation (if Codeberg supports it, i haven't researched this yet)
-
 - Expand syntax support to more `ide/`s
   - Jetbrains?
-  - VSCode?
+  - ~~VSCode?~~
 
 - ~~Create a logo or mascot~~
 
@@ -44,28 +42,12 @@ Some things i plan to still accomplish in 1.0.x:
 
 1.1.0 is planned for some time in the summer of 2026.
 
-## What won't be happening for now
-
-- Windows support
-  - Not in the spirit of the project
-  
-- GUI bindings
-  - Technically possible with optionals (e.g. Fyne, Qt)
-  - Not feasible as a long term project for me
-  - Very large subproject
-
-- FFI
-  - Too fragile and complicated for the spirit of the language
-  
-- Bytecode
-  - This will probably happen eventually but not in 1.1.x
-
 ## Release Names
 
 I like naming releases after various things for fun
 
-| Version |   Name    |        Meaning        |
-|---------|-----------| --------------------- |
-| 1.0.x   | pardalote | Small Australian birb |
-| 1.1.x   |    TBA    |           /           |
-| 1.2.x   |    TBA    |           /           |
+| Version |   Name    |          Meaning          |
+|---------|-----------| ------------------------- |
+| 1.0.x   | pardalote |   Small Australian birb   |
+| 1.1.x   |  rixosa   | Small South American borb |
+| 1.2.x   |    TBD    |             /             |

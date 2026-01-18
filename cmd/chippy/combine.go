@@ -595,7 +595,7 @@ func processFileContent(content string, config CombineConfig) string {
 				continue
 			}
 
-			builder.WriteString(line)
+			builder.WriteString(line + " ")
 		} else {
 			if config.StripComments && isCommentOnly {
 				continue
