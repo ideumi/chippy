@@ -3,7 +3,7 @@ set -e
 
 # Configuration
 RELEASE_NAME="chiplang"
-VERSION="1.0.9"
+VERSION="1.0.10"
 ARCH=$(uname -m)
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 RELEASE_DIR="${RELEASE_NAME}-${VERSION}-${OS}-${ARCH}"
