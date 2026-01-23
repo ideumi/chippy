@@ -8,13 +8,15 @@ loadopt("http");
 load("libmap.chh");
 load("libnet.chh");
 load("libtls.chh");
+load("libstrings.chh");
 
 #@ <HttpGet(url, headers)>
-#@ V-1.0.0 (2026-01-08)
+#@ V-1.0.1 (2026-01-22)
 #@
 #@ Performs an HTTP GET request to ''url'' with ''headers''. Supports
-#@ HTTP/1.0 and HTTP/1.1 only. Returns a response map with ''statusCode'',
-#@ ''statusText'', ''headers'', and ''body''. Returns ''err'' on failure.
+#@ HTTP/1.0 and HTTP/1.1 only. Automatically follows redirects up to 10 times.
+#@ Returns a response map with ''statusCode'', ''statusText'', ''headers'',
+#@ and ''body''. Returns ''err'' on failure.
 
 func HttpGet(url, headers)
 {
@@ -22,11 +24,12 @@ func HttpGet(url, headers)
 }
 
 #@ <HttpPost(url, headers, body)>
-#@ V-1.0.0 (2026-01-08)
+#@ V-1.0.1 (2026-01-22)
 #@
 #@ Performs an HTTP POST request to ''url'' with ''headers'' and ''body''.
 #@ The ''body'' can be a string or bytes. Supports HTTP/1.0 and HTTP/1.1
-#@ only. Returns a response map with ''statusCode'', ''statusText'',
+#@ only. Automatically follows redirects up to 10 times (note: 303 redirects
+#@ convert to GET). Returns a response map with ''statusCode'', ''statusText'',
 #@ ''headers'', and ''body''. Returns ''err'' on failure.
 
 func HttpPost(url, headers, body)
@@ -45,15 +48,273 @@ func HttpPost(url, headers, body)
 	return HttpRequest("POST", url, headers, bodyBytes);
 }
 
+#@ <HttpGetNoRedirect(url, headers)>
+#@ V-1.0.0 (2026-01-22)
+#@
+#@ Performs an HTTP GET request without following redirects. Returns the
+#@ response as-is, including 3xx redirect responses with Location header.
+#@ Returns a response map with ''statusCode'', ''statusText'', ''headers'',
+#@ and ''body''. Returns ''err'' on failure.
+#@
+#@ See: https://datatracker.ietf.org/doc/html/rfc9110 (15.4.).
+
+func HttpGetNoRedirect(url, headers)
+{
+	return HttpRequestFollow("GET", url, headers, b[], 0);
+}
+
+#@ <HttpPostNoRedirect(url, headers, body)>
+#@ V-1.0.0 (2026-01-22)
+#@
+#@ Performs an HTTP POST request without following redirects. Returns the
+#@ response as-is, including 3xx redirect responses with Location header.
+#@ The ''body'' can be a string or bytes. Returns a response map with
+#@ ''statusCode'', ''statusText'', ''headers'', and ''body''. Returns ''err''
+#@ on failure.
+#@
+#@ See: https://datatracker.ietf.org/doc/html/rfc9110 (15.4.).
+
+func HttpPostNoRedirect(url, headers, body)
+{
+	var bodyBytes = b[];
+
+	if type(body) == "string"
+	{
+		bodyBytes = pack(body);
+	}
+	elseif type(body) == "bytes"
+	{
+		bodyBytes = body;
+	}
+
+	return HttpRequestFollow("POST", url, headers, bodyBytes, 0);
+}
+
 #@ <HttpRequest(method, url, headers, body)>
-#@ V-1.0.0 (2026-01-08)
+#@ V-1.0.1 (2026-01-22)
 #@
 #@ Performs an HTTP request with specified ''method'', ''url'', ''headers'',
 #@ and ''body''. Supports both HTTP and HTTPS. Supports HTTP/1.0 and
-#@ HTTP/1.1 only. Returns a response map with ''statusCode'', ''statusText'',
+#@ HTTP/1.1 only. Automatically follows redirects (301, 302, 303, 307, 308)
+#@ up to 10 times. Returns a response map with ''statusCode'', ''statusText'',
 #@ ''headers'', and ''body''. Returns ''err'' on failure.
+#@
+#@ See: https://datatracker.ietf.org/doc/html/rfc9110 (15.4.).
 
 func HttpRequest(method, url, headers, body)
+{
+	return HttpRequestFollow(method, url, headers, body, 10);
+}
+
+# <_HttpResolveLocation_(location, url)>
+# V-1.0.0 (2026-01-22)
+#
+# Resolves a location header value against the original request URL. Handles
+# absolute URLs, protocol-relative URLs, absolute paths, query-only, fragment-
+# only, and relative paths (including . and ..). Returns the resolved absolute
+# URL, or ''err'' on failure.
+
+func _HttpResolveLocation_(location, url)
+{
+	if location == "" { return err; }
+
+	var origParts = _http_parseurl_(url);
+
+	if iserr(origParts) { return err; }
+
+	var origScheme = MapGet(origParts, "scheme");
+	var origHost = MapGet(origParts, "host");
+	var origPort = MapGet(origParts, "port");
+	var origPath = MapGet(origParts, "path");
+	var origQuery = MapGet(origParts, "query");
+
+	# Determine the base URL
+	var baseUrl = "";
+
+	if (origScheme == "http" and origPort == 80) or (origScheme == "https" and origPort == 443)
+	{
+		baseUrl = origScheme + "://" + origHost;
+	}
+	else
+	{
+		baseUrl = origScheme + "://" + origHost + ":" + str(origPort);
+	}
+
+	# Absolute URL
+	var isAbsoluteUrl = not iserr(indexof(location, "://"));
+
+	if isAbsoluteUrl
+	{
+		return location;
+	}
+
+	# Protocol-relative URLs
+	if len(location) >= 2 and charat(location, 1) == "/" and charat(location, 2) == "/"
+	{
+		return origScheme + ":" + location;
+	}
+
+	# Absolute path aka. /path
+	if charat(location, 1) == "/"
+	{
+		return baseUrl + location;
+	}
+
+	# Query-only redirect aka. ?query
+	if charat(location, 1) == "?"
+	{
+		return baseUrl + origPath + location;
+	}
+
+	# Fragment-only redirect aka. #fragment
+	if charat(location, 1) == "#"
+	{
+		if type(origQuery) == "string" and origQuery != ""
+		{
+			return baseUrl + origPath + "?" + origQuery + location;
+		}
+		else
+		{
+			return baseUrl + origPath + location;
+		}
+	}
+
+	# Relative path
+	var baseDir = "/";
+	var lastSlash = 0;
+
+	for i = 1 to len(origPath)
+	{
+		if charat(origPath, i) == "/"
+		{
+			lastSlash = i;
+		}
+	}
+
+	if lastSlash > 0
+	{
+		baseDir = substr(origPath, 1, lastSlash);
+	}
+
+	var combinedPath = baseDir + location;
+
+	# Normalize path: resolve . and .. segments
+	var segments = split(combinedPath, "/");
+	var normalized = [];
+
+	for i = 1 to len(segments)
+	{
+		var seg = segments[i];
+
+		if seg == "" or seg == "."
+		{
+			continue;
+		}
+		elseif seg == ".."
+		{
+			if len(normalized) > 0
+			{
+				var newNorm = [];
+
+				for j = 1 to len(normalized) - 1
+				{
+					newNorm = append(newNorm, normalized[j]);
+				}
+
+				normalized = newNorm;
+			}
+		}
+		else
+		{
+			normalized = append(normalized, seg);
+		}
+	}
+
+	var normalizedPath = "/" + join(normalized, "/");
+
+	return baseUrl + normalizedPath;
+}
+
+# <_HttpFilterRedirectHeaders_(headers, origUrl, targetUrl, statusCode)>
+# V-1.0.0 (2026-01-22)
+#
+# Filters headers for a redirect request. Strips the host header, strips
+# sensitive headers (Authorization, Cookie, Proxy-Authorization) on cross-
+# origin redirects, and strips body-related headers (Content-Type, Content-
+# Length) for 303 redirects. This prevents unintentional leaks of information
+# on redirect. Returns the filtered headers list, or an empty list on failure.
+
+func _HttpFilterRedirectHeaders_(headers, origUrl, targetUrl, statusCode)
+{
+	var origParts = _http_parseurl_(origUrl);
+	var targetParts = _http_parseurl_(targetUrl);
+
+	if iserr(origParts) or iserr(targetParts) { return []; }
+
+	var origHost = MapGet(origParts, "host");
+	var origScheme = MapGet(origParts, "scheme");
+	var targetHost = MapGet(targetParts, "host");
+	var targetScheme = MapGet(targetParts, "scheme");
+
+	var isCrossOrigin = (lower(origHost) != lower(targetHost))
+						or (origScheme != targetScheme);
+
+	# Build clean headers for redirect
+	var cleanHeaders = [];
+
+	for i = 1 to len(headers)
+	{
+		var hPair = headers[i];
+		var hKey = lower(hPair[1]);
+
+		# Strip host, it will be re-added for the new target
+		if hKey == "host" { continue; }
+
+		# Strip sensitive headers on cross-origin redirects
+		if isCrossOrigin
+		{
+			if hKey == "authorization" { continue; }
+			if hKey == "cookie" { continue; }
+			if hKey == "proxy-authorization" { continue; }
+		}
+
+		cleanHeaders = append(cleanHeaders, hPair);
+	}
+
+	# Strip body-related headers on 303
+	if statusCode == 303
+	{
+		var filteredHeaders = [];
+
+		for i = 1 to len(cleanHeaders)
+		{
+			var hPair = cleanHeaders[i];
+			var hKey = lower(hPair[1]);
+
+			if hKey == "content-type" { continue; }
+			if hKey == "content-length" { continue; }
+
+			filteredHeaders = append(filteredHeaders, hPair);
+		}
+
+		return filteredHeaders;
+	}
+
+	return cleanHeaders;
+}
+
+#@ <HttpRequestFollow(method, url, headers, body, maxRedirects)>
+#@ V-1.0.1 (2026-01-22)
+#@
+#@ Performs an HTTP request with redirect control. ''maxRedirects'' specifies
+#@ the maximum number of redirects to follow (0 to disable). When the limit is
+#@ reached, returns the redirect response (3xx status) instead of following.
+#@ Returns a response map with ''statusCode'', ''statusText'', ''headers'',
+#@ and ''body''. Returns ''err'' on failure.
+#@
+#@ See: https://datatracker.ietf.org/doc/html/rfc9110 (15.4.).
+
+func HttpRequestFollow(method, url, headers, body, maxRedirects)
 {
 	var urlParts = _http_parseurl_(url);
 
@@ -73,7 +334,7 @@ func HttpRequest(method, url, headers, body)
 		fullPath = fullPath + "?" + query;
 	}
 
-	# Add Host header if not present
+	# Add host header if not present
 	var hasHost = false;
 
 	for i = 1 to len(headers)
@@ -260,12 +521,63 @@ func HttpRequest(method, url, headers, body)
 
 	if chunked == true
 	{
-		var body = MapGet(response, "body");
-		var decodedBody = _http_dechunk_(body);
+		var respBody = MapGet(response, "body");
+		var decodedBody = _http_dechunk_(respBody);
 
 		if iserr(decodedBody) { return err; }
 
 		response = MapSet(response, "body", decodedBody);
+	}
+
+	# Follow redirects
+	var statusCode = MapGet(response, "statusCode");
+
+	if statusCode == 301 or
+	   statusCode == 302 or
+	   statusCode == 303 or
+	   statusCode == 307 or
+	   statusCode == 308
+	{
+		if maxRedirects <= 0 { return response; }
+
+		# Find location header
+		var respHeadersRedir = MapGet(response, "headers");
+		var location = "";
+
+		for i = 1 to len(respHeadersRedir)
+		{
+			var hPair = respHeadersRedir[i];
+
+			if lower(hPair[1]) == "location"
+			{
+				location = hPair[2];
+
+				break;
+			}
+		}
+
+		# RFC technically allows whitespace
+		location = Trim(location);
+
+		if location == "" { return err; }
+
+		# Resolve location against original URL
+		var targetUrl = _HttpResolveLocation_(location, url);
+
+		if iserr(targetUrl) { return err; }
+
+		var cleanHeaders = _HttpFilterRedirectHeaders_(headers, url, targetUrl, statusCode);
+
+		var redirectMethod = method;
+		var redirectBody = body;
+
+		if statusCode == 303
+		{
+			redirectMethod = "GET";
+			redirectBody = b[];
+		}
+
+		return HttpRequestFollow(redirectMethod, targetUrl, cleanHeaders, redirectBody, maxRedirects - 1);
 	}
 
 	return response;
@@ -312,7 +624,10 @@ func HttpStatusText(statusCode)
 	if statusCode == 204 { return "No Content"; }
 	if statusCode == 301 { return "Moved Permanently"; }
 	if statusCode == 302 { return "Found"; }
+	if statusCode == 303 { return "See Other"; }
 	if statusCode == 304 { return "Not Modified"; }
+	if statusCode == 307 { return "Temporary Redirect"; }
+	if statusCode == 308 { return "Permanent Redirect"; }
 	if statusCode == 400 { return "Bad Request"; }
 	if statusCode == 401 { return "Unauthorized"; }
 	if statusCode == 403 { return "Forbidden"; }
