@@ -15,6 +15,26 @@ import (
 	"syscall"
 )
 
+func fileModeToChmod(mode os.FileMode) float64 {
+	perm := mode.Perm()
+	owner := (perm >> 6) & 7
+	group := (perm >> 3) & 7
+	other := perm & 7
+
+	var special int
+	if mode&os.ModeSetuid != 0 {
+		special += 4
+	}
+	if mode&os.ModeSetgid != 0 {
+		special += 2
+	}
+	if mode&os.ModeSticky != 0 {
+		special += 1
+	}
+
+	return float64(special*1000 + int(owner)*100 + int(group)*10 + int(other))
+}
+
 func statFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
@@ -100,7 +120,7 @@ func statFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 		values.NewNumber(float64(fileInfo.ModTime().Unix())).SetContext(ctx), // mtime
 		values.NewNumber(float64(fileInfo.ModTime().Unix())).SetContext(ctx), // atime (Go doesn't expose separately)
 		values.NewNumber(float64(fileInfo.ModTime().Unix())).SetContext(ctx), // ctime (Go doesn't expose separately)
-		values.NewNumber(float64(fileInfo.Mode())).SetContext(ctx),           // mode (permissions)
+		values.NewNumber(fileModeToChmod(fileInfo.Mode())).SetContext(ctx),   // mode (permissions)
 		values.NewNumber(uid).SetContext(ctx),                                // uid
 		values.NewNumber(gid).SetContext(ctx),                                // gid
 		values.NewNumber(nlink).SetContext(ctx),                              // nlink
