@@ -6,7 +6,7 @@ Creates a directory with specified permissions.
 
 *Parameters:*
 - ''path'': String directory path
-- ''mode'': Number permissions mode (octal)
+- ''mode'': File permissions as a 3 or 4 digit number (e.g. 755, 1777)
 
 *Returns:*
 - ''ok'' on success

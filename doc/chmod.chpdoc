@@ -6,8 +6,11 @@ Changes the permissions of the file or directory at path.
 
 *Parameters:*
 - ''path'': String path to the file or directory
-- ''mode'': File permissions in octal representation
+- ''mode'': File permissions as a 3 or 4 digit number (e.g. 755, 4755)
 
 *Returns:*
 - ''ok'' on success
 - ''err'' on failure
+
+*Errors:*
+- Runtime error if mode is invalid octal

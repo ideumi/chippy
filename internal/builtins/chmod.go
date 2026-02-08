@@ -61,7 +61,6 @@ func chmodFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 	octalMode, err := strconv.ParseInt(modeStr, 8, 32)
 
 	if err != nil {
-
 		posStart, posEnd := args[1].GetPos()
 
 		return res.Failure(errors.NewRTError(
