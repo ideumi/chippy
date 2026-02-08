@@ -9,4 +9,5 @@ Returns file status information as a list, without following symbolic links.
 
 *Returns:*
 - List: [size, mtime, atime, ctime, mode, uid, gid, nlink, ino, dev, type]
+  - ''mode'' is a 3 or 4 digit permission number (e.g. 755, 4755)
 - ''err'' on failure

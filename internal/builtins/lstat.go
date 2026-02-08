@@ -99,7 +99,7 @@ func lstatFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 		values.NewNumber(float64(fileInfo.ModTime().Unix())).SetContext(ctx), // mtime
 		values.NewNumber(float64(fileInfo.ModTime().Unix())).SetContext(ctx), // atime (Go doesn't expose separately)
 		values.NewNumber(float64(fileInfo.ModTime().Unix())).SetContext(ctx), // ctime (Go doesn't expose separately)
-		values.NewNumber(float64(fileInfo.Mode())).SetContext(ctx),           // mode (permissions)
+		values.NewNumber(fileModeToChmod(fileInfo.Mode())).SetContext(ctx),   // mode (permissions)
 		values.NewNumber(uid).SetContext(ctx),                                // uid
 		values.NewNumber(gid).SetContext(ctx),                                // gid
 		values.NewNumber(nlink).SetContext(ctx),                              // nlink

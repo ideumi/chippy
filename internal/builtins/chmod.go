@@ -11,8 +11,8 @@ import (
 	"chip-go/internal/constants"
 	"chip-go/internal/errors"
 	"chip-go/internal/values"
-	"os"
 	"strconv"
+	"syscall"
 )
 
 func chmodFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
@@ -61,7 +61,6 @@ func chmodFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 	octalMode, err := strconv.ParseInt(modeStr, 8, 32)
 
 	if err != nil {
-
 		posStart, posEnd := args[1].GetPos()
 
 		return res.Failure(errors.NewRTError(
@@ -71,9 +70,7 @@ func chmodFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 		))
 	}
 
-	mode := os.FileMode(octalMode)
-
-	err = os.Chmod(pathStr.Value, mode)
+	err = syscall.Chmod(pathStr.Value, uint32(octalMode))
 
 	if err != nil {
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))

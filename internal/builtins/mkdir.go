@@ -11,8 +11,8 @@ import (
 	"chip-go/internal/constants"
 	"chip-go/internal/errors"
 	"chip-go/internal/values"
-	"os"
 	"strconv"
+	"syscall"
 )
 
 func mkdirFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
@@ -70,8 +70,7 @@ func mkdirFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 		))
 	}
 
-	mode := os.FileMode(octalMode)
-	err = os.Mkdir(pathStr.Value, mode)
+	err = syscall.Mkdir(pathStr.Value, uint32(octalMode))
 
 	if err != nil {
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
