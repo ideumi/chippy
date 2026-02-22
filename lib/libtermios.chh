@@ -139,13 +139,13 @@ var COLORBGCYAN = 46;
 var COLORBGWHITE = 47;
 
 #@ <SetTitle(title)>
-#@ V-1.0.0 (2025-08-20)
+#@ V-1.0.1 (2025-02-22)
 #@
 #@ Changes the terminal session title.
 
 func SetTitle(title)
 {
-	fwrite(OSC + pack(str(title)) + BEL, STDOUT);
+	fwrite(OSC + pack("0;" + str(title)) + BEL, STDOUT);
 }
 
 #@ <CursorUp(n)>
