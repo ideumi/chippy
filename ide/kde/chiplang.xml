@@ -75,6 +75,7 @@
       <item>loadopt</item>
       <item>lower</item>
       <item>lstat</item>
+      <item>lutime</item>
       <item>mkdir</item>
       <item>num</item>
       <item>off</item>
@@ -106,6 +107,7 @@
       <item>unlink</item>
       <item>unpack</item>
       <item>upper</item>
+      <item>utime</item>
     </list>
 
     <list name="alerts">
