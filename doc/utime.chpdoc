@@ -1,0 +1,14 @@
+*utime* | V-$CHIPVR ($CHIPCN)
+
+''utime(path, atime, mtime)''
+
+Sets the ''a''ccess and ''m''odification ''time''stamps of the file or directory at ''path'', following symbolic links.
+
+*Parameters:*
+- ''path'': String path to the file or directory
+- ''atime'': Number Unix timestamp of last access time
+- ''mtime'': Number Unix timestamp of last modification time
+
+*Returns:*
+- ''ok'' on success
+- ''err'' on failure

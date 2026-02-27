@@ -191,8 +191,15 @@ func (i *Interpreter) visitVarAccessNode(node *ast.VarAccessNode, ctx interface{
 	}
 
 	if val, ok := value.(values.Value); ok {
-		// No unnecessary copying for variable access
-		val.SetPos(node.PosStart, node.PosEnd).SetContext(ctx)
+		// Do NOT call SetContext here. Doing so mutates the stored
+		// value's context field in-place (no copy is made), which
+		// corrupts function values: their context field determines
+		// the parent scope for Execute(), so overwriting it with the
+		// current call-site context breaks re-entrant calls, the
+		// function's context ends up pointing at a call frame that
+		// has already been Cleanup()'d, severing the parent chain to
+		// file scope.
+		val.SetPos(node.PosStart, node.PosEnd)
 
 		return res.Success(val)
 	}

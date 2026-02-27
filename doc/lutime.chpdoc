@@ -1,0 +1,14 @@
+*lutime* | V-$CHIPVR ($CHIPCN)
+
+''lutime(path, atime, mtime)''
+
+Sets the ''a''ccess and ''m''odification ''time''stamps of the symbolic link at ''path'', without following it.
+
+*Parameters:*
+- ''path'': String path to the symbolic link
+- ''atime'': Number Unix timestamp of last access time
+- ''mtime'': Number Unix timestamp of last modification time
+
+*Returns:*
+- ''ok'' on success
+- ''err'' on failure

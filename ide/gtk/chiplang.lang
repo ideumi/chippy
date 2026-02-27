@@ -131,6 +131,7 @@
           <keyword>loadopt</keyword>
           <keyword>lower</keyword>
           <keyword>lstat</keyword>
+          <keyword>lutime</keyword>
           <keyword>mkdir</keyword>
           <keyword>num</keyword>
           <keyword>off</keyword>
@@ -162,6 +163,7 @@
           <keyword>unlink</keyword>
           <keyword>unpack</keyword>
           <keyword>upper</keyword>
+          <keyword>utime</keyword>
         </context>
 
         <!-- Byte arrays -->

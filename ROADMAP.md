@@ -6,11 +6,13 @@ ChipLang is a personal, open-source side-project. All development is performed a
 
 ## 1.0.x / Current
 
+ChipLang is in a feature freeze as of version `1.0.12` to prepare for the upcoming stable release. The focus in the next few months will be primarily to iron out bugs and other kinds of issues in the existing feature set.
+
 The language is currently in a state of heavy development where i may add or remove features at will without any advanced notice. Development currently also occurs in an irregular pace, depending on my mood and the time i can find.
 
 I would not recommend writing anything important in Chip as of yet, as there is no stability or predictability in regards to the language, the corelib is also as of now still underdeveloped.
 
-Some things i plan to still accomplish in 1.0.x:
+~~Some things i plan to still accomplish in 1.0.x:~~
 
 - ~~`chippy check` to parse a file for syntax errors~~
   - ~~Integrated in the makefile for `lib/` and `misc/`~~
@@ -24,8 +26,7 @@ Some things i plan to still accomplish in 1.0.x:
   - ~~JSON~~
   - ....
 
-- Expand syntax support to more `ide/`s
-  - Jetbrains?
+- ~~Expand syntax support to more `ide/`s~~
   - ~~VSCode?~~
 
 - ~~Create a logo or mascot~~

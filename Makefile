@@ -1,5 +1,7 @@
+export GO_BUILD = CGO_ENABLED=0 go build -trimpath
+
 build:
-	go build -o chippy cmd/chippy/*.go
+	$(GO_BUILD) -o chippy cmd/chippy/*.go
 
 	./chippy check all installer/
 	./chippy check all lib/
@@ -9,3 +11,8 @@ release:
 	@mkdir -p rel
 	@mkdir -p installer/out
 	@cd rel && ../scripts/make-release.sh
+
+release-all:
+	@mkdir -p rel
+	@mkdir -p installer/out
+	@cd rel && ../scripts/release-all.sh
