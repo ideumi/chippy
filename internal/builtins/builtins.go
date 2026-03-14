@@ -69,8 +69,9 @@ func GetBuiltins() map[string]*values.BuiltInFunction {
 		"sort":   values.NewBuiltInFunction("sort", sortFunction),
 
 		// Bytes
-		"pack":   values.NewBuiltInFunction("pack", packFunction),
-		"unpack": values.NewBuiltInFunction("unpack", unpackFunction),
+		"pack":    values.NewBuiltInFunction("pack", packFunction),
+		"unpack":  values.NewBuiltInFunction("unpack", unpackFunction),
+		"bsubstr": values.NewBuiltInFunction("bsubstr", bsubstrFunction),
 
 		// Env
 		"getenv": values.NewBuiltInFunction("getenv", getenvFunction),
@@ -88,6 +89,7 @@ func GetBuiltins() map[string]*values.BuiltInFunction {
 		"pclose": values.NewBuiltInFunction("pclose", pcloseFunction),
 		"kill":   values.NewBuiltInFunction("kill", killFunction),
 		"exec":   values.NewBuiltInFunction("exec", execFunction),
+		"spawn":  values.NewBuiltInFunction("spawn", spawnFunction),
 
 		// Randomness
 		"rand": values.NewBuiltInFunction("rand", randFunction),
