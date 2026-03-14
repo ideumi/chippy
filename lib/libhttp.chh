@@ -24,7 +24,7 @@ func HttpGet(url, headers)
 }
 
 #@ <HttpPost(url, headers, body)>
-#@ V-1.0.1 (2026-01-22)
+#@ V-1.0.2 (2026-03-13)
 #@
 #@ Performs an HTTP POST request to ''url'' with ''headers'' and ''body''.
 #@ The ''body'' can be a string or bytes. Supports HTTP/1.0 and HTTP/1.1
@@ -34,18 +34,7 @@ func HttpGet(url, headers)
 
 func HttpPost(url, headers, body)
 {
-	var bodyBytes = b[];
-
-	if type(body) == "string"
-	{
-		bodyBytes = pack(body);
-	}
-	elseif type(body) == "bytes"
-	{
-		bodyBytes = body;
-	}
-
-	return HttpRequest("POST", url, headers, bodyBytes);
+	return HttpRequest("POST", url, headers, _HttpPackBody_(body));
 }
 
 #@ <HttpGetNoRedirect(url, headers)>
@@ -64,7 +53,7 @@ func HttpGetNoRedirect(url, headers)
 }
 
 #@ <HttpPostNoRedirect(url, headers, body)>
-#@ V-1.0.0 (2026-01-22)
+#@ V-1.0.1 (2026-03-13)
 #@
 #@ Performs an HTTP POST request without following redirects. Returns the
 #@ response as-is, including 3xx redirect responses with Location header.
@@ -76,28 +65,17 @@ func HttpGetNoRedirect(url, headers)
 
 func HttpPostNoRedirect(url, headers, body)
 {
-	var bodyBytes = b[];
-
-	if type(body) == "string"
-	{
-		bodyBytes = pack(body);
-	}
-	elseif type(body) == "bytes"
-	{
-		bodyBytes = body;
-	}
-
-	return HttpRequestFollow("POST", url, headers, bodyBytes, 0);
+	return HttpRequestFollow("POST", url, headers, _HttpPackBody_(body), 0);
 }
 
 #@ <HttpRequest(method, url, headers, body)>
 #@ V-1.0.1 (2026-01-22)
 #@
 #@ Performs an HTTP request with specified ''method'', ''url'', ''headers'',
-#@ and ''body''. Supports both HTTP and HTTPS. Supports HTTP/1.0 and
-#@ HTTP/1.1 only. Automatically follows redirects (301, 302, 303, 307, 308)
-#@ up to 10 times. Returns a response map with ''statusCode'', ''statusText'',
-#@ ''headers'', and ''body''. Returns ''err'' on failure.
+#@ and ''body''. Supports both HTTP and HTTPS. Supports HTTP/1.0 and HTTP/1.1
+#@ only. Automatically follows redirects (301, 302, 303, 307, 308) up to 10
+#@ times. Returns a response map with ''statusCode'', ''statusText'', ''headers'',
+#@ and ''body''. Returns ''err'' on failure.
 #@
 #@ See: https://datatracker.ietf.org/doc/html/rfc9110 (15.4.).
 
@@ -107,12 +85,12 @@ func HttpRequest(method, url, headers, body)
 }
 
 # <_HttpResolveLocation_(location, url)>
-# V-1.0.0 (2026-01-22)
+# V-1.0.1 (2026-03-13)
 #
-# Resolves a location header value against the original request URL. Handles
-# absolute URLs, protocol-relative URLs, absolute paths, query-only, fragment-
-# only, and relative paths (including . and ..). Returns the resolved absolute
-# URL, or ''err'' on failure.
+# Resolves ''location'' against the original request ''url''. Handles absolute
+# URLs, protocol-relative URLs, absolute paths, query-only, fragment-only, and
+# relative paths (including . and ..). Returns the resolved absolute URL, or
+# ''err'' on failure.
 
 func _HttpResolveLocation_(location, url)
 {
@@ -128,7 +106,6 @@ func _HttpResolveLocation_(location, url)
 	var origPath = MapGet(origParts, "path");
 	var origQuery = MapGet(origParts, "query");
 
-	# Determine the base URL
 	var baseUrl = "";
 
 	if (origScheme == "http" and origPort == 80) or (origScheme == "https" and origPort == 443)
@@ -137,7 +114,7 @@ func _HttpResolveLocation_(location, url)
 	}
 	else
 	{
-		baseUrl = origScheme + "://" + origHost + ":" + str(origPort);
+		baseUrl = origScheme + "://" + origHost + ":" + str(int(origPort));
 	}
 
 	# Absolute URL
@@ -148,25 +125,25 @@ func _HttpResolveLocation_(location, url)
 		return location;
 	}
 
-	# Protocol-relative URLs
+	# Protocol-relative
 	if len(location) >= 2 and charat(location, 1) == "/" and charat(location, 2) == "/"
 	{
 		return origScheme + ":" + location;
 	}
 
-	# Absolute path aka. /path
+	# Absolute path
 	if charat(location, 1) == "/"
 	{
 		return baseUrl + location;
 	}
 
-	# Query-only redirect aka. ?query
+	# Query-only
 	if charat(location, 1) == "?"
 	{
 		return baseUrl + origPath + location;
 	}
 
-	# Fragment-only redirect aka. #fragment
+	# Fragment-only
 	if charat(location, 1) == "#"
 	{
 		if type(origQuery) == "string" and origQuery != ""
@@ -196,9 +173,18 @@ func _HttpResolveLocation_(location, url)
 		baseDir = substr(origPath, 1, lastSlash);
 	}
 
-	var combinedPath = baseDir + location;
+	var locationPath = location;
+	var locationQuery = "";
+	var qPos = indexof(location, "?");
+
+	if not iserr(qPos)
+	{
+		locationPath = substr(location, 1, qPos - 1);
+		locationQuery = substr(location, qPos, len(location));
+	}
 
 	# Normalize path: resolve . and .. segments
+	var combinedPath = baseDir + locationPath;
 	var segments = split(combinedPath, "/");
 	var normalized = [];
 
@@ -232,34 +218,37 @@ func _HttpResolveLocation_(location, url)
 
 	var normalizedPath = "/" + join(normalized, "/");
 
-	return baseUrl + normalizedPath;
+	return baseUrl + normalizedPath + locationQuery;
 }
 
 # <_HttpFilterRedirectHeaders_(headers, origUrl, targetUrl, statusCode)>
-# V-1.0.0 (2026-01-22)
+# V-1.0.1 (2026-03-13)
 #
-# Filters headers for a redirect request. Strips the host header, strips
-# sensitive headers (Authorization, Cookie, Proxy-Authorization) on cross-
-# origin redirects, and strips body-related headers (Content-Type, Content-
-# Length) for 303 redirects. This prevents unintentional leaks of information
-# on redirect. Returns the filtered headers list, or an empty list on failure.
+# Filters ''headers'' for a redirect from ''origUrl'' to ''targetUrl''. Strips
+# the host header, strips sensitive headers (Authorization, Cookie,
+# Proxy-Authorization) on cross-origin redirects, and strips body-related
+# headers (Content-Type, Content-Length) for 303 redirects. Returns the
+# filtered headers list, or ''err'' on failure.
 
 func _HttpFilterRedirectHeaders_(headers, origUrl, targetUrl, statusCode)
 {
 	var origParts = _http_parseurl_(origUrl);
 	var targetParts = _http_parseurl_(targetUrl);
 
-	if iserr(origParts) or iserr(targetParts) { return []; }
+	if iserr(origParts) or iserr(targetParts) { return err; }
 
 	var origHost = MapGet(origParts, "host");
 	var origScheme = MapGet(origParts, "scheme");
+	var origPort = MapGet(origParts, "port");
 	var targetHost = MapGet(targetParts, "host");
 	var targetScheme = MapGet(targetParts, "scheme");
+	var targetPort = MapGet(targetParts, "port");
 
+	# RFC 6454: origin = scheme + host + port
 	var isCrossOrigin = (lower(origHost) != lower(targetHost))
-						or (origScheme != targetScheme);
+						or (origScheme != targetScheme)
+						or (origPort != targetPort);
 
-	# Build clean headers for redirect
 	var cleanHeaders = [];
 
 	for i = 1 to len(headers)
@@ -267,10 +256,8 @@ func _HttpFilterRedirectHeaders_(headers, origUrl, targetUrl, statusCode)
 		var hPair = headers[i];
 		var hKey = lower(hPair[1]);
 
-		# Strip host, it will be re-added for the new target
 		if hKey == "host" { continue; }
 
-		# Strip sensitive headers on cross-origin redirects
 		if isCrossOrigin
 		{
 			if hKey == "authorization" { continue; }
@@ -303,8 +290,108 @@ func _HttpFilterRedirectHeaders_(headers, origUrl, targetUrl, statusCode)
 	return cleanHeaders;
 }
 
+# <_HttpRead_(conn, isTLS, nBytes)>
+# V-1.0.0 (2026-03-12)
+#
+# Reads up to ''nBytes'' from ''conn''. Dispatches to TLS or plain socket
+# based on ''isTLS''.
+
+func _HttpRead_(conn, isTLS, nBytes)
+{
+	if isTLS { return TlsRead(conn, nBytes); }
+	return sread(conn, nBytes);
+}
+
+# <_HttpWrite_(data, conn, isTLS)>
+# V-1.0.0 (2026-03-12)
+#
+# Writes ''data'' to ''conn''. Dispatches to TLS or plain socket based on
+# ''isTLS''.
+
+func _HttpWrite_(data, conn, isTLS)
+{
+	if isTLS { return TlsWrite(data, conn); }
+	return swrite(data, conn);
+}
+
+# <_HttpClose_(conn, isTLS)>
+# V-1.0.0 (2026-03-12)
+#
+# Closes ''conn''. Dispatches to TLS or plain socket based on ''isTLS''.
+
+func _HttpClose_(conn, isTLS)
+{
+	if isTLS { return TlsClose(conn); }
+	return sclose(conn);
+}
+
+# <_HttpPackBody_(body)>
+# V-1.0.0 (2026-03-12)
+#
+# Converts ''body'' to bytes. Passes bytes through unchanged, packs strings
+# directly, and converts other types via ''str'' before packing.
+
+func _HttpPackBody_(body)
+{
+	if type(body) == "bytes" { return body; }
+	if type(body) == "string" { return pack(body); }
+
+	return pack(str(body));
+}
+
+# <_HttpParseHex_(hexString)>
+# V-1.0.0 (2026-03-13)
+#
+# Parses ''hexString'' into a number. Returns ''err'' on invalid input.
+
+func _HttpParseHex_(hexString)
+{
+	if len(hexString) == 0 { return err; }
+
+	var result = 0;
+
+	for i = 1 to len(hexString)
+	{
+		var digit = indexof("0123456789abcdef", lower(charat(hexString, i)));
+
+		if iserr(digit) { return err; }
+
+		result = result * 16 + (digit - 1);
+	}
+
+	return result;
+}
+
+# <_HttpReadHeaders_(conn, isTLS, bufSize)>
+# V-1.0.0 (2026-03-12)
+#
+# Reads from ''conn'' until the HTTP header terminator is found. Uses
+# ''bufSize'' for each read chunk. Returns the raw bytes read, or ''err''
+# if the connection closes before headers are complete.
+
+func _HttpReadHeaders_(conn, isTLS, bufSize)
+{
+	var buf = b[];
+
+	while true
+	{
+		var chunk = _HttpRead_(conn, isTLS, bufSize);
+
+		if iserr(chunk) or len(chunk) == 0 { break; }
+
+		buf = buf + chunk;
+
+		if not iserr(indexof(unpack(buf), "\r\n\r\n"))
+		{
+			return buf;
+		}
+	}
+
+	return err;
+}
+
 #@ <HttpRequestFollow(method, url, headers, body, maxRedirects)>
-#@ V-1.0.1 (2026-01-22)
+#@ V-1.0.2 (2026-03-13)
 #@
 #@ Performs an HTTP request with redirect control. ''maxRedirects'' specifies
 #@ the maximum number of redirects to follow (0 to disable). When the limit is
@@ -326,7 +413,6 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 	var path = MapGet(urlParts, "path");
 	var query = MapGet(urlParts, "query");
 
-	# Build full path with query
 	var fullPath = path;
 
 	if type(query) == "string" and query != ""
@@ -334,7 +420,6 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 		fullPath = fullPath + "?" + query;
 	}
 
-	# Add host header if not present
 	var hasHost = false;
 
 	for i = 1 to len(headers)
@@ -349,103 +434,77 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 
 	if not hasHost
 	{
-		headers = append(headers, ["Host", host]);
+		if (scheme == "http" and port == 80) or (scheme == "https" and port == 443)
+		{
+			headers = append(headers, ["Host", host]);
+		}
+		else
+		{
+			headers = append(headers, ["Host", host + ":" + str(int(port))]);
+		}
 	}
 
 	var requestBytes = _http_formatrequest_(method, fullPath, headers, body);
 
 	if iserr(requestBytes) { return err; }
 
-	# Open connection
-	var conn = 0;
 	var isTLS = (scheme == "https");
+	var conn = 0;
 
-	if isTLS
-	{
-		# Always verify certificates
-		conn = TlsOpen(host, port, true);
-	}
-	else
-	{
-		conn = sopen(host, port, SOCKTCP);
-	}
+	if isTLS { conn = TlsOpen(host, port, true); }
+	else { conn = sopen(host, port, SOCKTCP); }
 
 	if iserr(conn) { return err; }
 
-	# Send request
-	var writeResult = 0;
-
-	if isTLS
-	{
-		writeResult = TlsWrite(requestBytes, conn);
-	}
-	else
-	{
-		writeResult = swrite(requestBytes, conn);
-	}
+	var writeResult = _HttpWrite_(requestBytes, conn, isTLS);
 
 	if iserr(writeResult)
 	{
-		if isTLS
-		{
-			TlsClose(conn);
-		}
-		else
-		{
-			sclose(conn);
-		}
-
+		_HttpClose_(conn, isTLS);
 		return err;
 	}
 
-	# Read response headers first
-	var responseBytes = b[];
-	var headerComplete = false;
+	var responseBytes = _HttpReadHeaders_(conn, isTLS, 1024);
 
-	while not headerComplete
+	if iserr(responseBytes)
 	{
-		var chunk = b[];
-
-		if isTLS
-		{
-			chunk = TlsRead(conn, 1024);
-		}
-		else
-		{
-			chunk = sread(conn, 1024);
-		}
-
-		if iserr(chunk) or len(chunk) == 0
-		{
-			break;
-		}
-
-		responseBytes = responseBytes + chunk;
-
-		# Check for header end
-		var asStr = unpack(responseBytes);
-
-		if not iserr(indexof(asStr, "\r\n\r\n"))
-		{
-			headerComplete = true;
-		}
+		_HttpClose_(conn, isTLS);
+		return err;
 	}
 
-	# Parse headers to get content length
 	var parsedResp = _http_parseresponse_(responseBytes);
 
 	if iserr(parsedResp)
 	{
-		if isTLS
+		_HttpClose_(conn, isTLS);
+		return err;
+	}
+
+	# RFC 9110 15.2: skip 1xx informational responses
+	while MapGet(parsedResp, "statusCode") >= 100 and MapGet(parsedResp, "statusCode") < 200
+	{
+		responseBytes = MapGet(parsedResp, "body");
+
+		while iserr(indexof(unpack(responseBytes), "\r\n\r\n"))
 		{
-			TlsClose(conn);
-		}
-		else
-		{
-			sclose(conn);
+			var chunk = _HttpRead_(conn, isTLS, 1024);
+
+			if iserr(chunk) or len(chunk) == 0
+			{
+				_HttpClose_(conn, isTLS);
+				return err;
+			}
+
+			responseBytes = responseBytes + chunk;
 		}
 
-		return err;
+		parsedResp = _http_parseresponse_(responseBytes);
+
+		if iserr(parsedResp)
+		{
+			_HttpClose_(conn, isTLS);
+			return err;
+		}
 	}
 
 	var respHeaders = MapGet(parsedResp, "headers");
@@ -471,52 +530,106 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 		}
 	}
 
-	# Calculate how much body we already have
 	var currentBody = MapGet(parsedResp, "body");
 	var bodyBytesNeeded = 0;
 
-	if contentLength >= 0
+	# RFC 9112 6.3: Transfer-Encoding overrides Content-Length
+	if contentLength >= 0 and not isChunked
 	{
 		bodyBytesNeeded = contentLength - len(currentBody);
 	}
 
-	# Read remaining body if needed
 	while bodyBytesNeeded > 0
 	{
-		var chunk = b[];
+		var chunk = _HttpRead_(conn, isTLS, bodyBytesNeeded);
 
-		if isTLS
-		{
-			chunk = TlsRead(conn, bodyBytesNeeded);
-		}
-		else
-		{
-			chunk = sread(conn, bodyBytesNeeded);
-		}
-
-		if iserr(chunk) or len(chunk) == 0
-		{
-			break;
-		}
+		if iserr(chunk) or len(chunk) == 0 { break; }
 
 		responseBytes = responseBytes + chunk;
 		bodyBytesNeeded = bodyBytesNeeded - len(chunk);
 	}
 
-	if isTLS
+	# RFC 9112 7.1: chunked framing — parse chunk sizes to know when
+	# the stream is complete. Trailers (7.1.2) are not decoded.
+	if isChunked
 	{
-		TlsClose(conn);
+		var pos = 1;
+
+		while true
+		{
+			var crlfBytePos = 0;
+
+			while crlfBytePos == 0
+			{
+				for j = pos to len(currentBody) - 1
+				{
+					if currentBody[j] == 13 and currentBody[j + 1] == 10
+					{
+						crlfBytePos = j;
+						break;
+					}
+				}
+
+				if crlfBytePos > 0 { break; }
+
+				var chunk = _HttpRead_(conn, isTLS, 4096);
+
+				if iserr(chunk) or len(chunk) == 0 { break; }
+
+				responseBytes = responseBytes + chunk;
+				currentBody = currentBody + chunk;
+			}
+
+			if crlfBytePos == 0 { break; }
+
+			var sizeLine = unpack(bsubstr(currentBody, pos, crlfBytePos - pos));
+			var semiPos = indexof(sizeLine, ";");
+
+			if not iserr(semiPos)
+			{
+				sizeLine = Trim(substr(sizeLine, 1, semiPos - 1));
+			}
+
+			var chunkSize = _HttpParseHex_(Trim(sizeLine));
+
+			if iserr(chunkSize) or chunkSize == 0 { break; }
+
+			var needed = crlfBytePos + 2 + chunkSize + 1;
+
+			while len(currentBody) < needed
+			{
+				var chunk = _HttpRead_(conn, isTLS, 4096);
+
+				if iserr(chunk) or len(chunk) == 0 { break; }
+
+				responseBytes = responseBytes + chunk;
+				currentBody = currentBody + chunk;
+			}
+
+			if len(currentBody) < needed { break; }
+
+			pos = crlfBytePos + 2 + chunkSize + 2;
+		}
 	}
-	else
+
+	if contentLength < 0 and not isChunked
 	{
-		sclose(conn);
+		while true
+		{
+			var chunk = _HttpRead_(conn, isTLS, 4096);
+
+			if iserr(chunk) or len(chunk) == 0 { break; }
+
+			responseBytes = responseBytes + chunk;
+		}
 	}
+
+	_HttpClose_(conn, isTLS);
 
 	var response = _http_parseresponse_(responseBytes);
 
 	if iserr(response) { return err; }
 
-	# Chunked encoding
 	var chunked = MapGet(response, "chunked");
 
 	if chunked == true
@@ -540,7 +653,6 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 	{
 		if maxRedirects <= 0 { return response; }
 
-		# Find location header
 		var respHeadersRedir = MapGet(response, "headers");
 		var location = "";
 
@@ -556,17 +668,18 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 			}
 		}
 
-		# RFC technically allows whitespace
+		# RFC 9110: whitespace is allowed around header values
 		location = Trim(location);
 
 		if location == "" { return err; }
 
-		# Resolve location against original URL
 		var targetUrl = _HttpResolveLocation_(location, url);
 
 		if iserr(targetUrl) { return err; }
 
 		var cleanHeaders = _HttpFilterRedirectHeaders_(headers, url, targetUrl, statusCode);
+
+		if iserr(cleanHeaders) { cleanHeaders = []; }
 
 		var redirectMethod = method;
 		var redirectBody = body;
@@ -640,46 +753,155 @@ func HttpStatusText(statusCode)
 	return "Unknown";
 }
 
-#@ <ParseHttpRequestLine(requestBytes)>
-#@ V-1.0.0 (2026-01-08)
+#@ <HttpParseRequest(requestBytes)>
+#@ V-1.0.0 (2026-03-10)
 #@
-#@ Parses the first line of an HTTP request from ''requestBytes''.
-#@ Returns a request map with ''method'', ''path'', ''headers'' (empty list),
-#@ and ''body'' (empty bytes). Used internally by HttpServe and HttpServeTLS.
-#@ Returns ''err'' if the request line is malformed.
+#@ Parses a complete HTTP request from ''requestBytes''. Returns a request map
+#@ with ''method'', ''path'', ''headers'', and ''body'' (bytes). Returns ''err''
+#@ if the request is malformed.
 
-func ParseHttpRequestLine(requestBytes)
+func HttpParseRequest(requestBytes)
 {
 	var requestStr = unpack(requestBytes);
-	var crlfPos = indexof(requestStr, "\r\n");
+	var headerEndPos = indexof(requestStr, "\r\n\r\n");
 
-	if iserr(crlfPos) { return err; }
+	if iserr(headerEndPos) { return err; }
 
-	var firstLine = substr(requestStr, 1, crlfPos - 1);
+	var headerSection = substr(requestStr, 1, headerEndPos - 1);
+	var headerLines = split(headerSection, "\r\n");
+
+	if len(headerLines) == 0 { return err; }
+
+	var firstLine = headerLines[1];
 	var methodEnd = indexof(firstLine, " ");
 
 	if iserr(methodEnd) { return err; }
 
 	var method = substr(firstLine, 1, methodEnd - 1);
-	var pathStart = methodEnd + 1;
-	var restOfLine = substr(firstLine, pathStart, len(firstLine));
+	var restOfLine = substr(firstLine, methodEnd + 1, len(firstLine));
 	var spacePos = indexof(restOfLine, " ");
 
 	if iserr(spacePos) { return err; }
 
 	var path = substr(restOfLine, 1, spacePos - 1);
+	var headers = [];
+
+	for i = 2 to len(headerLines)
+	{
+		var line = headerLines[i];
+		var colonPos = indexof(line, ":");
+
+		if not iserr(colonPos)
+		{
+			var key = Trim(substr(line, 1, colonPos - 1));
+			var val = Trim(substr(line, colonPos + 1, len(line)));
+			headers = append(headers, [key, val]);
+		}
+	}
+
+	# pack() for true byte length
+	var body = b[];
+	var headerByteLen = len(pack(headerSection));
+	var bodyStartByte = headerByteLen + 5;
+
+	if bodyStartByte <= len(requestBytes)
+	{
+		body = bsubstr(requestBytes, bodyStartByte, len(requestBytes));
+	}
 
 	var request = MapNew();
 	request = MapSet(request, "method", method);
 	request = MapSet(request, "path", path);
-	request = MapSet(request, "headers", []);
-	request = MapSet(request, "body", b[]);
+	request = MapSet(request, "headers", headers);
+	request = MapSet(request, "body", body);
 
 	return request;
 }
 
+# <_HttpReadRequest_(conn, isTLS)>
+# V-1.0.0 (2026-03-10)
+#
+# Reads a complete HTTP request from ''conn''. Returns the raw request bytes,
+# or ''err'' on failure.
+
+func _HttpReadRequest_(conn, isTLS)
+{
+	var requestBytes = _HttpReadHeaders_(conn, isTLS, 4096);
+
+	if iserr(requestBytes) { return err; }
+
+	var reqStr = unpack(requestBytes);
+	var headerEndPos = indexof(reqStr, "\r\n\r\n");
+	var headerSection = substr(reqStr, 1, headerEndPos - 1);
+	var headerLines = split(headerSection, "\r\n");
+	var contentLength = 0;
+
+	for i = 2 to len(headerLines)
+	{
+		var line = headerLines[i];
+		var colonPos = indexof(line, ":");
+
+		if not iserr(colonPos)
+		{
+			var key = lower(Trim(substr(line, 1, colonPos - 1)));
+
+			if key == "content-length"
+			{
+				var val = Trim(substr(line, colonPos + 1, len(line)));
+				contentLength = int(num(val));
+			}
+		}
+	}
+
+	# pack() for true byte length
+	var headerByteLen = len(pack(headerSection));
+	var bodyAlreadyRead = len(requestBytes) - (headerByteLen + 4);
+	var bodyNeeded = contentLength - bodyAlreadyRead;
+
+	while bodyNeeded > 0
+	{
+		var chunk = _HttpRead_(conn, isTLS, bodyNeeded);
+
+		if iserr(chunk) or len(chunk) == 0 { break; }
+
+		requestBytes = requestBytes + chunk;
+		bodyNeeded = bodyNeeded - len(chunk);
+	}
+
+	return requestBytes;
+}
+
+# <_HttpFormatServerResponse_(statusCode, headers, body, label)>
+# V-1.0.0 (2026-03-12)
+#
+# Formats an HTTP/1.1 response with ''statusCode'', ''headers'', ''body'',
+# and server ''label''. Returns the complete response as bytes.
+
+func _HttpFormatServerResponse_(statusCode, headers, body, label)
+{
+	var statusText = HttpStatusText(statusCode);
+	var responseStr = "HTTP/1.1 " + str(statusCode) + " " + statusText + "\r\n";
+	responseStr = responseStr + "Server: libhttp.chh (" + label + ") on chippy V-" + CHIPVR + "\r\n";
+
+	for i = 1 to len(headers)
+	{
+		var hPair = headers[i];
+		var hKey = lower(hPair[1]);
+
+		if hKey == "content-length" { continue; }
+		if hKey == "server" { continue; }
+
+		responseStr = responseStr + hPair[1] + ": " + hPair[2] + "\r\n";
+	}
+
+	responseStr = responseStr + "Content-Length: " + str(len(body)) + "\r\n";
+	responseStr = responseStr + "\r\n";
+
+	return pack(responseStr) + body;
+}
+
 #@ <HttpServe(port, handler)>
-#@ V-1.0.0 (2026-01-08)
+#@ V-1.0.1 (2026-03-10)
 #@
 #@ *!!WARNING!!: This is a single-threaded, blocking server intended for LOCAL*
 #@ *USAGE IN TRUSTED NETWORKS, DEVELOPMENT AND TESTING ONLY. DO NOT expose this*
@@ -703,7 +925,7 @@ func HttpServe(port, handler)
 
 		if iserr(client) { continue; }
 
-		var requestBytes = sread(client, 4096);
+		var requestBytes = _HttpReadRequest_(client, false);
 
 		if iserr(requestBytes)
 		{
@@ -711,7 +933,7 @@ func HttpServe(port, handler)
 			continue;
 		}
 
-		var request = ParseHttpRequestLine(requestBytes);
+		var request = HttpParseRequest(requestBytes);
 
 		if iserr(request)
 		{
@@ -719,56 +941,27 @@ func HttpServe(port, handler)
 			continue;
 		}
 
-		# Call handler
 		var response = handler(request);
 
-		# Handler returned error
 		if iserr(response)
 		{
-			var errorBody = "Handler returned err.";
-			var errorResponse = "HTTP/1.1 500 Internal Server Error\r\n";
-
-			errorResponse = errorResponse + "Server: libhttp.chh (HttpServe) on chippy V-" + CHIPVR + "\r\n";
-			errorResponse = errorResponse + "Content-Length: " + str(len(errorBody)) + "\r\n\r\n" + errorBody;
-
-			swrite(pack(errorResponse), client);
+			var errorBytes = _HttpFormatServerResponse_(500, [], pack("Handler returned err."), "HttpServe");
+			swrite(errorBytes, client);
 			sclose(client);
 			continue;
 		}
 
-		# Get response fields
 		var statusCode = MapGet(response, "statusCode");
 		var headers = MapGet(response, "headers");
 		var body = MapGet(response, "body");
 
-		# Format HTTP response
-		var statusText = HttpStatusText(statusCode);
-		var statusLine = "HTTP/1.1 " + str(statusCode) + " " + statusText + "\r\n";
-		var responseStr = statusLine;
-		responseStr = responseStr + "Server: libhttp.chh (HttpServe) on chippy V-" + CHIPVR + "\r\n";
-
-		for i = 1 to len(headers)
-		{
-			var hPair = headers[i];
-
-			responseStr = responseStr + hPair[1] + ": " + hPair[2] + "\r\n";
-		}
-
-		responseStr = responseStr + "Content-Length: " + str(len(body)) + "\r\n";
-		responseStr = responseStr + "\r\n";
-
-		var responseBytes = pack(responseStr) + body;
-
-		swrite(responseBytes, client);
+		swrite(_HttpFormatServerResponse_(statusCode, headers, body, "HttpServe"), client);
 		sclose(client);
 	}
-
-	sclose(server);
-	return ok;
 }
 
 #@ <HttpServeTLS(port, certPath, keyPath, handler)>
-#@ V-1.0.0 (2026-01-08)
+#@ V-1.0.1 (2026-03-10)
 #@
 #@ *!!WARNING!!: This is a single-threaded, blocking server intended for LOCAL*
 #@ *USAGE IN TRUSTED NETWORKS, DEVELOPMENT AND TESTING ONLY. DO NOT expose this*
@@ -788,79 +981,47 @@ func HttpServeTLS(port, certPath, keyPath, handler)
 
 	while true
 	{
-		# TlsAccept does accept + TLS upgrade internally
 		var tlsClient = TlsAccept(server, certPath, keyPath);
 
 		if iserr(tlsClient) { continue; }
 
-		var requestBytes = TlsRead(tlsClient, 4096);
+		var requestBytes = _HttpReadRequest_(tlsClient, true);
 
 		if iserr(requestBytes)
 		{
 			TlsClose(tlsClient);
-
 			continue;
 		}
 
-		var request = ParseHttpRequestLine(requestBytes);
+		var request = HttpParseRequest(requestBytes);
 
 		if iserr(request)
 		{
 			TlsClose(tlsClient);
-
 			continue;
 		}
 
-		# Call handler
 		var response = handler(request);
 
-		# Handler returned error
 		if iserr(response)
 		{
-			var errorBody = "Handler returned err.";
-			var errorResponse = "HTTP/1.1 500 Internal Server Error\r\n";
-
-			errorResponse = errorResponse + "Server: libhttp.chh (HttpServeTLS) on chippy V-" + CHIPVR + "\r\n";
-			errorResponse = errorResponse + "Content-Length: " + str(len(errorBody)) + "\r\n\r\n" + errorBody;
-
-			TlsWrite(pack(errorResponse), tlsClient);
+			var errorBytes = _HttpFormatServerResponse_(500, [], pack("Handler returned err."), "HttpServeTLS");
+			TlsWrite(errorBytes, tlsClient);
 			TlsClose(tlsClient);
 			continue;
 		}
 
-		# Get response fields
 		var statusCode = MapGet(response, "statusCode");
 		var headers = MapGet(response, "headers");
 		var body = MapGet(response, "body");
 
-		# Format HTTP response
-		var statusText = HttpStatusText(statusCode);
-		var statusLine = "HTTP/1.1 " + str(statusCode) + " " + statusText + "\r\n";
-		var responseStr = statusLine;
-		responseStr = responseStr + "Server: libhttp.chh (HttpServeTLS) on chippy V-" + CHIPVR + "\r\n";
-
-		for i = 1 to len(headers)
-		{
-			var hPair = headers[i];
-
-			responseStr = responseStr + hPair[1] + ": " + hPair[2] + "\r\n";
-		}
-
-		responseStr = responseStr + "Content-Length: " + str(len(body)) + "\r\n";
-		responseStr = responseStr + "\r\n";
-
-		var responseBytes = pack(responseStr) + body;
-
-		TlsWrite(responseBytes, tlsClient);
+		TlsWrite(_HttpFormatServerResponse_(statusCode, headers, body, "HttpServeTLS"), tlsClient);
 		TlsClose(tlsClient);
 	}
-
-	sclose(server);
-	return ok;
 }
 
 #@ <HttpResponse(statusCode, body)>
-#@ V-1.0.0 (2026-01-08)
+#@ V-1.0.1 (2026-03-13)
 #@
 #@ Creates an HTTP response map with ''statusCode'' and ''body''. The ''body''
 #@ can be a string or bytes. Returns a map with ''statusCode'', ''headers''
@@ -868,27 +1029,16 @@ func HttpServeTLS(port, certPath, keyPath, handler)
 
 func HttpResponse(statusCode, body)
 {
-	var bodyBytes = b[];
-
-	if type(body) == "string"
-	{
-		bodyBytes = pack(body);
-	}
-	elseif type(body) == "bytes"
-	{
-		bodyBytes = body;
-	}
-
 	var response = MapNew();
 	response = MapSet(response, "statusCode", statusCode);
 	response = MapSet(response, "headers", []);
-	response = MapSet(response, "body", bodyBytes);
+	response = MapSet(response, "body", _HttpPackBody_(body));
 
 	return response;
 }
 
 #@ <HttpResponseWithHeaders(statusCode, headers, body)>
-#@ V-1.0.0 (2026-01-08)
+#@ V-1.0.1 (2026-03-13)
 #@
 #@ Creates an HTTP response map with ''statusCode'', ''headers'', and ''body''.
 #@ The ''body'' can be a string or bytes. Returns a map with ''statusCode'',
@@ -896,21 +1046,10 @@ func HttpResponse(statusCode, body)
 
 func HttpResponseWithHeaders(statusCode, headers, body)
 {
-	var bodyBytes = b[];
-
-	if type(body) == "string"
-	{
-		bodyBytes = pack(body);
-	}
-	elseif type(body) == "bytes"
-	{
-		bodyBytes = body;
-	}
-
 	var response = MapNew();
 	response = MapSet(response, "statusCode", statusCode);
 	response = MapSet(response, "headers", headers);
-	response = MapSet(response, "body", bodyBytes);
+	response = MapSet(response, "body", _HttpPackBody_(body));
 
 	return response;
 }
@@ -941,7 +1080,7 @@ func HttpFormatRequest(method, path, headers, body)
 #@ <HttpParseResponse(responseBytes)>
 #@ V-1.0.0 (2026-01-08)
 #@
-#@ Parses HTTP response from ''responseBytes''. Returns a map with
+#@ Parses a complete HTTP response from ''responseBytes''. Returns a map with
 #@ ''statusCode'', ''statusText'', ''headers'', ''body'', and ''chunked''.
 #@ The ''chunked'' field is ''true'' if Transfer-Encoding: chunked, ''false''
 #@ otherwise. Returns ''err'' if the response is malformed.
@@ -968,8 +1107,7 @@ func HttpDechunk(chunkedBytes)
 #@ <HttpUrlEncode(text)>
 #@ V-1.0.0 (2026-01-08)
 #@
-#@ URL-encodes ''text'' for safe use in URLs. Converts special characters
-#@ to percent-encoded format. Returns the encoded string.
+#@ Percent / URL-encodes ''text''. Returns the encoded string.
 
 func HttpUrlEncode(text)
 {
@@ -979,9 +1117,8 @@ func HttpUrlEncode(text)
 #@ <HttpUrlDecode(text)>
 #@ V-1.0.0 (2026-01-08)
 #@
-#@ URL-decodes ''text'' by converting percent-encoded characters back to their
-#@ original form. Returns the decoded string on success, ''err'' if the
-#@ encoding is malformed.
+#@ Percent / URL-decodes ''text''. Returns the decoded string on success or
+#@ ''err'' if the encoding is malformed.
 
 func HttpUrlDecode(text)
 {
@@ -991,8 +1128,7 @@ func HttpUrlDecode(text)
 #@ <HttpBase64Encode(bytes)>
 #@ V-1.0.0 (2026-01-08)
 #@
-#@ Base64-encodes ''bytes'' using standard Base64 encoding. Returns the encoded
-#@ string.
+#@ Base64-encodes ''bytes''. Returns the encoded string.
 
 func HttpBase64Encode(bytes)
 {
@@ -1002,8 +1138,8 @@ func HttpBase64Encode(bytes)
 #@ <HttpBase64Decode(text)>
 #@ V-1.0.0 (2026-01-08)
 #@
-#@ Base64-decodes ''text'' using standard Base64 decoding. Returns the decoded
-#@ bytes on success, ''err'' if the encoding is invalid.
+#@ Base64-decodes ''text''. Returns the decoded bytes on success or ''err'' if
+#@ the encoding is malformed.
 
 func HttpBase64Decode(text)
 {
