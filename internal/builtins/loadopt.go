@@ -17,6 +17,7 @@ import (
 	_ "chip-go/internal/optional/http"
 	_ "chip-go/internal/optional/json"
 	_ "chip-go/internal/optional/tls"
+	_ "chip-go/internal/optional/hash"
 )
 
 func loadoptFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {

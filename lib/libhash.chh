@@ -1,0 +1,259 @@
+#!/usr/bin/chippy
+#
+# corelib - libhash.chh
+#
+
+loadopt("hash");
+
+#@ <BytesToHex(bytes)>
+#@ V-1.0.0 (2026-03-08)
+#@
+#@ Converts ''bytes'' to a lowercase hexadecimal string representation.
+
+func BytesToHex(bytes)
+{
+	var hexDigits = "0123456789abcdef";
+	var result = "";
+	var i = 1;
+	var byteLen = len(bytes);
+
+	while i <= byteLen
+	{
+		var byteVal = bytes[i];
+		var high = int(byteVal / 16);
+		var low = byteVal % 16;
+		result = result + substr(hexDigits, high + 1, 1) + substr(hexDigits, low + 1, 1);
+		i = i + 1;
+	}
+
+	return result;
+}
+
+# NOTE: SHA-1 and MD5 still reside here because they are still widely used hash
+# algorithms for non-cryptographic purposes, removing them will not make anyone
+# safer but WILL make Chip less useful for actual real world tasks users might
+# encounter, so they stay for now.
+
+#@ <Md5(bytes)>
+#@ V-1.0.0 (2026-03-08)
+#@
+#@ *!!WARNING!!: Do not use MD5 for purposes where you expect cryptographic*
+#@ *security, MD5 has had numerous security issues and vulnerabilities since*
+#@ *the late 90s and is considered fundamentally cryptographically broken.*
+#@ *It is recommended to use a FIPS-approved algorithm for purposes requiring*
+#@ *cryptographic security.*
+#@
+#@ Returns the MD5 hash digest of ''bytes''.
+
+func Md5(bytes)
+{
+	return _hash_md5_(bytes);
+}
+
+#@ <Md5Hex(bytes)>
+#@ V-1.0.0 (2026-03-08)
+#@
+#@ *!!WARNING!!: Do not use MD5 for purposes where you expect cryptographic*
+#@ *security, MD5 has had numerous security issues and vulnerabilities since*
+#@ *the late 90s and is considered fundamentally cryptographically broken.*
+#@ *It is recommended to use a FIPS-approved algorithm for purposes requiring*
+#@ *cryptographic security.*
+#@
+#@ Returns the MD5 hash digest of ''bytes'' as a hex string.
+
+func Md5Hex(bytes)
+{
+	return BytesToHex(Md5(bytes));
+}
+
+#@ <Sha1(bytes)>
+#@ V-1.0.0 (2026-03-08)
+#@
+#@ *!!WARNING!!: Do not use SHA-1 for purposes where you expect cryptographic*
+#@ *security, SHA-1 has been demonstrated to be vulnerable to collision attacks*
+#@ *and is considered cryptographically broken. It is recommended to use a*
+#@ *FIPS-approved algorithm such as SHA-2 or SHA-3 for purposes requiring*
+#@ *cryptographic security.*
+#@
+#@ Returns the SHA-1 hash digest of ''bytes''.
+
+func Sha1(bytes)
+{
+	return _hash_sha1_(bytes);
+}
+
+#@ <Sha1Hex(bytes)>
+#@ V-1.0.0 (2026-03-08)
+#@
+#@ *!!WARNING!!: Do not use SHA-1 for purposes where you expect cryptographic*
+#@ *security, SHA-1 has been demonstrated to be vulnerable to collision attacks*
+#@ *and is considered cryptographically broken. It is recommended to use a*
+#@ *FIPS-approved algorithm such as SHA-2 or SHA-3 for purposes requiring*
+#@ *cryptographic security.*
+#@
+#@ Returns the SHA-1 hash digest of ''bytes'' as a hex string.
+
+func Sha1Hex(bytes)
+{
+	return BytesToHex(Sha1(bytes));
+}
+
+#@ <Sha224(bytes)>
+#@ V-1.0.0 (2026-03-08)
+#@
+#@ Returns the SHA-224 hash digest of ''bytes''.
+
+func Sha224(bytes)
+{
+	return _hash_sha224_(bytes);
+}
+
+#@ <Sha224Hex(bytes)>
+#@ V-1.0.0 (2026-03-08)
+#@
+#@ Returns the SHA-224 hash digest of ''bytes'' as a hex string.
+
+func Sha224Hex(bytes)
+{
+	return BytesToHex(Sha224(bytes));
+}
+
+#@ <Sha256(bytes)>
+#@ V-1.0.0 (2026-03-08)
+#@
+#@ Returns the SHA-256 hash digest of ''bytes''.
+
+func Sha256(bytes)
+{
+	return _hash_sha256_(bytes);
+}
+
+#@ <Sha256Hex(bytes)>
+#@ V-1.0.0 (2026-03-08)
+#@
+#@ Returns the SHA-256 hash digest of ''bytes'' as a hex string.
+
+func Sha256Hex(bytes)
+{
+	return BytesToHex(Sha256(bytes));
+}
+
+#@ <Sha384(bytes)>
+#@ V-1.0.0 (2026-03-08)
+#@
+#@ Returns the SHA-384 hash digest of ''bytes''.
+
+func Sha384(bytes)
+{
+	return _hash_sha384_(bytes);
+}
+
+#@ <Sha384Hex(bytes)>
+#@ V-1.0.0 (2026-03-08)
+#@
+#@ Returns the SHA-384 hash digest of ''bytes'' as a hex string.
+
+func Sha384Hex(bytes)
+{
+	return BytesToHex(Sha384(bytes));
+}
+
+#@ <Sha512(bytes)>
+#@ V-1.0.0 (2026-03-08)
+#@
+#@ Returns the SHA-512 hash digest of ''bytes''.
+
+func Sha512(bytes)
+{
+	return _hash_sha512_(bytes);
+}
+
+#@ <Sha512Hex(bytes)>
+#@ V-1.0.0 (2026-03-08)
+#@
+#@ Returns the SHA-512 hash digest of ''bytes'' as a hex string.
+
+func Sha512Hex(bytes)
+{
+	return BytesToHex(Sha512(bytes));
+}
+
+#@ <Sha3224(bytes)>
+#@ V-1.0.0 (2026-03-10)
+#@
+#@ Returns the SHA-3-224 hash digest of ''bytes''.
+
+func Sha3224(bytes)
+{
+	return _hash_sha3224_(bytes);
+}
+
+#@ <Sha3224Hex(bytes)>
+#@ V-1.0.0 (2026-03-10)
+#@
+#@ Returns the SHA-3-224 hash digest of ''bytes'' as a hex string.
+
+func Sha3224Hex(bytes)
+{
+	return BytesToHex(Sha3224(bytes));
+}
+
+#@ <Sha3256(bytes)>
+#@ V-1.0.0 (2026-03-10)
+#@
+#@ Returns the SHA-3-256 hash digest of ''bytes''.
+
+func Sha3256(bytes)
+{
+	return _hash_sha3256_(bytes);
+}
+
+#@ <Sha3256Hex(bytes)>
+#@ V-1.0.0 (2026-03-10)
+#@
+#@ Returns the SHA-3-256 hash digest of ''bytes'' as a hex string.
+
+func Sha3256Hex(bytes)
+{
+	return BytesToHex(Sha3256(bytes));
+}
+
+#@ <Sha3384(bytes)>
+#@ V-1.0.0 (2026-03-10)
+#@
+#@ Returns the SHA-3-384 hash digest of ''bytes''.
+
+func Sha3384(bytes)
+{
+	return _hash_sha3384_(bytes);
+}
+
+#@ <Sha3384Hex(bytes)>
+#@ V-1.0.0 (2026-03-10)
+#@
+#@ Returns the SHA-3-384 hash digest of ''bytes'' as a hex string.
+
+func Sha3384Hex(bytes)
+{
+	return BytesToHex(Sha3384(bytes));
+}
+
+#@ <Sha3512(bytes)>
+#@ V-1.0.0 (2026-03-10)
+#@
+#@ Returns the SHA-3-512 hash digest of ''bytes''.
+
+func Sha3512(bytes)
+{
+	return _hash_sha3512_(bytes);
+}
+
+#@ <Sha3512Hex(bytes)>
+#@ V-1.0.0 (2026-03-10)
+#@
+#@ Returns the SHA-3-512 hash digest of ''bytes'' as a hex string.
+
+func Sha3512Hex(bytes)
+{
+	return BytesToHex(Sha3512(bytes));
+}

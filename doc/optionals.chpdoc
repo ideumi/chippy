@@ -17,3 +17,5 @@ See ''chippy doc loadopt'', ''chippy doc builtins'' and ''chippy doc corelib''.
 ''http'' - Abstracted by ''libhttp.chh''
 
 ''tls'' - Abstracted by ''libtls.chh''
+
+''hash'' - Abstacted by ''libhash.chh''
