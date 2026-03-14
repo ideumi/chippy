@@ -103,6 +103,7 @@ func formatrequestFunction(args []values.Value, ctx interface{}) *values.Runtime
 
 	// Headers
 	hasContentLength := false
+	hasConnection := false
 
 	for _, elem := range headersList.Elements {
 		pair, ok := elem.(*values.List)
@@ -136,17 +137,26 @@ func formatrequestFunction(args []values.Value, ctx interface{}) *values.Runtime
 			hasContentLength = true
 		}
 
+		if keyLower == "connection" {
+			hasConnection = true
+		}
+
 		buf.WriteString(key.Value)
 		buf.WriteString(": ")
 		buf.WriteString(val.Value)
 		buf.WriteString("\r\n")
 	}
 
-	// Add Content-Length if body present and not already set
-	if len(bodyBytes.Data) > 0 && !hasContentLength {
+	// Add Content-Length if not already set
+	if !hasContentLength {
 		buf.WriteString("Content-Length: ")
 		buf.WriteString(strconv.Itoa(len(bodyBytes.Data)))
 		buf.WriteString("\r\n")
+	}
+
+	// Close if not already set
+	if !hasConnection {
+		buf.WriteString("Connection: close\r\n")
 	}
 
 	// End headers
