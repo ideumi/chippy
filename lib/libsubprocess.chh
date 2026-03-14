@@ -74,7 +74,7 @@ func RunCheck(command)
 }
 
 #@ <Spawn(command)>
-#@ V-1.0.0 (2025-12-25)
+#@ V-1.0.1 (2026-03-11)
 #@
 #@ Starts a background process and returns its PID.
 #@
@@ -84,27 +84,5 @@ func RunCheck(command)
 
 func Spawn(command)
 {
-	# The shell's & operator backgrounds the command
-	# Redirect output to /dev/null to prevent pipe inheritance
-	# $! expands to the PID of the last backgrounded process
-	var handle = popen(command + " > /dev/null 2>&1 & echo $!", "r");
-
-	if iserr(handle) { return err; }
-
-	var rawOutput = fread(handle, 0);
-
-	if iserr(rawOutput)
-	{
-		pclose(handle);
-		return err;
-	}
-
-	var output = Trim(unpack(rawOutput));
-	pclose(handle);
-
-	var pid = num(output);
-
-	if pid == 0 { return err; }
-
-	return pid;
+	return spawn(["/bin/sh", "-c", command]);
 }
