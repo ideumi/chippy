@@ -78,7 +78,7 @@
       ]
     },
     "builtins": {
-      "match": "\\b(append|args|charat|chdir|chmod|cos|dclose|dopen|dread|error|exec|fclose|fopen|fread|fsync|fwrite|getch|getcwd|getenv|getpid|getuid|indexof|int|iserr|isok|join|kill|len|lenv|list|load|loadopt|lower|lstat|lutime|mkdir|num|off|pack|pclose|popen|rand|readlink|rename|replace|saccept|sclose|seek|setenv|sin|sleep|sopen|sort|split|sread|stat|str|substr|swrite|symlink|tan|time|type|unlink|unpack|upper|utime)\\b",
+      "match": "\\b(append|args|bsubstr|charat|chdir|chmod|cos|dclose|dopen|dread|error|exec|fclose|fopen|fread|fsync|fwrite|getch|getcwd|getenv|getpid|getuid|indexof|int|iserr|isok|join|kill|len|lenv|list|load|loadopt|lower|lstat|lutime|mkdir|num|off|pack|pclose|popen|rand|readlink|rename|replace|saccept|sclose|seek|setenv|sin|sleep|sopen|sort|spawn|split|sread|stat|str|substr|swrite|symlink|tan|time|type|unlink|unpack|upper|utime)\\b",
       "name": "support.function.builtin.chiplang"
     },
     "function-call": {

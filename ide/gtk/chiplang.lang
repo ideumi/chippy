@@ -99,6 +99,7 @@
         <context id="builtins" style-ref="builtin" class="no-spell-check">
           <keyword>append</keyword>
           <keyword>args</keyword>
+          <keyword>bsubstr</keyword>
           <keyword>charat</keyword>
           <keyword>chdir</keyword>
           <keyword>chmod</keyword>
@@ -150,6 +151,7 @@
           <keyword>sleep</keyword>
           <keyword>sopen</keyword>
           <keyword>sort</keyword>
+          <keyword>spawn</keyword>
           <keyword>split</keyword>
           <keyword>sread</keyword>
           <keyword>stat</keyword>

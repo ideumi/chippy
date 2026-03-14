@@ -43,6 +43,7 @@
     <list name="builtins">
       <item>append</item>
       <item>args</item>
+      <item>bsubstr</item>
       <item>charat</item>
       <item>chdir</item>
       <item>chmod</item>
@@ -94,6 +95,7 @@
       <item>sleep</item>
       <item>sopen</item>
       <item>sort</item>
+      <item>spawn</item>
       <item>split</item>
       <item>sread</item>
       <item>stat</item>
