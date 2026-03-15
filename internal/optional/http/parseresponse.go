@@ -133,8 +133,13 @@ func parseresponseFunction(args []values.Value, ctx interface{}) *values.Runtime
 	var body []byte
 
 	if bodyStart < len(data) {
-		if contentLength >= 0 {
-			// Use Content-Length
+		if contentLength >= 0 && !isChunked {
+			/* Use Content-Length
+			   RFC 9112 6.3:
+			   "If a message is received with both a Transfer-Encoding
+			   and a Content-Length header field, the Transfer-Encoding
+			   overrides the Content-Length."
+			*/
 			end := bodyStart + contentLength
 
 			if end > len(data) {
@@ -143,7 +148,7 @@ func parseresponseFunction(args []values.Value, ctx interface{}) *values.Runtime
 
 			body = data[bodyStart:end]
 		} else {
-			// Take remaining data
+			// Chunked or unknown length: take remaining data
 			body = data[bodyStart:]
 		}
 	}

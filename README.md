@@ -10,7 +10,7 @@ I aim to make ChipLang maintain a clean separation between builtins and librarie
 
 ChipLang is currently still in development and offers no guarantees of stability, the first real stable release will be `1.1.0` planned for some time in the summer of 2026.
 
-ChipLang is in a feature freeze as of version `1.0.12` to prepare for the upcoming stable release.
+ChipLang is in a feature freeze as of version `1.0.13` to prepare for the upcoming stable release.
 See the [ROADMAP](ROADMAP.md).
 
 ### [Download ChipLang](https://codeberg.org/ideumi/chip-go/releases) | [Quick Start](QUICKSTART.md)
@@ -41,6 +41,7 @@ Println("Hello World");
 - JSON encoding and decoding
 - HTTP client
 - TLS sockets
+- Hashing (SHA-2, SHA-3 etc.)
 - ....
 
 **Built-in Primitives**
@@ -93,7 +94,11 @@ make
 ## Building the Release Package
 
 ```bash
-make release
+# Build release your current platform
+make release    
+
+# Build releases for x86_64 and aarch64
+make release-all
 ```
 
 ## Quick Start

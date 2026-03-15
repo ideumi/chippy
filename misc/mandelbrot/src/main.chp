@@ -9,6 +9,11 @@
 load("libtermios.chh");
 load("libhandles.chh");
 
+var TERMSZE = GetTerminalSize();
+
+var SIZEROWS = TERMSZE[1];
+var SIZECOLS = TERMSZE[2];
+
 # Regular terminal columns to cartesian coordiates
 
 func CalcColCoord(maxCol, col)
@@ -57,11 +62,6 @@ func CalculateMB(col, row, iter)
 
 func Main()
 {
-	var TERMSZE = GetTerminalSize();
-
-	var SIZEROWS = TERMSZE[1];
-	var SIZECOLS = TERMSZE[2];
-
 	HideCursor();
 	ClearScreen();
 

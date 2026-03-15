@@ -6,7 +6,7 @@ ChipLang is a personal, open-source side-project. All development is performed a
 
 ## 1.0.x / Current
 
-ChipLang is in a feature freeze as of version `1.0.12` to prepare for the upcoming stable release. The focus in the next few months will be primarily to iron out bugs and other kinds of issues in the existing feature set.
+ChipLang is in a feature freeze as of version `1.0.13` to prepare for the upcoming stable release. The focus in the next few months will be primarily to iron out bugs and other kinds of issues in the existing feature set.
 
 The language is currently in a state of heavy development where i may add or remove features at will without any advanced notice. Development currently also occurs in an irregular pace, depending on my mood and the time i can find.
 

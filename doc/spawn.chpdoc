@@ -1,0 +1,22 @@
+*spawn* | V-$CHIPVR ($CHIPCN)
+
+''spawn(args)''
+
+Starts a detached background process. The spawned process runs in a new session
+and is not affected by the parent.
+
+*Parameters:*
+- ''args'': List of strings with program and arguments (first element is program path)
+
+*Returns:*
+- Number: Process ID (PID) of the spawned process
+- ''err'' on failure
+
+*Errors:*
+- Runtime error if args is not a list
+- Runtime error if any element in args is not a string
+- Runtime error if args list is empty
+
+*Environment propagation:*
+
+The current process environment is passed to the new program.

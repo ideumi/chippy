@@ -14,6 +14,7 @@ import (
 	"chip-go/internal/values"
 
 	// Import optionals to trigger their init()
+	_ "chip-go/internal/optional/hash"
 	_ "chip-go/internal/optional/http"
 	_ "chip-go/internal/optional/json"
 	_ "chip-go/internal/optional/tls"
