@@ -38,6 +38,7 @@ func NewLexer(file, text string) *Lexer {
 func (l *Lexer) advance() {
 	l.pos.Advance(l.currentChar)
 	l.byteIndex++
+
 	if l.byteIndex < len(l.text) {
 		r, size := utf8.DecodeRuneInString(l.text[l.byteIndex:])
 		l.currentChar = r
@@ -52,7 +53,6 @@ func (l *Lexer) MakeTokens() ([]*Token, error) {
 
 	for l.currentChar != 0 {
 		switch {
-
 		case l.currentChar == ' ' || l.currentChar == '\t':
 			l.advance()
 
@@ -65,24 +65,24 @@ func (l *Lexer) MakeTokens() ([]*Token, error) {
 
 		case unicode.IsDigit(l.currentChar):
 			token, err := l.makeNumber()
+
 			if err != nil {
 				return nil, err
 			}
+
 			tokens = append(tokens, token)
 
 		case unicode.IsLetter(l.currentChar) || l.currentChar == '_':
 			token := l.makeIdentifier()
-			// Check for byte literal syntax 'b['
-			if token.Type == constants.TT_IDENTIFIER && token.Value == "b" && l.currentChar == '[' {
-				token.Type = constants.TT_BYTELITERAL
-			}
 			tokens = append(tokens, token)
 
 		case l.currentChar == '"':
 			token, err := l.makeString()
+
 			if err != nil {
 				return nil, err
 			}
+
 			tokens = append(tokens, token)
 
 		case l.currentChar == '+':
@@ -137,15 +137,21 @@ func (l *Lexer) MakeTokens() ([]*Token, error) {
 			tokens = append(tokens, NewToken(constants.TT_COMMA, nil, l.pos.Copy(), nil))
 			l.advance()
 
+		case l.currentChar == ':':
+			tokens = append(tokens, NewToken(constants.TT_COLON, nil, l.pos.Copy(), nil))
+			l.advance()
+
 		case l.currentChar == ';':
 			tokens = append(tokens, NewToken(constants.TT_SEMICOLON, nil, l.pos.Copy(), nil))
 			l.advance()
 
 		case l.currentChar == '!':
 			token, err := l.makeNotEquals()
+
 			if err != nil {
 				return nil, err
 			}
+
 			tokens = append(tokens, token)
 
 		case l.currentChar == '=':
@@ -173,6 +179,7 @@ func (l *Lexer) MakeTokens() ([]*Token, error) {
 
 func (l *Lexer) skipComment() {
 	l.advance()
+
 	for l.currentChar != 0 && l.currentChar != '\n' {
 		l.advance()
 	}
@@ -190,12 +197,14 @@ func (l *Lexer) makeNumber() (*Token, error) {
 			}
 			dotCount++
 		}
+
 		numStr += string(l.currentChar)
 		l.advance()
 	}
 
 	if dotCount == 0 {
 		val, err := strconv.ParseInt(numStr, 10, 64)
+
 		if err != nil {
 			return nil, errors.NewIllegalCharError(posStart, l.pos.Copy(), "Invalid integer: "+numStr)
 		}
@@ -203,6 +212,7 @@ func (l *Lexer) makeNumber() (*Token, error) {
 		return NewToken(constants.TT_INT, val, posStart, l.pos.Copy()), nil
 	} else {
 		val, err := strconv.ParseFloat(numStr, 64)
+
 		if err != nil {
 			return nil, errors.NewIllegalCharError(posStart, l.pos.Copy(), "Invalid float: "+numStr)
 		}
@@ -243,6 +253,7 @@ func (l *Lexer) makeString() (*Token, error) {
 	for l.currentChar != 0 && l.currentChar != '"' && l.currentChar != '\n' {
 		if l.currentChar == '\\' {
 			l.advance()
+
 			if escapeChar, exists := escapeChars[l.currentChar]; exists {
 				str += string(escapeChar)
 			} else {
