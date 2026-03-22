@@ -89,6 +89,34 @@ func (n *ByteArrayNode) String() string {
 	return "b[" + strings.Join(elements, ", ") + "]"
 }
 
+type MapNode struct {
+	*BaseNode
+	KeyNodes   []Node
+	ValueNodes []Node
+}
+
+func NewMapNode(posStart, posEnd *errors.Position, keyNodes []Node, valueNodes []Node) *MapNode {
+	return &MapNode{
+		BaseNode:   NewBaseNode(posStart, posEnd),
+		KeyNodes:   keyNodes,
+		ValueNodes: valueNodes,
+	}
+}
+
+func (n *MapNode) String() string {
+	if len(n.KeyNodes) == 0 {
+		return "m[]"
+	}
+
+	pairs := make([]string, len(n.KeyNodes))
+
+	for i, k := range n.KeyNodes {
+		pairs[i] = k.String() + ": " + n.ValueNodes[i].String()
+	}
+
+	return "m[" + strings.Join(pairs, ", ") + "]"
+}
+
 type VarAccessNode struct {
 	*BaseNode
 	VarNameToken *lexer.Token
