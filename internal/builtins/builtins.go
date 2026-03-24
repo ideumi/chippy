@@ -68,6 +68,10 @@ func GetBuiltins() map[string]*values.BuiltInFunction {
 		"append": values.NewBuiltInFunction("append", appendFunction),
 		"sort":   values.NewBuiltInFunction("sort", sortFunction),
 
+		// Map operations
+		"keys": values.NewBuiltInFunction("keys", keysFunction),
+		"has":  values.NewBuiltInFunction("has", hasFunction),
+
 		// Bytes
 		"pack":    values.NewBuiltInFunction("pack", packFunction),
 		"unpack":  values.NewBuiltInFunction("unpack", unpackFunction),

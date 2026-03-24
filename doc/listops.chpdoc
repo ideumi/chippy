@@ -1,5 +1,6 @@
-*List and Bytes Operators* | V-$CHIPVR ($CHIPCN)
+*List, Map and Bytes Operators* | V-$CHIPVR ($CHIPCN)
 
+*Lists and Bytes:*
 ''+'' - Concatenate two lists or two bytes (see ''append(container, value)'')
 ''*'' - Repeat list or bytes by number
 ''-'' - Remove element at index
@@ -8,3 +9,15 @@
 ''container[index] = value'' - Assign element at index (returns a new copy)
 
 Indices are 1-based.
+
+*Maps:*
+''m[]'' - Empty map
+''m["key": value, "key2": value2]'' - Map with key-value pairs
+
+''+'' - Merge two maps (right-hand / incoming side wins on key conflict)
+''-'' - Remove a key by string: ''map - "key"''
+
+''map["key"]'' - Access value by key (''err'' if key not found)
+''map["key"] = value'' - Set key to value (returns a new copy)
+
+See ''chippy doc keys'' and ''chippy doc has''.

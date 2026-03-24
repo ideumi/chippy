@@ -1,0 +1,14 @@
+*keys* | V-$CHIPVR ($CHIPCN)
+
+''keys(map)''
+
+Returns the keys of a ''map'' as a list, in insertion order.
+
+*Parameters:*
+- ''map'': Map to get keys from
+
+*Returns:*
+- List: Keys of the map in insertion order
+
+*Errors:*
+- Runtime error if ''map'' is not a map
