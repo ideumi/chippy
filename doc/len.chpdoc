@@ -2,13 +2,13 @@
 
 ''len(value)''
 
-Returns the length of strings, lists, or bytes.
+Returns the length of strings, lists, bytes, or maps.
 
 *Parameters:*
-- ''value'': String, list, or bytes
+- ''value'': String, list, bytes, or map
 
 *Returns:*
 - Number: Length of the value
 
 *Errors:*
-- Runtime error if value is not string, list, or bytes
+- Runtime error if value is not string, list, bytes, or map

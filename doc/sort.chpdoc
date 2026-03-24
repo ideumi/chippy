@@ -14,7 +14,7 @@ Sorts a list and returns a new sorted list. The original list is not modified.
 - Numbers are sorted numerically (1 < 2 < 10)
 - Strings are sorted alphabetically
 - Lists are sorted element by element
-- Mixed types are sorted by type precedence: Numbers < Strings < Lists < Bytes < Functions
+- Mixed types are sorted by type precedence: Numbers < Strings < Lists < Bytes < Functions < Maps
 - Equal elements maintain their relative order (stable sort)
 
 *Errors:*
