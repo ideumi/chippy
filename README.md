@@ -8,11 +8,6 @@ ChipLang (Chipmunk language) is an interpreted scripting / programming language 
 
 I aim to make ChipLang maintain a clean separation between builtins and libraries where possible. Builtins provide fundamental primitives for common operations that require performance or cannot be implemented cleanly in Chip itself. The native core library (`lib/`) abstracts these primitives for convenience. The codebase is to stay simple and accessible on both the Go and Chip sides.
 
-ChipLang is currently still in development and offers no guarantees of stability, the first real stable release will be `1.1.0` planned for some time in the summer of 2026.
-
-ChipLang is in a feature freeze as of version `1.0.13` to prepare for the upcoming stable release.
-See the [ROADMAP](ROADMAP.md).
-
 ### [Download ChipLang](https://codeberg.org/ideumi/chip-go/releases) | [Quick Start](QUICKSTART.md)
 
 ### Hello World
@@ -26,7 +21,7 @@ Println("Hello World");
 **Language**
 - Dynamically typed, imperative (procedural) interpreted programming / scripting language
 - Clean, readable syntax with familiar C-like control flow (`if`, `elseif`, `else`, `while`, `for`)
-- Simple data types: numbers, strings, bytes and lists
+- Simple data types: numbers, strings, bytes, lists and maps
 - UTF-8 native
 - Functions with proper scoping
 - Very fast startup time

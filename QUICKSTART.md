@@ -115,10 +115,11 @@ Hello World
 
 ### Types
 ```chiplang
-var text = "text";                # String
-var number = 42;                  # Integer or floating point number
-var numCollection = [1, 2, 3];    # List
-var bytesList = b[65, 66, 67];    # Bytes
+var text = "text";                                             # String
+var number = 42;                                               # Integer or floating point number
+var numCollection = [1, 2, 3];                                 # List
+var bytesList = b[65, 66, 67];                                 # Bytes
+var map = m["key1": "value", "key2": 2, "key3": [1, 2, 3]];    # Map
 ```
 
 ### Functions
