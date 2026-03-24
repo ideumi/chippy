@@ -24,21 +24,19 @@ var JSONFALSE = _json_FALSE_;
 var JSONNULL = _json_NULL_;
 
 #@ <JsonParse(jsonStr)>
-#@ V-1.0.0 (2025-12-16)
+#@ V-1.0.1 (2026-03-22)
 #@
-#@ Parses a JSON string and returns the corresponding map.
+#@ Parses a JSON string and returns the corresponding value.
 #@ Returns ''err'' if the JSON is invalid.
 #@
-#@ See ''libmap.chh''
-#@
-#@ JSON objects become maps: ''["map", [key, val], ...]''
+#@ JSON objects become maps.
 #@ JSON arrays become lists.
 #@ JSON numbers become numbers.
 #@ JSON strings become strings.
 #@ JSON booleans become ''JSONTRUE'' or ''JSONFALSE''.
 #@ JSON null becomes ''JSONNULL''.
 #@
-#@ This function is deterministic, object keys are sorted 
+#@ This function is deterministic, object keys are sorted
 #@ alphabetically.
 
 func JsonParse(jsonStr)
@@ -47,21 +45,19 @@ func JsonParse(jsonStr)
 }
 
 #@ <JsonStringify(value)>
-#@ V-1.0.0 (2025-12-16)
+#@ V-1.0.1 (2026-03-22)
 #@
-#@ Converts a map to a JSON string.
+#@ Converts a value to a JSON string.
 #@ Returns ''err'' if the value cannot be converted to JSON.
 #@
-#@ See ''libmap.chh''
-#@
-#@ Maps (''["map", [key, val], ...]'') become JSON objects.
+#@ Maps become JSON objects.
 #@ Lists become JSON arrays.
 #@ Numbers become JSON numbers.
 #@ Strings become JSON strings.
 #@ ''JSONTRUE''/''JSONFALSE'' become JSON booleans.
 #@ ''JSONNULL'' becomes JSON null.
 #@
-#@ This function is deterministic, object keys are sorted 
+#@ This function is deterministic, object keys are sorted
 #@ alphabetically.
 
 func JsonStringify(value)

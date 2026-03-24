@@ -5,7 +5,6 @@
 
 loadopt("http");
 
-load("libmap.chh");
 load("libnet.chh");
 load("libtls.chh");
 load("libstrings.chh");
@@ -100,11 +99,11 @@ func _HttpResolveLocation_(location, url)
 
 	if iserr(origParts) { return err; }
 
-	var origScheme = MapGet(origParts, "scheme");
-	var origHost = MapGet(origParts, "host");
-	var origPort = MapGet(origParts, "port");
-	var origPath = MapGet(origParts, "path");
-	var origQuery = MapGet(origParts, "query");
+	var origScheme = origParts["scheme"];
+	var origHost = origParts["host"];
+	var origPort = origParts["port"];
+	var origPath = origParts["path"];
+	var origQuery = origParts["query"];
 
 	var baseUrl = "";
 
@@ -237,12 +236,12 @@ func _HttpFilterRedirectHeaders_(headers, origUrl, targetUrl, statusCode)
 
 	if iserr(origParts) or iserr(targetParts) { return err; }
 
-	var origHost = MapGet(origParts, "host");
-	var origScheme = MapGet(origParts, "scheme");
-	var origPort = MapGet(origParts, "port");
-	var targetHost = MapGet(targetParts, "host");
-	var targetScheme = MapGet(targetParts, "scheme");
-	var targetPort = MapGet(targetParts, "port");
+	var origHost = origParts["host"];
+	var origScheme = origParts["scheme"];
+	var origPort = origParts["port"];
+	var targetHost = targetParts["host"];
+	var targetScheme = targetParts["scheme"];
+	var targetPort = targetParts["port"];
 
 	# RFC 6454: origin = scheme + host + port
 	var isCrossOrigin = (lower(origHost) != lower(targetHost))
@@ -407,11 +406,11 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 
 	if iserr(urlParts) { return err; }
 
-	var scheme = MapGet(urlParts, "scheme");
-	var host = MapGet(urlParts, "host");
-	var port = MapGet(urlParts, "port");
-	var path = MapGet(urlParts, "path");
-	var query = MapGet(urlParts, "query");
+	var scheme = urlParts["scheme"];
+	var host = urlParts["host"];
+	var port = urlParts["port"];
+	var path = urlParts["path"];
+	var query = urlParts["query"];
 
 	var fullPath = path;
 
@@ -481,9 +480,9 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 	}
 
 	# RFC 9110 15.2: skip 1xx informational responses
-	while MapGet(parsedResp, "statusCode") >= 100 and MapGet(parsedResp, "statusCode") < 200
+	while parsedResp["statusCode"] >= 100 and parsedResp["statusCode"] < 200
 	{
-		responseBytes = MapGet(parsedResp, "body");
+		responseBytes = parsedResp["body"];
 
 		while iserr(indexof(unpack(responseBytes), "\r\n\r\n"))
 		{
@@ -507,7 +506,7 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 		}
 	}
 
-	var respHeaders = MapGet(parsedResp, "headers");
+	var respHeaders = parsedResp["headers"];
 	var contentLength = -1;
 	var isChunked = false;
 
@@ -530,7 +529,7 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 		}
 	}
 
-	var currentBody = MapGet(parsedResp, "body");
+	var currentBody = parsedResp["body"];
 	var bodyBytesNeeded = 0;
 
 	# RFC 9112 6.3: Transfer-Encoding overrides Content-Length
@@ -630,20 +629,20 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 
 	if iserr(response) { return err; }
 
-	var chunked = MapGet(response, "chunked");
+	var chunked = response["chunked"];
 
 	if chunked == true
 	{
-		var respBody = MapGet(response, "body");
+		var respBody = response["body"];
 		var decodedBody = _http_dechunk_(respBody);
 
 		if iserr(decodedBody) { return err; }
 
-		response = MapSet(response, "body", decodedBody);
+		response = response["body"] = decodedBody;
 	}
 
 	# Follow redirects
-	var statusCode = MapGet(response, "statusCode");
+	var statusCode = response["statusCode"];
 
 	if statusCode == 301 or
 	   statusCode == 302 or
@@ -653,7 +652,7 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 	{
 		if maxRedirects <= 0 { return response; }
 
-		var respHeadersRedir = MapGet(response, "headers");
+		var respHeadersRedir = response["headers"];
 		var location = "";
 
 		for i = 1 to len(respHeadersRedir)
@@ -708,7 +707,7 @@ func HttpDownloadToFile(url, filename)
 
 	if iserr(response) { return err; }
 
-	var body = MapGet(response, "body");
+	var body = response["body"];
 	var file = fopen(filename, "w");
 
 	if iserr(file) { return err; }
@@ -809,11 +808,12 @@ func HttpParseRequest(requestBytes)
 		body = bsubstr(requestBytes, bodyStartByte, len(requestBytes));
 	}
 
-	var request = MapNew();
-	request = MapSet(request, "method", method);
-	request = MapSet(request, "path", path);
-	request = MapSet(request, "headers", headers);
-	request = MapSet(request, "body", body);
+	var request = m[
+		"method": method,
+		"path": path,
+		"headers": headers,
+		"body": body
+	];
 
 	return request;
 }
@@ -951,9 +951,9 @@ func HttpServe(port, handler)
 			continue;
 		}
 
-		var statusCode = MapGet(response, "statusCode");
-		var headers = MapGet(response, "headers");
-		var body = MapGet(response, "body");
+		var statusCode = response["statusCode"];
+		var headers = response["headers"];
+		var body = response["body"];
 
 		swrite(_HttpFormatServerResponse_(statusCode, headers, body, "HttpServe"), client);
 		sclose(client);
@@ -1011,9 +1011,9 @@ func HttpServeTLS(port, certPath, keyPath, handler)
 			continue;
 		}
 
-		var statusCode = MapGet(response, "statusCode");
-		var headers = MapGet(response, "headers");
-		var body = MapGet(response, "body");
+		var statusCode = response["statusCode"];
+		var headers = response["headers"];
+		var body = response["body"];
 
 		TlsWrite(_HttpFormatServerResponse_(statusCode, headers, body, "HttpServeTLS"), tlsClient);
 		TlsClose(tlsClient);
@@ -1029,10 +1029,11 @@ func HttpServeTLS(port, certPath, keyPath, handler)
 
 func HttpResponse(statusCode, body)
 {
-	var response = MapNew();
-	response = MapSet(response, "statusCode", statusCode);
-	response = MapSet(response, "headers", []);
-	response = MapSet(response, "body", _HttpPackBody_(body));
+	var response = m[
+		"statusCode": statusCode,
+		"headers": [],
+		"body": _HttpPackBody_(body)
+	];
 
 	return response;
 }
@@ -1046,10 +1047,11 @@ func HttpResponse(statusCode, body)
 
 func HttpResponseWithHeaders(statusCode, headers, body)
 {
-	var response = MapNew();
-	response = MapSet(response, "statusCode", statusCode);
-	response = MapSet(response, "headers", headers);
-	response = MapSet(response, "body", _HttpPackBody_(body));
+	var response = m[
+		"statusCode": statusCode,
+		"headers": headers,
+		"body": _HttpPackBody_(body)
+	];
 
 	return response;
 }

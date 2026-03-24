@@ -3,17 +3,6 @@
 # corelib - libstrings.chh
 #
 
-#@ <Contains(value, needle)>
-#@ V-1.0.0 (2025-08-13)
-#@
-#@ Returns ''true'' if ''value'' contains ''needle'', ''false'' otherwise.
-
-func Contains(value, needle)
-{
-	if needle == "" { return false; }
-	return not iserr(indexof(value, needle));
-}
-
 #@ <StartsWith(value, prefix)>
 #@ V-1.0.0 (2025-08-13)
 #@
