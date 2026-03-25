@@ -22,7 +22,7 @@ func BytesToHex(bytes)
 		var byteVal = bytes[i];
 		var high = int(byteVal / 16);
 		var low = byteVal % 16;
-		result = result + substr(hexDigits, high + 1, 1) + substr(hexDigits, low + 1, 1);
+		result = result + slice(hexDigits, high + 1, high + 1) + slice(hexDigits, low + 1, low + 1);
 		i = i + 1;
 	}
 

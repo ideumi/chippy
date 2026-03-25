@@ -74,7 +74,7 @@ func CalculateTimezone()
 		}
 		else
 		{
-			var offsetNum = substr(offset, 2, len(offset) - 1);
+			var offsetNum = slice(offset, 2, len(offset));
 
 			if CheckIfNumber(charat(offsetNum, 1)) == true
 			{

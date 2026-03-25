@@ -169,7 +169,7 @@ func _HttpResolveLocation_(location, url)
 
 	if lastSlash > 0
 	{
-		baseDir = substr(origPath, 1, lastSlash);
+		baseDir = slice(origPath, 1, lastSlash);
 	}
 
 	var locationPath = location;
@@ -178,8 +178,8 @@ func _HttpResolveLocation_(location, url)
 
 	if not iserr(qPos)
 	{
-		locationPath = substr(location, 1, qPos - 1);
-		locationQuery = substr(location, qPos, len(location));
+		locationPath = slice(location, 1, qPos - 1);
+		locationQuery = slice(location, qPos, len(location));
 	}
 
 	# Normalize path: resolve . and .. segments
@@ -581,12 +581,12 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 
 			if crlfBytePos == 0 { break; }
 
-			var sizeLine = unpack(bsubstr(currentBody, pos, crlfBytePos - pos));
+			var sizeLine = unpack(slice(currentBody, pos, crlfBytePos - 1));
 			var semiPos = indexof(sizeLine, ";");
 
 			if not iserr(semiPos)
 			{
-				sizeLine = Trim(substr(sizeLine, 1, semiPos - 1));
+				sizeLine = Trim(slice(sizeLine, 1, semiPos - 1));
 			}
 
 			var chunkSize = _HttpParseHex_(Trim(sizeLine));
@@ -766,7 +766,7 @@ func HttpParseRequest(requestBytes)
 
 	if iserr(headerEndPos) { return err; }
 
-	var headerSection = substr(requestStr, 1, headerEndPos - 1);
+	var headerSection = slice(requestStr, 1, headerEndPos - 1);
 	var headerLines = split(headerSection, "\r\n");
 
 	if len(headerLines) == 0 { return err; }
@@ -776,13 +776,13 @@ func HttpParseRequest(requestBytes)
 
 	if iserr(methodEnd) { return err; }
 
-	var method = substr(firstLine, 1, methodEnd - 1);
-	var restOfLine = substr(firstLine, methodEnd + 1, len(firstLine));
+	var method = slice(firstLine, 1, methodEnd - 1);
+	var restOfLine = slice(firstLine, methodEnd + 1, len(firstLine));
 	var spacePos = indexof(restOfLine, " ");
 
 	if iserr(spacePos) { return err; }
 
-	var path = substr(restOfLine, 1, spacePos - 1);
+	var path = slice(restOfLine, 1, spacePos - 1);
 	var headers = [];
 
 	for i = 2 to len(headerLines)
@@ -792,8 +792,8 @@ func HttpParseRequest(requestBytes)
 
 		if not iserr(colonPos)
 		{
-			var key = Trim(substr(line, 1, colonPos - 1));
-			var val = Trim(substr(line, colonPos + 1, len(line)));
+			var key = Trim(slice(line, 1, colonPos - 1));
+			var val = Trim(slice(line, colonPos + 1, len(line)));
 			headers = append(headers, [key, val]);
 		}
 	}
@@ -805,7 +805,7 @@ func HttpParseRequest(requestBytes)
 
 	if bodyStartByte <= len(requestBytes)
 	{
-		body = bsubstr(requestBytes, bodyStartByte, len(requestBytes));
+		body = slice(requestBytes, bodyStartByte, len(requestBytes));
 	}
 
 	var request = m[
@@ -832,7 +832,7 @@ func _HttpReadRequest_(conn, isTLS)
 
 	var reqStr = unpack(requestBytes);
 	var headerEndPos = indexof(reqStr, "\r\n\r\n");
-	var headerSection = substr(reqStr, 1, headerEndPos - 1);
+	var headerSection = slice(reqStr, 1, headerEndPos - 1);
 	var headerLines = split(headerSection, "\r\n");
 	var contentLength = 0;
 
@@ -843,11 +843,11 @@ func _HttpReadRequest_(conn, isTLS)
 
 		if not iserr(colonPos)
 		{
-			var key = lower(Trim(substr(line, 1, colonPos - 1)));
+			var key = lower(Trim(slice(line, 1, colonPos - 1)));
 
 			if key == "content-length"
 			{
-				var val = Trim(substr(line, colonPos + 1, len(line)));
+				var val = Trim(slice(line, colonPos + 1, len(line)));
 				contentLength = int(num(val));
 			}
 		}

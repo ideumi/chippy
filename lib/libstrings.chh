@@ -12,7 +12,7 @@ func StartsWith(value, prefix)
 {
 	if len(prefix) > len(value) { return false; }
 
-	return substr(value, 1, len(prefix)) == prefix;
+	return slice(value, 1, len(prefix)) == prefix;
 }
 
 #@ <EndsWith(value, suffix)>
@@ -26,7 +26,7 @@ func EndsWith(value, suffix)
 
 	var start = len(value) - len(suffix) + 1;
 
-	return substr(value, start, len(suffix)) == suffix;
+	return slice(value, start, len(value)) == suffix;
 }
 
 #@ <Left(value, count)>
@@ -41,7 +41,7 @@ func Left(value, count)
 
 	if count > len(value) { return value; }
 
-	return substr(value, 1, count);
+	return slice(value, 1, count);
 }
 
 #@ <Right(value, count)>
@@ -58,7 +58,7 @@ func Right(value, count)
 
 	var start = len(value) - count + 1;
 
-	return substr(value, start, count);
+	return slice(value, start, len(value));
 }
 
 #@ <Reverse(value)>
@@ -101,7 +101,7 @@ func TrimLeft(value)
 		i = i + 1;
 	}
 
-	return substr(value, i, len(value) - i + 1);
+	return slice(value, i, len(value));
 }
 
 #@ <TrimRight(value)>
@@ -125,7 +125,7 @@ func TrimRight(value)
 		i = i - 1;
 	}
 
-	return substr(value, 1, i);
+	return slice(value, 1, i);
 }
 
 #@ <Trim(value)>

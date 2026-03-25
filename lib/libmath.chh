@@ -306,7 +306,7 @@ func Hex(n)
 	while number > 0
 	{
 		var remainder = number % 16;
-		result = substr(digits, remainder + 1, 1) + result;
+		result = slice(digits, remainder + 1, remainder + 1) + result;
 		number = Floor(number / 16);
 	}
 
