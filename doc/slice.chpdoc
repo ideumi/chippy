@@ -6,8 +6,8 @@ Extracts a sub-range from a string, bytes, or list. The range is inclusive on bo
 
 *Parameters:*
 - ''container'': String, bytes, or list to slice
-- ''start'': Start position
-- ''end'': End position
+- ''start'': Start position (inclusive)
+- ''end'': End position (inclusive)
 
 *Returns:*
 - Same type as ''container'': Sub-range from ''start'' to ''end''
