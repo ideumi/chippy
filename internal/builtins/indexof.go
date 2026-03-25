@@ -49,13 +49,7 @@ func indexofFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 		needle := needleArg.Value
 
 		if len(needle) == 0 {
-			posStart, posEnd := args[1].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				"Cannot search for empty string",
-				ctx,
-			))
+			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 		}
 
 		byteIndex := strings.Index(haystack.Value, needle)
@@ -114,13 +108,7 @@ func indexofFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		case *values.Bytes:
 			if len(needle.Data) == 0 {
-				posStart, posEnd := args[1].GetPos()
-
-				return res.Failure(errors.NewRTError(
-					posStart, posEnd,
-					"Cannot search for empty bytes",
-					ctx,
-				))
+				return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 			}
 
 			idx := bytes.Index(haystack.Data, needle.Data)

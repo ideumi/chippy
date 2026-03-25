@@ -88,13 +88,7 @@ func hasFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 		}
 
 		if needleStr.Value == "" {
-			posStart, posEnd := args[1].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				"Cannot search for empty string",
-				ctx,
-			))
+			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 		}
 
 		if strings.Contains(container.Value, needleStr.Value) {

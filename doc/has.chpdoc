@@ -11,9 +11,9 @@ Checks if ''container'' contains ''needle''.
 *Returns:*
 - ''true'': Container contains needle
 - ''false'': Container does not contain needle
+- ''err'' if ''needle'' is an empty string
 
 *Errors:*
 - Runtime error if ''container'' is not a map, list, string, or bytes
 - Runtime error if ''needle'' type does not match the type of the ''container''
-- Runtime error if ''needle'' is an empty string
 - Runtime error if ''container'' is bytes and ''needle'' is not between 0 and 255
