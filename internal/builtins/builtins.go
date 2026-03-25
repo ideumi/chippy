@@ -73,9 +73,8 @@ func GetBuiltins() map[string]*values.BuiltInFunction {
 		"has":  values.NewBuiltInFunction("has", hasFunction),
 
 		// Bytes
-		"pack":    values.NewBuiltInFunction("pack", packFunction),
-		"unpack":  values.NewBuiltInFunction("unpack", unpackFunction),
-		"bsubstr": values.NewBuiltInFunction("bsubstr", bsubstrFunction),
+		"pack":   values.NewBuiltInFunction("pack", packFunction),
+		"unpack": values.NewBuiltInFunction("unpack", unpackFunction),
 
 		// Env
 		"getenv": values.NewBuiltInFunction("getenv", getenvFunction),
@@ -100,7 +99,7 @@ func GetBuiltins() map[string]*values.BuiltInFunction {
 
 		// String operations
 		"charat":  values.NewBuiltInFunction("charat", charatFunction),
-		"substr":  values.NewBuiltInFunction("substr", substrFunction),
+		"slice":   values.NewBuiltInFunction("slice", sliceFunction),
 		"replace": values.NewBuiltInFunction("replace", replaceFunction),
 		"split":   values.NewBuiltInFunction("split", splitFunction),
 		"indexof": values.NewBuiltInFunction("indexof", indexofFunction),
