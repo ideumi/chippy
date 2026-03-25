@@ -20,6 +20,8 @@
       <item>and</item>
       <item>or</item>
       <item>not</item>
+      <item>b</item>
+      <item>m</item>
     </list>
 
     <list name="constants">
@@ -43,7 +45,6 @@
     <list name="builtins">
       <item>append</item>
       <item>args</item>
-      <item>bsubstr</item>
       <item>charat</item>
       <item>chdir</item>
       <item>chmod</item>
@@ -63,11 +64,13 @@
       <item>getenv</item>
       <item>getpid</item>
       <item>getuid</item>
+      <item>has</item>
       <item>indexof</item>
       <item>int</item>
       <item>iserr</item>
       <item>isok</item>
       <item>join</item>
+      <item>keys</item>
       <item>kill</item>
       <item>len</item>
       <item>lenv</item>
@@ -93,6 +96,7 @@
       <item>setenv</item>
       <item>sin</item>
       <item>sleep</item>
+      <item>slice</item>
       <item>sopen</item>
       <item>sort</item>
       <item>spawn</item>
@@ -100,7 +104,6 @@
       <item>sread</item>
       <item>stat</item>
       <item>str</item>
-      <item>substr</item>
       <item>swrite</item>
       <item>symlink</item>
       <item>tan</item>

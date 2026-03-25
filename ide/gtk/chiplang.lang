@@ -72,6 +72,8 @@
           <keyword>and</keyword>
           <keyword>or</keyword>
           <keyword>not</keyword>
+          <keyword>b</keyword>
+          <keyword>m</keyword>
         </context>
 
         <!-- Constants -->
@@ -99,7 +101,6 @@
         <context id="builtins" style-ref="builtin" class="no-spell-check">
           <keyword>append</keyword>
           <keyword>args</keyword>
-          <keyword>bsubstr</keyword>
           <keyword>charat</keyword>
           <keyword>chdir</keyword>
           <keyword>chmod</keyword>
@@ -119,11 +120,13 @@
           <keyword>getenv</keyword>
           <keyword>getpid</keyword>
           <keyword>getuid</keyword>
+          <keyword>has</keyword>
           <keyword>indexof</keyword>
           <keyword>int</keyword>
           <keyword>iserr</keyword>
           <keyword>isok</keyword>
           <keyword>join</keyword>
+          <keyword>keys</keyword>
           <keyword>kill</keyword>
           <keyword>len</keyword>
           <keyword>lenv</keyword>
@@ -149,6 +152,7 @@
           <keyword>setenv</keyword>
           <keyword>sin</keyword>
           <keyword>sleep</keyword>
+          <keyword>slice</keyword>
           <keyword>sopen</keyword>
           <keyword>sort</keyword>
           <keyword>spawn</keyword>
@@ -156,7 +160,6 @@
           <keyword>sread</keyword>
           <keyword>stat</keyword>
           <keyword>str</keyword>
-          <keyword>substr</keyword>
           <keyword>swrite</keyword>
           <keyword>symlink</keyword>
           <keyword>tan</keyword>
