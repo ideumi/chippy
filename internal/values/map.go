@@ -26,6 +26,14 @@ func NewMap() *Map {
 	}
 }
 
+func NewMapFromEntries(keys []string, entries map[string]Value) *Map {
+	return &Map{
+		BaseValue: NewBaseValue(),
+		Keys:      keys,
+		Entries:   entries,
+	}
+}
+
 func (m *Map) String() string {
 	pairs := make([]string, len(m.Keys))
 
@@ -88,14 +96,16 @@ func (m *Map) IsTrue() bool {
 
 func (m *Map) MapSet(key string, val Value) *Map {
 	newMap := m.Copy().(*Map)
+	newMap.setEntry(key, val)
+	return newMap
+}
 
-	if _, exists := newMap.Entries[key]; !exists {
-		newMap.Keys = append(newMap.Keys, key)
+func (m *Map) setEntry(key string, val Value) {
+	if _, exists := m.Entries[key]; !exists {
+		m.Keys = append(m.Keys, key)
 	}
 
-	newMap.Entries[key] = val
-
-	return newMap
+	m.Entries[key] = val
 }
 
 func (m *Map) MapRemove(key string) (*Map, bool) {
@@ -128,7 +138,7 @@ func (m *Map) AddedTo(other Value) (Value, error) {
 	result := m.Copy().(*Map)
 
 	for _, key := range otherMap.Keys {
-		result = result.MapSet(key, otherMap.Entries[key])
+		result.setEntry(key, otherMap.Entries[key])
 	}
 
 	return result, nil

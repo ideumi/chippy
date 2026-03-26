@@ -153,12 +153,16 @@ func parseresponseFunction(args []values.Value, ctx interface{}) *values.Runtime
 		}
 	}
 
-	nativeMap := values.NewMap()
-	nativeMap = nativeMap.MapSet("statusCode", values.NewNumber(float64(statusCode)).SetContext(ctx))
-	nativeMap = nativeMap.MapSet("statusText", values.NewString(statusText).SetContext(ctx))
-	nativeMap = nativeMap.MapSet("headers", values.NewList(headersList).SetContext(ctx))
-	nativeMap = nativeMap.MapSet("body", values.NewBytes(body).SetContext(ctx))
-	nativeMap = nativeMap.MapSet("chunked", values.NewNumber(boolToFloat(isChunked)).SetContext(ctx))
+	nativeMap := values.NewMapFromEntries(
+		[]string{"statusCode", "statusText", "headers", "body", "chunked"},
+		map[string]values.Value{
+			"statusCode": values.NewNumber(float64(statusCode)).SetContext(ctx),
+			"statusText": values.NewString(statusText).SetContext(ctx),
+			"headers":    values.NewList(headersList).SetContext(ctx),
+			"body":       values.NewBytes(body).SetContext(ctx),
+			"chunked":    values.NewNumber(boolToFloat(isChunked)).SetContext(ctx),
+		},
+	)
 
 	return res.Success(nativeMap.SetContext(ctx))
 }

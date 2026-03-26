@@ -80,12 +80,16 @@ func parseurlFunction(args []values.Value, ctx interface{}) *values.RuntimeResul
 		path = "/"
 	}
 
-	nativeMap := values.NewMap()
-	nativeMap = nativeMap.MapSet("scheme", values.NewString(parsedURL.Scheme).SetContext(ctx))
-	nativeMap = nativeMap.MapSet("host", values.NewString(parsedURL.Hostname()).SetContext(ctx))
-	nativeMap = nativeMap.MapSet("port", values.NewNumber(float64(portNum)).SetContext(ctx))
-	nativeMap = nativeMap.MapSet("path", values.NewString(path).SetContext(ctx))
-	nativeMap = nativeMap.MapSet("query", values.NewString(parsedURL.RawQuery).SetContext(ctx))
+	nativeMap := values.NewMapFromEntries(
+		[]string{"scheme", "host", "port", "path", "query"},
+		map[string]values.Value{
+			"scheme": values.NewString(parsedURL.Scheme).SetContext(ctx),
+			"host":   values.NewString(parsedURL.Hostname()).SetContext(ctx),
+			"port":   values.NewNumber(float64(portNum)).SetContext(ctx),
+			"path":   values.NewString(path).SetContext(ctx),
+			"query":  values.NewString(parsedURL.RawQuery).SetContext(ctx),
+		},
+	)
 
 	return res.Success(nativeMap.SetContext(ctx))
 }

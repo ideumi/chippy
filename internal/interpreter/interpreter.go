@@ -169,7 +169,8 @@ func (i *Interpreter) visitByteArrayNode(node *ast.ByteArrayNode, ctx interface{
 
 func (i *Interpreter) visitMapNode(node *ast.MapNode, ctx interface{}) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
-	result := values.NewMap()
+	keys := make([]string, 0, len(node.KeyNodes))
+	entries := make(map[string]values.Value, len(node.KeyNodes))
 
 	for idx, keyNode := range node.KeyNodes {
 		key := res.Register(i.Visit(keyNode, ctx))
@@ -194,10 +195,14 @@ func (i *Interpreter) visitMapNode(node *ast.MapNode, ctx interface{}) *values.R
 			return res
 		}
 
-		result = result.MapSet(keyStr.Value, val.SetContext(ctx))
+		if _, exists := entries[keyStr.Value]; !exists {
+			keys = append(keys, keyStr.Value)
+		}
+
+		entries[keyStr.Value] = val.SetContext(ctx)
 	}
 
-	return res.Success(result.SetContext(ctx).SetPos(node.PosStart, node.PosEnd))
+	return res.Success(values.NewMapFromEntries(keys, entries).SetContext(ctx).SetPos(node.PosStart, node.PosEnd))
 }
 
 func (i *Interpreter) visitVarAccessNode(node *ast.VarAccessNode, ctx interface{}) *values.RuntimeResult {

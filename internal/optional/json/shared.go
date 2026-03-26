@@ -56,13 +56,13 @@ func unmarshalValue(val interface{}, ctx interface{}) values.Value {
 
 		sort.Strings(keys)
 
-		nativeMap := values.NewMap()
+		entries := make(map[string]values.Value, len(v))
 
 		for _, key := range keys {
-			nativeMap = nativeMap.MapSet(key, unmarshalValue(v[key], ctx))
+			entries[key] = unmarshalValue(v[key], ctx)
 		}
 
-		return nativeMap.SetContext(ctx)
+		return values.NewMapFromEntries(keys, entries).SetContext(ctx)
 	default:
 		return values.NewString(constants.STR_ERR).SetContext(ctx)
 	}
