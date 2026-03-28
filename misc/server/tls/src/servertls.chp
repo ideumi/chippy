@@ -16,8 +16,8 @@ if not IsFile(KEYPATH) { error("Cannot find key"); }
 
 func Handler(request)
 {
-	var method = MapGet(request, "method");
-	var path = MapGet(request, "path");
+	var method = request["method"];
+	var path = request["path"];
 
 	Println("Request: " + method + " " + path);
 

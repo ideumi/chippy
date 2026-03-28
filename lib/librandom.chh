@@ -111,7 +111,7 @@ func RandomString(length, chars)
 
 		if len(finalString) > length
 		{
-			finalString = substr(finalString, 1, length);
+			finalString = slice(finalString, 1, length);
 			break;
 		}
 	}

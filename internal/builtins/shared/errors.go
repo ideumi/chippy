@@ -40,16 +40,6 @@ func (e BuiltinErrors) InvalidArgCountWithHint(funcName string, expected int, hi
 	}
 }
 
-// InvalidArgType generates error for wrong argument type
-func (e BuiltinErrors) InvalidArgType(funcName string, expectedType string) string {
-	return fmt.Sprintf("%s() argument must be %s", funcName, expectedType)
-}
-
-// InvalidArgTypePositional generates error for wrong argument type at specific position
-func (e BuiltinErrors) InvalidArgTypePositional(funcName string, position string, expectedType string) string {
-	return fmt.Sprintf("%s() %s argument must be %s", funcName, position, expectedType)
-}
-
 // InvalidArgTypeWithHint generates error for wrong argument type with descriptive hint
 func (e BuiltinErrors) InvalidArgTypeWithHint(funcName string, expectedType, hint string) string {
 	return fmt.Sprintf("%s() argument must be %s (%s)", funcName, expectedType, hint)
@@ -76,6 +66,7 @@ const (
 	TypeString       = "a string"
 	TypeList         = "a list"
 	TypeBytes        = "bytes"
+	TypeMap          = "a map"
 	TypeListOrBytes  = "list or bytes"
 	TypeStringOrList = "string or list"
 	TypeFunction     = "a function"

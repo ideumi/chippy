@@ -353,6 +353,37 @@ func (p *Parser) call() *ParseResult {
 
 	// Handle function calls with () and indexing with []
 	for {
+		// Handle index assignment: catches IndexAccessNode from mapExpr() or a previous [].
+		if indexAccess, ok := atom.(*ast.IndexAccessNode); ok {
+			// Skip optional newlines before '='
+			for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
+				res.RegisterAdvancement()
+				p.advance()
+			}
+
+			if p.currentTok != nil && p.currentTok.Type == constants.TT_EQ {
+				res.RegisterAdvancement()
+				p.advance()
+
+				// Skip optional newlines after '='
+				for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
+					res.RegisterAdvancement()
+					p.advance()
+				}
+
+				value := res.Register(p.expr())
+				if res.error != nil {
+					return res
+				}
+
+				return res.Success(ast.NewIndexAssignNode(
+					indexAccess.CollectionNode,
+					indexAccess.IndexNode,
+					value,
+				))
+			}
+		}
+
 		// Handle function calls with ()
 		if p.currentTok.Type == constants.TT_LPAREN {
 			res.RegisterAdvancement()
@@ -455,42 +486,6 @@ func (p *Parser) call() *ParseResult {
 			p.advance()
 
 			atom = ast.NewIndexAccessNode(atom, indexNode, posEnd)
-
-			// Skip optional newlines before checking for assignment
-			for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-				res.RegisterAdvancement()
-				p.advance()
-			}
-
-			// Check if this is an index assignment
-			if p.currentTok != nil && p.currentTok.Type == constants.TT_EQ {
-				// We have an index assignment: container[index] = value
-				if indexAccess, ok := atom.(*ast.IndexAccessNode); ok {
-					res.RegisterAdvancement()
-					p.advance()
-
-					// Skip optional newlines after =
-					for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-						res.RegisterAdvancement()
-						p.advance()
-					}
-
-					value := res.Register(p.expr())
-
-					if res.error != nil {
-						return res
-					}
-
-					atom = ast.NewIndexAssignNode(
-						indexAccess.CollectionNode,
-						indexAccess.IndexNode,
-						value,
-					)
-
-					// Return immediately, assignment should be the end of this expression chain
-					return res.Success(atom)
-				}
-			}
 
 			continue
 		}
@@ -597,7 +592,7 @@ func (p *Parser) atom() *ParseResult {
 		return res.Success(listExpr)
 	}
 
-	if tok.Type == constants.TT_BYTELITERAL {
+	if tok.Matches(constants.TT_KEYWORD, "b") {
 		res.RegisterAdvancement()
 		p.advance()
 		byteArrayExpr := res.Register(p.byteArrayExpr())
@@ -607,6 +602,18 @@ func (p *Parser) atom() *ParseResult {
 		}
 
 		return res.Success(byteArrayExpr)
+	}
+
+	if tok.Matches(constants.TT_KEYWORD, "m") {
+		res.RegisterAdvancement()
+		p.advance()
+		mapExpr := res.Register(p.mapExpr())
+
+		if res.error != nil {
+			return res
+		}
+
+		return res.Success(mapExpr)
 	}
 
 	if tok.Matches(constants.TT_KEYWORD, "if") {
@@ -651,7 +658,7 @@ func (p *Parser) atom() *ParseResult {
 
 	return res.Failure(errors.NewInvalidSyntaxError(
 		tok.PosStart, tok.PosEnd,
-		"Expected int, float, identifier, '+', '-', '(', '[', 'b[', 'if', 'for', 'while', 'func'",
+		"Expected int, float, identifier, '+', '-', '(', '[', 'b', 'm', 'if', 'for', 'while', 'func'",
 	))
 }
 
@@ -737,6 +744,171 @@ func (p *Parser) listExpr() *ParseResult {
 	return res.Success(ast.NewListNode(elementNodes, posStart, closingBracketEnd))
 }
 
+func (p *Parser) mapExpr() *ParseResult {
+	res := NewParseResult()
+	posStart := p.currentTok.PosStart.Copy()
+
+	if p.currentTok.Type != constants.TT_LSQUARE {
+		return res.Failure(errors.NewInvalidSyntaxError(
+			p.currentTok.PosStart, p.currentTok.PosEnd,
+			"Expected '['",
+		))
+	}
+
+	res.RegisterAdvancement()
+	p.advance()
+
+	// Skip optional newlines after opening bracket
+	for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
+		res.RegisterAdvancement()
+		p.advance()
+	}
+
+	// Empty map: m[]
+	if p.currentTok == nil || p.currentTok.Type == constants.TT_RSQUARE {
+		if p.currentTok == nil {
+			return res.Failure(errors.NewInvalidSyntaxError(
+				posStart, posStart,
+				"Expected ']'",
+			))
+		}
+
+		closingBracketEnd := p.currentTok.PosEnd.Copy()
+		res.RegisterAdvancement()
+		p.advance()
+
+		return res.Success(ast.NewMapNode(posStart, closingBracketEnd, nil, nil))
+	}
+
+	firstExpr := res.Register(p.expr())
+
+	if res.error != nil {
+		return res
+	}
+
+	// Skip optional newlines after first key
+	for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
+		res.RegisterAdvancement()
+		p.advance()
+	}
+
+	if p.currentTok != nil && p.currentTok.Type == constants.TT_COLON {
+		keyNodes := []ast.Node{firstExpr}
+		var valueNodes []ast.Node
+
+		for {
+			res.RegisterAdvancement()
+			p.advance()
+
+			// Skip optional newlines after ':'
+			for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
+				res.RegisterAdvancement()
+				p.advance()
+			}
+
+			valNode := res.Register(p.expr())
+
+			if res.error != nil {
+				return res
+			}
+
+			valueNodes = append(valueNodes, valNode)
+
+			// Skip optional newlines after value
+			for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
+				res.RegisterAdvancement()
+				p.advance()
+			}
+
+			if p.currentTok == nil || p.currentTok.Type == constants.TT_RSQUARE {
+				break
+			}
+
+			if p.currentTok.Type != constants.TT_COMMA {
+				return res.Failure(errors.NewInvalidSyntaxError(
+					p.currentTok.PosStart, p.currentTok.PosEnd,
+					"Expected ',' or ']' in map literal",
+				))
+			}
+
+			res.RegisterAdvancement()
+			p.advance()
+
+			// Skip optional newlines after ','
+			for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
+				res.RegisterAdvancement()
+				p.advance()
+			}
+
+			// Allow trailing comma
+			if p.currentTok == nil || p.currentTok.Type == constants.TT_RSQUARE {
+				break
+			}
+
+			keyNode := res.Register(p.expr())
+
+			if res.error != nil {
+				return res
+			}
+
+			keyNodes = append(keyNodes, keyNode)
+
+			// Skip optional newlines after key
+			for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
+				res.RegisterAdvancement()
+				p.advance()
+			}
+
+			if p.currentTok == nil || p.currentTok.Type != constants.TT_COLON {
+				if p.currentTok != nil {
+					return res.Failure(errors.NewInvalidSyntaxError(
+						p.currentTok.PosStart, p.currentTok.PosEnd,
+						"Expected ':' after map key",
+					))
+				}
+
+				return res.Failure(errors.NewInvalidSyntaxError(
+					posStart, posStart,
+					"Expected ':' after map key",
+				))
+			}
+		}
+
+		// Store closing bracket position before advancing
+		if p.currentTok == nil || p.currentTok.Type != constants.TT_RSQUARE {
+			if p.currentTok != nil {
+				return res.Failure(errors.NewInvalidSyntaxError(
+					p.currentTok.PosStart, p.currentTok.PosEnd,
+					"Expected ']'",
+				))
+			}
+
+			return res.Failure(errors.NewInvalidSyntaxError(
+				posStart, posStart,
+				"Expected ']'",
+			))
+		}
+
+		closingBracketEnd := p.currentTok.PosEnd.Copy()
+		res.RegisterAdvancement()
+		p.advance()
+
+		return res.Success(ast.NewMapNode(posStart, closingBracketEnd, keyNodes, valueNodes))
+	}
+
+	if p.currentTok != nil {
+		return res.Failure(errors.NewInvalidSyntaxError(
+			p.currentTok.PosStart, p.currentTok.PosEnd,
+			"Expected ':' after map key",
+		))
+	}
+
+	return res.Failure(errors.NewInvalidSyntaxError(
+		posStart, posStart,
+		"Expected ':' after map key",
+	))
+}
+
 func (p *Parser) byteArrayExpr() *ParseResult {
 	res := NewParseResult()
 	elementNodes := []ast.Node{}
@@ -764,10 +936,7 @@ func (p *Parser) byteArrayExpr() *ParseResult {
 	} else {
 		elementNodes = append(elementNodes, res.Register(p.expr()))
 		if res.error != nil {
-			return res.Failure(errors.NewInvalidSyntaxError(
-				p.currentTok.PosStart, p.currentTok.PosEnd,
-				"Expected ']', 'var', 'if', 'for', 'while', 'func', int, float, identifier, '+', '-', '(', '[' or 'not'",
-			))
+			return res
 		}
 
 		for p.currentTok.Type == constants.TT_COMMA {

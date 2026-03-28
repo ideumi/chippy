@@ -19,7 +19,7 @@ func Basename(path)
 
 	while i <= len(path)
 	{
-		var currentChar = substr(path, i, 1);
+		var currentChar = slice(path, i, i);
 
 		if currentChar == "/" { lastSlash = i; }
 
@@ -28,7 +28,7 @@ func Basename(path)
 
 	if lastSlash == -1 { return path; }
 
-	return substr(path, lastSlash + 1, len(path) - lastSlash);
+	return slice(path, lastSlash + 1, len(path));
 }
 
 #@ <Dirname(path)>
@@ -44,7 +44,7 @@ func Dirname(path)
 
 	while i <= len(path)
 	{
-		var currentChar = substr(path, i, 1);
+		var currentChar = slice(path, i, i);
 
 		if currentChar == "/" { lastSlash = i; }
 
@@ -55,7 +55,7 @@ func Dirname(path)
 
 	if lastSlash == 1 { return "/"; }
 
-	return substr(path, 1, lastSlash - 1);
+	return slice(path, 1, lastSlash - 1);
 }
 
 #@ <JoinPath(dir, filename)>
@@ -67,7 +67,7 @@ func JoinPath(dir, filename)
 {
 	if len(dir) == 0 { return filename; }
 
-	var lastChar = substr(dir, len(dir), 1);
+	var lastChar = slice(dir, len(dir), len(dir));
 
 	if lastChar == "/" { return dir + filename; }
 
@@ -147,7 +147,7 @@ func IsAbsolutePath(path)
 {
 	if len(path) == 0 { return false; }
 
-	var firstChar = substr(path, 1, 1);
+	var firstChar = slice(path, 1, 1);
 
 	if firstChar == "/" { return true; }
 

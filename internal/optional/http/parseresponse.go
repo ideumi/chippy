@@ -153,42 +153,18 @@ func parseresponseFunction(args []values.Value, ctx interface{}) *values.Runtime
 		}
 	}
 
-	// Response map
-	mapElements := []values.Value{
-		values.NewString("map").SetContext(ctx),
-	}
+	nativeMap := values.NewMapFromEntries(
+		[]string{"statusCode", "statusText", "headers", "body", "chunked"},
+		map[string]values.Value{
+			"statusCode": values.NewNumber(float64(statusCode)).SetContext(ctx),
+			"statusText": values.NewString(statusText).SetContext(ctx),
+			"headers":    values.NewList(headersList).SetContext(ctx),
+			"body":       values.NewBytes(body).SetContext(ctx),
+			"chunked":    values.NewNumber(boolToFloat(isChunked)).SetContext(ctx),
+		},
+	)
 
-	// Status code
-	mapElements = append(mapElements, values.NewList([]values.Value{
-		values.NewString("statusCode").SetContext(ctx),
-		values.NewNumber(float64(statusCode)).SetContext(ctx),
-	}).SetContext(ctx))
-
-	// Status text
-	mapElements = append(mapElements, values.NewList([]values.Value{
-		values.NewString("statusText").SetContext(ctx),
-		values.NewString(statusText).SetContext(ctx),
-	}).SetContext(ctx))
-
-	// Headers
-	mapElements = append(mapElements, values.NewList([]values.Value{
-		values.NewString("headers").SetContext(ctx),
-		values.NewList(headersList).SetContext(ctx),
-	}).SetContext(ctx))
-
-	// Body
-	mapElements = append(mapElements, values.NewList([]values.Value{
-		values.NewString("body").SetContext(ctx),
-		values.NewBytes(body).SetContext(ctx),
-	}).SetContext(ctx))
-
-	// Chunked
-	mapElements = append(mapElements, values.NewList([]values.Value{
-		values.NewString("chunked").SetContext(ctx),
-		values.NewNumber(boolToFloat(isChunked)).SetContext(ctx),
-	}).SetContext(ctx))
-
-	return res.Success(values.NewList(mapElements).SetContext(ctx))
+	return res.Success(nativeMap.SetContext(ctx))
 }
 
 func boolToFloat(b bool) float64 {

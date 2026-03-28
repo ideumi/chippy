@@ -2,17 +2,24 @@
 
 ''indexof(haystack, needle)''
 
-Finds the first occurrence of a substring.
+Finds the first occurrence of ''needle'' in ''haystack''.
 
 *Parameters:*
-- ''haystack'': String to search in
-- ''needle'': String to search for
+- ''haystack'': String, list, or bytes to search in
+- ''needle'': Value to search for
+
+*Behavior by type:*
+- String: Finds first occurrence of substring ''needle'' (string)
+- List: Finds first element equal to ''needle'' (any value)
+- Bytes: Finds first occurrence of byte value ''needle'' (number) or byte sequence ''needle'' (bytes)
 
 *Returns:*
-- Number: Index of first occurrence
+- Number: index of first occurrence
 - ''err'' if not found
+- ''err'' if ''needle'' is an empty string or empty bytes
 
 *Errors:*
-- Runtime error if haystack is not a string
-- Runtime error if needle is not a string
-- Runtime error if needle is empty
+- Runtime error if ''haystack'' is not a string, list, or bytes
+- Runtime error if ''haystack'' is a string and ''needle'' is not a string
+- Runtime error if ''haystack'' is bytes and ''needle'' is not a number or bytes
+- Runtime error if ''haystack'' is bytes and ''needle'' is a number not between 0 and 255

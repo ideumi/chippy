@@ -16,160 +16,161 @@ var PI = 3.1415926535897932;
 
 var E = 2.7182818284590452;
 
-#@ <Abs(x)>
+#@ <Abs(n)>
 #@ V-1.0.0 (2025-08-12)
 #@
-#@ Returns the absolute value of number ''x''.
+#@ Returns the absolute value of number ''n''.
 
-func Abs(x)
+func Abs(n)
 {
-	if x < 0 { return -x; }
+	if n < 0 { return -n; }
 
-	return x;
+	return n;
 }
 
-#@ <Floor(x)>
+#@ <Floor(n)>
 #@ V-1.0.0 (2025-08-12)
 #@
-#@ Rounds the number ''x'' down to the nearest integer.
+#@ Rounds the number ''n'' down to the nearest integer.
 
-func Floor(x)
+func Floor(n)
 {
-	if x >= 0 { return int(x); }
+	if n >= 0 { return int(n); }
 
-	var truncated = int(x);
+	var truncated = int(n);
 
-	if x != truncated { return truncated - 1; }
+	if n != truncated { return truncated - 1; }
 
 	return truncated;
 }
 
-#@ <Ceil(x)>
+#@ <Ceil(n)>
 #@ V-1.0.0 (2025-08-12)
 #@
-#@ Rounds the number ''x'' up to the nearest integer.
+#@ Rounds the number ''n'' up to the nearest integer.
 
-func Ceil(x)
+func Ceil(n)
 {
-	return -Floor(-x);
+	return -Floor(-n);
 }
 
-#@ <Mod(a, b)>
+#@ <Mod(n1, n2)>
 #@ V-1.0.0 (2025-08-12)
 #@
-#@ Returns the modulo of ''a'' divided by ''b''. ''err'' is returned if
-#@ ''b'' is zero.
+#@ Returns the modulo of ''n1'' divided by ''n2''. ''err'' is returned if
+#@ ''n2'' is zero.
 
-func Mod(a, b)
+func Mod(n1, n2)
 {
-	if b == 0 { return err; }
+	if n2 == 0 { return err; }
 
-	return a % b;
+	return n1 % n2;
 }
 
-#@ <Round(x, digits)>
+#@ <Round(n, digits)>
 #@ V-1.0.0 (2025-08-12)
 #@
-#@ Rounds the number ''x'' to ''digits'' decimal points.
+#@ Rounds the number ''n'' to ''digits'' decimal points.
 
-func Round(x, digits)
+func Round(n, digits)
 {
-	if digits == 0 { return Floor(x + 0.5); }
+	if digits == 0 { return Floor(n + 0.5); }
 
 	var multiplier = Pow(10, digits);
 
-	return Floor(x * multiplier + 0.5) / multiplier;
+	return Floor(n * multiplier + 0.5) / multiplier;
 }
 
-#@ <Max(a, b)>
+#@ <Max(n1, n2)>
 #@ V-1.0.0 (2025-08-12)
 #@
-#@ Returns the larger of ''a'' and ''b''.
+#@ Returns the larger of ''n1'' and ''n2''.
 
-func Max(a, b)
+func Max(n1, n2)
 {
-	if a > b { return a; }
+	if n1 > n2 { return n1; }
 
-	return b;
+	return n2;
 }
 
-#@ <Min(a, b)>
+#@ <Min(n1, n2)>
 #@ V-1.0.0 (2025-08-12)
 #@
-#@ Returns the smaller of ''a'' and ''b''.
+#@ Returns the smaller of ''n1'' and ''n2''.
 
-func Min(a, b)
+func Min(n1, n2)
 {
-	if a < b { return a; }
+	if n1 < n2 { return n1; }
 
-	return b;
+	return n2;
 }
 
-#@ <Sign(x)>
+#@ <Sign(n)>
 #@ V-1.0.0 (2025-08-12)
 #@
-#@ Returns the sign of ''x''.
+#@ Returns the sign of ''n''.
 
-func Sign(x)
+func Sign(n)
 {
-	if x > 0 { return 1; }
+	if n > 0 { return 1; }
 
-	if x < 0 { return -1; }
+	if n < 0 { return -1; }
 
 	return 0;
 }
 
-#@ <Sqrt(x)>
+#@ <Sqrt(n)>
 #@ V-1.0.0 (2025-08-12)
 #@
-#@ Returns the square root of ''x''.
+#@ Returns the square root of ''n''.
 
-func Sqrt(x)
+func Sqrt(n)
 {
-	if x < 0 { return err; }
+	if n < 0 { return err; }
 
-	return x ^ 0.5;
+	return n ^ 0.5;
 }
 
-#@ <Cbrt(x)>
+#@ <Cbrt(n)>
 #@ V-1.0.0 (2025-08-12)
 #@
-#@ Returns the cube root of ''x''.
+#@ Returns the cube root of ''n''.
 
-func Cbrt(x)
+func Cbrt(n)
 {
-	if x < 0 { return -(Abs(x) ^ (1/3)); }
-	return x ^ (1/3);
+	if n < 0 { return -(Abs(n) ^ (1/3)); }
+
+	return n ^ (1/3);
 }
 
 #@ <Pow(base, exp)>
 #@ V-1.0.0 (2025-08-12)
 #@
-#@ Returns ''base'' raised to the power of ''exp''
+#@ Returns ''base'' raised to the power of ''exp''.
 
 func Pow(base, exp)
 {
 	return base ^ exp;
 }
 
-#@ <Square(x)>
+#@ <Square(n)>
 #@ V-1.0.0 (2025-08-12)
 #@
-#@ Returns the square of ''x''
+#@ Returns the square of ''n''.
 
-func Square(x)
+func Square(n)
 {
-	return x * x;
+	return n * n;
 }
 
-#@ <Cube(x)>
+#@ <Cube(n)>
 #@ V-1.0.0 (2025-08-12)
 #@
-#@ Returns the cube of ''x''
+#@ Returns the cube of ''n''.
 
-func Cube(x)
+func Cube(n)
 {
-	return x * x * x;
+	return n * n * n;
 }
 
 #@ <Factorial(n)>
@@ -178,7 +179,8 @@ func Cube(x)
 #@ Returns the factorial of ''n''. If ''n'' is negative, ''err''
 #@ is returned.
 
-func Factorial(n) {
+func Factorial(n)
+{
 	if n < 0 { return err; }
 
 	var result = 1;
@@ -193,25 +195,25 @@ func Factorial(n) {
 	return result;
 }
 
-#@ <Gcd(a, b)>
+#@ <Gcd(n1, n2)>
 #@ V-1.0.0 (2025-08-12)
 #@
-#@ Returns the greatest common divisor of ''a'' and ''b''.
+#@ Returns the greatest common divisor of ''n1'' and ''n2''.
 
-func Gcd(a, b)
+func Gcd(n1, n2)
 {
-	a = Abs(a);
-	b = Abs(b);
+	n1 = Abs(n1);
+	n2 = Abs(n2);
 
-	while b != 0
+	while n2 != 0
 	{
-		var temp = a % b;
+		var temp = n1 % n2;
 
-		a = b;
-		b = temp;
+		n1 = n2;
+		n2 = temp;
 	}
 
-	return a;
+	return n1;
 }
 
 #@ <Clamp(value, minVal, maxVal)>
@@ -237,14 +239,14 @@ func Distance(x1, y1, x2, y2)
 	return Sqrt(dx * dx + dy * dy);
 }
 
-#@ <Hypotenuse(a, b)>
+#@ <Hypotenuse(n1, n2)>
 #@ V-1.0.0 (2025-08-12)
 #@
-#@ Returns the hypotenuse of a right triangle with sides ''a'' and ''b''.
+#@ Returns the hypotenuse of a right triangle with sides ''n1'' and ''n2''.
 
-func Hypotenuse(a, b)
+func Hypotenuse(n1, n2)
 {
-	return Sqrt(a * a + b * b);
+	return Sqrt(n1 * n1 + n2 * n2);
 }
 
 #@ <IsEven(n)>
@@ -304,7 +306,7 @@ func Hex(n)
 	while number > 0
 	{
 		var remainder = number % 16;
-		result = substr(digits, remainder + 1, 1) + result;
+		result = slice(digits, remainder + 1, remainder + 1) + result;
 		number = Floor(number / 16);
 	}
 

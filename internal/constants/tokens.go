@@ -10,11 +10,10 @@ package constants
 const (
 	// Literals
 
-	TT_INT         = "__~int~__"
-	TT_FLOAT       = "__~flt~__"
-	TT_STRING      = "__~str~__"
-	TT_IDENTIFIER  = "__~idf~__"
-	TT_BYTELITERAL = "__~byl~__"
+	TT_INT        = "__~int~__"
+	TT_FLOAT      = "__~flt~__"
+	TT_STRING     = "__~str~__"
+	TT_IDENTIFIER = "__~idf~__"
 
 	// Keywords
 
@@ -48,6 +47,7 @@ const (
 	TT_LBRACE    = "__~lbr~__" // {
 	TT_RBRACE    = "__~rbr~__" // }
 	TT_COMMA     = "__~cma~__" // ,
+	TT_COLON     = "__~col~__" // :
 	TT_SEMICOLON = "__~smc~__" // ;
 	TT_NEWLINE   = "__~nl~__"  // \n
 
@@ -64,6 +64,7 @@ var Keywords = []string{
 	"while",
 	"func",
 	"return", "continue", "break",
+	"b", "m",
 }
 
 func IsKeyword(word string) bool {

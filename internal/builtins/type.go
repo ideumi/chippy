@@ -45,6 +45,9 @@ func typeFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 	case *values.Bytes:
 		typeName = "bytes"
 
+	case *values.Map:
+		typeName = "map"
+
 	case *values.Function:
 		typeName = "function"
 

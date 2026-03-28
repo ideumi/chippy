@@ -39,12 +39,14 @@ func lenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 		return res.Success(values.NewNumber(float64(len(v.Elements))).SetContext(ctx))
 	case *values.Bytes:
 		return res.Success(values.NewNumber(float64(len(v.Data))).SetContext(ctx))
+	case *values.Map:
+		return res.Success(values.NewNumber(float64(len(v.Keys))).SetContext(ctx))
 	default:
 		posStart, posEnd := args[0].GetPos()
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("len() can only be used on strings, lists, and bytes"),
+			shared.Errors.InvalidValue("len() can only be used on strings, lists, bytes, and maps"),
 			ctx,
 		))
 	}

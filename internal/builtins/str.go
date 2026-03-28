@@ -10,7 +10,6 @@ import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/errors"
 	"chip-go/internal/values"
-	"strings"
 )
 
 func strFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
@@ -42,22 +41,12 @@ func strFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 		resultStr = v.Value // Remove quotes for str() conversion
 
 	case *values.List:
-		elements := make([]string, len(v.Elements))
-		for i, element := range v.Elements {
-			if element != nil {
-				if str, ok := element.(*values.String); ok {
-					elements[i] = str.Value
-				} else {
-					elements[i] = element.String()
-				}
-			} else {
-				elements[i] = "null"
-			}
-		}
-
-		resultStr = "[" + strings.Join(elements, ", ") + "]"
+		resultStr = v.String()
 
 	case *values.Bytes:
+		resultStr = v.String()
+
+	case *values.Map:
 		resultStr = v.String()
 
 	default:

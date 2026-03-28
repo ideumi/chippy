@@ -50,6 +50,6 @@ func parseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 	}
 
-	result := goToLibMap(raw, ctx)
+	result := unmarshalValue(raw, ctx)
 	return res.Success(result)
 }

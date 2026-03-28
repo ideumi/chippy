@@ -47,7 +47,7 @@ func sortFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 	elements := make([]values.Value, len(listArg.Elements))
 	copy(elements, listArg.Elements)
 
-	sort.Slice(elements, func(i, j int) bool {
+	sort.SliceStable(elements, func(i, j int) bool {
 		return compareValues(elements[i], elements[j]) < 0
 	})
 
@@ -57,7 +57,7 @@ func sortFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 }
 
 // compareValues implements type-aware comparison with precedence:
-// Number < String < List < Bytes < Function < Other
+// Number < String < List < Bytes < Function < Map
 func compareValues(a, b values.Value) int {
 	// Get type precedence values
 
@@ -116,8 +116,10 @@ func getTypePrecedence(v values.Value) int {
 		return 3
 	case *values.BuiltInFunction, *values.Function:
 		return 4
-	default:
+	case *values.Map:
 		return 5
+	default:
+		return 6
 	}
 }
 

@@ -32,7 +32,7 @@ func stringifyFunction(args []values.Value, ctx interface{}) *values.RuntimeResu
 		))
 	}
 
-	goValue, err := libMapToGo(args[0])
+	goValue, err := marshalValue(args[0])
 
 	if err != nil {
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))

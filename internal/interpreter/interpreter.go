@@ -41,6 +41,8 @@ func (i *Interpreter) Visit(node ast.Node, ctx interface{}) *values.RuntimeResul
 		return i.visitListNode(n, ctx)
 	case *ast.ByteArrayNode:
 		return i.visitByteArrayNode(n, ctx)
+	case *ast.MapNode:
+		return i.visitMapNode(n, ctx)
 	case *ast.VarAccessNode:
 		return i.visitVarAccessNode(n, ctx)
 	case *ast.VarAssignNode:
@@ -163,6 +165,44 @@ func (i *Interpreter) visitByteArrayNode(node *ast.ByteArrayNode, ctx interface{
 	return res.Success(
 		values.NewBytes(bytes).SetContext(ctx).SetPos(node.PosStart, node.PosEnd),
 	)
+}
+
+func (i *Interpreter) visitMapNode(node *ast.MapNode, ctx interface{}) *values.RuntimeResult {
+	res := values.NewRuntimeResult()
+	keys := make([]string, 0, len(node.KeyNodes))
+	entries := make(map[string]values.Value, len(node.KeyNodes))
+
+	for idx, keyNode := range node.KeyNodes {
+		key := res.Register(i.Visit(keyNode, ctx))
+
+		if res.ShouldReturn() {
+			return res
+		}
+
+		keyStr, ok := key.(*values.String)
+
+		if !ok {
+			return res.Failure(errors.NewRTError(
+				keyNode.GetPosStart(), keyNode.GetPosEnd(),
+				"Map keys must be strings",
+				ctx,
+			))
+		}
+
+		val := res.Register(i.Visit(node.ValueNodes[idx], ctx))
+
+		if res.ShouldReturn() {
+			return res
+		}
+
+		if _, exists := entries[keyStr.Value]; !exists {
+			keys = append(keys, keyStr.Value)
+		}
+
+		entries[keyStr.Value] = val.SetContext(ctx)
+	}
+
+	return res.Success(values.NewMapFromEntries(keys, entries).SetContext(ctx).SetPos(node.PosStart, node.PosEnd))
 }
 
 func (i *Interpreter) visitVarAccessNode(node *ast.VarAccessNode, ctx interface{}) *values.RuntimeResult {
@@ -678,6 +718,27 @@ func (i *Interpreter) visitIndexAccessNode(node *ast.IndexAccessNode, ctx interf
 		return res
 	}
 
+	// Map access with string key
+	if mapVal, ok := collection.(*values.Map); ok {
+		indexStr, ok := index.(*values.String)
+
+		if !ok {
+			return res.Failure(errors.NewRTError(
+				node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
+				"Map index must be a string",
+				ctx,
+			))
+		}
+
+		val, exists := mapVal.Entries[indexStr.Value]
+
+		if !exists {
+			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		}
+
+		return res.Success(val)
+	}
+
 	indexNum, ok := index.(*values.Number)
 
 	if !ok {
@@ -738,7 +799,7 @@ func (i *Interpreter) visitIndexAccessNode(node *ast.IndexAccessNode, ctx interf
 	default:
 		return res.Failure(errors.NewRTError(
 			node.CollectionNode.GetPosStart(), node.CollectionNode.GetPosEnd(),
-			"Can only index lists, bytes, or strings",
+			"Can only index lists, maps, bytes, or strings",
 			ctx,
 		))
 	}
@@ -763,6 +824,23 @@ func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx interf
 
 	if res.ShouldReturn() {
 		return res
+	}
+
+	// Map assignment with string key
+	if mapVal, ok := collection.(*values.Map); ok {
+		indexStr, ok := index.(*values.String)
+
+		if !ok {
+			return res.Failure(errors.NewRTError(
+				node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
+				"Map index must be a string",
+				ctx,
+			))
+		}
+
+		newMap := mapVal.MapSet(indexStr.Value, value.SetContext(ctx))
+
+		return res.Success(newMap)
 	}
 
 	indexNum, ok := index.(*values.Number)
@@ -876,7 +954,7 @@ func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx interf
 	default:
 		return res.Failure(errors.NewRTError(
 			node.CollectionNode.GetPosStart(), node.CollectionNode.GetPosEnd(),
-			"Can only assign to list, bytes, or string indices",
+			"Can only assign to list, map, bytes, or string indices",
 			ctx,
 		))
 	}

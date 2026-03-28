@@ -14,14 +14,13 @@ import (
 )
 
 const (
-	mapMarker = "map"
 	jsonTrue  = "__~JSONTRUE~__"
 	jsonFalse = "__~JSONFALSE~__"
 	jsonNull  = "__~JSONNULL~__"
 )
 
-// goToLibMap converts Go JSON values to ChipLang libmap format
-func goToLibMap(val interface{}, ctx interface{}) values.Value {
+// unmarshalValue converts Go JSON values to ChipLang values
+func unmarshalValue(val interface{}, ctx interface{}) values.Value {
 	switch v := val.(type) {
 	case nil:
 		return values.NewString(jsonNull).SetContext(ctx)
@@ -39,14 +38,11 @@ func goToLibMap(val interface{}, ctx interface{}) values.Value {
 		list := values.NewList([]values.Value{})
 
 		for _, item := range v {
-			list.Elements = append(list.Elements, goToLibMap(item, ctx))
+			list.Elements = append(list.Elements, unmarshalValue(item, ctx))
 		}
 
 		return list.SetContext(ctx)
 	case map[string]interface{}:
-		// ["map", [key1, val1], [key2, val2], ...] (libmap.chh)
-		list := values.NewList([]values.Value{values.NewString(mapMarker).SetContext(ctx)})
-
 		/* NOTE:
 		 * Sort keys for repeatable output.
 		 * Work around https://go.dev/doc/go1#iteration instead of silently
@@ -60,23 +56,20 @@ func goToLibMap(val interface{}, ctx interface{}) values.Value {
 
 		sort.Strings(keys)
 
-		for _, key := range keys {
-			pair := values.NewList([]values.Value{
-				values.NewString(key).SetContext(ctx),
-				goToLibMap(v[key], ctx),
-			})
+		entries := make(map[string]values.Value, len(v))
 
-			list.Elements = append(list.Elements, pair.SetContext(ctx))
+		for _, key := range keys {
+			entries[key] = unmarshalValue(v[key], ctx)
 		}
 
-		return list.SetContext(ctx)
+		return values.NewMapFromEntries(keys, entries).SetContext(ctx)
 	default:
 		return values.NewString(constants.STR_ERR).SetContext(ctx)
 	}
 }
 
-// libMapToGo converts ChipLang libmap format to Go JSON values
-func libMapToGo(val values.Value) (interface{}, error) {
+// marshalValue converts ChipLang values to Go JSON values
+func marshalValue(val values.Value) (interface{}, error) {
 	switch v := val.(type) {
 	case *values.Number:
 		return v.Value, nil
@@ -92,48 +85,32 @@ func libMapToGo(val values.Value) (interface{}, error) {
 		default:
 			return v.Value, nil
 		}
-	case *values.List:
-		if len(v.Elements) == 0 {
-			return []interface{}{}, nil
-		}
+	case *values.Map:
+		result := make(map[string]interface{})
 
-		// Check if it's a map ["map", [key, val], ...]
-		if firstElem, ok := v.Elements[0].(*values.String); ok {
-			if firstElem.Value == mapMarker {
-				// Convert to Go map
-				result := make(map[string]interface{})
+		for _, key := range v.Keys {
+			val := v.Entries[key]
 
-				for i := 1; i < len(v.Elements); i++ {
-					pair, ok := v.Elements[i].(*values.List)
-
-					if !ok || len(pair.Elements) != 2 {
-						return nil, fmt.Errorf("invalid map pair")
-					}
-
-					key, ok := pair.Elements[0].(*values.String)
-
-					if !ok {
-						return nil, fmt.Errorf("map key must be string")
-					}
-
-					value, err := libMapToGo(pair.Elements[1])
-
-					if err != nil {
-						return nil, err
-					}
-
-					result[key.Value] = value
-				}
-
-				return result, nil
+			if val == nil {
+				result[key] = nil
+				continue
 			}
+
+			goVal, err := marshalValue(val)
+
+			if err != nil {
+				return nil, err
+			}
+
+			result[key] = goVal
 		}
 
-		// Regular list (JSON array)
+		return result, nil
+	case *values.List:
 		result := make([]interface{}, len(v.Elements))
 
 		for i, elem := range v.Elements {
-			goVal, err := libMapToGo(elem)
+			goVal, err := marshalValue(elem)
 
 			if err != nil {
 				return nil, err

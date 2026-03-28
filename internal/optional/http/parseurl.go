@@ -80,39 +80,16 @@ func parseurlFunction(args []values.Value, ctx interface{}) *values.RuntimeResul
 		path = "/"
 	}
 
-	mapElements := []values.Value{
-		values.NewString("map").SetContext(ctx),
-	}
+	nativeMap := values.NewMapFromEntries(
+		[]string{"scheme", "host", "port", "path", "query"},
+		map[string]values.Value{
+			"scheme": values.NewString(parsedURL.Scheme).SetContext(ctx),
+			"host":   values.NewString(parsedURL.Hostname()).SetContext(ctx),
+			"port":   values.NewNumber(float64(portNum)).SetContext(ctx),
+			"path":   values.NewString(path).SetContext(ctx),
+			"query":  values.NewString(parsedURL.RawQuery).SetContext(ctx),
+		},
+	)
 
-	// Add scheme
-	mapElements = append(mapElements, values.NewList([]values.Value{
-		values.NewString("scheme").SetContext(ctx),
-		values.NewString(parsedURL.Scheme).SetContext(ctx),
-	}).SetContext(ctx))
-
-	// Add host
-	mapElements = append(mapElements, values.NewList([]values.Value{
-		values.NewString("host").SetContext(ctx),
-		values.NewString(parsedURL.Hostname()).SetContext(ctx),
-	}).SetContext(ctx))
-
-	// Add port
-	mapElements = append(mapElements, values.NewList([]values.Value{
-		values.NewString("port").SetContext(ctx),
-		values.NewNumber(float64(portNum)).SetContext(ctx),
-	}).SetContext(ctx))
-
-	// Add path
-	mapElements = append(mapElements, values.NewList([]values.Value{
-		values.NewString("path").SetContext(ctx),
-		values.NewString(path).SetContext(ctx),
-	}).SetContext(ctx))
-
-	// Add query
-	mapElements = append(mapElements, values.NewList([]values.Value{
-		values.NewString("query").SetContext(ctx),
-		values.NewString(parsedURL.RawQuery).SetContext(ctx),
-	}).SetContext(ctx))
-
-	return res.Success(values.NewList(mapElements).SetContext(ctx))
+	return res.Success(nativeMap.SetContext(ctx))
 }
