@@ -1,0 +1,567 @@
+#!/usr/bin/chippy
+#
+# corelib - libterm.chh
+#
+
+# https://invisible-island.net/xterm/ctlseqs/ctlseqs.html
+
+load("libhandles.chh");
+load("libbytes.chh");
+
+# --- Termios field byte offsets ---
+
+#@ <TIFLAG>
+#@ (2026-04-02)
+#@ Byte offset of Iflag in termios state
+
+var TIFLAG = 1;
+
+#@ <TOFLAG>
+#@ (2026-04-02)
+#@ Byte offset of Oflag in termios state
+
+var TOFLAG = 5;
+
+#@ <TCFLAG>
+#@ (2026-04-02)
+#@ Byte offset of Cflag in termios state
+
+var TCFLAG = 9;
+
+#@ <TLFLAG>
+#@ (2026-04-02)
+#@ Byte offset of Lflag in termios state
+
+var TLFLAG = 13;
+
+#@ <TVMIN>
+#@ (2026-04-03)
+#@ Byte offset of VMIN in termios state
+
+var TVMIN = 24;
+
+#@ <TVTIME>
+#@ (2026-04-03)
+#@ Byte offset of VTIME in termios state
+
+var TVTIME = 23;
+
+# --- Termios Iflag constants ---
+
+#@ <IGNBRK>
+#@ (2026-04-02)
+#@ Ignore break condition (Iflag)
+
+var IGNBRK = 1;
+
+#@ <BRKINT>
+#@ (2026-04-02)
+#@ Signal interrupt on break (Iflag)
+
+var BRKINT = 2;
+
+#@ <PARMRK>
+#@ (2026-04-03)
+#@ Mark parity errors (Iflag)
+
+var PARMRK = 8;
+
+#@ <ISTRIP>
+#@ (2026-04-03)
+#@ Strip 8th bit (Iflag)
+
+var ISTRIP = 32;
+
+#@ <INLCR>
+#@ (2026-04-02)
+#@ Map NL to CR on input (Iflag)
+
+var INLCR = 64;
+
+#@ <IGNCR>
+#@ (2026-04-02)
+#@ Ignore CR (Iflag)
+
+var IGNCR = 128;
+
+#@ <ICRNL>
+#@ (2026-04-03)
+#@ Map CR to NL on input (Iflag)
+
+var ICRNL = 256;
+
+#@ <IXON>
+#@ (2026-04-03)
+#@ Enable start/stop output flow control (Iflag)
+
+var IXON = 1024;
+
+# --- Termios Oflag constants ---
+
+#@ <OPOST>
+#@ (2026-04-02)
+#@ Post-process output (Oflag)
+
+var OPOST = 1;
+
+# --- Termios Cflag constants ---
+
+#@ <CSIZE>
+#@ (2026-04-03)
+#@ Character size mask (Cflag)
+
+var CSIZE = 48;
+
+#@ <PARENB>
+#@ (2026-04-03)
+#@ Enable parity generation/checking (Cflag)
+
+var PARENB = 256;
+
+#@ <CS8>
+#@ (2026-04-03)
+#@ 8-bit character size (Cflag)
+
+var CS8 = 48;
+
+# --- Termios Lflag constants ---
+
+#@ <ISIG>
+#@ (2026-04-02)
+#@ Enable signals (Lflag)
+
+var ISIG = 1;
+
+#@ <ICANON>
+#@ (2026-04-02)
+#@ Canonical input / line editing (Lflag)
+
+var ICANON = 2;
+
+#@ <ECHO>
+#@ (2026-04-02)
+#@ Echo input characters (Lflag)
+
+var ECHO = 8;
+
+#@ <ECHONL>
+#@ (2026-04-02)
+#@ Echo NL (Lflag)
+
+var ECHONL = 64;
+
+#@ <IEXTEN>
+#@ (2026-04-03)
+#@ Enable implementation-defined input processing (Lflag)
+
+var IEXTEN = 32768;
+
+# --- ANSI escape sequences ---
+
+#@ <ESC>
+#@ (2025-08-20)
+#@ Escape
+
+var ESC = b[27];
+
+#@ <CSI>
+#@ (2025-08-20)
+#@ Control Sequence Introducer
+
+var CSI = ESC + b[91];
+
+#@ <OSC>
+#@ (2025-08-20)
+#@ Operating System Command
+
+var OSC = ESC + b[93];
+
+#@ <BEL>
+#@ (2025-08-20)
+#@ Bell
+
+var BEL = b[7];
+
+#@ <DTSZ>
+#@ (2026-04-01)
+#@ Device Terminal Size query sequence
+
+var DTSZ = CSI + b[49, 56, 116];
+
+# --- Color constants ---
+
+#@ <COLORRESET>
+#@ (2025-08-20)
+#@ Reset all text attributes
+
+var COLORRESET = 0;
+
+#@ <COLORBOLD>
+#@ (2025-08-20)
+#@ Bold text attribute
+
+var COLORBOLD = 1;
+
+#@ <COLORBLACK>
+#@ (2025-08-20)
+#@ Black foreground color
+
+var COLORBLACK = 30;
+
+#@ <COLORRED>
+#@ (2025-08-20)
+#@ Red foreground color
+
+var COLORRED = 31;
+
+#@ <COLORGREEN>
+#@ (2025-08-20)
+#@ Green foreground color
+
+var COLORGREEN = 32;
+
+#@ <COLORYELLOW>
+#@ (2025-08-20)
+#@ Yellow foreground color
+
+var COLORYELLOW = 33;
+
+#@ <COLORBLUE>
+#@ (2025-08-20)
+#@ Blue foreground color
+
+var COLORBLUE = 34;
+
+#@ <COLORMAGENTA>
+#@ (2025-08-20)
+#@ Magenta foreground color
+
+var COLORMAGENTA = 35;
+
+#@ <COLORCYAN>
+#@ (2025-08-20)
+#@ Cyan foreground color
+
+var COLORCYAN = 36;
+
+#@ <COLORWHITE>
+#@ (2025-08-20)
+#@ White foreground color
+
+var COLORWHITE = 37;
+
+#@ <COLORBGBLACK>
+#@ (2025-08-20)
+#@ Black background color
+
+var COLORBGBLACK = 40;
+
+#@ <COLORBGRED>
+#@ (2025-08-20)
+#@ Red background color
+
+var COLORBGRED = 41;
+
+#@ <COLORBGGREEN>
+#@ (2025-08-20)
+#@ Green background color
+
+var COLORBGGREEN = 42;
+
+#@ <COLORBGYELLOW>
+#@ (2025-08-20)
+#@ Yellow background color
+
+var COLORBGYELLOW = 43;
+
+#@ <COLORBGBLUE>
+#@ (2025-08-20)
+#@ Blue background color
+
+var COLORBGBLUE = 44;
+
+#@ <COLORBGMAGENTA>
+#@ (2025-08-20)
+#@ Magenta background color
+
+var COLORBGMAGENTA = 45;
+
+#@ <COLORBGCYAN>
+#@ (2025-08-20)
+#@ Cyan background color
+
+var COLORBGCYAN = 46;
+
+#@ <COLORBGWHITE>
+#@ (2025-08-20)
+#@ White background color
+
+var COLORBGWHITE = 47;
+
+# ---
+
+#@ <SetTitle(title)>
+#@ V-1.0.1 (2025-02-22)
+#@
+#@ Changes the terminal session title.
+
+func SetTitle(title)
+{
+	fwrite(OSC + pack("0;" + str(title)) + BEL, STDOUT);
+}
+
+#@ <CursorUp(n)>
+#@ V-1.0.0 (2025-08-20)
+#@
+#@ Moves cursor up ''n'' lines.
+
+func CursorUp(n)
+{
+	fwrite(CSI + pack(str(num(n))) + b[65], STDOUT);
+}
+
+#@ <CursorDown(n)>
+#@ V-1.0.0 (2025-08-20)
+#@
+#@ Moves cursor down ''n'' lines.
+
+func CursorDown(n)
+{
+	fwrite(CSI + pack(str(num(n))) + b[66], STDOUT);
+}
+
+#@ <CursorRight(n)>
+#@ V-1.0.0 (2025-08-20)
+#@
+#@ Moves cursor right ''n'' columns.
+
+func CursorRight(n)
+{
+	fwrite(CSI + pack(str(num(n))) + b[67], STDOUT);
+}
+
+#@ <CursorLeft(n)>
+#@ V-1.0.0 (2025-08-20)
+#@
+#@ Moves cursor left ''n'' columns.
+
+func CursorLeft(n)
+{
+	fwrite(CSI + pack(str(num(n))) + b[68], STDOUT);
+}
+
+#@ <CursorTo(row, col)>
+#@ V-1.0.1 (2025-09-28)
+#@
+#@ Moves cursor to position ''row'', ''col''.
+
+func CursorTo(row, col)
+{
+	fwrite(CSI + pack(str(num(row))) + b[59] + pack(str(num(col))) + b[72], STDOUT);
+}
+
+#@ <CursorToXY(x, y)>
+#@ V-1.0.1 (2025-09-28)
+#@
+#@ Moves cursor to position ''x'', ''y''.
+
+func CursorToXY(x, y)
+{
+	CursorTo(y, x);
+}
+
+#@ <SaveCursor()>
+#@ V-1.0.0 (2025-08-20)
+#@
+#@ Saves current cursor position.
+
+func SaveCursor()
+{
+	fwrite(CSI + b[115], STDOUT);
+}
+
+#@ <RestoreCursor()>
+#@ V-1.0.0 (2025-08-20)
+#@
+#@ Restores saved cursor position.
+
+func RestoreCursor()
+{
+	fwrite(CSI + b[117], STDOUT);
+}
+
+#@ <ClearScreen()>
+#@ V-1.0.0 (2025-08-20)
+#@
+#@ Clears the screen.
+
+func ClearScreen()
+{
+	fwrite(CSI + b[50, 74], STDOUT);
+}
+
+#@ <ClearToEOL()>
+#@ V-1.0.0 (2025-08-20)
+#@
+#@ Erases from cursor to end of line.
+
+func ClearToEOL()
+{
+	fwrite(CSI + b[75], STDOUT);
+}
+
+#@ <SetAttribute(mode)>
+#@ V-1.0.0 (2025-08-20)
+#@
+#@ Sets text attribute / color mode.
+
+func SetAttribute(mode)
+{
+	fwrite(CSI + pack(str(mode)) + b[109], STDOUT);
+}
+
+#@ <SetBGColor256(color)>
+#@ V-1.0.0 (2026-04-03)
+#@
+#@ Sets background to the 8-bit ''color''.
+
+func SetBGColor256(color)
+{
+	fwrite(CSI + b[52, 56, 59, 53, 59] + pack(str(color)) + b[109], STDOUT);
+}
+
+#@ <SetFGColor256(color)>
+#@ V-1.0.0 (2026-04-03)
+#@
+#@ Sets foreground to the 8-bit ''color''.
+
+func SetFGColor256(color)
+{
+	fwrite(CSI + b[51, 56, 59, 53, 59] + pack(str(color)) + b[109], STDOUT);
+}
+
+#@ <SetBGColorRGB(red, green, blue)>
+#@ V-1.0.0 (2026-04-03)
+#@
+#@ Sets background to ''red'', ''green'', ''blue''.
+
+func SetBGColorRGB(red, green, blue)
+{
+	fwrite(CSI + b[52, 56, 59, 50, 59] +
+			pack(str(red)) + b[59] +
+			pack(str(green)) + b[59] +
+			pack(str(blue)) + b[109], STDOUT);
+}
+
+#@ <SetFGColorRGB(red, green, blue)>
+#@ V-1.0.0 (2026-04-03)
+#@
+#@ Sets foreground to ''red'', ''green'', ''blue''.
+
+func SetFGColorRGB(red, green, blue)
+{
+	fwrite(CSI + b[51, 56, 59, 50, 59] +
+			pack(str(red)) + b[59] +
+			pack(str(green)) + b[59] +
+			pack(str(blue)) + b[109], STDOUT);
+}
+
+#@ <ShowCursor()>
+#@ V-1.0.0 (2025-08-20)
+#@
+#@ Makes cursor visible.
+
+func ShowCursor()
+{
+	fwrite(CSI + b[63, 50, 53, 104], STDOUT);
+}
+
+#@ <HideCursor()>
+#@ V-1.0.0 (2025-08-20)
+#@
+#@ Makes cursor invisible.
+
+func HideCursor()
+{
+	fwrite(CSI + b[63, 50, 53, 108], STDOUT);
+}
+
+# From glibc:
+#
+# void
+# cfmakeraw (struct termios *t)
+# {
+#   t->c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL|IXON);
+#   t->c_oflag &= ~OPOST;
+#   t->c_lflag &= ~(ECHO|ECHONL|ICANON|ISIG|IEXTEN);
+#   t->c_cflag &= ~(CSIZE|PARENB);
+#   t->c_cflag |= CS8;
+#   t->c_cc[VMIN] = 1;		/* read returns when one char is available.  */
+#   t->c_cc[VTIME] = 0;
+# }
+
+#@ <MakeRaw(state)>
+#@ V-1.0.0 (2026-04-03)
+#@
+#@ Sets raw mode flags on termios ''state''. Returns the modified state.
+
+func MakeRaw(state)
+{
+	var iflag = GetInt(state, TIFLAG);
+	iflag = iflag band bnot (IGNBRK bor BRKINT bor PARMRK bor ISTRIP bor INLCR bor IGNCR bor ICRNL bor IXON);
+	state = SetInt(state, TIFLAG, iflag);
+
+	var oflag = GetInt(state, TOFLAG);
+	oflag = oflag band bnot OPOST;
+	state = SetInt(state, TOFLAG, oflag);
+
+	var lflag = GetInt(state, TLFLAG);
+	lflag = lflag band bnot (ECHO bor ECHONL bor ICANON bor ISIG bor IEXTEN);
+	state = SetInt(state, TLFLAG, lflag);
+
+	var cflag = GetInt(state, TCFLAG);
+	cflag = cflag band bnot (CSIZE bor PARENB);
+	cflag = cflag bor CS8;
+	state = SetInt(state, TCFLAG, cflag);
+
+	state = state[TVMIN] = 1;
+	state = state[TVTIME] = 0;
+
+	return state;
+}
+
+#@ <GetTerminalSize()>
+#@ V-1.0.1 (2026-04-01)
+#@
+#@ Returns terminal size ''[rows, columns]''.
+
+func GetTerminalSize()
+{
+	var saved = getterm();
+
+	if iserr(saved) { return err; }
+
+	setterm(MakeRaw(saved));
+
+	fwrite(DTSZ, STDOUT);
+
+	var resp = [];
+	var ch = fread(STDIN, 1);
+
+	# 116 = t
+	while not iserr(ch) and ch[1] != 116
+	{
+		resp = append(resp, ch[1]);
+		ch = fread(STDIN, 1);
+	}
+
+	resp = pack(resp);
+
+	setterm(saved);
+
+	var parts = split(unpack(resp), ";");
+
+	if len(parts) != 3 { return err; }
+
+	return [num(parts[2]), num(parts[3])];
+}
