@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: ChipLang
 " Maintainer: ideumi
-" Latest Revision: 2026-03-25
+" Latest Revision: 2026-04-04
 
 if exists("b:current_syntax")
   finish
@@ -9,7 +9,8 @@ endif
 
 " Keywords
 syn keyword chipKeyword var func return continue break if elseif else for while to step b m
-syn keyword chipOperator and or not
+syn keyword chipOperator and or not xor
+syn keyword chipOperator band bor bnot bxor
 
 " Constants
 syn keyword chipConstant null true false CHIPVR CHIPCN CHIPOS CHIPAR
@@ -21,7 +22,7 @@ syn keyword chipBuiltin append args charat chdir chmod cos
 syn keyword chipBuiltin dclose dopen dread
 syn keyword chipBuiltin error exec
 syn keyword chipBuiltin fclose fopen fread fsync fwrite
-syn keyword chipBuiltin getch getcwd getenv getpid getuid
+syn keyword chipBuiltin getch getcwd getenv getpid getterm getuid
 syn keyword chipBuiltin has indexof int iserr isok
 syn keyword chipBuiltin join
 syn keyword chipBuiltin keys kill
@@ -31,7 +32,7 @@ syn keyword chipBuiltin num
 syn keyword chipBuiltin off
 syn keyword chipBuiltin pack pclose popen
 syn keyword chipBuiltin rand readlink rename replace
-syn keyword chipBuiltin saccept sclose seek setenv sin sleep slice sopen sort spawn split sread stat str swrite symlink
+syn keyword chipBuiltin saccept sclose seek setenv setterm sin sleep slice sopen sort spawn split sread stat str swrite symlink
 syn keyword chipBuiltin tan time type
 syn keyword chipBuiltin unlink unpack upper utime
 
@@ -56,6 +57,8 @@ syn match chipOperator '=='
 syn match chipOperator '!='
 syn match chipOperator '<='
 syn match chipOperator '>='
+syn match chipOperator '<<'
+syn match chipOperator '>>'
 
 " Delimiters
 syn match chipDelimiter '[(){}\[\],;]'

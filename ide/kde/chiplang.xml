@@ -20,6 +20,11 @@
       <item>and</item>
       <item>or</item>
       <item>not</item>
+      <item>xor</item>
+      <item>band</item>
+      <item>bor</item>
+      <item>bnot</item>
+      <item>bxor</item>
       <item>b</item>
       <item>m</item>
     </list>
@@ -63,6 +68,7 @@
       <item>getcwd</item>
       <item>getenv</item>
       <item>getpid</item>
+      <item>getterm</item>
       <item>getuid</item>
       <item>has</item>
       <item>indexof</item>
@@ -94,6 +100,7 @@
       <item>sclose</item>
       <item>seek</item>
       <item>setenv</item>
+      <item>setterm</item>
       <item>sin</item>
       <item>sleep</item>
       <item>slice</item>
@@ -159,11 +166,13 @@
         <Int attribute="Decimal" context="#stay"/>
         
         <!-- Operators -->
-        <AnyChar attribute="Operator" context="#stay" String="+-*/%^=!&lt;&gt;"/>
         <StringDetect attribute="Operator" context="#stay" String="=="/>
         <StringDetect attribute="Operator" context="#stay" String="!="/>
         <StringDetect attribute="Operator" context="#stay" String="&lt;="/>
         <StringDetect attribute="Operator" context="#stay" String="&gt;="/>
+        <StringDetect attribute="Operator" context="#stay" String="&lt;&lt;"/>
+        <StringDetect attribute="Operator" context="#stay" String="&gt;&gt;"/>
+        <AnyChar attribute="Operator" context="#stay" String="+-*/%^=!&lt;&gt;"/>
         
         <!-- Delimiters -->
         <AnyChar attribute="Symbol" context="#stay" String="()[]{}"/>

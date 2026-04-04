@@ -72,6 +72,11 @@
           <keyword>and</keyword>
           <keyword>or</keyword>
           <keyword>not</keyword>
+          <keyword>xor</keyword>
+          <keyword>band</keyword>
+          <keyword>bor</keyword>
+          <keyword>bnot</keyword>
+          <keyword>bxor</keyword>
           <keyword>b</keyword>
           <keyword>m</keyword>
         </context>
@@ -119,6 +124,7 @@
           <keyword>getcwd</keyword>
           <keyword>getenv</keyword>
           <keyword>getpid</keyword>
+          <keyword>getterm</keyword>
           <keyword>getuid</keyword>
           <keyword>has</keyword>
           <keyword>indexof</keyword>
@@ -150,6 +156,7 @@
           <keyword>sclose</keyword>
           <keyword>seek</keyword>
           <keyword>setenv</keyword>
+          <keyword>setterm</keyword>
           <keyword>sin</keyword>
           <keyword>sleep</keyword>
           <keyword>slice</keyword>
@@ -195,7 +202,7 @@
 
         <!-- Operators -->
         <context id="operators" style-ref="operator" class="no-spell-check">
-          <match>[+\-*/%^=!&lt;&gt;]|==|!=|&lt;=|&gt;=</match>
+          <match>==|!=|&lt;=|&gt;=|&lt;&lt;|&gt;&gt;|[+\-*/%^=!&lt;&gt;]</match>
         </context>
 
         <!-- Function calls -->
