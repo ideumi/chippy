@@ -118,6 +118,10 @@ func GetBuiltins() map[string]*values.BuiltInFunction {
 		"time":   values.NewBuiltInFunction("time", timeFunction),
 		"sleep":  values.NewBuiltInFunction("sleep", sleepFunction),
 		"getch":  values.NewBuiltInFunction("getch", getchFunction),
+
+		// Terminal state
+		"getterm": values.NewBuiltInFunction("getterm", gettermFunction),
+		"setterm": values.NewBuiltInFunction("setterm", settermFunction),
 	}
 }
 

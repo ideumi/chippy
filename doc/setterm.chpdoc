@@ -1,0 +1,15 @@
+*setterm* | V-$CHIPVR ($CHIPCN)
+
+''setterm(state)''
+
+Sets the termios state to ''state''. Waits for pending output to drain before applying.
+
+*Parameters:*
+- ''state'': Termios state
+
+*Returns:*
+- ''ok'' on success
+- ''err'' on failure or invalid state size
+
+*Errors:*
+- Runtime error if argument is not Bytes
