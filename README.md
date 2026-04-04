@@ -40,7 +40,7 @@ Println("Hello World");
 - ....
 
 **Built-in Primitives**
-- 65+ built-in functions for core operations
+- 70+ built-in functions for core operations
 - Direct file descriptor and socket access
 - File system operations (stat, chmod, symlinks, etc.)
 - Directory traversal and file metadata
