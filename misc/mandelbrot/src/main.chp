@@ -4,9 +4,9 @@
 #
 
 # This is a small little demonstration on how to render a mandelbrot set
-# to the terminal using libtermios.
+# to the terminal using libterm.
 
-load("libtermios.chh");
+load("libterm.chh");
 load("libhandles.chh");
 
 var TERMSZE = GetTerminalSize();
