@@ -172,6 +172,18 @@ func (b *Bytes) Notted() (Value, error) {
 	return NewNumber(result).SetContext(b.context), nil
 }
 
+func (b *Bytes) XoredBy(other Value) (Value, error) {
+	var result float64
+
+	if b.IsTrue() != other.IsTrue() {
+		result = constants.NUM_TRU
+	} else {
+		result = constants.NUM_FAL
+	}
+
+	return NewNumber(result).SetContext(b.context), nil
+}
+
 func (b *Bytes) MultedBy(other Value) (Value, error) {
 	if otherNum, ok := other.(*Number); ok {
 

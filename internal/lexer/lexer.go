@@ -310,6 +310,11 @@ func (l *Lexer) makeLessThan() *Token {
 	posStart := l.pos.Copy()
 	l.advance()
 
+	if l.currentChar == '<' {
+		l.advance()
+		return NewToken(constants.TT_LSHIFT, nil, posStart, l.pos.Copy())
+	}
+
 	if l.currentChar == '=' {
 		l.advance()
 		return NewToken(constants.TT_LTE, nil, posStart, l.pos.Copy())
@@ -321,6 +326,11 @@ func (l *Lexer) makeLessThan() *Token {
 func (l *Lexer) makeGreaterThan() *Token {
 	posStart := l.pos.Copy()
 	l.advance()
+
+	if l.currentChar == '>' {
+		l.advance()
+		return NewToken(constants.TT_RSHIFT, nil, posStart, l.pos.Copy())
+	}
 
 	if l.currentChar == '=' {
 		l.advance()

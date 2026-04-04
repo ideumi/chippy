@@ -259,16 +259,20 @@ func (p *Parser) expr() *ParseResult {
 		return res.Success(ast.NewVarAssignNode(varName, expr))
 	}
 
-	node := res.Register(p.binOp(p.compExpr, []string{constants.TT_KEYWORD}, []interface{}{"and", "or"}))
+	node := res.Register(p.binOp(p.bitwiseExpr, []string{constants.TT_KEYWORD}, []interface{}{"and", "or", "xor"}))
 
 	if res.error != nil {
 		return res.Failure(errors.NewInvalidSyntaxError(
 			p.currentTok.PosStart, p.currentTok.PosEnd,
-			"Expected 'var', 'if', 'for', 'while', 'func', int, float, identifier, '+', '-', '(', '[' or 'not'",
+			"Expected 'var', 'if', 'for', 'while', 'func', int, float, identifier, '+', '-', '(', '[', 'not' or 'bnot'",
 		))
 	}
 
 	return res.Success(node)
+}
+
+func (p *Parser) bitwiseExpr() *ParseResult {
+	return p.binOp(p.compExpr, []string{constants.TT_KEYWORD}, []interface{}{"band", "bor", "bxor"})
 }
 
 func (p *Parser) compExpr() *ParseResult {
@@ -279,7 +283,6 @@ func (p *Parser) compExpr() *ParseResult {
 		res.RegisterAdvancement()
 		p.advance()
 
-		// Skip optional newlines after not
 		for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
 			res.RegisterAdvancement()
 			p.advance()
@@ -293,16 +296,20 @@ func (p *Parser) compExpr() *ParseResult {
 		return res.Success(ast.NewUnaryOpNode(opTok, node))
 	}
 
-	node := res.Register(p.binOp(p.arithExpr, []string{constants.TT_EE, constants.TT_NE, constants.TT_LT, constants.TT_GT, constants.TT_LTE, constants.TT_GTE}, nil))
+	node := res.Register(p.binOp(p.shiftExpr, []string{constants.TT_EE, constants.TT_NE, constants.TT_LT, constants.TT_GT, constants.TT_LTE, constants.TT_GTE}, nil))
 
 	if res.error != nil {
 		return res.Failure(errors.NewInvalidSyntaxError(
 			p.currentTok.PosStart, p.currentTok.PosEnd,
-			"Expected int, float, identifier, '+', '-', '(', '[', 'if', 'for', 'while', 'func' or 'not'",
+			"Expected int, float, identifier, '+', '-', '(', '[', 'if', 'for', 'while', 'func', 'not' or 'bnot'",
 		))
 	}
 
 	return res.Success(node)
+}
+
+func (p *Parser) shiftExpr() *ParseResult {
+	return p.binOp(p.arithExpr, []string{constants.TT_LSHIFT, constants.TT_RSHIFT}, nil)
 }
 
 func (p *Parser) arithExpr() *ParseResult {
@@ -317,7 +324,7 @@ func (p *Parser) factor() *ParseResult {
 	res := NewParseResult()
 	tok := p.currentTok
 
-	if tok.Type == constants.TT_PLUS || tok.Type == constants.TT_MINUS {
+	if tok.Type == constants.TT_PLUS || tok.Type == constants.TT_MINUS || tok.Matches(constants.TT_KEYWORD, "bnot") {
 		res.RegisterAdvancement()
 		p.advance()
 
