@@ -4,30 +4,7 @@
 #
 
 loadopt("hash");
-
-#@ <BytesToHex(bytes)>
-#@ V-1.0.0 (2026-03-08)
-#@
-#@ Converts ''bytes'' to a lowercase hexadecimal string representation.
-
-func BytesToHex(bytes)
-{
-	var hexDigits = "0123456789abcdef";
-	var result = "";
-	var i = 1;
-	var byteLen = len(bytes);
-
-	while i <= byteLen
-	{
-		var byteVal = bytes[i];
-		var high = int(byteVal / 16);
-		var low = byteVal % 16;
-		result = result + slice(hexDigits, high + 1, high + 1) + slice(hexDigits, low + 1, low + 1);
-		i = i + 1;
-	}
-
-	return result;
-}
+load("libbytes.chh");
 
 # NOTE: SHA-1 and MD5 still reside here because they are still widely used hash
 # algorithms for non-cryptographic purposes, removing them will not make anyone
