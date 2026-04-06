@@ -120,3 +120,15 @@ func (s *String) Notted() (Value, error) {
 
 	return NewNumber(result).SetContext(s.context), nil
 }
+
+func (s *String) XoredBy(other Value) (Value, error) {
+	var result float64
+
+	if s.IsTrue() != other.IsTrue() {
+		result = constants.NUM_TRU
+	} else {
+		result = constants.NUM_FAL
+	}
+
+	return NewNumber(result).SetContext(s.context), nil
+}

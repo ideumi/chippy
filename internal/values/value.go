@@ -104,6 +104,14 @@ type Value interface {
 	AndedBy(other Value) (Value, error)
 	OredBy(other Value) (Value, error)
 	Notted() (Value, error)
+	XoredBy(other Value) (Value, error)
+
+	BAndedBy(other Value) (Value, error)
+	BOredBy(other Value) (Value, error)
+	BNotted() (Value, error)
+	BXoredBy(other Value) (Value, error)
+	LShiftedBy(other Value) (Value, error)
+	RShiftedBy(other Value) (Value, error)
 
 	Execute(args []Value) *RuntimeResult
 	Copy() Value
@@ -216,6 +224,34 @@ func (bv *BaseValue) OredBy(other Value) (Value, error) {
 
 func (bv *BaseValue) Notted() (Value, error) {
 	return nil, IllegalOperation(bv, nil)
+}
+
+func (bv *BaseValue) XoredBy(other Value) (Value, error) {
+	return nil, IllegalOperation(bv, other)
+}
+
+func (bv *BaseValue) BAndedBy(other Value) (Value, error) {
+	return nil, IllegalOperation(bv, other)
+}
+
+func (bv *BaseValue) BOredBy(other Value) (Value, error) {
+	return nil, IllegalOperation(bv, other)
+}
+
+func (bv *BaseValue) BNotted() (Value, error) {
+	return nil, IllegalOperation(bv, nil)
+}
+
+func (bv *BaseValue) BXoredBy(other Value) (Value, error) {
+	return nil, IllegalOperation(bv, other)
+}
+
+func (bv *BaseValue) LShiftedBy(other Value) (Value, error) {
+	return nil, IllegalOperation(bv, other)
+}
+
+func (bv *BaseValue) RShiftedBy(other Value) (Value, error) {
+	return nil, IllegalOperation(bv, other)
 }
 
 func (bv *BaseValue) Execute(args []Value) *RuntimeResult {

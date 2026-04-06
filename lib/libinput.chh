@@ -4,18 +4,7 @@
 #
 
 load("libhandles.chh");
-
-#@ <STTYOFFECHO>
-#@ (2025-08-13)
-#@ Command to disable terminal echo for ''InputPw()''.
-
-var STTYOFFECHO = "stty -echo < /dev/tty";
-
-#@ <STTYONECHO>
-#@ (2025-08-13)
-#@ Command to re-enable terminal echo for ''InputPw()''.
-
-var STTYONECHO = "stty echo < /dev/tty";
+load("libterm.chh");
 
 #@ <Input()>
 #@ V-1.0.0 (2025-08-12)
@@ -45,21 +34,25 @@ func Input()
 }
 
 #@ <InputPw()>
-#@ V-1.0.0 (2025-08-13)
+#@ V-1.0.1 (2026-04-01)
 #@
 #@ Reads STDIN until a newline byte is encountered without echoing
 #@ characters. Returns the data in UTF-8 text.
 
 func InputPw()
 {
-	var sttyDisable = popen(STTYOFFECHO, "r");
-	if iserr(sttyDisable) { return err; }
-	pclose(sttyDisable);
+	var saved = getterm();
+
+	if iserr(saved) { return err; }
+
+	var noecho = saved;
+	noecho = noecho[TLFLAG] = noecho[TLFLAG] band bnot ECHO;
+
+	setterm(noecho);
 
 	var result = Input();
 
-	var sttyEnable = popen(STTYONECHO, "r");
-	if not iserr(sttyEnable) { pclose(sttyEnable); }
+	setterm(saved);
 
 	return result;
 }

@@ -1,0 +1,55 @@
+*Logical and Bitwise Operators* | V-$CHIPVR ($CHIPCN)
+
+*Logical Operators*
+
+''and'' - Logical AND (short-circuit: returns left if falsy, otherwise right)
+''or'' - Logical OR (short-circuit: returns left if truthy, otherwise right)
+''not'' - Logical NOT (returns ''true'' if falsy, ''false'' if truthy)
+''xor'' - Logical XOR (returns ''true'' if exactly one operand is truthy)
+
+'''
+var a = true and false;   # 0
+var r = true or false;    # 1
+var c = not false;        # 1
+var d = true xor true;    # 0
+'''
+
+*Bitwise Operators*
+
+''band'' - Bitwise AND
+''bor'' - Bitwise OR
+''bnot'' - Bitwise NOT (complement)
+''bxor'' - Bitwise XOR
+''<<'' - Left shift
+''>>'' - Right shift
+
+These operate on the integer portion of number values.
+
+'''
+var a = 5 band 3;           # 1
+var r = 5 bor 3;            # 7
+var c = 5 bxor 3;           # 6
+var d = bnot 0;             # -1
+var e = 255 band bnot 8;    # 247 (clear bit 3)
+var f = 1 << 4;             # 16
+var g = 256 >> 3;           # 32
+'''
+
+*Common Patterns*
+
+Clear a flag: ''value band bnot flag''
+Set a flag: ''value bor flag''
+Toggle a flag: ''value bxor flag''
+Check a flag: ''value band flag'' (non-zero means set)
+Create a flag mask: ''1 << n''
+
+*Precedence (low to high)*
+
+''and'', ''or'', ''xor''
+''band'', ''bor'', ''bxor''
+''not'', comparisons
+''<<'', ''>>''
+''+'', ''-''
+''*'', ''/'', ''%''
+''bnot'', unary ''+''/''-''
+''^''

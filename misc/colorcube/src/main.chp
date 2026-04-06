@@ -1,0 +1,51 @@
+#!/usr/bin/chippy
+#
+# colorcube - main.chp
+#
+
+# 8-bit terminal color demo inspired by:
+# https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit
+
+load("libterm.chh");
+load("libhandles.chh");
+load("libprint.chh");
+
+func PrintRow(start, count)
+{
+	for i = start to start + count - 1
+	{
+		SetBGColor256(i);
+		Print("  ");
+	}
+
+	SetAttribute(COLORRESET);
+}
+
+func Main()
+{
+	Println("Standard colors");
+	PrintRow(0, 8);
+	Println("");
+
+	Println("High-intensity colors");
+	PrintRow(8, 8);
+	Println("");
+
+	Println("216 colors");
+
+	for row = 0 to 5
+	{
+		for col = 0 to 5
+		{
+			PrintRow(16 + row * 36 + col * 6, 6);
+		}
+
+		Println("");
+	}
+
+	Println("Grayscale");
+	PrintRow(232, 24);
+	Println("");
+}
+
+Main();

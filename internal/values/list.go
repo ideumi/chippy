@@ -201,3 +201,15 @@ func (l *List) Notted() (Value, error) {
 
 	return NewNumber(result).SetContext(l.context), nil
 }
+
+func (l *List) XoredBy(other Value) (Value, error) {
+	var result float64
+
+	if l.IsTrue() != other.IsTrue() {
+		result = constants.NUM_TRU
+	} else {
+		result = constants.NUM_FAL
+	}
+
+	return NewNumber(result).SetContext(l.context), nil
+}

@@ -58,7 +58,7 @@
       ]
     },
     "keywords": {
-      "match": "\\b(var|func|return|continue|break|if|elseif|else|for|while|to|step|and|or|not|b|m)\\b",
+      "match": "\\b(var|func|return|continue|break|if|elseif|else|for|while|to|step|and|or|not|xor|band|bor|bnot|bxor|b|m)\\b",
       "name": "keyword.control.chiplang"
     },
     "constants": {
@@ -78,7 +78,7 @@
       ]
     },
     "builtins": {
-      "match": "\\b(append|args|charat|chdir|chmod|cos|dclose|dopen|dread|error|exec|fclose|fopen|fread|fsync|fwrite|getch|getcwd|getenv|getpid|getuid|has|indexof|int|iserr|isok|join|keys|kill|len|lenv|list|load|loadopt|lower|lstat|lutime|mkdir|num|off|pack|pclose|popen|rand|readlink|rename|replace|saccept|sclose|seek|setenv|sin|sleep|slice|sopen|sort|spawn|split|sread|stat|str|swrite|symlink|tan|time|type|unlink|unpack|upper|utime)\\b",
+      "match": "\\b(append|args|charat|chdir|chmod|cos|dclose|dopen|dread|error|exec|fclose|fopen|fread|fsync|fwrite|getch|getcwd|getenv|getpid|getterm|getuid|has|indexof|int|iserr|isok|join|keys|kill|len|lenv|list|load|loadopt|lower|lstat|lutime|mkdir|num|off|pack|pclose|popen|rand|readlink|rename|replace|saccept|sclose|seek|setenv|setterm|sin|sleep|slice|sopen|sort|spawn|split|sread|stat|str|swrite|symlink|tan|time|type|unlink|unpack|upper|utime)\\b",
       "name": "support.function.builtin.chiplang"
     },
     "function-call": {
@@ -86,7 +86,7 @@
       "name": "entity.name.function.chiplang"
     },
     "operators": {
-      "match": "(==|!=|<=|>=|[+\\-*/%^=!<>])",
+      "match": "(==|!=|<=|>=|<<|>>|[+\\-*/%^=!<>])",
       "name": "keyword.operator.chiplang"
     },
     "variable": {

@@ -1,0 +1,131 @@
+#!/usr/bin/chippy
+#
+# corelib - libbytes.chh
+#
+
+#@ <BytesToHex(bytes)>
+#@ V-1.0.0 (2026-03-08)
+#@
+#@ Converts ''bytes'' to a lowercase hexadecimal string representation.
+
+func BytesToHex(bytes)
+{
+	var hexDigits = "0123456789abcdef";
+	var result = "";
+	var i = 1;
+	var byteLen = len(bytes);
+
+	while i <= byteLen
+	{
+		var byteVal = bytes[i];
+		var high = int(byteVal / 16);
+		var low = byteVal % 16;
+
+		result = result + slice(hexDigits, high + 1, high + 1) + slice(hexDigits, low + 1, low + 1);
+		i = i + 1;
+	}
+
+	return result;
+}
+
+#@ <GetShort(data, idx)>
+#@ V-1.0.0 (2026-04-02)
+#@
+#@ Reads a little-endian uint16 from ''data'' at byte offset ''idx''.
+
+func GetShort(data, idx)
+{
+	return data[idx] bor (data[idx + 1] * 256);
+}
+
+#@ <SetShort(data, idx, value)>
+#@ V-1.0.0 (2026-04-02)
+#@
+#@ Writes ''value'' as a little-endian uint16 into ''data'' at byte offset ''idx''.
+
+func SetShort(data, idx, value)
+{
+	data = data[idx] = int(value) band 255;
+	data = data[idx + 1] = int(value / 256) band 255;
+
+	return data;
+}
+
+#@ <GetInt(data, idx)>
+#@ V-1.0.0 (2026-04-02)
+#@
+#@ Reads a little-endian uint32 from ''data'' at byte offset ''idx''.
+
+func GetInt(data, idx)
+{
+	return data[idx]
+			bor (data[idx + 1] * 256)
+			bor (data[idx + 2] * 256 ^ 2)
+			bor (data[idx + 3] * 256 ^ 3);
+}
+
+#@ <SetInt(data, idx, value)>
+#@ V-1.0.0 (2026-04-02)
+#@
+#@ Writes ''value'' as a little-endian uint32 into ''data'' at byte offset ''idx''.
+
+func SetInt(data, idx, value)
+{
+	data = data[idx] = int(value) band 255;
+	data = data[idx + 1] = int(value / 256) band 255;
+	data = data[idx + 2] = int(value / 256 ^ 2) band 255;
+	data = data[idx + 3] = int(value / 256 ^ 3) band 255;
+
+	return data;
+}
+
+#@ <GetShortBE(data, idx)>
+#@ V-1.0.0 (2026-04-02)
+#@
+#@ Reads a big-endian uint16 from ''data'' at byte offset ''idx''.
+
+func GetShortBE(data, idx)
+{
+	return (data[idx] * 256) bor data[idx + 1];
+}
+
+#@ <SetShortBE(data, idx, value)>
+#@ V-1.0.0 (2026-04-02)
+#@
+#@ Writes ''value'' as a big-endian uint16 into ''data'' at byte offset ''idx''.
+
+func SetShortBE(data, idx, value)
+{
+	data = data[idx] = int(value / 256) band 255;
+	data = data[idx + 1] = int(value) band 255;
+
+	return data;
+}
+
+#@ <GetIntBE(data, idx)>
+#@ V-1.0.0 (2026-04-02)
+#@
+#@ Reads a big-endian uint32 from ''data'' at byte offset ''idx''.
+
+func GetIntBE(data, idx)
+{
+	return (data[idx] * 256 ^ 3)
+			bor (data[idx + 1] * 256 ^ 2)
+			bor (data[idx + 2] * 256)
+			bor data[idx + 3];
+}
+
+#@ <SetIntBE(data, idx, value)>
+#@ V-1.0.0 (2026-04-02)
+#@
+#@ Writes ''value'' as a big-endian uint32 into ''data'' at byte offset ''idx''.
+
+func SetIntBE(data, idx, value)
+{
+	data = data[idx] = int(value / 256 ^ 3) band 255;
+	data = data[idx + 1] = int(value / 256 ^ 2) band 255;
+	data = data[idx + 2] = int(value / 256) band 255;
+	data = data[idx + 3] = int(value) band 255;
+
+	return data;
+}

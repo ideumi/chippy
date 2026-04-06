@@ -1,0 +1,9 @@
+*getterm* | V-$CHIPVR ($CHIPCN)
+
+''getterm()''
+
+Returns the current termios state as bytes.
+
+*Returns:*
+- Bytes: Serialized termios struct (little-endian)
+- ''err'' on failure

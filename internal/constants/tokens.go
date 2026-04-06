@@ -21,18 +21,20 @@ const (
 
 	// Operators
 
-	TT_PLUS  = "__~pls~__"
-	TT_MINUS = "__~mns~__"
-	TT_MUL   = "__~mul~__"
-	TT_DIV   = "__~div~__"
-	TT_MOD   = "__~mod~__" // %
-	TT_POW   = "__~pow~__" // ^
-	TT_EE    = "__~ee~__"  // ==
-	TT_NE    = "__~ne~__"  // !=
-	TT_LT    = "__~lt~__"  // <
-	TT_GT    = "__~gt~__"  // >
-	TT_LTE   = "__~lte~__" // <=
-	TT_GTE   = "__~gte~__" // >=
+	TT_PLUS   = "__~pls~__"
+	TT_MINUS  = "__~mns~__"
+	TT_MUL    = "__~mul~__"
+	TT_DIV    = "__~div~__"
+	TT_MOD    = "__~mod~__" // %
+	TT_POW    = "__~pow~__" // ^
+	TT_EE     = "__~ee~__"  // ==
+	TT_NE     = "__~ne~__"  // !=
+	TT_LT     = "__~lt~__"  // <
+	TT_GT     = "__~gt~__"  // >
+	TT_LTE    = "__~lte~__" // <=
+	TT_GTE    = "__~gte~__" // >=
+	TT_LSHIFT = "__~lsh~__" // <<
+	TT_RSHIFT = "__~rsh~__" // >>
 
 	// Assignment
 
@@ -58,7 +60,8 @@ const (
 
 var Keywords = []string{
 	"var",
-	"and", "or", "not",
+	"and", "or", "not", "xor",
+	"band", "bor", "bnot", "bxor",
 	"if", "elseif", "else",
 	"for", "to", "step",
 	"while",

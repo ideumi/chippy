@@ -270,3 +270,93 @@ func (n *Number) Notted() (Value, error) {
 
 	return NewNumber(result).SetContext(n.context), nil
 }
+
+func (n *Number) XoredBy(other Value) (Value, error) {
+	var result float64
+
+	if n.IsTrue() != other.IsTrue() {
+		result = constants.NUM_TRU
+	} else {
+		result = constants.NUM_FAL
+	}
+
+	return NewNumber(result).SetContext(n.context), nil
+}
+
+func (n *Number) BAndedBy(other Value) (Value, error) {
+	if otherNum, ok := other.(*Number); ok {
+		result := NewNumber(float64(int64(n.Value) & int64(otherNum.Value)))
+		result.SetContext(n.context)
+
+		return result, nil
+	}
+
+	return nil, IllegalOperation(n, other)
+}
+
+func (n *Number) BOredBy(other Value) (Value, error) {
+	if otherNum, ok := other.(*Number); ok {
+		result := NewNumber(float64(int64(n.Value) | int64(otherNum.Value)))
+		result.SetContext(n.context)
+
+		return result, nil
+	}
+
+	return nil, IllegalOperation(n, other)
+}
+
+func (n *Number) BNotted() (Value, error) {
+	result := NewNumber(float64(^int64(n.Value)))
+	result.SetContext(n.context)
+
+	return result, nil
+}
+
+func (n *Number) BXoredBy(other Value) (Value, error) {
+	if otherNum, ok := other.(*Number); ok {
+		result := NewNumber(float64(int64(n.Value) ^ int64(otherNum.Value)))
+		result.SetContext(n.context)
+
+		return result, nil
+	}
+
+	return nil, IllegalOperation(n, other)
+}
+
+func (n *Number) LShiftedBy(other Value) (Value, error) {
+	if otherNum, ok := other.(*Number); ok {
+		if otherNum.Value < 0 {
+			return nil, errors.NewRTError(
+				otherNum.posStart, otherNum.posEnd,
+				"Negative shift amount",
+				n.context,
+			)
+		}
+
+		result := NewNumber(float64(int64(n.Value) << uint64(otherNum.Value)))
+		result.SetContext(n.context)
+
+		return result, nil
+	}
+
+	return nil, IllegalOperation(n, other)
+}
+
+func (n *Number) RShiftedBy(other Value) (Value, error) {
+	if otherNum, ok := other.(*Number); ok {
+		if otherNum.Value < 0 {
+			return nil, errors.NewRTError(
+				otherNum.posStart, otherNum.posEnd,
+				"Negative shift amount",
+				n.context,
+			)
+		}
+
+		result := NewNumber(float64(int64(n.Value) >> uint64(otherNum.Value)))
+		result.SetContext(n.context)
+
+		return result, nil
+	}
+
+	return nil, IllegalOperation(n, other)
+}

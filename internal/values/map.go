@@ -235,3 +235,15 @@ func (m *Map) Notted() (Value, error) {
 
 	return NewNumber(result).SetContext(m.context), nil
 }
+
+func (m *Map) XoredBy(other Value) (Value, error) {
+	var result float64
+
+	if m.IsTrue() != other.IsTrue() {
+		result = constants.NUM_TRU
+	} else {
+		result = constants.NUM_FAL
+	}
+
+	return NewNumber(result).SetContext(m.context), nil
+}

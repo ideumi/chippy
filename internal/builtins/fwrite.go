@@ -26,7 +26,7 @@ func fwriteFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("fwrite", 2, "handle, bytes"),
+			shared.Errors.InvalidArgCountWithHint("fwrite", 2, "bytes, handle"),
 			ctx,
 		))
 	}

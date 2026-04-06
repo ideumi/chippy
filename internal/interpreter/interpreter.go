@@ -381,6 +381,12 @@ func (i *Interpreter) visitBinOpNode(node *ast.BinOpNode, ctx interface{}) *valu
 	case constants.TT_POW:
 		result, err = left.PowedBy(right)
 
+	case constants.TT_LSHIFT:
+		result, err = left.LShiftedBy(right)
+
+	case constants.TT_RSHIFT:
+		result, err = left.RShiftedBy(right)
+
 	case constants.TT_EE:
 		result, err = left.GetComparisonEe(right)
 
@@ -398,6 +404,18 @@ func (i *Interpreter) visitBinOpNode(node *ast.BinOpNode, ctx interface{}) *valu
 
 	case constants.TT_GTE:
 		result, err = left.GetComparisonGte(right)
+
+	case constants.TT_KEYWORD:
+		switch node.OpToken.Value {
+		case "xor":
+			result, err = left.XoredBy(right)
+		case "band":
+			result, err = left.BAndedBy(right)
+		case "bor":
+			result, err = left.BOredBy(right)
+		case "bxor":
+			result, err = left.BXoredBy(right)
+		}
 	}
 
 	if err != nil {
@@ -429,6 +447,8 @@ func (i *Interpreter) visitUnaryOpNode(node *ast.UnaryOpNode, ctx interface{}) *
 	case constants.TT_KEYWORD:
 		if node.OpToken.Value == "not" {
 			result, err = number.Notted()
+		} else if node.OpToken.Value == "bnot" {
+			result, err = number.BNotted()
 		}
 	}
 

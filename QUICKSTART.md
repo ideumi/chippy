@@ -170,10 +170,12 @@ while condition
 
 ### Operators
 ```
-+  -  *  /  %  ^     # Arithmetic
-== != <  >  <= >=    # Comparison
-and  or  not         # Logical
-=                    # Assignment
++  -  *  /  %  ^        # Arithmetic
+== != <  >  <= >=       # Comparison
+and  or  not  xor       # Logical
+band  bor  bnot  bxor   # Bitwise
+<<  >>                  # Shift
+=                       # Assignment
 ```
 
 ## Core library
@@ -219,3 +221,4 @@ For more information on the corelib, see `chippy doc corelib`
 - `chippy doc isok`
 - `chippy doc scoping`
 - `chippy doc listops`
+- `chippy doc operators`
