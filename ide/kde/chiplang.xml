@@ -120,6 +120,7 @@
       <item>unpack</item>
       <item>upper</item>
       <item>utime</item>
+      <item>winsize</item>
     </list>
 
     <list name="alerts">

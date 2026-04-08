@@ -176,6 +176,7 @@
           <keyword>unpack</keyword>
           <keyword>upper</keyword>
           <keyword>utime</keyword>
+          <keyword>winsize</keyword>
         </context>
 
         <!-- Byte arrays -->

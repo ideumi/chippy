@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: ChipLang
 " Maintainer: ideumi
-" Latest Revision: 2026-04-04
+" Latest Revision: 2026-04-08
 
 if exists("b:current_syntax")
   finish
@@ -34,7 +34,7 @@ syn keyword chipBuiltin pack pclose popen
 syn keyword chipBuiltin rand readlink rename replace
 syn keyword chipBuiltin saccept sclose seek setenv setterm sin sleep slice sopen sort spawn split sread stat str swrite symlink
 syn keyword chipBuiltin tan time type
-syn keyword chipBuiltin unlink unpack upper utime
+syn keyword chipBuiltin unlink unpack upper utime winsize
 
 " Comments
 syn match chipComment "#.*$" contains=chipTodo
