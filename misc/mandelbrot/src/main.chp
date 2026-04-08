@@ -9,7 +9,7 @@
 load("libterm.chh");
 load("libhandles.chh");
 
-var TERMSZE = GetTerminalSize();
+var TERMSZE = winsize();
 
 var SIZEROWS = TERMSZE[1];
 var SIZECOLS = TERMSZE[2];

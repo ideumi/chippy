@@ -122,6 +122,7 @@ func GetBuiltins() map[string]*values.BuiltInFunction {
 		// Terminal state
 		"getterm": values.NewBuiltInFunction("getterm", gettermFunction),
 		"setterm": values.NewBuiltInFunction("setterm", settermFunction),
+		"winsize": values.NewBuiltInFunction("winsize", winsizeFunction),
 	}
 }
 

@@ -1,0 +1,9 @@
+*winsize* | V-$CHIPVR ($CHIPCN)
+
+''winsize()''
+
+Returns the terminal window size.
+
+*Returns:*
+- List: ''[rows, columns]''
+- ''err'' on failure
