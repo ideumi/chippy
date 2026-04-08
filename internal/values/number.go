@@ -285,6 +285,22 @@ func (n *Number) XoredBy(other Value) (Value, error) {
 
 func (n *Number) BAndedBy(other Value) (Value, error) {
 	if otherNum, ok := other.(*Number); ok {
+		if n.Value != math.Trunc(n.Value) {
+			return nil, errors.NewRTError(
+				n.posStart, n.posEnd,
+				"Bitwise operation on decimal value",
+				n.context,
+			)
+		}
+
+		if otherNum.Value != math.Trunc(otherNum.Value) {
+			return nil, errors.NewRTError(
+				otherNum.posStart, otherNum.posEnd,
+				"Bitwise operation on decimal value",
+				n.context,
+			)
+		}
+
 		result := NewNumber(float64(int64(n.Value) & int64(otherNum.Value)))
 		result.SetContext(n.context)
 
@@ -296,6 +312,22 @@ func (n *Number) BAndedBy(other Value) (Value, error) {
 
 func (n *Number) BOredBy(other Value) (Value, error) {
 	if otherNum, ok := other.(*Number); ok {
+		if n.Value != math.Trunc(n.Value) {
+			return nil, errors.NewRTError(
+				n.posStart, n.posEnd,
+				"Bitwise operation on decimal value",
+				n.context,
+			)
+		}
+
+		if otherNum.Value != math.Trunc(otherNum.Value) {
+			return nil, errors.NewRTError(
+				otherNum.posStart, otherNum.posEnd,
+				"Bitwise operation on decimal value",
+				n.context,
+			)
+		}
+
 		result := NewNumber(float64(int64(n.Value) | int64(otherNum.Value)))
 		result.SetContext(n.context)
 
@@ -306,6 +338,14 @@ func (n *Number) BOredBy(other Value) (Value, error) {
 }
 
 func (n *Number) BNotted() (Value, error) {
+	if n.Value != math.Trunc(n.Value) {
+		return nil, errors.NewRTError(
+			n.posStart, n.posEnd,
+			"Bitwise operation on decimal value",
+			n.context,
+		)
+	}
+
 	result := NewNumber(float64(^int64(n.Value)))
 	result.SetContext(n.context)
 
@@ -314,6 +354,22 @@ func (n *Number) BNotted() (Value, error) {
 
 func (n *Number) BXoredBy(other Value) (Value, error) {
 	if otherNum, ok := other.(*Number); ok {
+		if n.Value != math.Trunc(n.Value) {
+			return nil, errors.NewRTError(
+				n.posStart, n.posEnd,
+				"Bitwise operation on decimal value",
+				n.context,
+			)
+		}
+
+		if otherNum.Value != math.Trunc(otherNum.Value) {
+			return nil, errors.NewRTError(
+				otherNum.posStart, otherNum.posEnd,
+				"Bitwise operation on decimal value",
+				n.context,
+			)
+		}
+
 		result := NewNumber(float64(int64(n.Value) ^ int64(otherNum.Value)))
 		result.SetContext(n.context)
 
@@ -325,6 +381,22 @@ func (n *Number) BXoredBy(other Value) (Value, error) {
 
 func (n *Number) LShiftedBy(other Value) (Value, error) {
 	if otherNum, ok := other.(*Number); ok {
+		if n.Value != math.Trunc(n.Value) {
+			return nil, errors.NewRTError(
+				n.posStart, n.posEnd,
+				"Shift operation on decimal value",
+				n.context,
+			)
+		}
+
+		if otherNum.Value != math.Trunc(otherNum.Value) {
+			return nil, errors.NewRTError(
+				otherNum.posStart, otherNum.posEnd,
+				"Shift operation on decimal value",
+				n.context,
+			)
+		}
+
 		if otherNum.Value < 0 {
 			return nil, errors.NewRTError(
 				otherNum.posStart, otherNum.posEnd,
@@ -344,6 +416,22 @@ func (n *Number) LShiftedBy(other Value) (Value, error) {
 
 func (n *Number) RShiftedBy(other Value) (Value, error) {
 	if otherNum, ok := other.(*Number); ok {
+		if n.Value != math.Trunc(n.Value) {
+			return nil, errors.NewRTError(
+				n.posStart, n.posEnd,
+				"Shift operation on decimal value",
+				n.context,
+			)
+		}
+
+		if otherNum.Value != math.Trunc(otherNum.Value) {
+			return nil, errors.NewRTError(
+				otherNum.posStart, otherNum.posEnd,
+				"Shift operation on decimal value",
+				n.context,
+			)
+		}
+
 		if otherNum.Value < 0 {
 			return nil, errors.NewRTError(
 				otherNum.posStart, otherNum.posEnd,
