@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/fsync.go
+ * RR2 - internal/builtins/send.go
  *
  */
 
@@ -14,10 +14,10 @@ import (
 	"chip-go/internal/values"
 )
 
-func fsyncFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func sendFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
-	if len(args) != 1 {
+	if len(args) != 2 {
 		var posStart, posEnd *errors.Position
 
 		if len(args) > 0 {
@@ -26,7 +26,7 @@ func fsyncFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("fsync", 1, "handle"),
+			shared.Errors.InvalidArgCountWithHint("send", 2, "handle, value"),
 			ctx,
 		))
 	}
@@ -38,30 +38,26 @@ func fsyncFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("fsync", shared.TypeNumber, "handle"),
+			shared.Errors.InvalidArgTypePositionalWithHint("send", shared.PositionFirst, shared.TypeNumber, "handle"),
 			ctx,
 		))
 	}
 
-	handle := int(handleNum.Value)
-	registry := orchestrator.Get().GetRegistry(ctx)
-	file, exists := registry.Files.Get(handle)
+	instanceID := int(handleNum.Value)
 
-	if !exists {
+	inst := orchestrator.Get().GetInstance(instanceID)
+
+	if inst == nil {
 		posStart, posEnd := args[0].GetPos()
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid handle"),
+			shared.Errors.InvalidValue("Invalid actor handle"),
 			ctx,
 		))
 	}
 
-	err := file.Sync()
-
-	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
-	}
+	inst.Inbox.Send(args[1].Copy())
 
 	return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
 }

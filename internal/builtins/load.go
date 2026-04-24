@@ -10,6 +10,7 @@ import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
 	"chip-go/internal/errors"
+	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 	"os"
 )
@@ -55,7 +56,7 @@ func loadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 		))
 	}
 
-	roadRunner := shared.GetGlobalRoadRunner2()
+	roadRunner := orchestrator.Get().GetRR2ForContext(ctx)
 
 	if roadRunner == nil {
 		posStart, posEnd := args[0].GetPos()

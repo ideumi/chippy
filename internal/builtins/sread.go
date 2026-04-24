@@ -10,6 +10,7 @@ import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
 	"chip-go/internal/errors"
+	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 	"io"
 )
@@ -72,7 +73,8 @@ func sreadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 	}
 
 	// Get socket handle
-	socket, exists := shared.GetSocketHandle(handle)
+	registry := orchestrator.Get().GetRegistry(ctx)
+	socket, exists := registry.Sockets.Get(handle)
 
 	if !exists {
 		posStart, posEnd := args[0].GetPos()

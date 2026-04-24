@@ -50,10 +50,15 @@ func (f *Function) SetContext(context interface{}) Value {
 	return f
 }
 
+// Shallow by design: f.context is the closure capture, and every copy of the
+// same function must share it so assignments to captured variables stay
+// visible across calls. Cross-actor isolation is the exception, and is
+// handled separately by orchestrator.IsolateForTransfer.
 func (f *Function) Copy() Value {
 	copy := NewFunction(f.Name, f.BodyNode, f.ArgNames, f.ShouldAutoReturn)
 	copy.SetPos(f.posStart, f.posEnd)
 	copy.SetContext(f.context)
+
 	return copy
 }
 
@@ -93,7 +98,6 @@ func (f *Function) Execute(args []Value) *RuntimeResult {
 	}
 
 	execCtx := context.NewContext(f.Name, f.context.(*context.Context), nil)
-	execCtx.IsTemporary = true // Mark this context as temporary for cleanup
 
 	for i, argName := range f.ArgNames {
 		execCtx.SymbolTable.Set(argName, args[i])
@@ -101,8 +105,6 @@ func (f *Function) Execute(args []Value) *RuntimeResult {
 
 	value := res.Register(globalInterpreter.Visit(f.BodyNode, execCtx))
 	if res.ShouldReturn() && res.FuncReturnValue == nil {
-		// Cleanup context before returning on early exit
-		execCtx.Cleanup()
 		return res
 	}
 
@@ -117,14 +119,7 @@ func (f *Function) Execute(args []Value) *RuntimeResult {
 		returnValue = NewNumber(constants.NUM_NUL)
 	}
 
-	// Explicit cleanup of function execution context
-	execCtx.Cleanup()
-
 	return res.Success(returnValue)
-}
-
-func (f *Function) generateNewContext() interface{} {
-	return f.context
 }
 
 var globalInterpreter InterpreterInterface
@@ -165,6 +160,7 @@ func (bf *BuiltInFunction) Copy() Value {
 	copy := NewBuiltInFunction(bf.Name, bf.Fn)
 	copy.SetPos(bf.posStart, bf.posEnd)
 	copy.SetContext(bf.context)
+
 	return copy
 }
 

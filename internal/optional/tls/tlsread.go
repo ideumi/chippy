@@ -71,7 +71,7 @@ func tlsreadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 	}
 
 	handle := int(handleNum.Value)
-	tlsHandle, ok := getTLSHandle(handle)
+	tlsHandle, ok := getTLSHandle(ctx, handle)
 
 	if !ok {
 		posStart, posEnd := args[0].GetPos()

@@ -10,6 +10,7 @@ import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
 	"chip-go/internal/errors"
+	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 	"io"
 )
@@ -69,8 +70,9 @@ func freadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 		))
 	}
 
-	file, fileExists := shared.GetFileHandle(handle)
-	procHandle, procExists := shared.GetProcessHandle(handle)
+	registry := orchestrator.Get().GetRegistry(ctx)
+	file, fileExists := registry.Files.Get(handle)
+	procHandle, procExists := registry.Processes.Get(handle)
 
 	var reader io.Reader
 
@@ -93,7 +95,6 @@ func freadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 	var err error
 
 	if count == 0 {
-		// Read entire file
 		buffer, err = io.ReadAll(reader)
 		n = len(buffer)
 	} else {

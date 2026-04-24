@@ -10,6 +10,8 @@ import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
 	"chip-go/internal/errors"
+	"chip-go/internal/handles"
+	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 	"os"
 )
@@ -58,8 +60,12 @@ func dopenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 	}
 
-	// Add to directory handle registry
-	handleID := shared.AddDirHandle(dirFile, pathStr.Value)
+	registry := orchestrator.Get().GetRegistry(ctx)
+	handle := registry.Alloc.Alloc()
+	registry.Dirs.Store(handle, &handles.DirectoryHandle{
+		DirFile: dirFile,
+		Path:    pathStr.Value,
+	})
 
-	return res.Success(values.NewNumber(float64(handleID)).SetContext(ctx))
+	return res.Success(values.NewNumber(float64(handle)).SetContext(ctx))
 }

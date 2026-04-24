@@ -10,6 +10,7 @@ import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
 	"chip-go/internal/errors"
+	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 )
 
@@ -81,7 +82,8 @@ func seekFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 		))
 	}
 
-	file, exists := shared.GetFileHandle(handle)
+	registry := orchestrator.Get().GetRegistry(ctx)
+	file, exists := registry.Files.Get(handle)
 
 	if !exists {
 		posStart, posEnd := args[0].GetPos()

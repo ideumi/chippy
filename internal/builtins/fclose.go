@@ -10,6 +10,7 @@ import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
 	"chip-go/internal/errors"
+	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 )
 
@@ -53,16 +54,8 @@ func fcloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 		))
 	}
 
-	file, exists := shared.GetFileHandle(handle)
-
-	if exists {
-		shared.RemoveFileHandle(handle)
-	}
-
-	if exists {
-		// Recycle the handle ID for reuse
-		shared.RecycleFileHandle(handle)
-	}
+	registry := orchestrator.Get().GetRegistry(ctx)
+	file, exists := registry.Files.Extract(handle)
 
 	if !exists {
 		posStart, posEnd := args[0].GetPos()
@@ -73,6 +66,8 @@ func fcloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 			ctx,
 		))
 	}
+
+	registry.Alloc.Free(handle)
 
 	err := file.Close()
 

@@ -9,6 +9,8 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/errors"
+	"chip-go/internal/handles"
+	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 	"os/exec"
 	"strings"
@@ -62,7 +64,7 @@ func popenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 	// This avoids PATH dependencies in forked processes
 	cmd := exec.Command("/bin/sh", "-c", command)
 
-	var procHandle shared.ProcessHandle
+	var procHandle handles.ProcessHandle
 	procHandle.Cmd = cmd
 
 	var err error
@@ -110,8 +112,9 @@ func popenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 	}
 
 	// Allocate handle using recycling system
-	handle := shared.GetNextFileHandle()
-	shared.StoreProcessHandle(handle, &procHandle)
+	registry := orchestrator.Get().GetRegistry(ctx)
+	handle := registry.Alloc.Alloc()
+	registry.Processes.Store(handle, &procHandle)
 
 	return res.Success(values.NewNumber(float64(handle)).SetContext(ctx))
 }

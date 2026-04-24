@@ -58,7 +58,7 @@ func tlswriteFunction(args []values.Value, ctx interface{}) *values.RuntimeResul
 	}
 
 	handle := int(handleNum.Value)
-	tlsHandle, ok := getTLSHandle(handle)
+	tlsHandle, ok := getTLSHandle(ctx, handle)
 
 	if !ok {
 		posStart, posEnd := args[1].GetPos()

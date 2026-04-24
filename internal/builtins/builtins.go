@@ -123,6 +123,18 @@ func GetBuiltins() map[string]*values.BuiltInFunction {
 		"getterm": values.NewBuiltInFunction("getterm", gettermFunction),
 		"setterm": values.NewBuiltInFunction("setterm", settermFunction),
 		"winsize": values.NewBuiltInFunction("winsize", winsizeFunction),
+
+		// Signals
+		"sigcatch": values.NewBuiltInFunction("sigcatch", sigcatchFunction),
+		"sigfree":  values.NewBuiltInFunction("sigfree", sigfreeFunction),
+		"signal":   values.NewBuiltInFunction("signal", signalFunction),
+
+		// Concurrency
+		"actor":    values.NewBuiltInFunction("actor", actorFunction),
+		"send":     values.NewBuiltInFunction("send", sendFunction),
+		"receive":  values.NewBuiltInFunction("receive", receiveFunction),
+		"wait":     values.NewBuiltInFunction("wait", waitFunction),
+		"transfer": values.NewBuiltInFunction("transfer", transferFunction),
 	}
 }
 

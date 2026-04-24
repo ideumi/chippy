@@ -231,14 +231,9 @@ func (i *Interpreter) visitVarAccessNode(node *ast.VarAccessNode, ctx interface{
 	}
 
 	if val, ok := value.(values.Value); ok {
-		// Do NOT call SetContext here. Doing so mutates the stored
-		// value's context field in-place (no copy is made), which
-		// corrupts function values: their context field determines
-		// the parent scope for Execute(), so overwriting it with the
-		// current call-site context breaks re-entrant calls, the
-		// function's context ends up pointing at a call frame that
-		// has already been Cleanup()'d, severing the parent chain to
-		// file scope.
+		// Do NOT call SetContext here. Function values capture their
+		// defining scope via f.context; overwriting it with the call
+		// site's ctx would break closures and re-entrant calls.
 		val.SetPos(node.PosStart, node.PosEnd)
 
 		return res.Success(val)
@@ -693,8 +688,10 @@ func (i *Interpreter) visitCallNode(node *ast.CallNode, ctx interface{}) *values
 		return res
 	}
 
-	// Don't copy return values unnecessarily; Set position and context directly
-	returnValue.SetPos(node.PosStart, node.PosEnd).SetContext(ctx)
+	// Point position at the call site for error reporting. Do not touch
+	// context: function values capture their defining scope there, and
+	// stomping it with the caller breaks closures.
+	returnValue.SetPos(node.PosStart, node.PosEnd)
 
 	return res.Success(returnValue)
 }

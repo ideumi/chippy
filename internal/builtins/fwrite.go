@@ -10,6 +10,7 @@ import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
 	"chip-go/internal/errors"
+	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 	"io"
 )
@@ -57,8 +58,9 @@ func fwriteFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 	handle := int(handleNum.Value)
 
-	file, fileExists := shared.GetFileHandle(handle)
-	procHandle, procExists := shared.GetProcessHandle(handle)
+	registry := orchestrator.Get().GetRegistry(ctx)
+	file, fileExists := registry.Files.Get(handle)
+	procHandle, procExists := registry.Processes.Get(handle)
 
 	var writer io.Writer
 

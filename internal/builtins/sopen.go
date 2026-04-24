@@ -10,6 +10,8 @@ import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
 	"chip-go/internal/errors"
+	"chip-go/internal/handles"
+	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 	"fmt"
 	"net"
@@ -97,8 +99,8 @@ func sopenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 		))
 	}
 
-	handle := shared.GetNextSocketHandle()
-	socket := &shared.SocketHandle{Mode: mode}
+	registry := orchestrator.Get().GetRegistry(ctx)
+	socket := &handles.SocketHandle{Mode: mode}
 
 	switch mode {
 
@@ -140,7 +142,8 @@ func sopenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 		socket.Listener = listener
 	}
 
-	shared.StoreSocketHandle(handle, socket)
+	handle := registry.Alloc.Alloc()
+	registry.Sockets.Store(handle, socket)
 
 	return res.Success(values.NewNumber(float64(handle)).SetContext(ctx))
 }
