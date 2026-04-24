@@ -5,14 +5,14 @@
 
 # Metadata
 
-var Project = "server";
+var Project = "servermp";
 var Version = "1.0.0";
 var Licence = "../../../LICENCE.txt";
-var Output = "out/server";
+var Output = "out/servermp";
 
 # Entry point
 
-var Source = "src/server.chp";
+var Source = "src/servermp.chp";
 
 # Search paths for dependencies
 
