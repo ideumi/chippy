@@ -50,6 +50,12 @@ Println("Hello World");
 - Low-level string and byte operations
 - ....
 
+**Concurrency**
+- Actor model
+- Message passing
+- Operating system signals
+- Automatic deadlock detection
+
 **Developer Tools**
 - Interactive REPL with history for experimentation
 - Syntax files in `ide/` for:
