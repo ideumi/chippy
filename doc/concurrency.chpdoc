@@ -1,0 +1,147 @@
+*Concurrency* | V-$CHIPVR ($CHIPCN)
+
+*The Model*
+
+ChipLang uses an actor model for concurrency. Actors are isolated units of execution that communicate through message passing.
+
+Every ChipLang program starts as the main actor (''CHIPRT == 0''). You spawn new actors with ''actor(function, arg1, arg2, ...)'', which returns a handle. The spawned actor runs that function in its own interpreter with its own I/O handles. When the function returns, the actor is completed.
+
+Every runtime knows its own ID through the ''CHIPRT'' constant. Main is always ''0''. Each spawned actor has its own non-zero ID. ''CHIPRT'' is set per runtime actor and never inherited from the spawner.
+
+'''
+func Worker(x)
+{
+    return x * 2;
+}
+
+var a = actor(Worker, 32);
+var result = wait(a);
+'''
+
+*Isolation*
+
+Each actor gets its own interpreter instance, its own handle registry, and a deep copy of all non-builtin symbols visible at spawn time. After ''actor(function, arg1, arg2, ...)'' is called, the spawner and the actor operate on completely separate data.
+
+Optionals loaded with ''loadopt(name)'' are inherited at spawn time: any optional the spawner has loaded is installed into the child actor before the handler runs.
+
+*Communication*
+
+Actors communicate with ''send(handle, value)'' and ''receive(blocking)''.
+
+''send(handle, value)'' delivers a deep copy of ''value'' to the target actor's inbox. It is non-blocking for the sender.
+
+''receive(blocking)'' drains all pending messages from the current actor's inbox and returns them as a list. With ''true'', it waits until at least one message is available. With ''false'', it returns immediately (empty list if nothing is there).
+
+If an actor needs to talk back to its spawner, the spawner passes its own ''CHIPRT'' as an argument:
+
+'''
+func Greeter(spawner)
+{
+    var msgs = receive(true);
+    send(spawner, "Hello " + msgs[1]);
+
+    return ok;
+}
+
+var a = actor(Greeter, CHIPRT);
+
+send(a, "World\n");
+
+var reply = receive(true)[1];
+var ret = wait(a);
+'''
+
+*Drain Semantics*
+
+''receive(blocking)'' returns all messages that have accumulated since the last call. If three ''send(handle, value)'' calls happened before the actor called ''receive(blocking)'', the returned list has three elements. The inbox is emptied on each ''receive(blocking)''.
+
+'''
+func Collector()
+{
+    sleep(100);
+    var msgs = receive(true);
+
+    return len(msgs);
+}
+
+var a = actor(Collector);
+
+send(a, "a");
+send(a, "b");
+send(a, "c");
+
+var count = wait(a);
+'''
+
+*Collecting Results*
+
+''wait(handle)'' blocks until the actor finishes and returns whatever the function returned. If the actor hit a runtime error, that error is propagated to the caller.
+
+Each handle can only be waited on once. After ''wait(handle)'' returns, the handle is freed.
+
+''wait(handle)'' is the only way to release an actor's bookkeeping. An actor that finishes but is never waited on keeps its handle entry alive until the program exits. Always wait on every handle returned by ''actor(function, arg1, arg2, ...)''.
+
+*Handle Transfer*
+
+Since each actor has its own handle registry, an open file or socket in one actor is not accessible in another. ''transfer(actor, handle)'' moves a handle from the caller's registry to the target actor's registry, returning the new handle ID. The old ID is invalid in the source after the transfer.
+
+*Error Propagation*
+
+A runtime error inside an actor terminates that actor. The error is stored until ''wait(handle)'' is called, at which point it is raised in the caller.
+
+*Spawning Actors from Actors*
+
+Actors can spawn other actors. Each spawner that wants its child to reach back must pass its own ''CHIPRT'' to the child. To talk to a grandparent or sibling, the relevant ID has to be threaded through explicitly.
+
+*Signals*
+
+Operating system signals are integrated into the concurrency model. ''sigcatch(signums)'' registers signals for interception, ''signal()'' blocks until one arrives, and ''sigfree(signums)'' restores default behaviour. Any actor can call ''signal()'', so signal handling can be delegated to a dedicated actor while the rest of the program runs.
+
+Each incoming signal is delivered to exactly one ''signal()'' waiter, chosen arbitrarily by the runtime. For predictable behaviour, route signals through a single actor.
+
+*Deadlock Detection*
+
+The runtime tracks every blocking call (''receive(true)'', ''wait(handle)'', ''signal()''). When every actor is blocked and nothing outside the program can wake one up, the blocked calls are cancelled and each raises a runtime error. This prevents a ChipLang program from hanging silently on a programming mistake.
+
+*Architecture*
+
+'''
+                 Orchestrator
+           +----------------------------+
+           |  actor registry            |
+           |  deadlock detector         |
+           |  signal forwarder          |
+           |  message delivery          |
+           |  value isolation           |
+           |  handle transfer           |
+           +--------------+-------------+
+                          |
+       +------------------+------------------+
+       |                  |                  |
++------+------+    +------+------+    +------+------+
+|    Main     |    |   Actor 1   |    |   Actor N   |
+| CHIPRT = 0  |    | CHIPRT = 1  |    | CHIPRT = N  |
++-------------+    +-------------+    +-------------+
+|  RR2        |    |  RR2        |    |  RR2        |
+|  Handles    |    |  Handles    |    |  Handles    |
+|  Inbox      |    |  Inbox      |    |  Inbox      |
+|  ResultCh   |    |  ResultCh   |    |  ResultCh   |
++-------------+    +-------------+    +-------------+
+
+send(h, v)   -->   target Inbox
+receive(t)   -->   drain own Inbox
+wait(h)      -->   read target ResultCh
+transfer     -->   move handle between registries
+signal()     -->   block until forwarder broadcast
+'''
+
+*Recommended Reading*
+
+''chippy doc actor''
+''chippy doc send''
+''chippy doc receive''
+''chippy doc wait''
+''chippy doc transfer''
+''chippy doc signal''
+''chippy doc sigcatch''
+''chippy doc sigfree''

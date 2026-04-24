@@ -1,0 +1,21 @@
+*transfer* | V-$CHIPVR ($CHIPCN)
+
+''transfer(actor, handle)''
+
+Moves a handle from the current actor's registry to another actor's registry. The handle is removed from the source and assigned a new ID in the target. The original handle ID is no longer valid after the transfer.
+
+The standard handles: ''STDIN'', ''STDOUT'' and ''STDERR'' cannot be transferred.
+
+*Parameters:*
+- ''actor'': Actor handle of the target
+- ''handle'': Handle to transfer
+
+*Returns:*
+- Number: New handle ID valid in the target actor
+
+*Errors:*
+- Runtime error if actor is not a number
+- Runtime error if handle is not a number
+- Runtime error if actor handle is invalid
+- Runtime error if handle is invalid
+- Runtime error if handle is a standard handle

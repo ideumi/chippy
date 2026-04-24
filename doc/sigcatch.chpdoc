@@ -1,0 +1,20 @@
+*sigcatch* | V-$CHIPVR ($CHIPCN)
+
+''sigcatch(signums)''
+
+Registers a list of operating system ''signums'' for interception and suspends default signal handling behaviour.
+
+*Parameters:*
+- ''signums'': List of signal numbers
+
+*Returns:*
+- ''ok''
+
+*Errors:*
+- Runtime error if signums is not a list
+- Runtime error if signums contains a non-number
+
+*Important:*
+Signal registration is process wide, not per actor runtime.
+
+Calling ''sigcatch(signums)'' from any actor catches ''signums'' for the whole program.

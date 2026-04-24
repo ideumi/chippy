@@ -17,3 +17,4 @@ These constants are available at runtime with a clean chippy session:
 ''CHIPCN'' - Release codename for CHIPVR
 ''CHIPOS'' - Host operating system
 ''CHIPAR'' - Host architecture
+''CHIPRT'' - Runtime instance
