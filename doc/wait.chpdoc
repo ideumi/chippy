@@ -1,0 +1,21 @@
+*wait* | V-$CHIPVR ($CHIPCN)
+
+''wait(handle)''
+
+Blocks until the actor at ''handle'' finishes and returns its value. If the actor encountered a runtime error, that error is propagated to the caller.
+
+Each actor handle can only be waited on once. The handle is freed after ''wait(handle)'' returns.
+
+*Parameters:*
+- ''handle'': Actor handle
+
+*Returns:*
+- The actor's return value, or ''null'' if none
+
+*Errors:*
+- Runtime error if handle is not a number
+- Runtime error if handle is invalid
+- Runtime error if handle refers to the main actor
+- Runtime error if the actor has already been waited on
+- Runtime error if the deadlock detector determines the target actor cannot finish
+- Propagated runtime error from the actor

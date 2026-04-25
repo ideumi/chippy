@@ -96,9 +96,9 @@ func tlsopenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 	}
 
-	handle := getNextTLSHandle()
+	handle := getNextTLSHandle(ctx)
 
-	storeTLSHandle(handle, &TLSHandle{
+	storeTLSHandle(ctx, handle, &TLSHandle{
 		Conn:   conn,
 		Mode:   "client",
 		Closed: false,

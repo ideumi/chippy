@@ -1,0 +1,15 @@
+*receive* | V-$CHIPVR ($CHIPCN)
+
+''receive(blocking)''
+
+Drains all pending messages from the current actor's inbox.
+
+*Parameters:*
+- ''blocking'': ''true'' to block until at least one message arrives, ''false'' to return immediately
+
+*Returns:*
+- List: All pending messages (empty list if none available in non-blocking mode)
+
+*Errors:*
+- Runtime error if blocking is not a number
+- Runtime error if ''receive(true)'' is cancelled by the deadlock detector (no actor can still send)

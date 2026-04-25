@@ -182,12 +182,6 @@ var OSC = ESC + b[93];
 
 var BEL = b[7];
 
-#@ <DTSZ>
-#@ (2026-04-01)
-#@ Device Terminal Size query sequence
-
-var DTSZ = CSI + b[49, 56, 116];
-
 # --- Color constants ---
 
 #@ <COLORRESET>
@@ -528,40 +522,4 @@ func MakeRaw(state)
 	state = state[TVTIME] = 0;
 
 	return state;
-}
-
-#@ <GetTerminalSize()>
-#@ V-1.0.1 (2026-04-01)
-#@
-#@ Returns terminal size ''[rows, columns]''.
-
-func GetTerminalSize()
-{
-	var saved = getterm();
-
-	if iserr(saved) { return err; }
-
-	setterm(MakeRaw(saved));
-
-	fwrite(DTSZ, STDOUT);
-
-	var resp = [];
-	var ch = fread(STDIN, 1);
-
-	# 116 = t
-	while not iserr(ch) and ch[1] != 116
-	{
-		resp = append(resp, ch[1]);
-		ch = fread(STDIN, 1);
-	}
-
-	resp = pack(resp);
-
-	setterm(saved);
-
-	var parts = split(unpack(resp), ";");
-
-	if len(parts) != 3 { return err; }
-
-	return [num(parts[2]), num(parts[3])];
 }

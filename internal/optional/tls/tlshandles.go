@@ -4,19 +4,15 @@
  *
  */
 
-/*
- * NOTE: The mutex calls in here are intentional and are supposed
- * to mirror the implementation in chip-go/internal/builtins/shared/filehandles.go.
- * We don't do concurrency currently but this costs nothing and will
- * prevent headaches in case we ever do.
- */
-
 package tls
 
+// TLS handles live in the per-actor registry at internal/handles; this file
+// just provides typed accessors over the shared Optional manager.
+
 import (
-	"chip-go/internal/builtins/shared"
+	"chip-go/internal/handles"
+	"chip-go/internal/orchestrator"
 	"crypto/tls"
-	"sync"
 )
 
 type TLSHandle struct {
@@ -25,33 +21,41 @@ type TLSHandle struct {
 	Closed bool
 }
 
-var (
-	tlsHandles = make(map[int]*TLSHandle)
-	tlsMutex   sync.RWMutex
-)
+func (h *TLSHandle) Close() error {
+	if !h.Closed && h.Conn != nil {
+		h.Closed = true
+		return h.Conn.Close()
+	}
 
-func getNextTLSHandle() int {
-	return shared.GetNextFileHandle()
+	return nil
 }
 
-func storeTLSHandle(handle int, tlsHandle *TLSHandle) {
-	tlsMutex.Lock()
-	tlsHandles[handle] = tlsHandle
-	tlsMutex.Unlock()
+func getRegistry(ctx interface{}) *handles.HandleRegistry {
+	return orchestrator.Get().GetRegistry(ctx)
 }
 
-func getTLSHandle(handle int) (*TLSHandle, bool) {
-	tlsMutex.RLock()
-	tlsHandle, ok := tlsHandles[handle]
-	tlsMutex.RUnlock()
+func getNextTLSHandle(ctx interface{}) int {
+	return getRegistry(ctx).Alloc.Alloc()
+}
+
+func storeTLSHandle(ctx interface{}, handle int, tlsHandle *TLSHandle) {
+	getRegistry(ctx).Optional.Store(handle, tlsHandle)
+}
+
+func getTLSHandle(ctx interface{}, handle int) (*TLSHandle, bool) {
+	opt, ok := getRegistry(ctx).Optional.Get(handle)
+
+	if !ok {
+		return nil, false
+	}
+
+	tlsHandle, ok := opt.(*TLSHandle)
 
 	return tlsHandle, ok
 }
 
-func removeTLSHandle(handle int) {
-	tlsMutex.Lock()
-	delete(tlsHandles, handle)
-	tlsMutex.Unlock()
-
-	shared.RecycleFileHandle(handle)
+func removeTLSHandle(ctx interface{}, handle int) {
+	reg := getRegistry(ctx)
+	reg.Optional.Remove(handle)
+	reg.Alloc.Free(handle)
 }

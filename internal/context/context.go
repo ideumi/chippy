@@ -13,7 +13,7 @@ type Context struct {
 	Parent         *Context
 	ParentEntryPos *errors.Position
 	SymbolTable    *SymbolTable
-	IsTemporary    bool // Track if this context should be cleaned up after use
+	InstanceID     int
 }
 
 func NewContext(displayName string, parent *Context, parentEntryPos *errors.Position) *Context {
@@ -25,6 +25,7 @@ func NewContext(displayName string, parent *Context, parentEntryPos *errors.Posi
 
 	if parent != nil {
 		ctx.SymbolTable = NewSymbolTable(parent.SymbolTable)
+		ctx.InstanceID = parent.InstanceID
 	} else {
 		ctx.SymbolTable = NewSymbolTable(nil)
 	}
@@ -32,13 +33,9 @@ func NewContext(displayName string, parent *Context, parentEntryPos *errors.Posi
 	return ctx
 }
 
-// Cleanup explicitly clears the context and breaks references to help GC
-func (c *Context) Cleanup() {
-	if c.SymbolTable != nil {
-		c.SymbolTable.Clear()
-		c.SymbolTable = nil
+func GetInstanceID(ctx interface{}) int {
+	if c, ok := ctx.(*Context); ok {
+		return c.InstanceID
 	}
-	// Break parent reference to prevent memory leaks
-	c.Parent = nil
-	c.ParentEntryPos = nil
+	return 0
 }

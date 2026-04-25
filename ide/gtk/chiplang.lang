@@ -86,10 +86,11 @@
           <keyword>null</keyword>
           <keyword>true</keyword>
           <keyword>false</keyword>
-          <keyword>CHIPVR</keyword>
+          <keyword>CHIPAR</keyword>
           <keyword>CHIPCN</keyword>
           <keyword>CHIPOS</keyword>
-          <keyword>CHIPAR</keyword>
+          <keyword>CHIPRT</keyword>
+          <keyword>CHIPVR</keyword>
         </context>
 
         <!-- Error constants -->
@@ -104,6 +105,7 @@
 
         <!-- Built-in functions -->
         <context id="builtins" style-ref="builtin" class="no-spell-check">
+          <keyword>actor</keyword>
           <keyword>append</keyword>
           <keyword>args</keyword>
           <keyword>charat</keyword>
@@ -150,13 +152,18 @@
           <keyword>popen</keyword>
           <keyword>rand</keyword>
           <keyword>readlink</keyword>
+          <keyword>receive</keyword>
           <keyword>rename</keyword>
           <keyword>replace</keyword>
           <keyword>saccept</keyword>
           <keyword>sclose</keyword>
           <keyword>seek</keyword>
+          <keyword>send</keyword>
           <keyword>setenv</keyword>
           <keyword>setterm</keyword>
+          <keyword>sigcatch</keyword>
+          <keyword>sigfree</keyword>
+          <keyword>signal</keyword>
           <keyword>sin</keyword>
           <keyword>sleep</keyword>
           <keyword>slice</keyword>
@@ -171,11 +178,14 @@
           <keyword>symlink</keyword>
           <keyword>tan</keyword>
           <keyword>time</keyword>
+          <keyword>transfer</keyword>
           <keyword>type</keyword>
           <keyword>unlink</keyword>
           <keyword>unpack</keyword>
           <keyword>upper</keyword>
           <keyword>utime</keyword>
+          <keyword>wait</keyword>
+          <keyword>winsize</keyword>
         </context>
 
         <!-- Byte arrays -->

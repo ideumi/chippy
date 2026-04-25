@@ -1,0 +1,20 @@
+*sigfree* | V-$CHIPVR ($CHIPCN)
+
+''sigfree(signums)''
+
+Unregisters and restores the default signal handling behaviour for the operating system ''signums''.
+
+*Parameters:*
+- ''signums'': List of signal numbers
+
+*Returns:*
+- ''ok''
+
+*Errors:*
+- Runtime error if signums is not a list
+- Runtime error if signums contains a non-number
+
+*Important:*
+Signal registration is process wide, not per actor runtime.
+
+Calling ''sigfree(signums)'' restores the default behaviour of ''signums'' for the whole program.

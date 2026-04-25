@@ -1,0 +1,93 @@
+#!/usr/bin/chippy
+#
+# server/mp - servermp.chp
+#
+
+load("libhttp.chh");
+load("libprint.chh");
+
+var PORT = 8080;
+var MAXREQ = 8192;
+var REAPEVERY = 60;
+
+func Handle()
+{
+	var msg = receive(true);
+	var conn = msg[1];
+
+	var raw = sread(conn, MAXREQ);
+	var method = "?";
+	var path = "?";
+
+	if not iserr(raw)
+	{
+		var req = HttpParseRequest(raw);
+
+		if not iserr(req)
+		{
+			method = req["method"];
+			path = req["path"];
+		}
+	}
+
+	Println("Request: " + method + " " + path + " (actor " + str(CHIPRT) + ")");
+
+	var html = "<html><body>";
+	html = html + "<h1>ChipLang multi-actor server</h1>";
+	html = html + "<p>Handled by actor: " + str(CHIPRT) + "</p>";
+	html = html + "<p>Method: " + method + "</p>";
+	html = html + "<p>Path: " + path + "</p>";
+	html = html + "<p>Time: " + str(time()) + "</p>";
+	html = html + "</body></html>";
+
+	var body = pack(html);
+
+	var head = "HTTP/1.1 200 OK\r\n";
+	head = head + "Content-Type: text/html\r\n";
+	head = head + "Server: servermp Handle() on chippy V-" + CHIPVR + "\r\n";
+	head = head + "Content-Length: " + str(len(body)) + "\r\n";
+	head = head + "Connection: close\r\n\r\n";
+
+	swrite(pack(head) + body, conn);
+	sclose(conn);
+
+	return ok;
+}
+
+func Reaper()
+{
+	while true
+	{
+		sleep(REAPEVERY * 1000);
+
+		var pending = receive(false);
+
+		for i = 1 to len(pending)
+		{
+			wait(pending[i]);
+			Println("Reaped worker: " + str(pending[i]));
+		}
+	}
+}
+
+var server = sopen("0.0.0.0", PORT, "listen");
+
+if iserr(server) { error("Failed to bind port " + str(PORT)); }
+
+var reaper = actor(Reaper);
+
+Println("Visit: http://localhost:" + str(PORT) + "/");
+Println("Ctrl+C to stop");
+
+while true
+{
+	var conn = saccept(server);
+
+	if iserr(conn) { continue; }
+
+	var worker = actor(Handle);
+	var newHandle = transfer(worker, conn);
+
+	send(worker, newHandle);
+	send(reaper, worker);
+}

@@ -10,6 +10,7 @@ import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
 	"chip-go/internal/errors"
+	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 	"os/exec"
 )
@@ -56,16 +57,8 @@ func pcloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 		))
 	}
 
-	procHandle, exists := shared.GetProcessHandle(handle)
-
-	if exists {
-		shared.RemoveProcessHandle(handle)
-	}
-
-	if exists {
-		// Recycle
-		shared.RecycleFileHandle(handle)
-	}
+	registry := orchestrator.Get().GetRegistry(ctx)
+	procHandle, exists := registry.Processes.Extract(handle)
 
 	if !exists {
 		posStart, posEnd := args[0].GetPos()
@@ -76,6 +69,8 @@ func pcloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 			ctx,
 		))
 	}
+
+	registry.Alloc.Free(handle)
 
 	// Close pipes if they exist
 	if procHandle.Stdin != nil {

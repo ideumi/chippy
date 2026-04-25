@@ -20,13 +20,14 @@ package roadrunner
 
 import (
 	"chip-go/internal/builtins"
-	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
 	"chip-go/internal/context"
 	"chip-go/internal/interpreter"
 	"chip-go/internal/lexer"
+	"chip-go/internal/orchestrator"
 	"chip-go/internal/parser"
 	"chip-go/internal/values"
+	"fmt"
 )
 
 type RoadRunner2 struct {
@@ -34,38 +35,24 @@ type RoadRunner2 struct {
 	globalContext *context.Context
 }
 
+var sharedInterpreter *interpreter.Interpreter
+
 func NewRoadRunner2() *RoadRunner2 {
-	interp := interpreter.NewInterpreter()
-
-	globalCtx := context.NewContext(constants.RR_CONTEXT_DISPLAY_NAME, nil, nil)
-
-	roadRunner2 := &RoadRunner2{
-		interpreter:   interp,
-		globalContext: globalCtx,
+	if sharedInterpreter == nil {
+		sharedInterpreter = interpreter.NewInterpreter()
 	}
 
-	// Set interp for values package so functions can create function context
-	// chippy doc scoping
-	values.SetGlobalInterpreter(interp)
+	values.SetGlobalInterpreter(sharedInterpreter)
 
-	// Set RR2 for the shared package so load, loadopt etc. have proper access.
-	shared.SetGlobalRoadRunner2(roadRunner2)
+	rr := newRR2(0, constants.RR_CONTEXT_DISPLAY_NAME)
 
-	builtinFuncs := builtins.GetBuiltins()
+	orch := orchestrator.New()
+	orch.CreateMain(rr)
+	orch.SetFactory(func(instanceID int) orchestrator.RR2Interface {
+		return newRR2(instanceID, fmt.Sprintf("<Actor %d>", instanceID))
+	})
 
-	for name, fn := range builtinFuncs {
-		fn.SetContext(globalCtx)
-		globalCtx.SymbolTable.Set(name, fn)
-	}
-
-	builtinConstants := builtins.GetConstants()
-
-	for name, constant := range builtinConstants {
-		constant.SetContext(globalCtx)
-		globalCtx.SymbolTable.Set(name, constant)
-	}
-
-	return roadRunner2
+	return rr
 }
 
 func (rr *RoadRunner2) Run(filename, text string) (values.Value, error) {
@@ -95,4 +82,28 @@ func (rr *RoadRunner2) Run(filename, text string) (values.Value, error) {
 
 func (rr *RoadRunner2) GetGlobalContext() *context.Context {
 	return rr.globalContext
+}
+
+func newRR2(instanceID int, displayName string) *RoadRunner2 {
+	globalCtx := context.NewContext(displayName, nil, nil)
+	globalCtx.InstanceID = instanceID
+
+	rr := &RoadRunner2{
+		interpreter:   sharedInterpreter,
+		globalContext: globalCtx,
+	}
+
+	for name, fn := range builtins.GetBuiltins() {
+		fn.SetContext(globalCtx)
+		globalCtx.SymbolTable.Set(name, fn)
+	}
+
+	for name, constant := range builtins.GetConstants() {
+		constant.SetContext(globalCtx)
+		globalCtx.SymbolTable.Set(name, constant)
+	}
+
+	globalCtx.SymbolTable.Set("CHIPRT", values.NewNumber(float64(instanceID)).SetContext(globalCtx))
+
+	return rr
 }

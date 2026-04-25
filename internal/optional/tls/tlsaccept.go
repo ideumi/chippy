@@ -11,6 +11,7 @@ import (
 	"chip-go/internal/constants"
 	"chip-go/internal/errors"
 	"chip-go/internal/optional"
+	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 	"crypto/tls"
 )
@@ -72,7 +73,8 @@ func tlsacceptFunction(args []values.Value, ctx interface{}) *values.RuntimeResu
 	}
 
 	serverHandle := int(handleNum.Value)
-	serverSocket, exists := shared.GetSocketHandle(serverHandle)
+	registry := orchestrator.Get().GetRegistry(ctx)
+	serverSocket, exists := registry.Sockets.Get(serverHandle)
 
 	if !exists {
 		posStart, posEnd := args[0].GetPos()
@@ -127,9 +129,9 @@ func tlsacceptFunction(args []values.Value, ctx interface{}) *values.RuntimeResu
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 	}
 
-	clientHandle := getNextTLSHandle()
+	clientHandle := getNextTLSHandle(ctx)
 
-	storeTLSHandle(clientHandle, &TLSHandle{
+	storeTLSHandle(ctx, clientHandle, &TLSHandle{
 		Conn:   tlsConn,
 		Mode:   "server",
 		Closed: false,

@@ -10,6 +10,7 @@ import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
 	"chip-go/internal/errors"
+	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 )
 
@@ -42,7 +43,8 @@ func dcloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 	}
 
 	handleID := int(handleNum.Value)
-	_, exists := shared.GetDirHandle(handleID)
+	registry := orchestrator.Get().GetRegistry(ctx)
+	handle, exists := registry.Dirs.Extract(handleID)
 
 	if !exists {
 		posStart, posEnd := args[0].GetPos()
@@ -54,7 +56,13 @@ func dcloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 		))
 	}
 
-	shared.RemoveDirHandle(handleID)
+	registry.Alloc.Free(handleID)
+
+	err := handle.DirFile.Close()
+
+	if err != nil {
+		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+	}
 
 	return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
 }

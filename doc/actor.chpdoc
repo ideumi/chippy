@@ -1,0 +1,22 @@
+*actor* | V-$CHIPVR ($CHIPCN)
+
+''actor(function)''
+''actor(function, arg)''
+''actor(function, arg1, arg2, ...)''
+
+Spawns a new concurrent actor that executes ''function'' with the given ''arg''uments. Returns the handle of the new actor.
+
+The spawned actor runs in its own interpreter instance with its own handle registry and a deep copy of all non-builtin symbols visible at spawn time. The spawner and the actor operate on fully separate data. For more information about the model see ''chippy doc concurrency''.
+
+Every spawned actor handle must eventually be passed to ''wait(handle)'' to release its bookkeeping.
+
+*Parameters:*
+- ''function'': Function to run in the actor
+- ''arg1, arg2, ...'': Arguments passed to the function
+
+*Returns:*
+- Number: Actor handle
+
+*Errors:*
+- Runtime error if first argument is not a function
+- Runtime error if argument count does not match the function signature

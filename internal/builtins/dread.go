@@ -10,6 +10,7 @@ import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
 	"chip-go/internal/errors"
+	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 	"io"
 )
@@ -44,7 +45,8 @@ func dreadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 	}
 
 	handleID := int(handleNum.Value)
-	handle, exists := shared.GetDirHandle(handleID)
+	registry := orchestrator.Get().GetRegistry(ctx)
+	handle, exists := registry.Dirs.Get(handleID)
 
 	if !exists {
 		posStart, posEnd := args[0].GetPos()

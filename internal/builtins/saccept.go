@@ -10,6 +10,8 @@ import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
 	"chip-go/internal/errors"
+	"chip-go/internal/handles"
+	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 )
 
@@ -46,7 +48,8 @@ func sacceptFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 	serverHandle := int(handleNum.Value)
 
 	// Get server socket handle
-	serverSocket, exists := shared.GetSocketHandle(serverHandle)
+	registry := orchestrator.Get().GetRegistry(ctx)
+	serverSocket, exists := registry.Sockets.Get(serverHandle)
 
 	if !exists {
 		posStart, posEnd := args[0].GetPos()
@@ -87,14 +90,14 @@ func sacceptFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 	}
 
 	// Create new socket handle for the accepted connection
-	clientHandle := shared.GetNextSocketHandle()
+	clientHandle := registry.Alloc.Alloc()
 
-	clientSocket := &shared.SocketHandle{
+	clientSocket := &handles.SocketHandle{
 		Conn: conn,
 		Mode: "tcp", // Accepted connections are always TCP
 	}
 
-	shared.StoreSocketHandle(clientHandle, clientSocket)
+	registry.Sockets.Store(clientHandle, clientSocket)
 
 	return res.Success(values.NewNumber(float64(clientHandle)).SetContext(ctx))
 }

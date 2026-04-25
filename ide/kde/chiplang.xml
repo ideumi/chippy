@@ -33,10 +33,11 @@
       <item>null</item>
       <item>true</item>
       <item>false</item>
-      <item>CHIPVR</item>
+      <item>CHIPAR</item>
       <item>CHIPCN</item>
       <item>CHIPOS</item>
-      <item>CHIPAR</item>
+      <item>CHIPRT</item>
+      <item>CHIPVR</item>
     </list>
 
     <list name="error_constants">
@@ -48,6 +49,7 @@
     </list>
 
     <list name="builtins">
+      <item>actor</item>
       <item>append</item>
       <item>args</item>
       <item>charat</item>
@@ -94,13 +96,18 @@
       <item>popen</item>
       <item>rand</item>
       <item>readlink</item>
+      <item>receive</item>
       <item>rename</item>
       <item>replace</item>
       <item>saccept</item>
       <item>sclose</item>
       <item>seek</item>
+      <item>send</item>
       <item>setenv</item>
       <item>setterm</item>
+      <item>sigcatch</item>
+      <item>sigfree</item>
+      <item>signal</item>
       <item>sin</item>
       <item>sleep</item>
       <item>slice</item>
@@ -115,11 +122,14 @@
       <item>symlink</item>
       <item>tan</item>
       <item>time</item>
+      <item>transfer</item>
       <item>type</item>
       <item>unlink</item>
       <item>unpack</item>
       <item>upper</item>
       <item>utime</item>
+      <item>wait</item>
+      <item>winsize</item>
     </list>
 
     <list name="alerts">

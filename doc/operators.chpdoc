@@ -23,7 +23,7 @@ var d = true xor true;    # 0
 ''<<'' - Left shift
 ''>>'' - Right shift
 
-These operate on the integer portion of number values.
+Non integer operands on bitwise operators will cause a runtime error.
 
 '''
 var a = 5 band 3;           # 1

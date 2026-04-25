@@ -548,8 +548,7 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 		bodyBytesNeeded = bodyBytesNeeded - len(chunk);
 	}
 
-	# RFC 9112 7.1: chunked framing — parse chunk sizes to know when
-	# the stream is complete. Trailers (7.1.2) are not decoded.
+	# RFC 9112 7.1: chunked framing
 	if isChunked
 	{
 		var pos = 1;
@@ -853,7 +852,6 @@ func _HttpReadRequest_(conn, isTLS)
 		}
 	}
 
-	# pack() for true byte length
 	var headerByteLen = len(pack(headerSection));
 	var bodyAlreadyRead = len(requestBytes) - (headerByteLen + 4);
 	var bodyNeeded = contentLength - bodyAlreadyRead;
@@ -1008,6 +1006,7 @@ func HttpServeTLS(port, certPath, keyPath, handler)
 			var errorBytes = _HttpFormatServerResponse_(500, [], pack("Handler returned err."), "HttpServeTLS");
 			TlsWrite(errorBytes, tlsClient);
 			TlsClose(tlsClient);
+
 			continue;
 		}
 

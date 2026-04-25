@@ -10,6 +10,7 @@ import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
 	"chip-go/internal/errors"
+	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 	"os"
 )
@@ -85,8 +86,9 @@ func fopenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 	}
 
-	handle := shared.GetNextFileHandle()
-	shared.StoreFileHandle(handle, file)
+	registry := orchestrator.Get().GetRegistry(ctx)
+	handle := registry.Alloc.Alloc()
+	registry.Files.Store(handle, file)
 
 	return res.Success(values.NewNumber(float64(handle)).SetContext(ctx))
 }

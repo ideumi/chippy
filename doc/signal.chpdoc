@@ -1,0 +1,18 @@
+*signal* | V-$CHIPVR ($CHIPCN)
+
+''signal()''
+
+Blocks until a registered operating system signal (see: ''sigcatch(signums)'', ''sigfree(signums)'') is received and returns its signal number.
+
+*Returns:*
+- Number: Signal number received
+
+*Errors:*
+- Runtime error if any arguments are passed
+- Runtime error if ''signal()'' is cancelled by the deadlock detector (e.g. no signals are being caught)
+
+*Important:*
+Signal registration is process wide, not per actor runtime.
+
+Each incoming signal is delivered to exactly one ''signal()'' waiter, chosen arbitrarily by the runtime.
+For predictable behaviour, route signals through a single actor.

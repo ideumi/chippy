@@ -45,7 +45,7 @@ func tlscloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResul
 	}
 
 	handle := int(handleNum.Value)
-	tlsHandle, ok := getTLSHandle(handle)
+	tlsHandle, ok := getTLSHandle(ctx, handle)
 
 	if !ok {
 		posStart, posEnd := args[0].GetPos()
@@ -69,12 +69,12 @@ func tlscloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResul
 
 	err := tlsHandle.Conn.Close()
 
+	tlsHandle.Closed = true
+	removeTLSHandle(ctx, handle)
+
 	if err != nil {
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 	}
-
-	tlsHandle.Closed = true
-	removeTLSHandle(handle)
 
 	return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
 }

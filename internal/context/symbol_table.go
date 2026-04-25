@@ -38,8 +38,8 @@ func (st *SymbolTable) Set(name string, value interface{}) {
 	st.symbols[name] = value
 }
 
-// SetInScope sets a variable value in the scope where it already exists,
-// or in the current scope if it doesn't exist anywhere in the scope chain
+// SetInScope sets a variable value in the scope where it already exists, or in
+// the current scope if it doesn't exist anywhere in the scope chain
 func (st *SymbolTable) SetInScope(name string, value interface{}) {
 	current := st
 	for current != nil {
@@ -57,10 +57,16 @@ func (st *SymbolTable) Remove(name string) {
 	delete(st.symbols, name)
 }
 
-// Clear removes all symbols and breaks parent reference for cleanup
-func (st *SymbolTable) Clear() {
-	for k := range st.symbols {
-		delete(st.symbols, k)
+// ForEach iterates over all symbols in this scope (not parents)
+func (st *SymbolTable) ForEach(fn func(name string, value interface{})) {
+	for name, value := range st.symbols {
+		fn(name, value)
 	}
-	st.parent = nil
+}
+
+// SetParent rebinds the parent scope. Used during cross-actor value transfer so
+// a sender-built closure snapshot can be attached to the receiver's globals after
+// it crosses the actor boundary.
+func (st *SymbolTable) SetParent(parent *SymbolTable) {
+	st.parent = parent
 }

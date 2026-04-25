@@ -1,0 +1,16 @@
+*send* | V-$CHIPVR ($CHIPCN)
+
+''send(handle, value)''
+
+Sends a deep copy of a value to an actor's inbox. Non-blocking for the sender.
+
+*Parameters:*
+- ''handle'': Actor handle
+- ''value'': Any value to send
+
+*Returns:*
+- ''ok''
+
+*Errors:*
+- Runtime error if handle is not a number
+- Runtime error if handle is invalid

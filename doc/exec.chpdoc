@@ -16,5 +16,4 @@ Replaces the current process with a new program using the execv system call.
 - Runtime error if args list is empty
 
 *Environment propagation:*
-
 The current process environment is passed to the new program.

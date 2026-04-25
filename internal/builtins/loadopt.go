@@ -9,8 +9,10 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
+	"chip-go/internal/context"
 	"chip-go/internal/errors"
 	"chip-go/internal/optional"
+	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 
 	// Import optionals to trigger their init()
@@ -19,6 +21,28 @@ import (
 	_ "chip-go/internal/optional/json"
 	_ "chip-go/internal/optional/tls"
 )
+
+// InstallOpt registers an optional's functions and constants into the given GST.
+// Names already present are left alone so a second loadopt(optional) of the same
+// optional is a silent no-op.
+//
+// Used both by loadopt(optional) and by actor spawn to inherit the spawner's
+// loaded optionals.
+func InstallOpt(opt *optional.Optional, globalCtx *context.Context) {
+	for name, fn := range opt.Functions {
+		if existing := globalCtx.SymbolTable.Get(name); existing == nil {
+			fn.SetContext(globalCtx)
+			globalCtx.SymbolTable.Set(name, fn)
+		}
+	}
+
+	for name, constant := range opt.Constants {
+		if existing := globalCtx.SymbolTable.Get(name); existing == nil {
+			constant.SetContext(globalCtx)
+			globalCtx.SymbolTable.Set(name, constant)
+		}
+	}
+}
 
 func loadoptFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
@@ -49,7 +73,6 @@ func loadoptFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 		))
 	}
 
-	// Look up the optional
 	opt, exists := optional.GetOptional(optionalName.Value)
 
 	if !exists {
@@ -62,8 +85,7 @@ func loadoptFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 		))
 	}
 
-	// Get global context
-	roadRunner := shared.GetGlobalRoadRunner2()
+	roadRunner := orchestrator.Get().GetRR2ForContext(ctx)
 
 	if roadRunner == nil {
 		posStart, posEnd := args[0].GetPos()
@@ -77,28 +99,13 @@ func loadoptFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 	globalCtx := roadRunner.GetGlobalContext()
 
-	// Register funcs into GST
-	for name, fn := range opt.Functions {
-		// Silently succeed if already loaded
-		existing := globalCtx.SymbolTable.Get(name)
+	InstallOpt(opt, globalCtx)
 
-		if existing == nil {
-			fn.SetContext(globalCtx)
+	instanceID := context.GetInstanceID(ctx)
+	orch := orchestrator.Get()
 
-			globalCtx.SymbolTable.Set(name, fn)
-		}
-	}
-
-	// Register constants into GST
-	for name, constant := range opt.Constants {
-		// Silently succeed if already loaded
-		existing := globalCtx.SymbolTable.Get(name)
-
-		if existing == nil {
-			constant.SetContext(globalCtx)
-
-			globalCtx.SymbolTable.Set(name, constant)
-		}
+	if inst := orch.GetInstance(instanceID); inst != nil {
+		orch.AddLoadedOpt(inst, optionalName.Value)
 	}
 
 	return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
