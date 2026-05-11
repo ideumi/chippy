@@ -17,12 +17,15 @@ import (
 	"syscall"
 )
 
-// Signal handling runs a forwarder goroutine that drains the raw os/signal
-// channel into a managed queue, then broadcasts a wakeup to every actor blocked
-// in signal(). Consumers pop from the queue atomically with their state
-// transition, closing the race with CheckDeadlock.
+// Signal handling runs a forwarder goroutine that drains the raw os/signal channel
+// into a managed queue, then broadcasts a wakeup to every actor blocked in
+// signal(). Consumers pop from the queue atomically with their state transition,
+// closing the race with CheckDeadlock.
 //
 // Lock order: orchestrator.mu before signalMu.
+
+const signalChanBuffer = 16
+
 var (
 	signalMu      sync.Mutex
 	signalCh      chan os.Signal
@@ -39,14 +42,13 @@ func init() {
 	})
 }
 
-// ensureSignalInfra lazily wires up the signal infrastructure. Caller holds
-// signalMu.
+// Caller holds signalMu.
 func ensureSignalInfra() {
 	if signalCh != nil {
 		return
 	}
 
-	signalCh = make(chan os.Signal, 16)
+	signalCh = make(chan os.Signal, signalChanBuffer)
 	caught = make(map[syscall.Signal]bool)
 	signalWaiters = make(map[*orchestrator.Instance]chan struct{})
 
@@ -58,20 +60,28 @@ func signalForwarder() {
 		signalMu.Lock()
 		signalQueue = append(signalQueue, sig)
 
+		// Snapshot under the lock, send after release. A waiter that
+		// registers after the snapshot is covered by the post-register
+		// queue re-check in signalFunction, so it cannot miss this signal.
+		wakeups := make([]chan struct{}, 0, len(signalWaiters))
+
 		for _, wakeup := range signalWaiters {
+			wakeups = append(wakeups, wakeup)
+		}
+
+		signalMu.Unlock()
+
+		for _, wakeup := range wakeups {
 			select {
 			case wakeup <- struct{}{}:
 			default:
 			}
 		}
-
-		signalMu.Unlock()
 	}
 }
 
-// tryConsumeSignal atomically pops the oldest queued signal and transitions
-// inst to StateRunning. Returns (zero, false) when the queue is empty, with
-// inst's state untouched.
+// Pops the oldest queued signal atomically with the transition to StateRunning,
+// so CheckDeadlock cannot observe a stale blocked state.
 func tryConsumeSignal(inst *orchestrator.Instance) (os.Signal, bool) {
 	var sig os.Signal
 	got := false
@@ -86,6 +96,13 @@ func tryConsumeSignal(inst *orchestrator.Instance) (os.Signal, bool) {
 
 		sig = signalQueue[0]
 		signalQueue = signalQueue[1:]
+
+		// Drop the backing array once drained so walked-past slots can
+		// be GC'd instead of leaking for the process lifetime.
+		if len(signalQueue) == 0 {
+			signalQueue = nil
+		}
+
 		got = true
 		return true
 	})
