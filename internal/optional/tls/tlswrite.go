@@ -14,7 +14,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func tlswriteFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func tlswriteFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
@@ -26,9 +26,7 @@ func tlswriteFunction(args []values.Value, ctx interface{}) *values.RuntimeResul
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "write"), 2, "data, handle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "write"), 2, "data, handle")))
 	}
 
 	dataBytes, ok := args[0].(*values.Bytes)
@@ -39,9 +37,7 @@ func tlswriteFunction(args []values.Value, ctx interface{}) *values.RuntimeResul
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
 			shared.Errors.InvalidArgTypePositionalWithHint(
-				optional.Prefixed(OptionalName, "write"), shared.PositionFirst, shared.TypeBytes, "data"),
-			ctx,
-		))
+				optional.Prefixed(OptionalName, "write"), shared.PositionFirst, shared.TypeBytes, "data")))
 	}
 
 	handleNum, ok := args[1].(*values.Number)
@@ -52,9 +48,7 @@ func tlswriteFunction(args []values.Value, ctx interface{}) *values.RuntimeResul
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
 			shared.Errors.InvalidArgTypePositionalWithHint(
-				optional.Prefixed(OptionalName, "write"), shared.PositionSecond, shared.TypeNumber, "handle"),
-			ctx,
-		))
+				optional.Prefixed(OptionalName, "write"), shared.PositionSecond, shared.TypeNumber, "handle")))
 	}
 
 	handle := int(handleNum.Value)
@@ -65,9 +59,7 @@ func tlswriteFunction(args []values.Value, ctx interface{}) *values.RuntimeResul
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid TLS handle"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Invalid TLS handle")))
 	}
 
 	if tlsHandle.Closed {
@@ -75,9 +67,7 @@ func tlswriteFunction(args []values.Value, ctx interface{}) *values.RuntimeResul
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("TLS connection is closed"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("TLS connection is closed")))
 	}
 
 	n, err := tlsHandle.Conn.Write(dataBytes.Data)

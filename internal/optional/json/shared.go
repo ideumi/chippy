@@ -20,7 +20,7 @@ const (
 )
 
 // unmarshalValue converts Go JSON values to ChipLang values
-func unmarshalValue(val interface{}, ctx interface{}) values.Value {
+func unmarshalValue(val interface{}, ctx values.Ctx) values.Value {
 	switch v := val.(type) {
 	case nil:
 		return values.NewString(jsonNull).SetContext(ctx)

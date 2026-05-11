@@ -43,8 +43,8 @@ func (l *List) SetPos(posStart, posEnd *errors.Position) Value {
 	return l
 }
 
-func (l *List) SetContext(context interface{}) Value {
-	l.BaseValue.SetContext(context)
+func (l *List) SetContext(ctx Ctx) Value {
+	l.BaseValue.SetContext(ctx)
 
 	return l
 }
@@ -86,9 +86,8 @@ func (l *List) SubbedBy(other Value) (Value, error) {
 		if index < 1 || index > len(newList.Elements) {
 			return nil, errors.NewRTError(
 				otherNum.posStart, otherNum.posEnd,
-				"Element at this index could not be removed from list because index is out of bounds",
-				l.context,
-			)
+				"Element at this index could not be removed from list because index is out of bounds")
+
 		}
 
 		newList.Elements = append(newList.Elements[:index-1], newList.Elements[index:]...)
@@ -104,9 +103,8 @@ func (l *List) MultedBy(other Value) (Value, error) {
 		if otherNum.Value < 0 {
 			return nil, errors.NewRTError(
 				otherNum.posStart, otherNum.posEnd,
-				"Cannot repeat list negative times",
-				l.context,
-			)
+				"Cannot repeat list negative times")
+
 		}
 
 		newElements := []Value{}

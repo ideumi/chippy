@@ -45,8 +45,8 @@ func (b *Bytes) SetPos(posStart, posEnd *errors.Position) Value {
 	return b
 }
 
-func (b *Bytes) SetContext(context interface{}) Value {
-	b.BaseValue.SetContext(context)
+func (b *Bytes) SetContext(ctx Ctx) Value {
+	b.BaseValue.SetContext(ctx)
 
 	return b
 }
@@ -190,9 +190,8 @@ func (b *Bytes) MultedBy(other Value) (Value, error) {
 		if otherNum.Value < 0 {
 			return nil, errors.NewRTError(
 				otherNum.posStart, otherNum.posEnd,
-				"Cannot repeat bytes negative times",
-				b.context,
-			)
+				"Cannot repeat bytes negative times")
+
 		}
 
 		repeatCount := int(otherNum.Value)
@@ -216,9 +215,8 @@ func (b *Bytes) SubbedBy(other Value) (Value, error) {
 		if index < 1 || index > len(b.Data) {
 			return nil, errors.NewRTError(
 				otherNum.posStart, otherNum.posEnd,
-				"Byte at this index could not be removed from bytes because index is out of bounds",
-				b.context,
-			)
+				"Byte at this index could not be removed from bytes because index is out of bounds")
+
 		}
 
 		newData := make([]byte, len(b.Data)-1)

@@ -14,7 +14,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func swriteFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func swriteFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
@@ -26,9 +26,7 @@ func swriteFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("swrite", 2, "data, handle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("swrite", 2, "data, handle")))
 	}
 
 	// Get data argument (bytes)
@@ -39,9 +37,7 @@ func swriteFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("swrite", shared.PositionFirst, shared.TypeBytes, shared.TypeBytes),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("swrite", shared.PositionFirst, shared.TypeBytes, shared.TypeBytes)))
 	}
 
 	// Get handle argument
@@ -52,15 +48,13 @@ func swriteFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("swrite", shared.PositionSecond, shared.TypeNumber, "handle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("swrite", shared.PositionSecond, shared.TypeNumber, "handle")))
 	}
 
 	handle := int(handleNum.Value)
 
 	// Get socket handle
-	registry := orchestrator.Get().GetRegistry(ctx)
+	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
 	socket, exists := registry.Sockets.Get(handle)
 
 	if !exists {
@@ -68,9 +62,7 @@ func swriteFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid socket handle"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Invalid socket handle")))
 	}
 
 	if len(bytesVal.Data) == 0 {
@@ -88,9 +80,7 @@ func swriteFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				shared.Errors.InvalidValue("Socket connection is closed"),
-				ctx,
-			))
+				shared.Errors.InvalidValue("Socket connection is closed")))
 		}
 		n, err = socket.Conn.Write(bytesVal.Data)
 
@@ -100,9 +90,7 @@ func swriteFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				shared.Errors.InvalidValue("UDP connection is closed"),
-				ctx,
-			))
+				shared.Errors.InvalidValue("UDP connection is closed")))
 		}
 		n, err = socket.UdpConn.Write(bytesVal.Data)
 
@@ -111,18 +99,14 @@ func swriteFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Cannot write to listening socket. Use saccept() first"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Cannot write to listening socket. Use saccept() first")))
 
 	default:
 		posStart, posEnd := args[1].GetPos()
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid socket mode"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Invalid socket mode")))
 	}
 
 	// Handle write errors

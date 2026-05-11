@@ -14,7 +14,7 @@ import (
 	"os"
 )
 
-func symlinkFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func symlinkFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
@@ -26,9 +26,7 @@ func symlinkFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("symlink", 2, "target, link path"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("symlink", 2, "target, link path")))
 	}
 
 	targetStr, ok := args[0].(*values.String)
@@ -38,9 +36,7 @@ func symlinkFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("symlink", shared.PositionFirst, shared.TypeString, "target"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("symlink", shared.PositionFirst, shared.TypeString, "target")))
 	}
 
 	linkPathStr, ok := args[1].(*values.String)
@@ -50,9 +46,7 @@ func symlinkFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("symlink", shared.PositionSecond, shared.TypeString, "link path"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("symlink", shared.PositionSecond, shared.TypeString, "link path")))
 	}
 
 	err := os.Symlink(targetStr.Value, linkPathStr.Value)

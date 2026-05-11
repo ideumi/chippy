@@ -18,7 +18,7 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-func settermFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func settermFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -30,9 +30,7 @@ func settermFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("setterm", 1, "state"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("setterm", 1, "state")))
 	}
 
 	argBytes, ok := args[0].(*values.Bytes)
@@ -42,9 +40,7 @@ func settermFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("setterm", shared.TypeBytes, "state"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("setterm", shared.TypeBytes, "state")))
 	}
 
 	if len(argBytes.Data) != binary.Size(unix.Termios{}) {

@@ -16,7 +16,7 @@ import (
 	"strings"
 )
 
-func formatrequestFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func formatrequestFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 4 {
@@ -28,9 +28,7 @@ func formatrequestFunction(args []values.Value, ctx interface{}) *values.Runtime
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "formatrequest"), 4, "method, path, headers, body"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "formatrequest"), 4, "method, path, headers, body")))
 	}
 
 	methodStr, ok := args[0].(*values.String)
@@ -41,9 +39,7 @@ func formatrequestFunction(args []values.Value, ctx interface{}) *values.Runtime
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
 			shared.Errors.InvalidArgTypePositionalWithHint(
-				optional.Prefixed(OptionalName, "formatrequest"), shared.PositionFirst, shared.TypeString, "method"),
-			ctx,
-		))
+				optional.Prefixed(OptionalName, "formatrequest"), shared.PositionFirst, shared.TypeString, "method")))
 	}
 
 	pathStr, ok := args[1].(*values.String)
@@ -54,9 +50,7 @@ func formatrequestFunction(args []values.Value, ctx interface{}) *values.Runtime
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
 			shared.Errors.InvalidArgTypePositionalWithHint(
-				optional.Prefixed(OptionalName, "formatrequest"), shared.PositionSecond, shared.TypeString, "path"),
-			ctx,
-		))
+				optional.Prefixed(OptionalName, "formatrequest"), shared.PositionSecond, shared.TypeString, "path")))
 	}
 
 	headersList, ok := args[2].(*values.List)
@@ -67,9 +61,7 @@ func formatrequestFunction(args []values.Value, ctx interface{}) *values.Runtime
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
 			shared.Errors.InvalidArgTypePositionalWithHint(
-				optional.Prefixed(OptionalName, "formatrequest"), shared.PositionThird, shared.TypeList, "headers"),
-			ctx,
-		))
+				optional.Prefixed(OptionalName, "formatrequest"), shared.PositionThird, shared.TypeList, "headers")))
 	}
 
 	bodyBytes, ok := args[3].(*values.Bytes)
@@ -80,9 +72,7 @@ func formatrequestFunction(args []values.Value, ctx interface{}) *values.Runtime
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
 			shared.Errors.InvalidArgTypePositionalWithHint(
-				optional.Prefixed(OptionalName, "formatrequest"), shared.PositionFourth, shared.TypeBytes, "body"),
-			ctx,
-		))
+				optional.Prefixed(OptionalName, "formatrequest"), shared.PositionFourth, shared.TypeBytes, "body")))
 	}
 
 	// Build request
@@ -113,9 +103,7 @@ func formatrequestFunction(args []values.Value, ctx interface{}) *values.Runtime
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				shared.Errors.InvalidValue("Headers must be a list of [key, value] pairs"),
-				ctx,
-			))
+				shared.Errors.InvalidValue("Headers must be a list of [key, value] pairs")))
 		}
 
 		key, ok1 := pair.Elements[0].(*values.String)
@@ -126,9 +114,7 @@ func formatrequestFunction(args []values.Value, ctx interface{}) *values.Runtime
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				shared.Errors.InvalidValue("Header keys and values must be strings"),
-				ctx,
-			))
+				shared.Errors.InvalidValue("Header keys and values must be strings")))
 		}
 
 		keyLower := strings.ToLower(key.Value)

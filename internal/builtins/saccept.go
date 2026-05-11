@@ -15,7 +15,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func sacceptFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func sacceptFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -27,9 +27,7 @@ func sacceptFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("saccept", 1, "serverHandle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("saccept", 1, "serverHandle")))
 	}
 
 	// Get server handle argument
@@ -40,15 +38,13 @@ func sacceptFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("saccept", shared.PositionFirst, shared.TypeNumber, "serverHandle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("saccept", shared.PositionFirst, shared.TypeNumber, "serverHandle")))
 	}
 
 	serverHandle := int(handleNum.Value)
 
 	// Get server socket handle
-	registry := orchestrator.Get().GetRegistry(ctx)
+	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
 	serverSocket, exists := registry.Sockets.Get(serverHandle)
 
 	if !exists {
@@ -56,9 +52,7 @@ func sacceptFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid server socket handle"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Invalid server socket handle")))
 	}
 
 	// Verify this is a listening socket
@@ -67,9 +61,7 @@ func sacceptFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Socket is not in listening mode. Use sopen() with 'listen' mode first"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Socket is not in listening mode. Use sopen() with 'listen' mode first")))
 	}
 
 	if serverSocket.Listener == nil {
@@ -77,9 +69,7 @@ func sacceptFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Listening socket is closed"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Listening socket is closed")))
 	}
 
 	// Accept incoming connection

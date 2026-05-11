@@ -6,59 +6,66 @@
 
 package context
 
-type SymbolTable struct {
-	symbols map[string]interface{}
-	parent  *SymbolTable
+type SymbolTable[T any] struct {
+	symbols map[string]T
+	parent  *SymbolTable[T]
 }
 
-func NewSymbolTable(parent *SymbolTable) *SymbolTable {
-	return &SymbolTable{
-		symbols: make(map[string]interface{}),
+func NewSymbolTable[T any](parent *SymbolTable[T]) *SymbolTable[T] {
+	return &SymbolTable[T]{
+		symbols: make(map[string]T),
 		parent:  parent,
 	}
 }
 
-func (st *SymbolTable) Get(name string) interface{} {
-	value, exists := st.symbols[name]
-	if !exists && st.parent != nil {
+func (st *SymbolTable[T]) Get(name string) T {
+	if value, exists := st.symbols[name]; exists {
+		return value
+	}
+
+	if st.parent != nil {
 		return st.parent.Get(name)
 	}
-	return value
+
+	var zero T
+	return zero
 }
 
-func (st *SymbolTable) Exists(name string) bool {
-	_, exists := st.symbols[name]
-	if !exists && st.parent != nil {
+func (st *SymbolTable[T]) Exists(name string) bool {
+	if _, exists := st.symbols[name]; exists {
+		return true
+	}
+
+	if st.parent != nil {
 		return st.parent.Exists(name)
 	}
-	return exists
+
+	return false
 }
 
-func (st *SymbolTable) Set(name string, value interface{}) {
+func (st *SymbolTable[T]) Set(name string, value T) {
 	st.symbols[name] = value
 }
 
 // SetInScope sets a variable value in the scope where it already exists, or in
-// the current scope if it doesn't exist anywhere in the scope chain
-func (st *SymbolTable) SetInScope(name string, value interface{}) {
-	current := st
-	for current != nil {
+// the current scope if it doesn't exist anywhere in the scope chain.
+func (st *SymbolTable[T]) SetInScope(name string, value T) {
+	for current := st; current != nil; current = current.parent {
 		if _, exists := current.symbols[name]; exists {
 			current.symbols[name] = value
 			return
 		}
-		current = current.parent
 	}
-	// Variable doesn't exist in any scope, set it in current scope
+
 	st.symbols[name] = value
 }
 
-func (st *SymbolTable) Remove(name string) {
+func (st *SymbolTable[T]) Remove(name string) {
 	delete(st.symbols, name)
 }
 
-// ForEach iterates over all symbols in this scope (not parents)
-func (st *SymbolTable) ForEach(fn func(name string, value interface{})) {
+// ForEach iterates over symbols in this scope only, not parents.
+func (st *SymbolTable[T]) ForEach(fn func(name string, value T)) {
 	for name, value := range st.symbols {
 		fn(name, value)
 	}
@@ -67,6 +74,6 @@ func (st *SymbolTable) ForEach(fn func(name string, value interface{})) {
 // SetParent rebinds the parent scope. Used during cross-actor value transfer so
 // a sender-built closure snapshot can be attached to the receiver's globals after
 // it crosses the actor boundary.
-func (st *SymbolTable) SetParent(parent *SymbolTable) {
+func (st *SymbolTable[T]) SetParent(parent *SymbolTable[T]) {
 	st.parent = parent
 }

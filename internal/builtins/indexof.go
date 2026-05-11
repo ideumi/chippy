@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-func indexofFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func indexofFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
@@ -27,9 +27,7 @@ func indexofFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("indexof", 2, "haystack, needle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("indexof", 2, "haystack, needle")))
 	}
 
 	switch haystack := args[0].(type) {
@@ -41,9 +39,7 @@ func indexofFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("indexof", shared.PositionSecond, shared.TypeString, "needle"),
-				ctx,
-			))
+				shared.Errors.InvalidArgTypePositionalWithHint("indexof", shared.PositionSecond, shared.TypeString, "needle")))
 		}
 
 		needle := needleArg.Value
@@ -91,9 +87,7 @@ func indexofFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 				return res.Failure(errors.NewRTError(
 					posStart, posEnd,
-					"Byte values must be between 0 and 255",
-					ctx,
-				))
+					"Byte values must be between 0 and 255"))
 			}
 
 			target := byte(byteValue)
@@ -124,9 +118,7 @@ func indexofFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("indexof", shared.PositionSecond, "a number or bytes", "needle"),
-				ctx,
-			))
+				shared.Errors.InvalidArgTypePositionalWithHint("indexof", shared.PositionSecond, "a number or bytes", "needle")))
 		}
 
 	default:
@@ -134,8 +126,6 @@ func indexofFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("indexof", shared.PositionFirst, "a string, list, or bytes", "haystack"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("indexof", shared.PositionFirst, "a string, list, or bytes", "haystack")))
 	}
 }

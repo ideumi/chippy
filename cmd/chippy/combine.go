@@ -10,7 +10,6 @@ import (
 	"bufio"
 	"chip-go/cmd/chippy/safety"
 	"chip-go/internal/constants"
-	"chip-go/internal/context"
 	"chip-go/internal/roadrunner"
 	"chip-go/internal/values"
 	"fmt"
@@ -265,7 +264,7 @@ type CombineConfig struct {
 	AddShebang      bool
 }
 
-func extractCombineConfig(ctx *context.Context) CombineConfig {
+func extractCombineConfig(ctx values.Ctx) CombineConfig {
 	config := CombineConfig{}
 
 	// Extract string variables

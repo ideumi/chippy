@@ -14,7 +14,7 @@ import (
 	"strconv"
 )
 
-func numFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func numFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -26,9 +26,7 @@ func numFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("num", 1, "value"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("num", 1, "value")))
 	}
 
 	value := args[0]
@@ -46,9 +44,7 @@ func numFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				shared.Errors.CannotConvert("string to number", ": "+err.Error()),
-				ctx,
-			))
+				shared.Errors.CannotConvert("string to number", ": "+err.Error())))
 		}
 
 	case *values.List:
@@ -68,17 +64,13 @@ func numFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.CannotConvert("list to number", ""),
-			ctx,
-		))
+			shared.Errors.CannotConvert("list to number", "")))
 
 	default:
 		posStart, posEnd := args[0].GetPos()
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.CannotConvert("value to number", ""),
-			ctx,
-		))
+			shared.Errors.CannotConvert("value to number", "")))
 	}
 }

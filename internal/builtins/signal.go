@@ -8,7 +8,6 @@ package builtins
 
 import (
 	"chip-go/internal/builtins/shared"
-	"chip-go/internal/context"
 	"chip-go/internal/errors"
 	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
@@ -110,7 +109,7 @@ func tryConsumeSignal(inst *orchestrator.Instance) (os.Signal, bool) {
 	return sig, got
 }
 
-func signalFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func signalFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 0 {
@@ -118,9 +117,7 @@ func signalFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCount("signal", 0),
-			ctx,
-		))
+			shared.Errors.InvalidArgCount("signal", 0)))
 	}
 
 	signalMu.Lock()
@@ -128,15 +125,13 @@ func signalFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 	signalMu.Unlock()
 
 	orch := orchestrator.Get()
-	instanceID := context.GetInstanceID(ctx)
+	instanceID := ctx.InstanceID
 	inst := orch.GetInstance(instanceID)
 
 	if inst == nil {
 		return res.Failure(errors.NewRTError(
 			nil, nil,
-			shared.Errors.InvalidValue("Invalid actor handle"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Invalid actor handle")))
 	}
 
 	// Fast path: signal already queued.
@@ -183,9 +178,7 @@ func signalFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 			return res.Failure(errors.NewRTError(
 				nil, nil,
-				shared.Errors.InvalidValue("Deadlock: signal() blocked with no signals being caught"),
-				ctx,
-			))
+				shared.Errors.InvalidValue("Deadlock: signal() blocked with no signals being caught")))
 		}
 	}
 }

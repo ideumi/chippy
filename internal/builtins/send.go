@@ -14,7 +14,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func sendFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func sendFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
@@ -26,9 +26,7 @@ func sendFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("send", 2, "handle, value"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("send", 2, "handle, value")))
 	}
 
 	handleNum, ok := args[0].(*values.Number)
@@ -38,9 +36,7 @@ func sendFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("send", shared.PositionFirst, shared.TypeNumber, "handle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("send", shared.PositionFirst, shared.TypeNumber, "handle")))
 	}
 
 	instanceID := int(handleNum.Value)
@@ -52,9 +48,7 @@ func sendFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid actor handle"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Invalid actor handle")))
 	}
 
 	inst.Inbox.Send(args[1].Copy())

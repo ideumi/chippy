@@ -12,7 +12,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func listFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func listFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	// Errors are handled differently here, since list() takes an arbitrary amount of args.
@@ -48,9 +48,7 @@ func listFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				shared.Errors.CannotConvert("value to list", ""),
-				ctx,
-			))
+				shared.Errors.CannotConvert("value to list", "")))
 		}
 	} else {
 		// Create list from multiple arguments

@@ -14,7 +14,7 @@ import (
 	"os"
 )
 
-func readlinkFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func readlinkFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -26,9 +26,7 @@ func readlinkFunction(args []values.Value, ctx interface{}) *values.RuntimeResul
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("readlink", 1, "path"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("readlink", 1, "path")))
 	}
 
 	pathStr, ok := args[0].(*values.String)
@@ -38,9 +36,7 @@ func readlinkFunction(args []values.Value, ctx interface{}) *values.RuntimeResul
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("readlink", shared.TypeString, "path"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("readlink", shared.TypeString, "path")))
 	}
 
 	target, err := os.Readlink(pathStr.Value)

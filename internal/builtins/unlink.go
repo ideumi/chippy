@@ -14,7 +14,7 @@ import (
 	"os"
 )
 
-func unlinkFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func unlinkFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -26,9 +26,7 @@ func unlinkFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("unlink", 1, "path"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("unlink", 1, "path")))
 	}
 
 	pathStr, ok := args[0].(*values.String)
@@ -38,9 +36,7 @@ func unlinkFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("unlink", shared.TypeString, "path"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("unlink", shared.TypeString, "path")))
 	}
 
 	err := os.Remove(pathStr.Value)

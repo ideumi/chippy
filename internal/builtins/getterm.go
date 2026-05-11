@@ -18,7 +18,7 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-func gettermFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func gettermFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 0 {
@@ -30,9 +30,7 @@ func gettermFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCount("getterm", 0),
-			ctx,
-		))
+			shared.Errors.InvalidArgCount("getterm", 0)))
 	}
 
 	fd := int(os.Stdin.Fd())

@@ -16,7 +16,7 @@ import (
 	"syscall"
 )
 
-func sigfreeFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func sigfreeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -28,9 +28,7 @@ func sigfreeFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("sigfree", 1, "signums"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("sigfree", 1, "signums")))
 	}
 
 	listArg, ok := args[0].(*values.List)
@@ -40,9 +38,7 @@ func sigfreeFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("sigfree", shared.TypeList, "signums"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("sigfree", shared.TypeList, "signums")))
 	}
 
 	sigs := make([]syscall.Signal, 0, len(listArg.Elements))
@@ -55,9 +51,7 @@ func sigfreeFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				shared.Errors.InvalidValue("All signums must be numbers"),
-				ctx,
-			))
+				shared.Errors.InvalidValue("All signums must be numbers")))
 		}
 
 		sigs = append(sigs, syscall.Signal(int(num.Value)))

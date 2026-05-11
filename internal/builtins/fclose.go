@@ -14,7 +14,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func fcloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func fcloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -26,9 +26,7 @@ func fcloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("fclose", 1, "handle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("fclose", 1, "handle")))
 	}
 
 	handleNum, ok := args[0].(*values.Number)
@@ -37,9 +35,7 @@ func fcloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("fclose", shared.TypeNumber, "handle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("fclose", shared.TypeNumber, "handle")))
 	}
 
 	handle := int(handleNum.Value)
@@ -49,12 +45,10 @@ func fcloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Cannot close standard handles (0, 1, 2)"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Cannot close standard handles (0, 1, 2)")))
 	}
 
-	registry := orchestrator.Get().GetRegistry(ctx)
+	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
 	file, exists := registry.Files.Extract(handle)
 
 	if !exists {
@@ -62,9 +56,7 @@ func fcloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid handle"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Invalid handle")))
 	}
 
 	registry.Alloc.Free(handle)

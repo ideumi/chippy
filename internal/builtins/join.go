@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-func joinFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func joinFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
@@ -25,9 +25,7 @@ func joinFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("join", 2, "array, separator"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("join", 2, "array, separator")))
 	}
 
 	listArg, ok := args[0].(*values.List)
@@ -37,9 +35,7 @@ func joinFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("join", shared.PositionFirst, shared.TypeList, "array"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("join", shared.PositionFirst, shared.TypeList, "array")))
 	}
 
 	separatorArg, ok := args[1].(*values.String)
@@ -49,9 +45,7 @@ func joinFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("join", shared.PositionSecond, shared.TypeString, "separator"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("join", shared.PositionSecond, shared.TypeString, "separator")))
 	}
 
 	parts := make([]string, len(listArg.Elements))

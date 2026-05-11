@@ -45,8 +45,8 @@ func (f *Function) SetPos(posStart, posEnd *errors.Position) Value {
 	return f
 }
 
-func (f *Function) SetContext(context interface{}) Value {
-	f.BaseValue.SetContext(context)
+func (f *Function) SetContext(ctx Ctx) Value {
+	f.BaseValue.SetContext(ctx)
 	return f
 }
 
@@ -67,7 +67,7 @@ func (f *Function) IsTrue() bool {
 }
 
 type InterpreterInterface interface {
-	Visit(node ast.Node, ctx interface{}) *RuntimeResult
+	Visit(node ast.Node, ctx Ctx) *RuntimeResult
 }
 
 func (f *Function) Execute(args []Value) *RuntimeResult {
@@ -76,28 +76,22 @@ func (f *Function) Execute(args []Value) *RuntimeResult {
 	if globalInterpreter == nil {
 		return res.Failure(errors.NewRTError(
 			f.posStart, f.posEnd,
-			"Interpreter not available",
-			f.context,
-		))
+			"Interpreter not available"))
 	}
 
 	if len(args) > len(f.ArgNames) {
 		return res.Failure(errors.NewRTError(
 			f.posStart, f.posEnd,
-			fmt.Sprintf("Too many args passed into '%s'. Expected %d, got %d", f.Name, len(f.ArgNames), len(args)),
-			f.context,
-		))
+			fmt.Sprintf("Too many args passed into '%s'. Expected %d, got %d", f.Name, len(f.ArgNames), len(args))))
 	}
 
 	if len(args) < len(f.ArgNames) {
 		return res.Failure(errors.NewRTError(
 			f.posStart, f.posEnd,
-			fmt.Sprintf("Too few args passed into '%s'. Expected %d, got %d", f.Name, len(f.ArgNames), len(args)),
-			f.context,
-		))
+			fmt.Sprintf("Too few args passed into '%s'. Expected %d, got %d", f.Name, len(f.ArgNames), len(args))))
 	}
 
-	execCtx := context.NewContext(f.Name, f.context.(*context.Context), nil)
+	execCtx := context.NewContext(f.Name, f.context, nil)
 
 	for i, argName := range f.ArgNames {
 		execCtx.SymbolTable.Set(argName, args[i])
@@ -131,10 +125,10 @@ func SetGlobalInterpreter(interpreter InterpreterInterface) {
 type BuiltInFunction struct {
 	*BaseValue
 	Name string
-	Fn   func([]Value, interface{}) *RuntimeResult
+	Fn   func([]Value, Ctx) *RuntimeResult
 }
 
-func NewBuiltInFunction(name string, fn func([]Value, interface{}) *RuntimeResult) *BuiltInFunction {
+func NewBuiltInFunction(name string, fn func([]Value, Ctx) *RuntimeResult) *BuiltInFunction {
 	return &BuiltInFunction{
 		BaseValue: NewBaseValue(),
 		Name:      name,
@@ -151,8 +145,8 @@ func (bf *BuiltInFunction) SetPos(posStart, posEnd *errors.Position) Value {
 	return bf
 }
 
-func (bf *BuiltInFunction) SetContext(context interface{}) Value {
-	bf.BaseValue.SetContext(context)
+func (bf *BuiltInFunction) SetContext(ctx Ctx) Value {
+	bf.BaseValue.SetContext(ctx)
 	return bf
 }
 
@@ -174,9 +168,7 @@ func (bf *BuiltInFunction) Execute(args []Value) *RuntimeResult {
 	if bf.context == nil {
 		return res.Failure(errors.NewRTError(
 			bf.posStart, bf.posEnd,
-			"Built-in function context is nil",
-			nil,
-		))
+			"Built-in function context is nil"))
 	}
 
 	return bf.Fn(args, bf.context)

@@ -15,7 +15,7 @@ import (
 	"encoding/json"
 )
 
-func parseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func parseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -27,9 +27,7 @@ func parseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "parse"), 1, "jsonStr"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "parse"), 1, "jsonStr")))
 	}
 
 	jsonStr, ok := args[0].(*values.String)
@@ -39,9 +37,7 @@ func parseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint(optional.Prefixed(OptionalName, "parse"), shared.TypeString, "jsonStr"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint(optional.Prefixed(OptionalName, "parse"), shared.TypeString, "jsonStr")))
 	}
 
 	var raw interface{}

@@ -14,7 +14,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func scloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func scloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -26,9 +26,7 @@ func scloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("sclose", 1, "handle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("sclose", 1, "handle")))
 	}
 
 	// Get handle argument
@@ -39,14 +37,12 @@ func scloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("sclose", shared.PositionFirst, shared.TypeNumber, "handle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("sclose", shared.PositionFirst, shared.TypeNumber, "handle")))
 	}
 
 	handle := int(handleNum.Value)
 
-	registry := orchestrator.Get().GetRegistry(ctx)
+	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
 	socket, exists := registry.Sockets.Extract(handle)
 
 	if !exists {
@@ -54,9 +50,7 @@ func scloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid socket handle"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Invalid socket handle")))
 	}
 
 	registry.Alloc.Free(handle)
@@ -87,9 +81,7 @@ func scloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid socket mode"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Invalid socket mode")))
 	}
 
 	if err != nil {

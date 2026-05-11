@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-func sortFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func sortFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -26,9 +26,7 @@ func sortFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("sort", 1, "list"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("sort", 1, "list")))
 	}
 
 	listArg, ok := args[0].(*values.List)
@@ -38,9 +36,7 @@ func sortFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("sort", shared.TypeList, "list"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("sort", shared.TypeList, "list")))
 	}
 
 	// Immutable

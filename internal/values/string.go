@@ -34,8 +34,8 @@ func (s *String) SetPos(posStart, posEnd *errors.Position) Value {
 	return s
 }
 
-func (s *String) SetContext(context interface{}) Value {
-	s.BaseValue.SetContext(context)
+func (s *String) SetContext(ctx Ctx) Value {
+	s.BaseValue.SetContext(ctx)
 	return s
 }
 
@@ -67,9 +67,8 @@ func (s *String) MultedBy(other Value) (Value, error) {
 		if otherNum.Value < 0 {
 			return nil, errors.NewRTError(
 				otherNum.posStart, otherNum.posEnd,
-				"Cannot repeat string negative times",
-				s.context,
-			)
+				"Cannot repeat string negative times")
+
 		}
 		result := NewString(strings.Repeat(s.Value, int(otherNum.Value)))
 		result.SetContext(s.context)

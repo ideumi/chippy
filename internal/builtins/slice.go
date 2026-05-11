@@ -12,7 +12,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func sliceFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func sliceFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 3 {
@@ -24,9 +24,7 @@ func sliceFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("slice", 3, "container, start, end"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("slice", 3, "container, start, end")))
 	}
 
 	switch container := args[0].(type) {
@@ -38,9 +36,7 @@ func sliceFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionSecond, shared.TypeNumber, "start"),
-				ctx,
-			))
+				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionSecond, shared.TypeNumber, "start")))
 		}
 
 		endNum, ok := args[2].(*values.Number)
@@ -50,9 +46,7 @@ func sliceFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionThird, shared.TypeNumber, "end"),
-				ctx,
-			))
+				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionThird, shared.TypeNumber, "end")))
 		}
 
 		start := int(startNum.Value)
@@ -63,9 +57,7 @@ func sliceFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				"Start must be >= 1",
-				ctx,
-			))
+				"Start must be >= 1"))
 		}
 
 		runes := []rune(container.Value)
@@ -89,9 +81,7 @@ func sliceFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionSecond, shared.TypeNumber, "start"),
-				ctx,
-			))
+				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionSecond, shared.TypeNumber, "start")))
 		}
 
 		endNum, ok := args[2].(*values.Number)
@@ -101,9 +91,7 @@ func sliceFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionThird, shared.TypeNumber, "end"),
-				ctx,
-			))
+				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionThird, shared.TypeNumber, "end")))
 		}
 
 		start := int(startNum.Value)
@@ -114,9 +102,7 @@ func sliceFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				"Start must be >= 1",
-				ctx,
-			))
+				"Start must be >= 1"))
 		}
 
 		data := container.Data
@@ -143,9 +129,7 @@ func sliceFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionSecond, shared.TypeNumber, "start"),
-				ctx,
-			))
+				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionSecond, shared.TypeNumber, "start")))
 		}
 
 		endNum, ok := args[2].(*values.Number)
@@ -155,9 +139,7 @@ func sliceFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionThird, shared.TypeNumber, "end"),
-				ctx,
-			))
+				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionThird, shared.TypeNumber, "end")))
 		}
 
 		start := int(startNum.Value)
@@ -168,9 +150,7 @@ func sliceFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				"Start must be >= 1",
-				ctx,
-			))
+				"Start must be >= 1"))
 		}
 
 		elements := container.Elements
@@ -194,8 +174,6 @@ func sliceFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionFirst, "a string, bytes, or list", "container"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionFirst, "a string, bytes, or list", "container")))
 	}
 }

@@ -16,7 +16,7 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-func winsizeFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func winsizeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 0 {
@@ -28,9 +28,7 @@ func winsizeFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCount("winsize", 0),
-			ctx,
-		))
+			shared.Errors.InvalidArgCount("winsize", 0)))
 	}
 
 	fd := int(os.Stdin.Fd())

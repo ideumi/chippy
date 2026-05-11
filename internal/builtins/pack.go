@@ -12,7 +12,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func packFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func packFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -24,9 +24,7 @@ func packFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("pack", 1, "value"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("pack", 1, "value")))
 	}
 
 	value := args[0]
@@ -52,9 +50,7 @@ func packFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 				posStart, posEnd := args[0].GetPos()
 				return res.Failure(errors.NewRTError(
 					posStart, posEnd,
-					"List elements must be numbers representing bytes",
-					ctx,
-				))
+					"List elements must be numbers representing bytes"))
 			}
 
 			byteVal := int(num.Value)
@@ -63,9 +59,7 @@ func packFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 				posStart, posEnd := args[0].GetPos()
 				return res.Failure(errors.NewRTError(
 					posStart, posEnd,
-					"Byte values must be between 0 and 255",
-					ctx,
-				))
+					"Byte values must be between 0 and 255"))
 			}
 
 			bytes[i] = byte(byteVal)
@@ -77,8 +71,6 @@ func packFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 		posStart, posEnd := args[0].GetPos()
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("pack", shared.TypeStringOrList, shared.TypeStringOrList),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("pack", shared.TypeStringOrList, shared.TypeStringOrList)))
 	}
 }

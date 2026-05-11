@@ -17,7 +17,7 @@ import (
 	"strings"
 )
 
-func parseresponseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func parseresponseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -29,9 +29,7 @@ func parseresponseFunction(args []values.Value, ctx interface{}) *values.Runtime
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "parseresponse"), 1, "responseBytes"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "parseresponse"), 1, "responseBytes")))
 	}
 
 	responseBytes, ok := args[0].(*values.Bytes)
@@ -41,9 +39,7 @@ func parseresponseFunction(args []values.Value, ctx interface{}) *values.Runtime
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
 			shared.Errors.InvalidArgTypeWithHint(
-				optional.Prefixed(OptionalName, "parseresponse"), shared.TypeBytes, "responseBytes"),
-			ctx,
-		))
+				optional.Prefixed(OptionalName, "parseresponse"), shared.TypeBytes, "responseBytes")))
 	}
 
 	data := responseBytes.Data

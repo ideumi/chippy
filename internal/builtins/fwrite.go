@@ -15,7 +15,7 @@ import (
 	"io"
 )
 
-func fwriteFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func fwriteFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
@@ -27,9 +27,7 @@ func fwriteFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("fwrite", 2, "bytes, handle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("fwrite", 2, "bytes, handle")))
 	}
 
 	bytesVal, ok := args[0].(*values.Bytes)
@@ -39,9 +37,7 @@ func fwriteFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("fwrite", shared.PositionFirst, shared.TypeBytes, shared.TypeBytes),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("fwrite", shared.PositionFirst, shared.TypeBytes, shared.TypeBytes)))
 	}
 
 	handleNum, ok := args[1].(*values.Number)
@@ -51,14 +47,12 @@ func fwriteFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("fwrite", shared.PositionSecond, shared.TypeNumber, "handle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("fwrite", shared.PositionSecond, shared.TypeNumber, "handle")))
 	}
 
 	handle := int(handleNum.Value)
 
-	registry := orchestrator.Get().GetRegistry(ctx)
+	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
 	file, fileExists := registry.Files.Get(handle)
 	procHandle, procExists := registry.Processes.Get(handle)
 
@@ -73,9 +67,7 @@ func fwriteFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid handle"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Invalid handle")))
 	}
 
 	if len(bytesVal.Data) == 0 {

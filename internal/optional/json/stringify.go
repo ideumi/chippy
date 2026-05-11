@@ -15,7 +15,7 @@ import (
 	"encoding/json"
 )
 
-func stringifyFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func stringifyFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -27,9 +27,7 @@ func stringifyFunction(args []values.Value, ctx interface{}) *values.RuntimeResu
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "stringify"), 1, "value"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "stringify"), 1, "value")))
 	}
 
 	goValue, err := marshalValue(args[0])

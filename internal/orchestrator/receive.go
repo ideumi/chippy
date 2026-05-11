@@ -7,7 +7,6 @@
 package orchestrator
 
 import (
-	"chip-go/internal/context"
 	"chip-go/internal/values"
 )
 
@@ -38,7 +37,7 @@ func (o *Orchestrator) tryDrainAndRun(inst *Instance) []values.Value {
 // or the deadlock detector cancels the actor. Returns (nil, true) on cancel.
 // Owns the Begin/EndBlocking lifecycle so transitions stay atomic with inbox
 // drains.
-func (o *Orchestrator) ReceiveBlocking(inst *Instance, globals *context.Context) ([]values.Value, bool) {
+func (o *Orchestrator) ReceiveBlocking(inst *Instance, globals values.Ctx) ([]values.Value, bool) {
 	if items := o.tryDrainAndRun(inst); items != nil {
 		BindValuesToGlobals(items, globals)
 

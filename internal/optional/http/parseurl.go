@@ -16,7 +16,7 @@ import (
 	"strconv"
 )
 
-func parseurlFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func parseurlFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -28,9 +28,7 @@ func parseurlFunction(args []values.Value, ctx interface{}) *values.RuntimeResul
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "parseurl"), 1, "url"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "parseurl"), 1, "url")))
 	}
 
 	urlStr, ok := args[0].(*values.String)
@@ -41,9 +39,7 @@ func parseurlFunction(args []values.Value, ctx interface{}) *values.RuntimeResul
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
 			shared.Errors.InvalidArgTypeWithHint(
-				optional.Prefixed(OptionalName, "parseurl"), shared.TypeString, "url"),
-			ctx,
-		))
+				optional.Prefixed(OptionalName, "parseurl"), shared.TypeString, "url")))
 	}
 
 	parsedURL, err := url.Parse(urlStr.Value)

@@ -59,8 +59,8 @@ func (m *Map) SetPos(posStart, posEnd *errors.Position) Value {
 	return m
 }
 
-func (m *Map) SetContext(context interface{}) Value {
-	m.BaseValue.SetContext(context)
+func (m *Map) SetContext(ctx Ctx) Value {
+	m.BaseValue.SetContext(ctx)
 
 	return m
 }

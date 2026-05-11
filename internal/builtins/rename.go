@@ -14,7 +14,7 @@ import (
 	"os"
 )
 
-func renameFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func renameFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
@@ -26,9 +26,7 @@ func renameFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("rename", 2, "old path, new path"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("rename", 2, "old path, new path")))
 	}
 
 	oldPathStr, ok := args[0].(*values.String)
@@ -38,9 +36,7 @@ func renameFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("rename", shared.PositionFirst, shared.TypeString, "old path"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("rename", shared.PositionFirst, shared.TypeString, "old path")))
 	}
 
 	newPathStr, ok := args[1].(*values.String)
@@ -50,9 +46,7 @@ func renameFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("rename", shared.PositionSecond, shared.TypeString, "new path"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("rename", shared.PositionSecond, shared.TypeString, "new path")))
 	}
 
 	// Rename/move file or directory

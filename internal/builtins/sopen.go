@@ -17,7 +17,7 @@ import (
 	"net"
 )
 
-func sopenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func sopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 3 {
@@ -29,9 +29,7 @@ func sopenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("sopen", 3, "address, port, mode"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("sopen", 3, "address, port, mode")))
 	}
 
 	// Get address argument
@@ -42,9 +40,7 @@ func sopenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("sopen", shared.PositionFirst, shared.TypeString, "address"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("sopen", shared.PositionFirst, shared.TypeString, "address")))
 	}
 
 	// Get port argument
@@ -55,9 +51,7 @@ func sopenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("sopen", shared.PositionSecond, shared.TypeNumber, "port"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("sopen", shared.PositionSecond, shared.TypeNumber, "port")))
 	}
 
 	// Get mode argument
@@ -68,9 +62,7 @@ func sopenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("sopen", shared.PositionThird, shared.TypeString, "mode"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("sopen", shared.PositionThird, shared.TypeString, "mode")))
 	}
 
 	address := addressStr.Value
@@ -83,9 +75,7 @@ func sopenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid mode. Use 'tcp', 'udp', or 'listen'"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Invalid mode. Use 'tcp', 'udp', or 'listen'")))
 	}
 
 	// Validate port range
@@ -94,12 +84,10 @@ func sopenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Port must be between 1 and 65535"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Port must be between 1 and 65535")))
 	}
 
-	registry := orchestrator.Get().GetRegistry(ctx)
+	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
 	socket := &handles.SocketHandle{Mode: mode}
 
 	switch mode {

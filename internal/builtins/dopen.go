@@ -16,7 +16,7 @@ import (
 	"os"
 )
 
-func dopenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func dopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -28,9 +28,7 @@ func dopenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("dopen", 1, "path"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("dopen", 1, "path")))
 	}
 
 	pathStr, ok := args[0].(*values.String)
@@ -40,9 +38,7 @@ func dopenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("dopen", shared.TypeString, "path"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("dopen", shared.TypeString, "path")))
 	}
 
 	dirFile, err := os.Open(pathStr.Value)
@@ -60,7 +56,7 @@ func dopenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 	}
 
-	registry := orchestrator.Get().GetRegistry(ctx)
+	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
 	handle := registry.Alloc.Alloc()
 	registry.Dirs.Store(handle, &handles.DirectoryHandle{
 		DirFile: dirFile,

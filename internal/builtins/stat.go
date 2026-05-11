@@ -35,7 +35,7 @@ func fileModeToChmod(mode os.FileMode) float64 {
 	return float64(special*1000 + int(owner)*100 + int(group)*10 + int(other))
 }
 
-func statFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func statFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -47,9 +47,7 @@ func statFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("stat", 1, "path"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("stat", 1, "path")))
 	}
 
 	pathStr, ok := args[0].(*values.String)
@@ -59,9 +57,7 @@ func statFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("stat", shared.TypeString, "path"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("stat", shared.TypeString, "path")))
 	}
 
 	fileInfo, err := os.Stat(pathStr.Value)

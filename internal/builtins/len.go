@@ -13,7 +13,7 @@ import (
 	"unicode/utf8"
 )
 
-func lenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func lenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -25,9 +25,7 @@ func lenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("len", 1, "value"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("len", 1, "value")))
 	}
 
 	value := args[0]
@@ -46,8 +44,6 @@ func lenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("len() can only be used on strings, lists, bytes, and maps"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("len() can only be used on strings, lists, bytes, and maps")))
 	}
 }

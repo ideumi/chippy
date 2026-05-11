@@ -8,7 +8,6 @@ package builtins
 
 import (
 	"chip-go/internal/builtins/shared"
-	"chip-go/internal/context"
 	"chip-go/internal/errors"
 	"chip-go/internal/optional"
 	"chip-go/internal/orchestrator"
@@ -17,15 +16,13 @@ import (
 	"os"
 )
 
-func actorFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func actorFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) < 1 {
 		return res.Failure(errors.NewRTError(
 			nil, nil,
-			shared.Errors.InvalidArgCountWithHint("actor", 1, "function, ...args"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("actor", 1, "function, ...args")))
 	}
 
 	fn, ok := args[0].(*values.Function)
@@ -35,9 +32,7 @@ func actorFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("actor", shared.PositionFirst, shared.TypeFunction, "handler"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("actor", shared.PositionFirst, shared.TypeFunction, "handler")))
 	}
 
 	fnArgs := args[1:]
@@ -48,16 +43,14 @@ func actorFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
 			shared.Errors.InvalidValue(fmt.Sprintf("handler '%s' expects %d argument(s), got %d",
-				fn.Name, len(fn.ArgNames), len(fnArgs))),
-			ctx,
-		))
+				fn.Name, len(fn.ArgNames), len(fnArgs)))))
 	}
 
 	orch := orchestrator.Get()
 
 	var inheritedOpts []string
 
-	if spawnerInst := orch.GetInstance(context.GetInstanceID(ctx)); spawnerInst != nil {
+	if spawnerInst := orch.GetInstance(ctx.InstanceID); spawnerInst != nil {
 		inheritedOpts = orch.GetLoadedOpts(spawnerInst)
 	}
 
@@ -74,7 +67,7 @@ func actorFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 	// reference the spawner's context. Isolate them so the actor can't reach
 	// back into spawner scope. The cycles map is shared so references into
 	// the same context get rewritten consistently across all values.
-	cycles := make(map[*context.Context]*context.Context)
+	cycles := make(map[values.Ctx]values.Ctx)
 	orchestrator.IsolateForTransfer(fnCopy, cycles)
 
 	for _, arg := range argsCopy {
@@ -166,7 +159,7 @@ func actorFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 		// actor's context. Isolate it before delivery so the receiver
 		// can use it without reaching back into this actor's scope.
 		if returnValue != nil {
-			orchestrator.IsolateForTransfer(returnValue, make(map[*context.Context]*context.Context))
+			orchestrator.IsolateForTransfer(returnValue, make(map[values.Ctx]values.Ctx))
 		}
 
 		deliver(orchestrator.ActorResult{Value: returnValue})

@@ -15,7 +15,7 @@ import (
 	"io"
 )
 
-func sreadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func sreadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
@@ -27,9 +27,7 @@ func sreadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("sread", 2, "handle, maxBytes"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("sread", 2, "handle, maxBytes")))
 	}
 
 	// Get handle argument
@@ -40,9 +38,7 @@ func sreadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("sread", shared.PositionFirst, shared.TypeNumber, "handle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("sread", shared.PositionFirst, shared.TypeNumber, "handle")))
 	}
 
 	// Get maxBytes argument
@@ -53,9 +49,7 @@ func sreadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("sread", shared.PositionSecond, shared.TypeNumber, "maxBytes"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("sread", shared.PositionSecond, shared.TypeNumber, "maxBytes")))
 	}
 
 	handle := int(handleNum.Value)
@@ -67,13 +61,11 @@ func sreadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("maxBytes must be greater than 0"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("maxBytes must be greater than 0")))
 	}
 
 	// Get socket handle
-	registry := orchestrator.Get().GetRegistry(ctx)
+	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
 	socket, exists := registry.Sockets.Get(handle)
 
 	if !exists {
@@ -81,9 +73,7 @@ func sreadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid socket handle"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Invalid socket handle")))
 	}
 
 	// Prepare buffer
@@ -100,9 +90,7 @@ func sreadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				shared.Errors.InvalidValue("Socket connection is closed"),
-				ctx,
-			))
+				shared.Errors.InvalidValue("Socket connection is closed")))
 		}
 
 		n, err = socket.Conn.Read(buffer)
@@ -113,9 +101,7 @@ func sreadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				shared.Errors.InvalidValue("UDP connection is closed"),
-				ctx,
-			))
+				shared.Errors.InvalidValue("UDP connection is closed")))
 		}
 
 		n, err = socket.UdpConn.Read(buffer)
@@ -125,18 +111,14 @@ func sreadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Cannot read from listening socket. Use saccept() first"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Cannot read from listening socket. Use saccept() first")))
 
 	default:
 		posStart, posEnd := args[0].GetPos()
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid socket mode"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Invalid socket mode")))
 	}
 
 	// Handle read errors

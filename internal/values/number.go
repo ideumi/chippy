@@ -34,8 +34,8 @@ func (n *Number) SetPos(posStart, posEnd *errors.Position) Value {
 	return n
 }
 
-func (n *Number) SetContext(context interface{}) Value {
-	n.BaseValue.SetContext(context)
+func (n *Number) SetContext(ctx Ctx) Value {
+	n.BaseValue.SetContext(ctx)
 	return n
 }
 
@@ -89,9 +89,8 @@ func (n *Number) DivedBy(other Value) (Value, error) {
 		if otherNum.Value == 0 {
 			return nil, errors.NewRTError(
 				otherNum.posStart, otherNum.posEnd,
-				"Division by zero",
-				n.context,
-			)
+				"Division by zero")
+
 		}
 		result := NewNumber(n.Value / otherNum.Value)
 		result.SetContext(n.context)
@@ -118,9 +117,8 @@ func (n *Number) ModdedBy(other Value) (Value, error) {
 		if otherNum.Value == 0 {
 			return nil, errors.NewRTError(
 				otherNum.posStart, otherNum.posEnd,
-				"Division by zero",
-				n.context,
-			)
+				"Division by zero")
+
 		}
 		result := NewNumber(math.Mod(n.Value, otherNum.Value))
 		result.SetContext(n.context)
@@ -288,17 +286,15 @@ func (n *Number) BAndedBy(other Value) (Value, error) {
 		if n.Value != math.Trunc(n.Value) {
 			return nil, errors.NewRTError(
 				n.posStart, n.posEnd,
-				"Bitwise operation on decimal value",
-				n.context,
-			)
+				"Bitwise operation on decimal value")
+
 		}
 
 		if otherNum.Value != math.Trunc(otherNum.Value) {
 			return nil, errors.NewRTError(
 				otherNum.posStart, otherNum.posEnd,
-				"Bitwise operation on decimal value",
-				n.context,
-			)
+				"Bitwise operation on decimal value")
+
 		}
 
 		result := NewNumber(float64(int64(n.Value) & int64(otherNum.Value)))
@@ -315,17 +311,15 @@ func (n *Number) BOredBy(other Value) (Value, error) {
 		if n.Value != math.Trunc(n.Value) {
 			return nil, errors.NewRTError(
 				n.posStart, n.posEnd,
-				"Bitwise operation on decimal value",
-				n.context,
-			)
+				"Bitwise operation on decimal value")
+
 		}
 
 		if otherNum.Value != math.Trunc(otherNum.Value) {
 			return nil, errors.NewRTError(
 				otherNum.posStart, otherNum.posEnd,
-				"Bitwise operation on decimal value",
-				n.context,
-			)
+				"Bitwise operation on decimal value")
+
 		}
 
 		result := NewNumber(float64(int64(n.Value) | int64(otherNum.Value)))
@@ -341,9 +335,8 @@ func (n *Number) BNotted() (Value, error) {
 	if n.Value != math.Trunc(n.Value) {
 		return nil, errors.NewRTError(
 			n.posStart, n.posEnd,
-			"Bitwise operation on decimal value",
-			n.context,
-		)
+			"Bitwise operation on decimal value")
+
 	}
 
 	result := NewNumber(float64(^int64(n.Value)))
@@ -357,17 +350,15 @@ func (n *Number) BXoredBy(other Value) (Value, error) {
 		if n.Value != math.Trunc(n.Value) {
 			return nil, errors.NewRTError(
 				n.posStart, n.posEnd,
-				"Bitwise operation on decimal value",
-				n.context,
-			)
+				"Bitwise operation on decimal value")
+
 		}
 
 		if otherNum.Value != math.Trunc(otherNum.Value) {
 			return nil, errors.NewRTError(
 				otherNum.posStart, otherNum.posEnd,
-				"Bitwise operation on decimal value",
-				n.context,
-			)
+				"Bitwise operation on decimal value")
+
 		}
 
 		result := NewNumber(float64(int64(n.Value) ^ int64(otherNum.Value)))
@@ -384,25 +375,22 @@ func (n *Number) LShiftedBy(other Value) (Value, error) {
 		if n.Value != math.Trunc(n.Value) {
 			return nil, errors.NewRTError(
 				n.posStart, n.posEnd,
-				"Shift operation on decimal value",
-				n.context,
-			)
+				"Shift operation on decimal value")
+
 		}
 
 		if otherNum.Value != math.Trunc(otherNum.Value) {
 			return nil, errors.NewRTError(
 				otherNum.posStart, otherNum.posEnd,
-				"Shift operation on decimal value",
-				n.context,
-			)
+				"Shift operation on decimal value")
+
 		}
 
 		if otherNum.Value < 0 {
 			return nil, errors.NewRTError(
 				otherNum.posStart, otherNum.posEnd,
-				"Negative shift amount",
-				n.context,
-			)
+				"Negative shift amount")
+
 		}
 
 		result := NewNumber(float64(int64(n.Value) << uint64(otherNum.Value)))
@@ -419,25 +407,22 @@ func (n *Number) RShiftedBy(other Value) (Value, error) {
 		if n.Value != math.Trunc(n.Value) {
 			return nil, errors.NewRTError(
 				n.posStart, n.posEnd,
-				"Shift operation on decimal value",
-				n.context,
-			)
+				"Shift operation on decimal value")
+
 		}
 
 		if otherNum.Value != math.Trunc(otherNum.Value) {
 			return nil, errors.NewRTError(
 				otherNum.posStart, otherNum.posEnd,
-				"Shift operation on decimal value",
-				n.context,
-			)
+				"Shift operation on decimal value")
+
 		}
 
 		if otherNum.Value < 0 {
 			return nil, errors.NewRTError(
 				otherNum.posStart, otherNum.posEnd,
-				"Negative shift amount",
-				n.context,
-			)
+				"Negative shift amount")
+
 		}
 
 		result := NewNumber(float64(int64(n.Value) >> uint64(otherNum.Value)))

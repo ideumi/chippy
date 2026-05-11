@@ -121,7 +121,7 @@ func getchSequence() ([]byte, error) {
 	return buffer[:bytesRead], nil
 }
 
-func getchFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func getchFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 0 {
@@ -133,9 +133,7 @@ func getchFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCount("getch", 0),
-			ctx,
-		))
+			shared.Errors.InvalidArgCount("getch", 0)))
 	}
 
 	bytes, err := getchSequence()

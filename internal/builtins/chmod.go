@@ -15,7 +15,7 @@ import (
 	"syscall"
 )
 
-func chmodFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func chmodFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
@@ -27,9 +27,7 @@ func chmodFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("chmod", 2, "path, mode"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("chmod", 2, "path, mode")))
 	}
 
 	pathStr, ok := args[0].(*values.String)
@@ -39,9 +37,7 @@ func chmodFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("chmod", shared.PositionFirst, shared.TypeString, "path"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("chmod", shared.PositionFirst, shared.TypeString, "path")))
 	}
 
 	modeNum, ok := args[1].(*values.Number)
@@ -51,9 +47,7 @@ func chmodFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("chmod", shared.PositionSecond, shared.TypeNumber, "mode"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("chmod", shared.PositionSecond, shared.TypeNumber, "mode")))
 	}
 
 	// Convert octal notation to proper file mode
@@ -65,9 +59,7 @@ func chmodFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			"Invalid octal mode: "+modeStr,
-			ctx,
-		))
+			"Invalid octal mode: "+modeStr))
 	}
 
 	err = syscall.Chmod(pathStr.Value, uint32(octalMode))

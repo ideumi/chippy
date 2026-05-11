@@ -40,12 +40,10 @@ func NewInvalidSyntaxError(posStart, posEnd *Position, details string) *InvalidS
 
 type RTError struct {
 	*BaseError
-	Context interface{}
 }
 
-func NewRTError(posStart, posEnd *Position, details string, context interface{}) *RTError {
+func NewRTError(posStart, posEnd *Position, details string) *RTError {
 	return &RTError{
 		BaseError: NewBaseError(posStart, posEnd, constants.RT_ERROR_TITLE, details),
-		Context:   context,
 	}
 }

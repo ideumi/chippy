@@ -15,7 +15,7 @@ import (
 	"syscall"
 )
 
-func lstatFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func lstatFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -27,9 +27,7 @@ func lstatFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("lstat", 1, "path"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("lstat", 1, "path")))
 	}
 
 	pathStr, ok := args[0].(*values.String)
@@ -39,9 +37,7 @@ func lstatFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("lstat", shared.TypeString, "path"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("lstat", shared.TypeString, "path")))
 	}
 
 	fileInfo, err := os.Lstat(pathStr.Value)

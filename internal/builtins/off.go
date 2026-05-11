@@ -13,7 +13,7 @@ import (
 	"os"
 )
 
-func offFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func offFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -25,9 +25,7 @@ func offFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("off", 1, "exitCode"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("off", 1, "exitCode")))
 	}
 
 	exitCode, ok := args[0].(*values.Number)
@@ -37,9 +35,7 @@ func offFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("off", shared.TypeNumber, "exitCode"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("off", shared.TypeNumber, "exitCode")))
 	}
 
 	code := int(exitCode.Value)
@@ -49,9 +45,7 @@ func offFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Exit code must be between 0 and 255"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Exit code must be between 0 and 255")))
 	}
 
 	os.Exit(code)

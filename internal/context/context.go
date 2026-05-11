@@ -8,16 +8,16 @@ package context
 
 import "chip-go/internal/errors"
 
-type Context struct {
+type Context[T any] struct {
 	DisplayName    string
-	Parent         *Context
+	Parent         *Context[T]
 	ParentEntryPos *errors.Position
-	SymbolTable    *SymbolTable
+	SymbolTable    *SymbolTable[T]
 	InstanceID     int
 }
 
-func NewContext(displayName string, parent *Context, parentEntryPos *errors.Position) *Context {
-	ctx := &Context{
+func NewContext[T any](displayName string, parent *Context[T], parentEntryPos *errors.Position) *Context[T] {
+	ctx := &Context[T]{
 		DisplayName:    displayName,
 		Parent:         parent,
 		ParentEntryPos: parentEntryPos,
@@ -27,15 +27,8 @@ func NewContext(displayName string, parent *Context, parentEntryPos *errors.Posi
 		ctx.SymbolTable = NewSymbolTable(parent.SymbolTable)
 		ctx.InstanceID = parent.InstanceID
 	} else {
-		ctx.SymbolTable = NewSymbolTable(nil)
+		ctx.SymbolTable = NewSymbolTable[T](nil)
 	}
 
 	return ctx
-}
-
-func GetInstanceID(ctx interface{}) int {
-	if c, ok := ctx.(*Context); ok {
-		return c.InstanceID
-	}
-	return 0
 }

@@ -15,7 +15,7 @@ import (
 	"syscall"
 )
 
-func execFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func execFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -27,9 +27,7 @@ func execFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("exec", 1, "args"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("exec", 1, "args")))
 	}
 
 	argsList, ok := args[0].(*values.List)
@@ -39,9 +37,7 @@ func execFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("exec", shared.TypeList, "args"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("exec", shared.TypeList, "args")))
 	}
 
 	var execArgs []string
@@ -53,9 +49,7 @@ func execFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				shared.Errors.InvalidValue("All arguments must be strings"),
-				ctx,
-			))
+				shared.Errors.InvalidValue("All arguments must be strings")))
 		}
 		execArgs = append(execArgs, str.Value)
 	}
@@ -65,9 +59,7 @@ func execFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Arguments list cannot be empty"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Arguments list cannot be empty")))
 	}
 
 	program := execArgs[0]

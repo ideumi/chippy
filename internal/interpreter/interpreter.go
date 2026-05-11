@@ -9,7 +9,6 @@ package interpreter
 import (
 	"chip-go/internal/ast"
 	"chip-go/internal/constants"
-	"chip-go/internal/context"
 	"chip-go/internal/errors"
 	"chip-go/internal/values"
 	"fmt"
@@ -21,17 +20,7 @@ func NewInterpreter() *Interpreter {
 	return &Interpreter{}
 }
 
-func (i *Interpreter) getContext(ctx interface{}) *context.Context {
-	if ctx == nil {
-		return nil
-	}
-	if contextPtr, ok := ctx.(*context.Context); ok {
-		return contextPtr
-	}
-	return nil
-}
-
-func (i *Interpreter) Visit(node ast.Node, ctx interface{}) *values.RuntimeResult {
+func (i *Interpreter) Visit(node ast.Node, ctx values.Ctx) *values.RuntimeResult {
 	switch n := node.(type) {
 	case *ast.NumberNode:
 		return i.visitNumberNode(n, ctx)
@@ -78,7 +67,7 @@ func (i *Interpreter) Visit(node ast.Node, ctx interface{}) *values.RuntimeResul
 	}
 }
 
-func (i *Interpreter) visitNumberNode(node *ast.NumberNode, ctx interface{}) *values.RuntimeResult {
+func (i *Interpreter) visitNumberNode(node *ast.NumberNode, ctx values.Ctx) *values.RuntimeResult {
 	var value float64
 	switch v := node.Token.Value.(type) {
 
@@ -94,9 +83,7 @@ func (i *Interpreter) visitNumberNode(node *ast.NumberNode, ctx interface{}) *va
 	default:
 		return values.NewRuntimeResult().Failure(errors.NewRTError(
 			node.PosStart, node.PosEnd,
-			fmt.Sprintf("Invalid number value: %v", node.Token.Value),
-			ctx,
-		))
+			fmt.Sprintf("Invalid number value: %v", node.Token.Value)))
 	}
 
 	return values.NewRuntimeResult().Success(
@@ -104,13 +91,13 @@ func (i *Interpreter) visitNumberNode(node *ast.NumberNode, ctx interface{}) *va
 	)
 }
 
-func (i *Interpreter) visitStringNode(node *ast.StringNode, ctx interface{}) *values.RuntimeResult {
+func (i *Interpreter) visitStringNode(node *ast.StringNode, ctx values.Ctx) *values.RuntimeResult {
 	return values.NewRuntimeResult().Success(
 		values.NewString(node.Token.Value.(string)).SetContext(ctx).SetPos(node.PosStart, node.PosEnd),
 	)
 }
 
-func (i *Interpreter) visitListNode(node *ast.ListNode, ctx interface{}) *values.RuntimeResult {
+func (i *Interpreter) visitListNode(node *ast.ListNode, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 	elements := []values.Value{}
 
@@ -126,7 +113,7 @@ func (i *Interpreter) visitListNode(node *ast.ListNode, ctx interface{}) *values
 	)
 }
 
-func (i *Interpreter) visitByteArrayNode(node *ast.ByteArrayNode, ctx interface{}) *values.RuntimeResult {
+func (i *Interpreter) visitByteArrayNode(node *ast.ByteArrayNode, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 	bytes := make([]byte, len(node.ElementNodes))
 
@@ -143,9 +130,7 @@ func (i *Interpreter) visitByteArrayNode(node *ast.ByteArrayNode, ctx interface{
 		if !ok {
 			return res.Failure(errors.NewRTError(
 				node.PosStart, node.PosEnd,
-				"Byte array elements must be numbers",
-				ctx,
-			))
+				"Byte array elements must be numbers"))
 		}
 
 		// Validate byte range (0-255)
@@ -154,9 +139,7 @@ func (i *Interpreter) visitByteArrayNode(node *ast.ByteArrayNode, ctx interface{
 		if byteVal < 0 || byteVal > 255 {
 			return res.Failure(errors.NewRTError(
 				node.PosStart, node.PosEnd,
-				"Byte values must be between 0 and 255",
-				ctx,
-			))
+				"Byte values must be between 0 and 255"))
 		}
 
 		bytes[idx] = byte(byteVal)
@@ -167,7 +150,7 @@ func (i *Interpreter) visitByteArrayNode(node *ast.ByteArrayNode, ctx interface{
 	)
 }
 
-func (i *Interpreter) visitMapNode(node *ast.MapNode, ctx interface{}) *values.RuntimeResult {
+func (i *Interpreter) visitMapNode(node *ast.MapNode, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 	keys := make([]string, 0, len(node.KeyNodes))
 	entries := make(map[string]values.Value, len(node.KeyNodes))
@@ -184,9 +167,7 @@ func (i *Interpreter) visitMapNode(node *ast.MapNode, ctx interface{}) *values.R
 		if !ok {
 			return res.Failure(errors.NewRTError(
 				keyNode.GetPosStart(), keyNode.GetPosEnd(),
-				"Map keys must be strings",
-				ctx,
-			))
+				"Map keys must be strings"))
 		}
 
 		val := res.Register(i.Visit(node.ValueNodes[idx], ctx))
@@ -205,48 +186,28 @@ func (i *Interpreter) visitMapNode(node *ast.MapNode, ctx interface{}) *values.R
 	return res.Success(values.NewMapFromEntries(keys, entries).SetContext(ctx).SetPos(node.PosStart, node.PosEnd))
 }
 
-func (i *Interpreter) visitVarAccessNode(node *ast.VarAccessNode, ctx interface{}) *values.RuntimeResult {
+func (i *Interpreter) visitVarAccessNode(node *ast.VarAccessNode, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 	varName := node.VarNameToken.Value.(string)
 
 	// Direct context cast
-	context, ok := ctx.(*context.Context)
-
-	if !ok || context == nil {
-		return res.Failure(errors.NewRTError(
-			node.PosStart, node.PosEnd,
-			"Invalid context",
-			ctx,
-		))
-	}
-
-	value := context.SymbolTable.Get(varName)
+	value := ctx.SymbolTable.Get(varName)
 
 	if value == nil {
 		return res.Failure(errors.NewRTError(
 			node.PosStart, node.PosEnd,
-			fmt.Sprintf("'%s' is not defined", varName),
-			ctx,
-		))
+			fmt.Sprintf("'%s' is not defined", varName)))
 	}
 
-	if val, ok := value.(values.Value); ok {
-		// Do NOT call SetContext here. Function values capture their
-		// defining scope via f.context; overwriting it with the call
-		// site's ctx would break closures and re-entrant calls.
-		val.SetPos(node.PosStart, node.PosEnd)
+	// Do NOT call SetContext here. Function values capture their defining
+	// scope via f.context; overwriting it with the call site's ctx would
+	// break closures and re-entrant calls.
+	value.SetPos(node.PosStart, node.PosEnd)
 
-		return res.Success(val)
-	}
-
-	return res.Failure(errors.NewRTError(
-		node.PosStart, node.PosEnd,
-		fmt.Sprintf("Invalid value type for '%s'", varName),
-		ctx,
-	))
+	return res.Success(value)
 }
 
-func (i *Interpreter) visitVarAssignNode(node *ast.VarAssignNode, ctx interface{}) *values.RuntimeResult {
+func (i *Interpreter) visitVarAssignNode(node *ast.VarAssignNode, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 	varName := node.VarNameToken.Value.(string)
 	value := res.Register(i.Visit(node.ValueNode, ctx))
@@ -255,22 +216,11 @@ func (i *Interpreter) visitVarAssignNode(node *ast.VarAssignNode, ctx interface{
 		return res
 	}
 
-	// Direct context cast
-	context, ok := ctx.(*context.Context)
-
-	if !ok || context == nil {
-		return res.Failure(errors.NewRTError(
-			node.PosStart, node.PosEnd,
-			"Invalid context",
-			ctx,
-		))
-	}
-
-	context.SymbolTable.Set(varName, value)
+	ctx.SymbolTable.Set(varName, value)
 	return res.Success(value)
 }
 
-func (i *Interpreter) visitVarUpdateNode(node *ast.VarUpdateNode, ctx interface{}) *values.RuntimeResult {
+func (i *Interpreter) visitVarUpdateNode(node *ast.VarUpdateNode, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 	varName := node.VarNameToken.Value.(string)
 	value := res.Register(i.Visit(node.ValueNode, ctx))
@@ -279,32 +229,18 @@ func (i *Interpreter) visitVarUpdateNode(node *ast.VarUpdateNode, ctx interface{
 		return res
 	}
 
-	// Direct context cast
-	context, ok := ctx.(*context.Context)
-
-	if !ok || context == nil {
+	if !ctx.SymbolTable.Exists(varName) {
 		return res.Failure(errors.NewRTError(
 			node.PosStart, node.PosEnd,
-			"Invalid context",
-			ctx,
-		))
+			fmt.Sprintf("'%s' is not defined", varName)))
 	}
 
-	// Check if variable exists before updating
-	if !context.SymbolTable.Exists(varName) {
-		return res.Failure(errors.NewRTError(
-			node.PosStart, node.PosEnd,
-			fmt.Sprintf("'%s' is not defined", varName),
-			ctx,
-		))
-	}
-
-	context.SymbolTable.SetInScope(varName, value)
+	ctx.SymbolTable.SetInScope(varName, value)
 
 	return res.Success(value)
 }
 
-func (i *Interpreter) visitBinOpNode(node *ast.BinOpNode, ctx interface{}) *values.RuntimeResult {
+func (i *Interpreter) visitBinOpNode(node *ast.BinOpNode, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 	left := res.Register(i.Visit(node.LeftNode, ctx))
 
@@ -420,7 +356,7 @@ func (i *Interpreter) visitBinOpNode(node *ast.BinOpNode, ctx interface{}) *valu
 	return res.Success(result.SetPos(node.PosStart, node.PosEnd))
 }
 
-func (i *Interpreter) visitUnaryOpNode(node *ast.UnaryOpNode, ctx interface{}) *values.RuntimeResult {
+func (i *Interpreter) visitUnaryOpNode(node *ast.UnaryOpNode, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 	number := res.Register(i.Visit(node.Node, ctx))
 
@@ -454,7 +390,7 @@ func (i *Interpreter) visitUnaryOpNode(node *ast.UnaryOpNode, ctx interface{}) *
 	return res.Success(result.SetPos(node.PosStart, node.PosEnd))
 }
 
-func (i *Interpreter) visitIfNode(node *ast.IfNode, ctx interface{}) *values.RuntimeResult {
+func (i *Interpreter) visitIfNode(node *ast.IfNode, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	for _, ifCase := range node.Cases {
@@ -492,7 +428,7 @@ func (i *Interpreter) visitIfNode(node *ast.IfNode, ctx interface{}) *values.Run
 	return res.Success(values.NewNumber(constants.NUM_NUL))
 }
 
-func (i *Interpreter) visitForNode(node *ast.ForNode, ctx interface{}) *values.RuntimeResult {
+func (i *Interpreter) visitForNode(node *ast.ForNode, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	startValue := res.Register(i.Visit(node.StartValueNode, ctx))
@@ -522,9 +458,7 @@ func (i *Interpreter) visitForNode(node *ast.ForNode, ctx interface{}) *values.R
 	if !ok {
 		return res.Failure(errors.NewRTError(
 			node.StartValueNode.GetPosStart(), node.StartValueNode.GetPosEnd(),
-			"Start value must be a number",
-			ctx,
-		))
+			"Start value must be a number"))
 	}
 
 	endNum, ok := endValue.(*values.Number)
@@ -532,9 +466,7 @@ func (i *Interpreter) visitForNode(node *ast.ForNode, ctx interface{}) *values.R
 	if !ok {
 		return res.Failure(errors.NewRTError(
 			node.EndValueNode.GetPosStart(), node.EndValueNode.GetPosEnd(),
-			"End value must be a number",
-			ctx,
-		))
+			"End value must be a number"))
 	}
 
 	stepNum, ok := stepValue.(*values.Number)
@@ -542,24 +474,11 @@ func (i *Interpreter) visitForNode(node *ast.ForNode, ctx interface{}) *values.R
 	if !ok {
 		return res.Failure(errors.NewRTError(
 			node.StepValueNode.GetPosStart(), node.StepValueNode.GetPosEnd(),
-			"Step value must be a number",
-			ctx,
-		))
+			"Step value must be a number"))
 	}
 
 	i_val := startNum.Value
 	varName := node.VarNameToken.Value.(string)
-
-	// Cache context outside loop to avoid repeated lookups
-	context, ok := ctx.(*context.Context)
-
-	if !ok || context == nil {
-		return res.Failure(errors.NewRTError(
-			node.PosStart, node.PosEnd,
-			"Invalid context",
-			ctx,
-		))
-	}
 
 	for {
 		if stepNum.Value >= 0 && i_val > endNum.Value {
@@ -570,7 +489,7 @@ func (i *Interpreter) visitForNode(node *ast.ForNode, ctx interface{}) *values.R
 			break
 		}
 
-		context.SymbolTable.Set(varName, values.NewNumber(i_val))
+		ctx.SymbolTable.Set(varName, values.NewNumber(i_val))
 
 		res.Register(i.Visit(node.BodyNode, ctx))
 
@@ -594,12 +513,12 @@ func (i *Interpreter) visitForNode(node *ast.ForNode, ctx interface{}) *values.R
 		i_val += stepNum.Value
 	}
 
-	context.SymbolTable.Remove(varName)
+	ctx.SymbolTable.Remove(varName)
 
 	return res.Success(values.NewNumber(constants.NUM_NUL).SetContext(ctx).SetPos(node.PosStart, node.PosEnd))
 }
 
-func (i *Interpreter) visitWhileNode(node *ast.WhileNode, ctx interface{}) *values.RuntimeResult {
+func (i *Interpreter) visitWhileNode(node *ast.WhileNode, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	for {
@@ -634,7 +553,7 @@ func (i *Interpreter) visitWhileNode(node *ast.WhileNode, ctx interface{}) *valu
 	return res.Success(values.NewNumber(constants.NUM_NUL).SetContext(ctx).SetPos(node.PosStart, node.PosEnd))
 }
 
-func (i *Interpreter) visitFuncDefNode(node *ast.FuncDefNode, ctx interface{}) *values.RuntimeResult {
+func (i *Interpreter) visitFuncDefNode(node *ast.FuncDefNode, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	var funcName string
@@ -653,16 +572,13 @@ func (i *Interpreter) visitFuncDefNode(node *ast.FuncDefNode, ctx interface{}) *
 	funcValue.SetContext(ctx).SetPos(node.PosStart, node.PosEnd)
 
 	if node.VarNameToken != nil {
-		// Direct context cast
-		if context, ok := ctx.(*context.Context); ok && context != nil {
-			context.SymbolTable.Set(funcName, funcValue)
-		}
+		ctx.SymbolTable.Set(funcName, funcValue)
 	}
 
 	return res.Success(funcValue)
 }
 
-func (i *Interpreter) visitCallNode(node *ast.CallNode, ctx interface{}) *values.RuntimeResult {
+func (i *Interpreter) visitCallNode(node *ast.CallNode, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 	args := []values.Value{}
 
@@ -696,7 +612,7 @@ func (i *Interpreter) visitCallNode(node *ast.CallNode, ctx interface{}) *values
 	return res.Success(returnValue)
 }
 
-func (i *Interpreter) visitReturnNode(node *ast.ReturnNode, ctx interface{}) *values.RuntimeResult {
+func (i *Interpreter) visitReturnNode(node *ast.ReturnNode, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	var value values.Value = values.NewNumber(constants.NUM_NUL)
@@ -712,15 +628,15 @@ func (i *Interpreter) visitReturnNode(node *ast.ReturnNode, ctx interface{}) *va
 	return res.SuccessReturn(value)
 }
 
-func (i *Interpreter) visitContinueNode(node *ast.ContinueNode, ctx interface{}) *values.RuntimeResult {
+func (i *Interpreter) visitContinueNode(node *ast.ContinueNode, ctx values.Ctx) *values.RuntimeResult {
 	return values.NewRuntimeResult().SuccessContinue()
 }
 
-func (i *Interpreter) visitBreakNode(node *ast.BreakNode, ctx interface{}) *values.RuntimeResult {
+func (i *Interpreter) visitBreakNode(node *ast.BreakNode, ctx values.Ctx) *values.RuntimeResult {
 	return values.NewRuntimeResult().SuccessBreak()
 }
 
-func (i *Interpreter) visitIndexAccessNode(node *ast.IndexAccessNode, ctx interface{}) *values.RuntimeResult {
+func (i *Interpreter) visitIndexAccessNode(node *ast.IndexAccessNode, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	collection := res.Register(i.Visit(node.CollectionNode, ctx))
@@ -742,9 +658,7 @@ func (i *Interpreter) visitIndexAccessNode(node *ast.IndexAccessNode, ctx interf
 		if !ok {
 			return res.Failure(errors.NewRTError(
 				node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
-				"Map index must be a string",
-				ctx,
-			))
+				"Map index must be a string"))
 		}
 
 		val, exists := mapVal.Entries[indexStr.Value]
@@ -761,18 +675,14 @@ func (i *Interpreter) visitIndexAccessNode(node *ast.IndexAccessNode, ctx interf
 	if !ok {
 		return res.Failure(errors.NewRTError(
 			node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
-			"Index must be a number",
-			ctx,
-		))
+			"Index must be a number"))
 	}
 
 	// Force integer
 	if indexNum.Value != float64(int(indexNum.Value)) {
 		return res.Failure(errors.NewRTError(
 			node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
-			"Index must be an integer",
-			ctx,
-		))
+			"Index must be an integer"))
 	}
 
 	idx := int(indexNum.Value)
@@ -782,9 +692,7 @@ func (i *Interpreter) visitIndexAccessNode(node *ast.IndexAccessNode, ctx interf
 		if idx < 1 || idx > len(coll.Elements) {
 			return res.Failure(errors.NewRTError(
 				node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
-				"Index out of bounds",
-				ctx,
-			))
+				"Index out of bounds"))
 		}
 
 		return res.Success(coll.Elements[idx-1])
@@ -793,9 +701,7 @@ func (i *Interpreter) visitIndexAccessNode(node *ast.IndexAccessNode, ctx interf
 		if idx < 1 || idx > len(coll.Data) {
 			return res.Failure(errors.NewRTError(
 				node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
-				"Index out of bounds",
-				ctx,
-			))
+				"Index out of bounds"))
 		}
 
 		return res.Success(values.NewNumber(float64(coll.Data[idx-1])).SetContext(ctx))
@@ -806,9 +712,7 @@ func (i *Interpreter) visitIndexAccessNode(node *ast.IndexAccessNode, ctx interf
 		if idx < 1 || idx > len(runes) {
 			return res.Failure(errors.NewRTError(
 				node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
-				"Index out of bounds",
-				ctx,
-			))
+				"Index out of bounds"))
 		}
 
 		return res.Success(values.NewString(string(runes[idx-1])).SetContext(ctx))
@@ -816,13 +720,11 @@ func (i *Interpreter) visitIndexAccessNode(node *ast.IndexAccessNode, ctx interf
 	default:
 		return res.Failure(errors.NewRTError(
 			node.CollectionNode.GetPosStart(), node.CollectionNode.GetPosEnd(),
-			"Can only index lists, maps, bytes, or strings",
-			ctx,
-		))
+			"Can only index lists, maps, bytes, or strings"))
 	}
 }
 
-func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx interface{}) *values.RuntimeResult {
+func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	collection := res.Register(i.Visit(node.CollectionNode, ctx))
@@ -850,9 +752,7 @@ func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx interf
 		if !ok {
 			return res.Failure(errors.NewRTError(
 				node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
-				"Map index must be a string",
-				ctx,
-			))
+				"Map index must be a string"))
 		}
 
 		newMap := mapVal.MapSet(indexStr.Value, value.SetContext(ctx))
@@ -865,18 +765,14 @@ func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx interf
 	if !ok {
 		return res.Failure(errors.NewRTError(
 			node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
-			"Index must be a number",
-			ctx,
-		))
+			"Index must be a number"))
 	}
 
 	// Force integer
 	if indexNum.Value != float64(int(indexNum.Value)) {
 		return res.Failure(errors.NewRTError(
 			node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
-			"Index must be an integer",
-			ctx,
-		))
+			"Index must be an integer"))
 	}
 
 	idx := int(indexNum.Value)
@@ -886,9 +782,7 @@ func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx interf
 		if idx < 1 || idx > len(coll.Elements) {
 			return res.Failure(errors.NewRTError(
 				node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
-				"Index out of bounds",
-				ctx,
-			))
+				"Index out of bounds"))
 		}
 
 		newList := coll.Copy().(*values.List)
@@ -901,9 +795,7 @@ func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx interf
 		if !ok {
 			return res.Failure(errors.NewRTError(
 				node.ValueNode.GetPosStart(), node.ValueNode.GetPosEnd(),
-				"Byte value must be a number",
-				ctx,
-			))
+				"Byte value must be a number"))
 		}
 
 		byteValue := int(valueNum.Value)
@@ -911,17 +803,13 @@ func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx interf
 		if byteValue < 0 || byteValue > 255 {
 			return res.Failure(errors.NewRTError(
 				node.ValueNode.GetPosStart(), node.ValueNode.GetPosEnd(),
-				"Byte values must be between 0 and 255",
-				ctx,
-			))
+				"Byte values must be between 0 and 255"))
 		}
 
 		if idx < 1 || idx > len(coll.Data) {
 			return res.Failure(errors.NewRTError(
 				node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
-				"Index out of bounds",
-				ctx,
-			))
+				"Index out of bounds"))
 		}
 
 		newBytes := coll.Copy().(*values.Bytes)
@@ -935,9 +823,7 @@ func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx interf
 		if !ok {
 			return res.Failure(errors.NewRTError(
 				node.ValueNode.GetPosStart(), node.ValueNode.GetPosEnd(),
-				"String character value must be a string",
-				ctx,
-			))
+				"String character value must be a string"))
 		}
 
 		// Check if the value is a single character
@@ -946,9 +832,7 @@ func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx interf
 		if len(valueRunes) != 1 {
 			return res.Failure(errors.NewRTError(
 				node.ValueNode.GetPosStart(), node.ValueNode.GetPosEnd(),
-				"String assignment value must be a single character",
-				ctx,
-			))
+				"String assignment value must be a single character"))
 		}
 
 		runes := []rune(coll.Value)
@@ -956,9 +840,7 @@ func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx interf
 		if idx < 1 || idx > len(runes) {
 			return res.Failure(errors.NewRTError(
 				node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
-				"Index out of bounds",
-				ctx,
-			))
+				"Index out of bounds"))
 		}
 
 		// Create new string with replaced character
@@ -971,8 +853,6 @@ func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx interf
 	default:
 		return res.Failure(errors.NewRTError(
 			node.CollectionNode.GetPosStart(), node.CollectionNode.GetPosEnd(),
-			"Can only assign to list, map, bytes, or string indices",
-			ctx,
-		))
+			"Can only assign to list, map, bytes, or string indices"))
 	}
 }
