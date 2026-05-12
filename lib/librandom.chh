@@ -16,15 +16,30 @@ func RandomInt(min, max)
 
 	var range = max - min + 1;
 
-	var maxFair = 256 - (256 % range);
+	var pool = 256;
+	var bytesNeeded = 1;
+	while pool < range
+	{
+		pool = pool * 256;
+		bytesNeeded = bytesNeeded + 1;
+	}
+
+	var maxFair = pool - (pool % range);
 
 	while true
 	{
-		var randomNum = rand(1)[1];
-
-		if randomNum < maxFair
+		var bytes = rand(bytesNeeded);
+		var bigInt = 0;
+		var place = 1;
+		for i = 1 to bytesNeeded
 		{
-			return min + (randomNum % range);
+			bigInt = bigInt + bytes[i] * place;
+			place = place * 256;
+		}
+
+		if bigInt < maxFair
+		{
+			return min + (bigInt % range);
 		}
 	}
 }
