@@ -150,6 +150,9 @@ func Cbrt(n)
 
 func Pow(base, exp)
 {
+	if base < 0 and exp != int(exp) { return err; }
+	if base == 0 and exp < 0 { return err; }
+
 	return base ^ exp;
 }
 
