@@ -5,5 +5,9 @@
 Returns the terminal window size.
 
 *Returns:*
-- List: ''[rows, columns]''
+- Map: terminal dimensions
 - ''err'' on failure
+
+*Map fields:*
+- ''"rows"'' (Number): number of rows
+- ''"columns"'' (Number): number of columns

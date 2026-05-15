@@ -21,7 +21,7 @@ var LEFT = "left";
 var RIGHT = "right";
 var SESC = "esc";
 
-# - row [1] | col [2]
+# - rows ["rows"] | columns ["columns"]
 var CANVASSIZE = winsize();
 
 var TICKRATE = 125;
@@ -86,8 +86,8 @@ func DrawApple(playerPosition, body)
 
 	while true
 	{
-		applePosRow = RandomInt(2, CANVASSIZE[1]);
-		applePosCol = RandomInt(1, CANVASSIZE[2]);
+		applePosRow = RandomInt(2, CANVASSIZE["rows"]);
+		applePosCol = RandomInt(1, CANVASSIZE["columns"]);
 
 		if playerPosition["row"] == applePosRow and playerPosition["col"] == applePosCol
 		{
@@ -158,8 +158,8 @@ func MoveAndDrawPlayer(direction, playerPosition)
 func Main()
 {
 	var initialPlayerPos = m[
-		"row": int(CANVASSIZE[1] / 2),
-		"col": int(CANVASSIZE[2] / 2),
+		"row": int(CANVASSIZE["rows"] / 2),
+		"col": int(CANVASSIZE["columns"] / 2),
 	];
 
 	var state = getterm();
@@ -236,8 +236,8 @@ func Main()
 		# Wall
 		if game["playerPosition"]["row"] == 1
 			or game["playerPosition"]["col"] == 0
-			or game["playerPosition"]["row"] == CANVASSIZE[1] + 1
-			or game["playerPosition"]["col"] == CANVASSIZE[2] + 1
+			or game["playerPosition"]["row"] == CANVASSIZE["rows"] + 1
+			or game["playerPosition"]["col"] == CANVASSIZE["columns"] + 1
 		{ break; }
 
 		# nom

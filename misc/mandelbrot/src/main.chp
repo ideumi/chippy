@@ -11,8 +11,8 @@ load("libhandles.chh");
 
 var TERMSZE = winsize();
 
-var SIZEROWS = TERMSZE[1];
-var SIZECOLS = TERMSZE[2];
+var SIZEROWS = TERMSZE["rows"];
+var SIZECOLS = TERMSZE["columns"];
 
 # Regular terminal columns to cartesian coordiates
 
