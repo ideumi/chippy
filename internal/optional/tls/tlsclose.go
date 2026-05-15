@@ -40,7 +40,13 @@ func tlscloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult
 				optional.Prefixed(OptionalName, "close"), shared.PositionFirst, shared.TypeNumber, "handle")))
 	}
 
-	handle := int(handleNum.Value)
+	handle64, err := handleNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	handle := int(handle64)
 	tlsHandle, ok := getTLSHandle(ctx, handle)
 
 	if !ok {
@@ -59,7 +65,7 @@ func tlscloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult
 			shared.Errors.InvalidValue("TLS connection already closed")))
 	}
 
-	err := tlsHandle.Conn.Close()
+	err = tlsHandle.Conn.Close()
 
 	tlsHandle.Closed = true
 	removeTLSHandle(ctx, handle)

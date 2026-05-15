@@ -12,6 +12,7 @@ import (
 	"chip-go/internal/errors"
 	"chip-go/internal/values"
 	"fmt"
+	"math"
 )
 
 type Interpreter struct{}
@@ -68,17 +69,26 @@ func (i *Interpreter) Visit(node ast.Node, ctx values.Ctx) *values.RuntimeResult
 }
 
 func (i *Interpreter) visitNumberNode(node *ast.NumberNode, ctx values.Ctx) *values.RuntimeResult {
-	var value float64
+	var num *values.Number
+
 	switch v := node.Token.Value.(type) {
 
 	case int64:
-		value = float64(v)
-
-	case float64:
-		value = v
+		num = values.NewNumber(v)
 
 	case int:
-		value = float64(v)
+		num = values.NewNumber(int64(v))
+
+	case float64:
+		n, err := values.NewNumberFromFloat(v)
+
+		if err != nil {
+			return values.NewRuntimeResult().Failure(errors.NewRTError(
+				node.PosStart, node.PosEnd,
+				err.Error()))
+		}
+
+		num = n
 
 	default:
 		return values.NewRuntimeResult().Failure(errors.NewRTError(
@@ -87,7 +97,7 @@ func (i *Interpreter) visitNumberNode(node *ast.NumberNode, ctx values.Ctx) *val
 	}
 
 	return values.NewRuntimeResult().Success(
-		values.NewNumber(value).SetContext(ctx).SetPos(node.PosStart, node.PosEnd),
+		num.SetContext(ctx).SetPos(node.PosStart, node.PosEnd),
 	)
 }
 
@@ -133,8 +143,14 @@ func (i *Interpreter) visitByteArrayNode(node *ast.ByteArrayNode, ctx values.Ctx
 				"Byte array elements must be numbers"))
 		}
 
+		intVal, err := num.AsInt()
+
+		if err != nil {
+			return res.Failure(err)
+		}
+
 		// Validate byte range (0-255)
-		byteVal := int(num.Value)
+		byteVal := int(intVal)
 
 		if byteVal < 0 || byteVal > 255 {
 			return res.Failure(errors.NewRTError(
@@ -370,7 +386,15 @@ func (i *Interpreter) visitUnaryOpNode(node *ast.UnaryOpNode, ctx values.Ctx) *v
 	switch node.OpToken.Type {
 
 	case constants.TT_MINUS:
-		result, err = number.MultedBy(values.NewNumber(-1))
+		num, isNum := number.(*values.Number)
+
+		if !isNum {
+			return res.Failure(errors.NewRTError(
+				node.PosStart, node.PosEnd,
+				"Unary minus expects a number"))
+		}
+
+		result = num.Negate()
 
 	case constants.TT_PLUS:
 		result = number
@@ -477,31 +501,97 @@ func (i *Interpreter) visitForNode(node *ast.ForNode, ctx values.Ctx) *values.Ru
 			"Step value must be a number"))
 	}
 
-	i_val := startNum.Value
 	varName := node.VarNameToken.Value.(string)
 
+	// Int path: keeps precision for loops above 2^53 and stops cleanly when
+	// the next step would wrap past int64 range.
+	if startNum.IsInt() && endNum.IsInt() && stepNum.IsInt() {
+		i_val, err := startNum.AsInt()
+
+		if err != nil {
+			return res.Failure(err)
+		}
+
+		end, err := endNum.AsInt()
+
+		if err != nil {
+			return res.Failure(err)
+		}
+
+		step, err := stepNum.AsInt()
+
+		if err != nil {
+			return res.Failure(err)
+		}
+
+		for {
+			if step >= 0 && i_val > end {
+				break
+			}
+
+			if step < 0 && i_val < end {
+				break
+			}
+
+			ctx.SymbolTable.Set(varName, values.NewNumber(i_val))
+
+			res.Register(i.Visit(node.BodyNode, ctx))
+
+			if res.ShouldReturn() && !res.LoopShouldContinue && !res.LoopShouldBreak {
+				return res
+			}
+
+			if res.LoopShouldBreak {
+				res.LoopShouldBreak = false
+
+				break
+			}
+
+			res.LoopShouldContinue = false
+
+			if step > 0 && i_val > math.MaxInt64-step {
+				break
+			}
+
+			if step < 0 && i_val < math.MinInt64-step {
+				break
+			}
+
+			i_val += step
+		}
+
+		ctx.SymbolTable.Remove(varName)
+
+		return res.Success(values.NewNumber(constants.NUM_NUL).SetContext(ctx).SetPos(node.PosStart, node.PosEnd))
+	}
+
+	i_val := startNum.AsFloat()
+	end := endNum.AsFloat()
+	step := stepNum.AsFloat()
+
 	for {
-		if stepNum.Value >= 0 && i_val > endNum.Value {
+		if step >= 0 && i_val > end {
 			break
 		}
 
-		if stepNum.Value < 0 && i_val < endNum.Value {
+		if step < 0 && i_val < end {
 			break
 		}
 
-		ctx.SymbolTable.Set(varName, values.NewNumber(i_val))
+		iterNum, err := values.NewNumberFromFloat(i_val)
+
+		if err != nil {
+			return res.Failure(errors.NewRTError(
+				node.PosStart, node.PosEnd,
+				err.Error()))
+		}
+
+		ctx.SymbolTable.Set(varName, iterNum)
 
 		res.Register(i.Visit(node.BodyNode, ctx))
 
 		if res.ShouldReturn() && !res.LoopShouldContinue && !res.LoopShouldBreak {
 			return res
-		}
-
-		if res.LoopShouldContinue {
-			res.LoopShouldContinue = false
-			i_val += stepNum.Value
-
-			continue
 		}
 
 		if res.LoopShouldBreak {
@@ -510,7 +600,9 @@ func (i *Interpreter) visitForNode(node *ast.ForNode, ctx values.Ctx) *values.Ru
 			break
 		}
 
-		i_val += stepNum.Value
+		res.LoopShouldContinue = false
+
+		i_val += step
 	}
 
 	ctx.SymbolTable.Remove(varName)
@@ -678,14 +770,19 @@ func (i *Interpreter) visitIndexAccessNode(node *ast.IndexAccessNode, ctx values
 			"Index must be a number"))
 	}
 
-	// Force integer
-	if indexNum.Value != float64(int(indexNum.Value)) {
+	if !indexNum.IsInt() {
 		return res.Failure(errors.NewRTError(
 			node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
 			"Index must be an integer"))
 	}
 
-	idx := int(indexNum.Value)
+	idx64, err := indexNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	idx := int(idx64)
 
 	switch coll := collection.(type) {
 	case *values.List:
@@ -704,7 +801,7 @@ func (i *Interpreter) visitIndexAccessNode(node *ast.IndexAccessNode, ctx values
 				"Index out of bounds"))
 		}
 
-		return res.Success(values.NewNumber(float64(coll.Data[idx-1])).SetContext(ctx))
+		return res.Success(values.NewNumber(coll.Data[idx-1]).SetContext(ctx))
 
 	case *values.String:
 		runes := []rune(coll.Value)
@@ -768,14 +865,19 @@ func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx values
 			"Index must be a number"))
 	}
 
-	// Force integer
-	if indexNum.Value != float64(int(indexNum.Value)) {
+	if !indexNum.IsInt() {
 		return res.Failure(errors.NewRTError(
 			node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
 			"Index must be an integer"))
 	}
 
-	idx := int(indexNum.Value)
+	idx64, err := indexNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	idx := int(idx64)
 
 	switch coll := collection.(type) {
 	case *values.List:
@@ -798,7 +900,13 @@ func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx values
 				"Byte value must be a number"))
 		}
 
-		byteValue := int(valueNum.Value)
+		byteIntVal, err := valueNum.AsInt()
+
+		if err != nil {
+			return res.Failure(err)
+		}
+
+		byteValue := int(byteIntVal)
 
 		if byteValue < 0 || byteValue > 255 {
 			return res.Failure(errors.NewRTError(

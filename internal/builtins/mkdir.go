@@ -50,8 +50,14 @@ func mkdirFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			shared.Errors.InvalidArgTypePositionalWithHint("mkdir", shared.PositionSecond, shared.TypeNumber, "mode")))
 	}
 
+	mode64, err := modeNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
 	// Convert octal notation to proper file mode
-	modeStr := strconv.FormatInt(int64(modeNum.Value), 10)
+	modeStr := strconv.FormatInt(mode64, 10)
 	octalMode, err := strconv.ParseInt(modeStr, 8, 32)
 
 	if err != nil {

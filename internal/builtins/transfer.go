@@ -48,8 +48,20 @@ func transferFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult
 			shared.Errors.InvalidArgTypePositionalWithHint("transfer", shared.PositionSecond, shared.TypeNumber, "handle")))
 	}
 
-	targetID := int(targetNum.Value)
-	handleID := int(handleNum.Value)
+	target64, err := targetNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	handle64, err := handleNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	targetID := int(target64)
+	handleID := int(handle64)
 
 	newID, errMsg := orchestrator.Get().Transfer(ctx.InstanceID, targetID, handleID)
 
@@ -61,5 +73,5 @@ func transferFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult
 			shared.Errors.InvalidValue(errMsg)))
 	}
 
-	return res.Success(values.NewNumber(float64(newID)).SetContext(ctx))
+	return res.Success(values.NewNumber(newID).SetContext(ctx))
 }

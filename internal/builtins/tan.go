@@ -38,8 +38,15 @@ func tanFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			shared.Errors.InvalidArgTypeWithHint("tan", shared.TypeNumber, "radians")))
 	}
 
-	radians := radiansArg.Value
-	result := math.Tan(radians)
+	radians := radiansArg.AsFloat()
 
-	return res.Success(values.NewNumber(result).SetContext(ctx))
+	num, err := values.NewNumberFromFloat(math.Tan(radians))
+
+	if err != nil {
+		posStart, posEnd := args[0].GetPos()
+
+		return res.Failure(errors.NewRTError(posStart, posEnd, err.Error()))
+	}
+
+	return res.Success(num.SetContext(ctx))
 }

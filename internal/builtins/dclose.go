@@ -38,7 +38,13 @@ func dcloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			shared.Errors.InvalidArgTypeWithHint("dclose", shared.TypeNumber, "handle")))
 	}
 
-	handleID := int(handleNum.Value)
+	handle64, err := handleNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	handleID := int(handle64)
 	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
 	handle, exists := registry.Dirs.Extract(handleID)
 
@@ -52,7 +58,7 @@ func dcloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	registry.Alloc.Free(handleID)
 
-	err := handle.DirFile.Close()
+	err = handle.DirFile.Close()
 
 	if err != nil {
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))

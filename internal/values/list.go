@@ -80,8 +80,15 @@ func (l *List) AddedTo(other Value) (Value, error) {
 
 func (l *List) SubbedBy(other Value) (Value, error) {
 	if otherNum, ok := other.(*Number); ok {
+		if !otherNum.IsInt() {
+			return nil, errors.NewRTError(
+				otherNum.posStart, otherNum.posEnd,
+				"Index must be an integer")
+
+		}
+
 		newList := l.Copy().(*List)
-		index := int(otherNum.Value)
+		index := int(otherNum.iVal)
 
 		if index < 1 || index > len(newList.Elements) {
 			return nil, errors.NewRTError(
@@ -100,7 +107,14 @@ func (l *List) SubbedBy(other Value) (Value, error) {
 
 func (l *List) MultedBy(other Value) (Value, error) {
 	if otherNum, ok := other.(*Number); ok {
-		if otherNum.Value < 0 {
+		if !otherNum.IsInt() {
+			return nil, errors.NewRTError(
+				otherNum.posStart, otherNum.posEnd,
+				"Repeat count must be an integer")
+
+		}
+
+		if otherNum.iVal < 0 {
 			return nil, errors.NewRTError(
 				otherNum.posStart, otherNum.posEnd,
 				"Cannot repeat list negative times")
@@ -108,7 +122,7 @@ func (l *List) MultedBy(other Value) (Value, error) {
 		}
 
 		newElements := []Value{}
-		for i := 0; i < int(otherNum.Value); i++ {
+		for i := int64(0); i < otherNum.iVal; i++ {
 			for _, element := range l.Elements {
 				if element != nil {
 					newElements = append(newElements, element.Copy())
@@ -129,7 +143,7 @@ func (l *List) MultedBy(other Value) (Value, error) {
 
 func (l *List) GetComparisonEe(other Value) (Value, error) {
 	if otherList, ok := other.(*List); ok {
-		var result float64 = constants.NUM_TRU
+		result := constants.NUM_TRU
 
 		if len(l.Elements) != len(otherList.Elements) {
 			result = constants.NUM_FAL
@@ -152,7 +166,7 @@ func (l *List) GetComparisonEe(other Value) (Value, error) {
 				}
 
 				if compNum, ok := comparison.(*Number); ok {
-					if compNum.Value == constants.NUM_FAL {
+					if !compNum.IsTrue() {
 						result = constants.NUM_FAL
 						break
 					}
@@ -174,12 +188,10 @@ func (l *List) GetComparisonNe(other Value) (Value, error) {
 	}
 
 	if compNum, ok := comparison.(*Number); ok {
-		var result float64
+		result := constants.NUM_TRU
 
-		if compNum.Value == constants.NUM_TRU {
+		if compNum.IsTrue() {
 			result = constants.NUM_FAL
-		} else {
-			result = constants.NUM_TRU
 		}
 
 		return NewNumber(result).SetContext(l.context), nil
@@ -189,24 +201,20 @@ func (l *List) GetComparisonNe(other Value) (Value, error) {
 }
 
 func (l *List) Notted() (Value, error) {
-	var result float64
+	result := constants.NUM_TRU
 
 	if l.IsTrue() {
 		result = constants.NUM_FAL
-	} else {
-		result = constants.NUM_TRU
 	}
 
 	return NewNumber(result).SetContext(l.context), nil
 }
 
 func (l *List) XoredBy(other Value) (Value, error) {
-	var result float64
+	result := constants.NUM_FAL
 
 	if l.IsTrue() != other.IsTrue() {
 		result = constants.NUM_TRU
-	} else {
-		result = constants.NUM_FAL
 	}
 
 	return NewNumber(result).SetContext(l.context), nil

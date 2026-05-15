@@ -54,7 +54,13 @@ func sigfreeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 				shared.Errors.InvalidValue("All signums must be numbers")))
 		}
 
-		sigs = append(sigs, syscall.Signal(int(num.Value)))
+		sig64, err := num.AsInt()
+
+		if err != nil {
+			return res.Failure(err)
+		}
+
+		sigs = append(sigs, syscall.Signal(int(sig64)))
 	}
 
 	signalMu.Lock()

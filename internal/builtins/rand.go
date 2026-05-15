@@ -39,7 +39,13 @@ func randFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			shared.Errors.InvalidArgTypeWithHint("rand", shared.TypeNumber, "count")))
 	}
 
-	numBytes := int(bytesNum.Value)
+	count64, err := bytesNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	numBytes := int(count64)
 
 	if numBytes <= 0 {
 		posStart, posEnd := args[0].GetPos()
@@ -50,7 +56,7 @@ func randFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	}
 
 	buf := make([]byte, numBytes)
-	_, err := rand.Read(buf)
+	_, err = rand.Read(buf)
 
 	if err != nil {
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))

@@ -324,19 +324,19 @@ func extractCombineConfig(ctx values.Ctx) CombineConfig {
 	// Flags
 	if val := ctx.SymbolTable.Get(constants.CONFIG_STRIP_COMMENTS); val != nil {
 		if num, ok := val.(*values.Number); ok {
-			config.StripComments = num.Value != 0
+			config.StripComments = num.IsTrue()
 		}
 	}
 
 	if val := ctx.SymbolTable.Get(constants.CONFIG_STRIP_WHITESPACE); val != nil {
 		if num, ok := val.(*values.Number); ok {
-			config.StripWhitespace = num.Value != 0
+			config.StripWhitespace = num.IsTrue()
 		}
 	}
 
 	if val := ctx.SymbolTable.Get(constants.CONFIG_ADD_SHEBANG); val != nil {
 		if num, ok := val.(*values.Number); ok {
-			config.AddShebang = num.Value != 0
+			config.AddShebang = num.IsTrue()
 		}
 	}
 

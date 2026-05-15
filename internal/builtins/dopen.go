@@ -63,5 +63,5 @@ func dopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		Path:    pathStr.Value,
 	})
 
-	return res.Success(values.NewNumber(float64(handle)).SetContext(ctx))
+	return res.Success(values.NewNumber(handle).SetContext(ctx))
 }

@@ -64,7 +64,13 @@ func tlsacceptFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResul
 				optional.Prefixed(OptionalName, "accept"), shared.PositionThird, shared.TypeString, "keyPath")))
 	}
 
-	serverHandle := int(handleNum.Value)
+	handle64, err := handleNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	serverHandle := int(handle64)
 	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
 	serverSocket, exists := registry.Sockets.Get(serverHandle)
 
@@ -123,5 +129,5 @@ func tlsacceptFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResul
 		Closed: false,
 	})
 
-	return res.Success(values.NewNumber(float64(clientHandle)).SetContext(ctx))
+	return res.Success(values.NewNumber(clientHandle).SetContext(ctx))
 }

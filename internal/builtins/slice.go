@@ -49,8 +49,20 @@ func sliceFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionThird, shared.TypeNumber, "end")))
 		}
 
-		start := int(startNum.Value)
-		end := int(endNum.Value)
+		start64, err := startNum.AsInt()
+
+		if err != nil {
+			return res.Failure(err)
+		}
+
+		end64, err := endNum.AsInt()
+
+		if err != nil {
+			return res.Failure(err)
+		}
+
+		start := int(start64)
+		end := int(end64)
 
 		if start < 1 {
 			posStart, posEnd := args[1].GetPos()
@@ -94,8 +106,20 @@ func sliceFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionThird, shared.TypeNumber, "end")))
 		}
 
-		start := int(startNum.Value)
-		end := int(endNum.Value)
+		start64, err := startNum.AsInt()
+
+		if err != nil {
+			return res.Failure(err)
+		}
+
+		end64, err := endNum.AsInt()
+
+		if err != nil {
+			return res.Failure(err)
+		}
+
+		start := int(start64)
+		end := int(end64)
 
 		if start < 1 {
 			posStart, posEnd := args[1].GetPos()
@@ -142,8 +166,20 @@ func sliceFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionThird, shared.TypeNumber, "end")))
 		}
 
-		start := int(startNum.Value)
-		end := int(endNum.Value)
+		start64, err := startNum.AsInt()
+
+		if err != nil {
+			return res.Failure(err)
+		}
+
+		end64, err := endNum.AsInt()
+
+		if err != nil {
+			return res.Failure(err)
+		}
+
+		start := int(start64)
+		end := int(end64)
 
 		if start < 1 {
 			posStart, posEnd := args[1].GetPos()

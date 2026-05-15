@@ -47,7 +47,13 @@ func charatFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			shared.Errors.InvalidArgTypePositionalWithHint("charat", shared.PositionSecond, shared.TypeNumber, "index")))
 	}
 
-	index := int(indexNum.Value)
+	idx64, err := indexNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	index := int(idx64)
 	str := stringArg.Value
 
 	// UTF8

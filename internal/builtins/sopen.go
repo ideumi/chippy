@@ -65,8 +65,14 @@ func sopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			shared.Errors.InvalidArgTypePositionalWithHint("sopen", shared.PositionThird, shared.TypeString, "mode")))
 	}
 
+	port64, err := portNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
 	address := addressStr.Value
-	port := int(portNum.Value)
+	port := int(port64)
 	mode := modeStr.Value
 
 	// Validate mode
@@ -133,5 +139,5 @@ func sopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	handle := registry.Alloc.Alloc()
 	registry.Sockets.Store(handle, socket)
 
-	return res.Success(values.NewNumber(float64(handle)).SetContext(ctx))
+	return res.Success(values.NewNumber(handle).SetContext(ctx))
 }

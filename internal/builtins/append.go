@@ -40,7 +40,13 @@ func appendFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 				shared.Errors.InvalidArgTypePositionalWithHint("append", shared.PositionSecond, shared.TypeNumber, "value")))
 		}
 
-		byteValue := int(valueNum.Value)
+		byte64, err := valueNum.AsInt()
+
+		if err != nil {
+			return res.Failure(err)
+		}
+
+		byteValue := int(byte64)
 
 		if byteValue < 0 || byteValue > 255 {
 			posStart, posEnd := args[1].GetPos()

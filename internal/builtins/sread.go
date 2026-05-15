@@ -52,8 +52,20 @@ func sreadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			shared.Errors.InvalidArgTypePositionalWithHint("sread", shared.PositionSecond, shared.TypeNumber, "maxBytes")))
 	}
 
-	handle := int(handleNum.Value)
-	maxBytes := int(maxBytesNum.Value)
+	handle64, err := handleNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	maxBytes64, err := maxBytesNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	handle := int(handle64)
+	maxBytes := int(maxBytes64)
 
 	// Validate maxBytes
 	if maxBytes <= 0 {
@@ -79,7 +91,6 @@ func sreadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	// Prepare buffer
 	buffer := make([]byte, maxBytes)
 	var n int
-	var err error
 
 	// Read based on socket type
 	switch socket.Mode {

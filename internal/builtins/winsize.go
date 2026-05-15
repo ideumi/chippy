@@ -39,8 +39,8 @@ func winsizeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 	}
 
-	rows := values.NewNumber(float64(ws.Row)).SetContext(ctx)
-	cols := values.NewNumber(float64(ws.Col)).SetContext(ctx)
+	rows := values.NewNumber(ws.Row).SetContext(ctx)
+	cols := values.NewNumber(ws.Col).SetContext(ctx)
 
 	return res.Success(values.NewList([]values.Value{rows, cols}).SetContext(ctx))
 }

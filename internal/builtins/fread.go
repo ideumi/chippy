@@ -50,9 +50,20 @@ func freadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			shared.Errors.InvalidArgTypePositionalWithHint("fread", shared.PositionSecond, shared.TypeNumber, "count")))
 	}
 
-	handle := int(handleNum.Value)
+	handle64, err := handleNum.AsInt()
 
-	count := int(countNum.Value)
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	count64, err := countNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	handle := int(handle64)
+	count := int(count64)
 
 	if count < 0 {
 		posStart, posEnd := args[1].GetPos()
@@ -82,7 +93,6 @@ func freadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	var buffer []byte
 	var n int
-	var err error
 
 	if count == 0 {
 		buffer, err = io.ReadAll(reader)

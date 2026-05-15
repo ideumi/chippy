@@ -152,18 +152,18 @@ func parseresponseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeR
 	nativeMap := values.NewMapFromEntries(
 		[]string{"statusCode", "statusText", "headers", "body", "chunked"},
 		map[string]values.Value{
-			"statusCode": values.NewNumber(float64(statusCode)).SetContext(ctx),
+			"statusCode": values.NewNumber(statusCode).SetContext(ctx),
 			"statusText": values.NewString(statusText).SetContext(ctx),
 			"headers":    values.NewList(headersList).SetContext(ctx),
 			"body":       values.NewBytes(body).SetContext(ctx),
-			"chunked":    values.NewNumber(boolToFloat(isChunked)).SetContext(ctx),
+			"chunked":    values.NewNumber(boolToInt(isChunked)).SetContext(ctx),
 		},
 	)
 
 	return res.Success(nativeMap.SetContext(ctx))
 }
 
-func boolToFloat(b bool) float64 {
+func boolToInt(b bool) int {
 	if b {
 		return constants.NUM_TRU
 	}

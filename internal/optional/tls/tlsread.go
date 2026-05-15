@@ -52,7 +52,13 @@ func tlsreadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 				optional.Prefixed(OptionalName, "read"), shared.PositionSecond, shared.TypeNumber, "maxBytes")))
 	}
 
-	maxBytes := int(maxBytesNum.Value)
+	max64, err := maxBytesNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	maxBytes := int(max64)
 
 	if maxBytes <= 0 {
 		posStart, posEnd := args[1].GetPos()
@@ -62,7 +68,13 @@ func tlsreadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 			shared.Errors.InvalidValue("maxBytes must be greater than 0")))
 	}
 
-	handle := int(handleNum.Value)
+	handle64, err := handleNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	handle := int(handle64)
 	tlsHandle, ok := getTLSHandle(ctx, handle)
 
 	if !ok {

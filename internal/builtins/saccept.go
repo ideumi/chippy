@@ -41,7 +41,13 @@ func sacceptFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 			shared.Errors.InvalidArgTypePositionalWithHint("saccept", shared.PositionFirst, shared.TypeNumber, "serverHandle")))
 	}
 
-	serverHandle := int(handleNum.Value)
+	handle64, err := handleNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	serverHandle := int(handle64)
 
 	// Get server socket handle
 	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
@@ -89,5 +95,5 @@ func sacceptFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 
 	registry.Sockets.Store(clientHandle, clientSocket)
 
-	return res.Success(values.NewNumber(float64(clientHandle)).SetContext(ctx))
+	return res.Success(values.NewNumber(clientHandle).SetContext(ctx))
 }

@@ -38,7 +38,7 @@ func receiveFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 			shared.Errors.InvalidArgTypeWithHint("receive", shared.TypeNumber, "blocking")))
 	}
 
-	blocking := blockArg.Value != 0
+	blocking := blockArg.IsTrue()
 
 	instanceID := ctx.InstanceID
 	orch := orchestrator.Get()

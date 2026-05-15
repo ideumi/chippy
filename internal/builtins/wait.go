@@ -39,7 +39,13 @@ func waitFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			shared.Errors.InvalidArgTypeWithHint("wait", shared.TypeNumber, "handle")))
 	}
 
-	instanceID := int(handleNum.Value)
+	id64, err := handleNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	instanceID := int(id64)
 
 	if instanceID == 0 {
 		posStart, posEnd := args[0].GetPos()

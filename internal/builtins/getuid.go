@@ -30,5 +30,5 @@ func getuidFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	uid := os.Getuid()
 
-	return res.Success(values.NewNumber(float64(uid)).SetContext(ctx))
+	return res.Success(values.NewNumber(uid).SetContext(ctx))
 }

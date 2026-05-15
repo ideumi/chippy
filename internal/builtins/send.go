@@ -39,7 +39,13 @@ func sendFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			shared.Errors.InvalidArgTypePositionalWithHint("send", shared.PositionFirst, shared.TypeNumber, "handle")))
 	}
 
-	instanceID := int(handleNum.Value)
+	id64, err := handleNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	instanceID := int(id64)
 
 	inst := orchestrator.Get().GetInstance(instanceID)
 

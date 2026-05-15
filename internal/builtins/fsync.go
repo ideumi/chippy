@@ -39,7 +39,13 @@ func fsyncFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			shared.Errors.InvalidArgTypeWithHint("fsync", shared.TypeNumber, "handle")))
 	}
 
-	handle := int(handleNum.Value)
+	handle64, err := handleNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	handle := int(handle64)
 	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
 	file, exists := registry.Files.Get(handle)
 
@@ -51,7 +57,7 @@ func fsyncFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			shared.Errors.InvalidValue("Invalid handle")))
 	}
 
-	err := file.Sync()
+	err = file.Sync()
 
 	if err != nil {
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))

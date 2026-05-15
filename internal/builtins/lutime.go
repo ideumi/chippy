@@ -68,8 +68,8 @@ func lutimeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	}
 
 	ts := []unix.Timespec{
-		toTimespec(atimeNum.Value),
-		toTimespec(mtimeNum.Value),
+		toTimespec(atimeNum.AsFloat()),
+		toTimespec(mtimeNum.AsFloat()),
 	}
 
 	err := unix.UtimesNanoAt(unix.AT_FDCWD, pathStr.Value, ts, unix.AT_SYMLINK_NOFOLLOW)

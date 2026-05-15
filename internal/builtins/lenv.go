@@ -41,5 +41,5 @@ func lenvFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	str := stringArg.Value
 	width := runewidth.StringWidth(str)
 
-	return res.Success(values.NewNumber(float64(width)).SetContext(ctx))
+	return res.Success(values.NewNumber(width).SetContext(ctx))
 }

@@ -31,7 +31,13 @@ func unmarshalValue(val interface{}, ctx values.Ctx) values.Value {
 
 		return values.NewString(jsonFalse).SetContext(ctx)
 	case float64:
-		return values.NewNumber(v).SetContext(ctx)
+		num, err := values.NewNumberFromFloat(v)
+
+		if err != nil {
+			return values.NewString(constants.STR_ERR).SetContext(ctx)
+		}
+
+		return num.SetContext(ctx)
 	case string:
 		return values.NewString(v).SetContext(ctx)
 	case []interface{}:
@@ -72,7 +78,17 @@ func unmarshalValue(val interface{}, ctx values.Ctx) values.Value {
 func marshalValue(val values.Value) (interface{}, error) {
 	switch v := val.(type) {
 	case *values.Number:
-		return v.Value, nil
+		if v.IsInt() {
+			i, err := v.AsInt()
+
+			if err != nil {
+				return nil, err
+			}
+
+			return i, nil
+		}
+
+		return v.AsFloat(), nil
 	case *values.String:
 		// Check for special JSON constants
 		switch v.Value {

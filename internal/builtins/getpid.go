@@ -30,5 +30,5 @@ func getpidFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	pid := os.Getpid()
 
-	return res.Success(values.NewNumber(float64(pid)).SetContext(ctx))
+	return res.Success(values.NewNumber(pid).SetContext(ctx))
 }

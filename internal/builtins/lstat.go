@@ -49,17 +49,18 @@ func lstatFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	// Format: [size, mtime, atime, ctime, mode, uid, gid, nlink, ino, dev, type]
 
 	// Get underlying syscall.Stat_t
-	var uid, gid, nlink, ino, dev float64
+	var uid, gid uint32
+	var nlink, ino, dev uint64
 	atime := fileInfo.ModTime().Unix()
 	mtime := fileInfo.ModTime().Unix()
 	ctime := fileInfo.ModTime().Unix()
 
 	if stat, ok := fileInfo.Sys().(*syscall.Stat_t); ok {
-		uid = float64(stat.Uid)
-		gid = float64(stat.Gid)
-		nlink = float64(stat.Nlink)
-		ino = float64(stat.Ino)
-		dev = float64(stat.Dev)
+		uid = stat.Uid
+		gid = stat.Gid
+		nlink = uint64(stat.Nlink)
+		ino = stat.Ino
+		dev = stat.Dev
 		atime = stat.Atim.Sec
 		mtime = stat.Mtim.Sec
 		ctime = stat.Ctim.Sec
@@ -98,10 +99,10 @@ func lstatFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	}
 
 	statElements := []values.Value{
-		values.NewNumber(float64(fileInfo.Size())).SetContext(ctx),         // size
-		values.NewNumber(float64(mtime)).SetContext(ctx),                   // mtime
-		values.NewNumber(float64(atime)).SetContext(ctx),                   // atime
-		values.NewNumber(float64(ctime)).SetContext(ctx),                   // ctime
+		values.NewNumber(fileInfo.Size()).SetContext(ctx),                  // size
+		values.NewNumber(mtime).SetContext(ctx),                            // mtime
+		values.NewNumber(atime).SetContext(ctx),                            // atime
+		values.NewNumber(ctime).SetContext(ctx),                            // ctime
 		values.NewNumber(fileModeToChmod(fileInfo.Mode())).SetContext(ctx), // mode (permissions)
 		values.NewNumber(uid).SetContext(ctx),                              // uid
 		values.NewNumber(gid).SetContext(ctx),                              // gid

@@ -39,7 +39,7 @@ func sleepFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			shared.Errors.InvalidArgTypeWithHint("sleep", shared.TypeNumber, "milliseconds to sleep")))
 	}
 
-	milliseconds := millisecondsNum.Value
+	milliseconds := millisecondsNum.AsFloat()
 
 	if milliseconds < 0 {
 		posStart, posEnd := args[0].GetPos()

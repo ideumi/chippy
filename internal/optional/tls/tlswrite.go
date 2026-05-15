@@ -51,7 +51,13 @@ func tlswriteFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult
 				optional.Prefixed(OptionalName, "write"), shared.PositionSecond, shared.TypeNumber, "handle")))
 	}
 
-	handle := int(handleNum.Value)
+	handle64, err := handleNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	handle := int(handle64)
 	tlsHandle, ok := getTLSHandle(ctx, handle)
 
 	if !ok {
@@ -76,5 +82,5 @@ func tlswriteFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 	}
 
-	return res.Success(values.NewNumber(float64(n)).SetContext(ctx))
+	return res.Success(values.NewNumber(n).SetContext(ctx))
 }

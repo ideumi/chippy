@@ -81,7 +81,7 @@ func parseurlFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult
 		map[string]values.Value{
 			"scheme": values.NewString(parsedURL.Scheme).SetContext(ctx),
 			"host":   values.NewString(parsedURL.Hostname()).SetContext(ctx),
-			"port":   values.NewNumber(float64(portNum)).SetContext(ctx),
+			"port":   values.NewNumber(portNum).SetContext(ctx),
 			"path":   values.NewString(path).SetContext(ctx),
 			"query":  values.NewString(parsedURL.RawQuery).SetContext(ctx),
 		},

@@ -56,7 +56,7 @@ func indexofFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 
 		runeIndex := len([]rune(haystack.Value[:byteIndex]))
 
-		return res.Success(values.NewNumber(float64(runeIndex + 1)).SetContext(ctx))
+		return res.Success(values.NewNumber(runeIndex + 1).SetContext(ctx))
 
 	case *values.List:
 		needle := args[1]
@@ -69,8 +69,8 @@ func indexofFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 			}
 
 			if compNum, ok := comparison.(*values.Number); ok {
-				if compNum.Value == constants.NUM_TRU {
-					return res.Success(values.NewNumber(float64(i + 1)).SetContext(ctx))
+				if compNum.IsTrue() {
+					return res.Success(values.NewNumber(i + 1).SetContext(ctx))
 				}
 			}
 		}
@@ -80,7 +80,13 @@ func indexofFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 	case *values.Bytes:
 		switch needle := args[1].(type) {
 		case *values.Number:
-			byteValue := int(needle.Value)
+			byte64, err := needle.AsInt()
+
+			if err != nil {
+				return res.Failure(err)
+			}
+
+			byteValue := int(byte64)
 
 			if byteValue < 0 || byteValue > 255 {
 				posStart, posEnd := args[1].GetPos()
@@ -94,7 +100,7 @@ func indexofFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 
 			for i, b := range haystack.Data {
 				if b == target {
-					return res.Success(values.NewNumber(float64(i + 1)).SetContext(ctx))
+					return res.Success(values.NewNumber(i + 1).SetContext(ctx))
 				}
 			}
 
@@ -111,7 +117,7 @@ func indexofFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 				return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 			}
 
-			return res.Success(values.NewNumber(float64(idx + 1)).SetContext(ctx))
+			return res.Success(values.NewNumber(idx + 1).SetContext(ctx))
 
 		default:
 			posStart, posEnd := args[1].GetPos()

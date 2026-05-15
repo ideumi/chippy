@@ -165,5 +165,5 @@ func actorFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		deliver(orchestrator.ActorResult{Value: returnValue})
 	}()
 
-	return res.Success(values.NewNumber(float64(inst.ID)).SetContext(ctx))
+	return res.Success(values.NewNumber(inst.ID).SetContext(ctx))
 }

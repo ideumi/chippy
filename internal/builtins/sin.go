@@ -38,8 +38,15 @@ func sinFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			shared.Errors.InvalidArgTypeWithHint("sin", shared.TypeNumber, "radians")))
 	}
 
-	radians := radiansArg.Value
-	result := math.Sin(radians)
+	radians := radiansArg.AsFloat()
 
-	return res.Success(values.NewNumber(result).SetContext(ctx))
+	num, err := values.NewNumberFromFloat(math.Sin(radians))
+
+	if err != nil {
+		posStart, posEnd := args[0].GetPos()
+
+		return res.Failure(errors.NewRTError(posStart, posEnd, err.Error()))
+	}
+
+	return res.Success(num.SetContext(ctx))
 }

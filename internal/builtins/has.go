@@ -62,7 +62,7 @@ func hasFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			}
 
 			if compNum, ok := comparison.(*values.Number); ok {
-				if compNum.Value == constants.NUM_TRU {
+				if compNum.IsTrue() {
 					return res.Success(values.NewNumber(constants.NUM_TRU).SetContext(ctx))
 				}
 			}
@@ -102,7 +102,13 @@ func hasFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 				shared.Errors.InvalidArgTypePositionalWithHint("has", shared.PositionSecond, shared.TypeNumber, "bytes")))
 		}
 
-		byteValue := int(needleNum.Value)
+		byte64, err := needleNum.AsInt()
+
+		if err != nil {
+			return res.Failure(err)
+		}
+
+		byteValue := int(byte64)
 
 		if byteValue < 0 || byteValue > 255 {
 			posStart, posEnd := args[1].GetPos()

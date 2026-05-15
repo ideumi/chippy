@@ -70,9 +70,26 @@ func compareValues(a, b values.Value) int {
 	case *values.Number:
 		bVal := b.(*values.Number)
 
-		if aVal.Value < bVal.Value {
+		if aVal.IsInt() && bVal.IsInt() {
+			aInt, _ := aVal.AsInt()
+			bInt, _ := bVal.AsInt()
+
+			if aInt < bInt {
+				return -1
+			}
+
+			if aInt > bInt {
+				return 1
+			}
+
+			return 0
+		}
+
+		if aVal.AsFloat() < bVal.AsFloat() {
 			return -1
-		} else if aVal.Value > bVal.Value {
+		}
+
+		if aVal.AsFloat() > bVal.AsFloat() {
 			return 1
 		}
 

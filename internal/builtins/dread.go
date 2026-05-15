@@ -40,7 +40,13 @@ func dreadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			shared.Errors.InvalidArgTypeWithHint("dread", shared.TypeNumber, "handle")))
 	}
 
-	handleID := int(handleNum.Value)
+	handle64, err := handleNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	handleID := int(handle64)
 	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
 	handle, exists := registry.Dirs.Get(handleID)
 
@@ -53,10 +59,10 @@ func dreadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	}
 
 	// Read next directory entry
-	entries, err := handle.DirFile.Readdir(1)
+	entries, readErr := handle.DirFile.Readdir(1)
 
-	if err != nil {
-		if err == io.EOF {
+	if readErr != nil {
+		if readErr == io.EOF {
 			// End of directory
 			return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
 		}

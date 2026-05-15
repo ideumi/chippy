@@ -36,7 +36,11 @@ func intFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			shared.Errors.InvalidArgTypeWithHint("int", shared.TypeNumber, "value")))
 	}
 
-	result := float64(int64(num.Value))
+	intVal, err := num.AsInt()
 
-	return res.Success(values.NewNumber(result).SetContext(ctx))
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	return res.Success(values.NewNumber(intVal).SetContext(ctx))
 }

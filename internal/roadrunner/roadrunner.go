@@ -103,7 +103,7 @@ func newRR2(instanceID int, displayName string) *RoadRunner2 {
 		globalCtx.SymbolTable.Set(name, constant)
 	}
 
-	globalCtx.SymbolTable.Set("CHIPRT", values.NewNumber(float64(instanceID)).SetContext(globalCtx))
+	globalCtx.SymbolTable.Set("CHIPRT", values.NewNumber(instanceID).SetContext(globalCtx))
 
 	return rr
 }

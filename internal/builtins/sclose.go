@@ -40,7 +40,13 @@ func scloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			shared.Errors.InvalidArgTypePositionalWithHint("sclose", shared.PositionFirst, shared.TypeNumber, "handle")))
 	}
 
-	handle := int(handleNum.Value)
+	handle64, err := handleNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	handle := int(handle64)
 
 	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
 	socket, exists := registry.Sockets.Extract(handle)
@@ -54,8 +60,6 @@ func scloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	}
 
 	registry.Alloc.Free(handle)
-
-	var err error
 
 	switch socket.Mode {
 	case "tcp":

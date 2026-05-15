@@ -38,7 +38,13 @@ func fcloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			shared.Errors.InvalidArgTypeWithHint("fclose", shared.TypeNumber, "handle")))
 	}
 
-	handle := int(handleNum.Value)
+	handle64, err := handleNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	handle := int(handle64)
 
 	if handle >= 0 && handle <= 2 {
 		posStart, posEnd := args[0].GetPos()
@@ -61,7 +67,7 @@ func fcloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	registry.Alloc.Free(handle)
 
-	err := file.Close()
+	err = file.Close()
 
 	if err != nil {
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))

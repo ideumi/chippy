@@ -51,7 +51,13 @@ func swriteFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			shared.Errors.InvalidArgTypePositionalWithHint("swrite", shared.PositionSecond, shared.TypeNumber, "handle")))
 	}
 
-	handle := int(handleNum.Value)
+	handle64, err := handleNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	handle := int(handle64)
 
 	// Get socket handle
 	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
@@ -71,7 +77,6 @@ func swriteFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	// Write based on socket type
 	var n int
-	var err error
 
 	switch socket.Mode {
 	case "tcp":
@@ -114,5 +119,5 @@ func swriteFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 	}
 
-	return res.Success(values.NewNumber(float64(n)).SetContext(ctx))
+	return res.Success(values.NewNumber(n).SetContext(ctx))
 }

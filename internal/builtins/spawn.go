@@ -81,5 +81,5 @@ func spawnFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	// Release the process so it doesn't become a zombie
 	go proc.Wait()
 
-	return res.Success(values.NewNumber(float64(pid)).SetContext(ctx))
+	return res.Success(values.NewNumber(pid).SetContext(ctx))
 }

@@ -37,14 +37,24 @@ func numFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		return res.Success(v.Copy().SetContext(ctx))
 
 	case *values.String:
-		if f, err := strconv.ParseFloat(v.Value, 64); err == nil {
-			return res.Success(values.NewNumber(f).SetContext(ctx))
+		if f, parseErr := strconv.ParseFloat(v.Value, 64); parseErr == nil {
+			num, err := values.NewNumberFromFloat(f)
+
+			if err != nil {
+				posStart, posEnd := args[0].GetPos()
+
+				return res.Failure(errors.NewRTError(
+					posStart, posEnd,
+					shared.Errors.CannotConvert("string to number", ": "+err.Error())))
+			}
+
+			return res.Success(num.SetContext(ctx))
 		} else {
 			posStart, posEnd := args[0].GetPos()
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				shared.Errors.CannotConvert("string to number", ": "+err.Error())))
+				shared.Errors.CannotConvert("string to number", ": "+parseErr.Error())))
 		}
 
 	case *values.List:

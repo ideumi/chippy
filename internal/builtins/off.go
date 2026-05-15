@@ -38,7 +38,13 @@ func offFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			shared.Errors.InvalidArgTypeWithHint("off", shared.TypeNumber, "exitCode")))
 	}
 
-	code := int(exitCode.Value)
+	code64, err := exitCode.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	code := int(code64)
 
 	if code < 0 || code > 255 {
 		posStart, posEnd := args[0].GetPos()

@@ -67,8 +67,8 @@ func utimeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	}
 
 	ts := []syscall.Timespec{
-		toTimespec(atimeNum.Value),
-		toTimespec(mtimeNum.Value),
+		toTimespec(atimeNum.AsFloat()),
+		toTimespec(mtimeNum.AsFloat()),
 	}
 
 	err := syscall.UtimesNano(pathStr.Value, ts)
