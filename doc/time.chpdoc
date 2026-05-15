@@ -2,7 +2,7 @@
 
 ''time()''
 
-Returns the current Unix timestamp with nanosecond precision.
+Returns the current Unix timestamp in seconds.
 
 *Returns:*
-- Number: Unix timestamp with nanosecond precision
+- Number: Unix timestamp in seconds
