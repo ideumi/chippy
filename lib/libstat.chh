@@ -6,73 +6,6 @@
 load("libgregorian.chh");
 load("libfsio.chh");
 
-#@ <STATSIZE>
-#@ (2025-08-13)
-#@ File size in bytes
-
-var STATSIZE = 1;
-
-#@ <STATMTIME>
-#@ (2025-08-13)
-#@ Last modified time (Unix timestamp)
-
-var STATMTIME = 2;
-
-#@ <STATATIME>
-#@ (2025-08-13)
-#@ Last access time (Unix timestamp)
-
-var STATATIME = 3;
-
-#@ <STATCTIME>
-#@ (2025-08-13)
-#@ Creation/change time (Unix timestamp)
-
-var STATCTIME = 4;
-
-#@ <STATMODE>
-#@ (2025-08-13)
-#@ File permissions/mode bits
-
-var STATMODE = 5;
-
-#@ <STATUID>
-#@ (2025-08-13)
-#@ Owner user ID
-
-var STATUID = 6;
-
-#@ <STATGID>
-#@ (2025-08-13)
-#@ Owner group ID
-
-var STATGID = 7;
-
-#@ <STATNLINK>
-#@ (2025-08-13)
-#@ Number of hard links
-
-var STATNLINK = 8;
-
-#@ <STATINODE>
-#@ (2025-08-13)
-#@ Inode number
-
-var STATINODE = 9;
-
-#@ <STATDEVICE>
-#@ (2025-08-13)
-#@ Device ID
-
-var STATDEVICE = 10;
-
-#@ <STATTYPE>
-#@ (2025-08-13)
-#@ File type string
-
-var STATTYPE = 11;
-
-
 #@ <TYPEFILE>
 #@ (2025-08-13)
 #@ Regular file type
@@ -124,12 +57,12 @@ var TYPEUNKNOWN = "unknown";
 #@ <StatType(statResult)>
 #@ V-1.0.0 (2025-08-13)
 #@
-#@ Extracts the file type from ''stat()'' result list ''statResult''.
+#@ Extracts the file type from ''stat()'' result map ''statResult''.
 
 func StatType(statResult)
 {
-	if type(statResult) == "list" and len(statResult) >= STATTYPE
-	{ return statResult[STATTYPE]; }
+	if type(statResult) == "map" and has(statResult, "type")
+	{ return statResult["type"]; }
 
 	return TYPEUNKNOWN;
 }
@@ -144,7 +77,7 @@ func PathExists(path)
 {
 	var info = stat(path);
 
-	return type(info) == "list";
+	return type(info) == "map";
 }
 
 #@ <IsFile(path)>
@@ -193,17 +126,17 @@ func StatInfo(path)
 {
 	var info = stat(path);
 
-	if type(info) != "list" { return err; }
+	if type(info) != "map" { return err; }
 
 	var result = "Path: " + path + "\n";
 
 	result = result + "Type: " + StatType(info) + "\n";
-	result = result + "Size: " + SizeToString(info[STATSIZE]) + "\n";
-	result = result + "Modified: " + GregorianFormatTime(info[STATMTIME]) + "\n";
-	result = result + "Mode: " + str(info[STATMODE]) + "\n";
-	result = result + "UID: " + str(info[STATUID]) + "\n";
-	result = result + "GID: " + str(info[STATGID]) + "\n";
-	result = result + "Inode: " + str(info[STATINODE]);
+	result = result + "Size: " + SizeToString(info["size"]) + "\n";
+	result = result + "Modified: " + GregorianFormatTime(info["modified"]) + "\n";
+	result = result + "Mode: " + str(info["mode"]) + "\n";
+	result = result + "UID: " + str(info["userId"]) + "\n";
+	result = result + "GID: " + str(info["groupId"]) + "\n";
+	result = result + "Inode: " + str(info["inode"]);
 
 	return result;
 }

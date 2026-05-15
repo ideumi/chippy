@@ -46,9 +46,6 @@ func lstatFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 	}
 
-	// Format: [size, mtime, atime, ctime, mode, uid, gid, nlink, ino, dev, type]
-
-	// Get underlying syscall.Stat_t
 	var uid, gid uint32
 	var nlink, ino, dev uint64
 	atime := fileInfo.ModTime().Unix()
@@ -66,7 +63,6 @@ func lstatFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		ctime = stat.Ctim.Sec
 	}
 
-	// Determine file type
 	var fileType string
 
 	mode := fileInfo.Mode()
@@ -98,21 +94,35 @@ func lstatFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		fileType = "unknown"
 	}
 
-	statElements := []values.Value{
-		values.NewNumber(fileInfo.Size()).SetContext(ctx),                  // size
-		values.NewNumber(mtime).SetContext(ctx),                            // mtime
-		values.NewNumber(atime).SetContext(ctx),                            // atime
-		values.NewNumber(ctime).SetContext(ctx),                            // ctime
-		values.NewNumber(fileModeToChmod(fileInfo.Mode())).SetContext(ctx), // mode (permissions)
-		values.NewNumber(uid).SetContext(ctx),                              // uid
-		values.NewNumber(gid).SetContext(ctx),                              // gid
-		values.NewNumber(nlink).SetContext(ctx),                            // nlink
-		values.NewNumber(ino).SetContext(ctx),                              // inode
-		values.NewNumber(dev).SetContext(ctx),                              // device
-		values.NewString(fileType).SetContext(ctx),                         // type
+	keys := []string{
+		"size",
+		"modified",
+		"accessed",
+		"changed",
+		"mode",
+		"userId",
+		"groupId",
+		"links",
+		"inode",
+		"device",
+		"type",
 	}
 
-	result := values.NewList(statElements)
+	entries := map[string]values.Value{
+		"size":     values.NewNumber(fileInfo.Size()).SetContext(ctx),
+		"modified": values.NewNumber(mtime).SetContext(ctx),
+		"accessed": values.NewNumber(atime).SetContext(ctx),
+		"changed":  values.NewNumber(ctime).SetContext(ctx),
+		"mode":     values.NewNumber(fileModeToChmod(fileInfo.Mode())).SetContext(ctx),
+		"userId":   values.NewNumber(uid).SetContext(ctx),
+		"groupId":  values.NewNumber(gid).SetContext(ctx),
+		"links":    values.NewNumber(nlink).SetContext(ctx),
+		"inode":    values.NewNumber(ino).SetContext(ctx),
+		"device":   values.NewNumber(dev).SetContext(ctx),
+		"type":     values.NewString(fileType).SetContext(ctx),
+	}
+
+	result := values.NewMapFromEntries(keys, entries)
 
 	return res.Success(result.SetContext(ctx))
 }
