@@ -4,7 +4,7 @@
 #
 
 #@ <Basename(path)>
-#@ V-1.0.0 (2025-08-13)
+#@ V-1.0.1 (2026-05-16)
 #@
 #@ Returns the filename portion of ''path''.
 
@@ -41,7 +41,7 @@ func Basename(path)
 }
 
 #@ <Dirname(path)>
-#@ V-1.0.0 (2025-08-13)
+#@ V-1.0.1 (2026-05-16)
 #@
 #@ Returns the directory portion of ''path'' or ''"."'' if no directory separator
 #@ found.

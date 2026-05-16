@@ -4,14 +4,14 @@
 #
 
 #@ <PI>
-#@ (2025-08-12)
+#@ (2026-05-16)
 #@ Constant ratio of the circumference of a circle to
 #@ its diameter.
 
 var PI = 3.141592653589793;
 
 #@ <E>
-#@ (2025-08-12)
+#@ (2026-05-16)
 #@ Euler's number, the base of natural logarithms.
 
 var E = 2.718281828459045;
