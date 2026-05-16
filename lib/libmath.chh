@@ -8,13 +8,25 @@
 #@ Constant ratio of the circumference of a circle to
 #@ its diameter.
 
-var PI = 3.1415926535897932;
+var PI = 3.141592653589793;
 
 #@ <E>
 #@ (2025-08-12)
 #@ Euler's number, the base of natural logarithms.
 
-var E = 2.7182818284590452;
+var E = 2.718281828459045;
+
+#@ <INTMAX>
+#@ (2026-05-16)
+#@ Largest exact integer value.
+
+var INTMAX = 9223372036854775807;
+
+#@ <INTMIN>
+#@ (2026-05-16)
+#@ Smallest exact integer value.
+
+var INTMIN = -INTMAX - 1;
 
 #@ <Abs(n)>
 #@ V-1.0.0 (2025-08-12)
