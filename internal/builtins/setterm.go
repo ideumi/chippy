@@ -7,13 +7,14 @@
 package builtins
 
 import (
-	"bytes"
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
 	"chip-go/internal/errors"
 	"chip-go/internal/values"
-	"encoding/binary"
+	"fmt"
+	"math"
 	"os"
+	"strings"
 
 	"golang.org/x/sys/unix"
 )
@@ -33,26 +34,104 @@ func settermFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 			shared.Errors.InvalidArgCountWithHint("setterm", 1, "state")))
 	}
 
-	argBytes, ok := args[0].(*values.Bytes)
+	argMap, ok := args[0].(*values.Map)
 
 	if !ok {
 		posStart, posEnd := args[0].GetPos()
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("setterm", shared.TypeBytes, "state")))
+			shared.Errors.InvalidArgTypeWithHint("setterm", shared.TypeMap, "state")))
 	}
 
-	if len(argBytes.Data) != binary.Size(unix.Termios{}) {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+	posStart, posEnd := args[0].GetPos()
+
+	var missing []string
+
+	for _, key := range termiosScalarKeys {
+		if _, exists := argMap.Entries[key]; !exists {
+			missing = append(missing, key)
+		}
 	}
 
-	// Deserialize
+	for _, cc := range termiosCcIndices {
+		if _, exists := argMap.Entries[cc.name]; !exists {
+			missing = append(missing, cc.name)
+		}
+	}
+
+	if len(missing) > 0 {
+		var detail string
+
+		if len(missing) == 1 {
+			detail = fmt.Sprintf("state is missing key '%s'", missing[0])
+		} else {
+			quoted := make([]string, len(missing))
+
+			for i, key := range missing {
+				quoted[i] = "'" + key + "'"
+			}
+
+			detail = fmt.Sprintf("state is missing keys: %s", strings.Join(quoted, ", "))
+		}
+
+		return res.Failure(errors.NewRTError(
+			posStart, posEnd,
+			shared.Errors.InvalidValue(detail)))
+	}
+
+	iflag, rtErr := requireTermiosField(argMap, "iflag", math.MaxUint32, posStart, posEnd)
+	if rtErr != nil {
+		return res.Failure(rtErr)
+	}
+
+	oflag, rtErr := requireTermiosField(argMap, "oflag", math.MaxUint32, posStart, posEnd)
+	if rtErr != nil {
+		return res.Failure(rtErr)
+	}
+
+	cflag, rtErr := requireTermiosField(argMap, "cflag", math.MaxUint32, posStart, posEnd)
+	if rtErr != nil {
+		return res.Failure(rtErr)
+	}
+
+	lflag, rtErr := requireTermiosField(argMap, "lflag", math.MaxUint32, posStart, posEnd)
+	if rtErr != nil {
+		return res.Failure(rtErr)
+	}
+
+	line, rtErr := requireTermiosField(argMap, "line", math.MaxUint8, posStart, posEnd)
+	if rtErr != nil {
+		return res.Failure(rtErr)
+	}
+
+	ispeed, rtErr := requireTermiosField(argMap, "ispeed", math.MaxUint32, posStart, posEnd)
+	if rtErr != nil {
+		return res.Failure(rtErr)
+	}
+
+	ospeed, rtErr := requireTermiosField(argMap, "ospeed", math.MaxUint32, posStart, posEnd)
+	if rtErr != nil {
+		return res.Failure(rtErr)
+	}
+
 	var termios unix.Termios
-	reader := bytes.NewReader(argBytes.Data)
 
-	if err := binary.Read(reader, binary.LittleEndian, &termios); err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+	termios.Iflag = uint32(iflag)
+	termios.Oflag = uint32(oflag)
+	termios.Cflag = uint32(cflag)
+	termios.Lflag = uint32(lflag)
+	termios.Line = uint8(line)
+	termios.Ispeed = uint32(ispeed)
+	termios.Ospeed = uint32(ospeed)
+
+	for _, cc := range termiosCcIndices {
+		value, rtErr := requireTermiosField(argMap, cc.name, math.MaxUint8, posStart, posEnd)
+		if rtErr != nil {
+			return res.Failure(rtErr)
+		}
+
+		termios.Cc[cc.index] = uint8(value)
 	}
 
 	fd := int(os.Stdin.Fd())
@@ -62,4 +141,28 @@ func settermFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 	}
 
 	return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
+}
+
+func requireTermiosField(m *values.Map, key string, max int64, posStart, posEnd *errors.Position) (int64, *errors.RTError) {
+	num, ok := m.Entries[key].(*values.Number)
+
+	if !ok {
+		return 0, errors.NewRTError(
+			posStart, posEnd,
+			shared.Errors.InvalidValue(fmt.Sprintf("state key '%s' must be a number", key)))
+	}
+
+	intVal, err := num.AsInt()
+
+	if err != nil {
+		return 0, err.(*errors.RTError)
+	}
+
+	if intVal < 0 || intVal > max {
+		return 0, errors.NewRTError(
+			posStart, posEnd,
+			shared.Errors.InvalidValue(fmt.Sprintf("state key '%s' value %d is out of range [0, %d]", key, intVal, max)))
+	}
+
+	return intVal, nil
 }

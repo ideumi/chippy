@@ -2,14 +2,17 @@
 
 ''setterm(state)''
 
-Sets the termios state to ''state''. Waits for pending output to drain before applying.
+Sets the termios state for the controlling terminal. Waits for pending output to drain before applying.
 
 *Parameters:*
-- ''state'': Termios state
+- ''state'': Map of termios state (see ''chippy doc getterm'' for map fields)
 
 *Returns:*
 - ''ok'' on success
-- ''err'' on failure or invalid state size
+- ''err'' on failure
 
 *Errors:*
-- Runtime error if argument is not Bytes
+- Runtime error if ''state'' is not a map
+- Runtime error if ''state'' is missing any termios key
+- Runtime error if any value in ''state'' is not a number
+- Runtime error if any value in ''state'' is out of range for its field

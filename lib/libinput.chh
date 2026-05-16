@@ -46,7 +46,7 @@ func InputPw()
 	if iserr(saved) { return err; }
 
 	var noecho = saved;
-	noecho = noecho[TLFLAG] = noecho[TLFLAG] band bnot ECHO;
+	noecho = noecho["lflag"] = noecho["lflag"] band bnot ECHO;
 
 	setterm(noecho);
 
