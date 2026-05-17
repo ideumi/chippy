@@ -14,7 +14,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func tlscloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func tlscloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -26,9 +26,7 @@ func tlscloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResul
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "close"), 1, "handle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "close"), 1, "handle")))
 	}
 
 	handleNum, ok := args[0].(*values.Number)
@@ -39,12 +37,16 @@ func tlscloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResul
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
 			shared.Errors.InvalidArgTypePositionalWithHint(
-				optional.Prefixed(OptionalName, "close"), shared.PositionFirst, shared.TypeNumber, "handle"),
-			ctx,
-		))
+				optional.Prefixed(OptionalName, "close"), shared.PositionFirst, shared.TypeNumber, "handle")))
 	}
 
-	handle := int(handleNum.Value)
+	handle64, err := handleNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	handle := int(handle64)
 	tlsHandle, ok := getTLSHandle(ctx, handle)
 
 	if !ok {
@@ -52,9 +54,7 @@ func tlscloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResul
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid TLS handle"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Invalid TLS handle")))
 	}
 
 	if tlsHandle.Closed {
@@ -62,12 +62,10 @@ func tlscloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResul
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("TLS connection already closed"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("TLS connection already closed")))
 	}
 
-	err := tlsHandle.Conn.Close()
+	err = tlsHandle.Conn.Close()
 
 	tlsHandle.Closed = true
 	removeTLSHandle(ctx, handle)

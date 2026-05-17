@@ -8,7 +8,6 @@ package builtins
 
 import (
 	"chip-go/internal/builtins/shared"
-	"chip-go/internal/context"
 	"chip-go/internal/errors"
 	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
@@ -17,12 +16,15 @@ import (
 	"syscall"
 )
 
-// Signal handling runs a forwarder goroutine that drains the raw os/signal
-// channel into a managed queue, then broadcasts a wakeup to every actor blocked
-// in signal(). Consumers pop from the queue atomically with their state
-// transition, closing the race with CheckDeadlock.
+// Signal handling runs a forwarder goroutine that drains the raw os/signal channel
+// into a managed queue, then broadcasts a wakeup to every actor blocked in
+// signal(). Consumers pop from the queue atomically with their state transition,
+// closing the race with CheckDeadlock.
 //
 // Lock order: orchestrator.mu before signalMu.
+
+const signalChanBuffer = 16
+
 var (
 	signalMu      sync.Mutex
 	signalCh      chan os.Signal
@@ -39,14 +41,13 @@ func init() {
 	})
 }
 
-// ensureSignalInfra lazily wires up the signal infrastructure. Caller holds
-// signalMu.
+// Caller holds signalMu.
 func ensureSignalInfra() {
 	if signalCh != nil {
 		return
 	}
 
-	signalCh = make(chan os.Signal, 16)
+	signalCh = make(chan os.Signal, signalChanBuffer)
 	caught = make(map[syscall.Signal]bool)
 	signalWaiters = make(map[*orchestrator.Instance]chan struct{})
 
@@ -58,20 +59,28 @@ func signalForwarder() {
 		signalMu.Lock()
 		signalQueue = append(signalQueue, sig)
 
+		// Snapshot under the lock, send after release. A waiter that
+		// registers after the snapshot is covered by the post-register
+		// queue re-check in signalFunction, so it cannot miss this signal.
+		wakeups := make([]chan struct{}, 0, len(signalWaiters))
+
 		for _, wakeup := range signalWaiters {
+			wakeups = append(wakeups, wakeup)
+		}
+
+		signalMu.Unlock()
+
+		for _, wakeup := range wakeups {
 			select {
 			case wakeup <- struct{}{}:
 			default:
 			}
 		}
-
-		signalMu.Unlock()
 	}
 }
 
-// tryConsumeSignal atomically pops the oldest queued signal and transitions
-// inst to StateRunning. Returns (zero, false) when the queue is empty, with
-// inst's state untouched.
+// Pops the oldest queued signal atomically with the transition to StateRunning,
+// so CheckDeadlock cannot observe a stale blocked state.
 func tryConsumeSignal(inst *orchestrator.Instance) (os.Signal, bool) {
 	var sig os.Signal
 	got := false
@@ -86,6 +95,13 @@ func tryConsumeSignal(inst *orchestrator.Instance) (os.Signal, bool) {
 
 		sig = signalQueue[0]
 		signalQueue = signalQueue[1:]
+
+		// Drop the backing array once drained so walked-past slots can
+		// be GC'd instead of leaking for the process lifetime.
+		if len(signalQueue) == 0 {
+			signalQueue = nil
+		}
+
 		got = true
 		return true
 	})
@@ -93,7 +109,7 @@ func tryConsumeSignal(inst *orchestrator.Instance) (os.Signal, bool) {
 	return sig, got
 }
 
-func signalFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func signalFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 0 {
@@ -101,9 +117,7 @@ func signalFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCount("signal", 0),
-			ctx,
-		))
+			shared.Errors.InvalidArgCount("signal", 0)))
 	}
 
 	signalMu.Lock()
@@ -111,20 +125,18 @@ func signalFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 	signalMu.Unlock()
 
 	orch := orchestrator.Get()
-	instanceID := context.GetInstanceID(ctx)
+	instanceID := ctx.InstanceID
 	inst := orch.GetInstance(instanceID)
 
 	if inst == nil {
 		return res.Failure(errors.NewRTError(
 			nil, nil,
-			shared.Errors.InvalidValue("Invalid actor handle"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Invalid actor handle")))
 	}
 
 	// Fast path: signal already queued.
 	if sig, ok := tryConsumeSignal(inst); ok {
-		return res.Success(values.NewNumber(float64(signalToInt(sig))).SetContext(ctx))
+		return res.Success(values.NewNumber(signalToInt(sig)).SetContext(ctx))
 	}
 
 	wakeup := make(chan struct{}, 1)
@@ -143,7 +155,7 @@ func signalFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 	// before signalWaiters saw us, leaving no wakeup queued for us while
 	// signalProbe still reports liveness.
 	if sig, ok := tryConsumeSignal(inst); ok {
-		return res.Success(values.NewNumber(float64(signalToInt(sig))).SetContext(ctx))
+		return res.Success(values.NewNumber(signalToInt(sig)).SetContext(ctx))
 	}
 
 	cancelCh := orch.BeginBlocking(inst, orchestrator.StateBlockedSignal)
@@ -153,22 +165,20 @@ func signalFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 		select {
 		case <-wakeup:
 			if sig, ok := tryConsumeSignal(inst); ok {
-				return res.Success(values.NewNumber(float64(signalToInt(sig))).SetContext(ctx))
+				return res.Success(values.NewNumber(signalToInt(sig)).SetContext(ctx))
 			}
 
 		case <-cancelCh:
 			// A signal may have landed during the cancel race.
 			if sig, ok := tryConsumeSignal(inst); ok {
-				return res.Success(values.NewNumber(float64(signalToInt(sig))).SetContext(ctx))
+				return res.Success(values.NewNumber(signalToInt(sig)).SetContext(ctx))
 			}
 
 			orch.EndBlocking(inst)
 
 			return res.Failure(errors.NewRTError(
 				nil, nil,
-				shared.Errors.InvalidValue("Deadlock: signal() blocked with no signals being caught"),
-				ctx,
-			))
+				shared.Errors.InvalidValue("Deadlock: signal() blocked with no signals being caught")))
 		}
 	}
 }

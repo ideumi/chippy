@@ -15,7 +15,7 @@ import (
 	"os/exec"
 )
 
-func pcloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func pcloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -27,9 +27,7 @@ func pcloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("pclose", 1, "handle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("pclose", 1, "handle")))
 	}
 
 	handleNum, ok := args[0].(*values.Number)
@@ -39,12 +37,16 @@ func pcloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("pclose", shared.TypeNumber, "handle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("pclose", shared.TypeNumber, "handle")))
 	}
 
-	handle := int(handleNum.Value)
+	handle64, err := handleNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	handle := int(handle64)
 
 	// Check for standard handles (cannot close these)
 	if handle >= 0 && handle <= 2 {
@@ -52,12 +54,10 @@ func pcloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Cannot close standard handles (0, 1, 2)"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Cannot close standard handles (0, 1, 2)")))
 	}
 
-	registry := orchestrator.Get().GetRegistry(ctx)
+	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
 	procHandle, exists := registry.Processes.Extract(handle)
 
 	if !exists {
@@ -65,9 +65,7 @@ func pcloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid process handle"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Invalid process handle")))
 	}
 
 	registry.Alloc.Free(handle)
@@ -86,7 +84,7 @@ func pcloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 	}
 
 	// Wait for process to finish and get exit code
-	err := procHandle.Cmd.Wait()
+	err = procHandle.Cmd.Wait()
 	exitCode := 0
 
 	if err != nil {
@@ -99,5 +97,5 @@ func pcloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 		}
 	}
 
-	return res.Success(values.NewNumber(float64(exitCode)).SetContext(ctx))
+	return res.Success(values.NewNumber(exitCode).SetContext(ctx))
 }

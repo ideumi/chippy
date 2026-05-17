@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-func sortFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func sortFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -26,9 +26,7 @@ func sortFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("sort", 1, "list"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("sort", 1, "list")))
 	}
 
 	listArg, ok := args[0].(*values.List)
@@ -38,9 +36,7 @@ func sortFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("sort", shared.TypeList, "list"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("sort", shared.TypeList, "list")))
 	}
 
 	// Immutable
@@ -74,9 +70,26 @@ func compareValues(a, b values.Value) int {
 	case *values.Number:
 		bVal := b.(*values.Number)
 
-		if aVal.Value < bVal.Value {
+		if aVal.IsInt() && bVal.IsInt() {
+			aInt, _ := aVal.AsInt()
+			bInt, _ := bVal.AsInt()
+
+			if aInt < bInt {
+				return -1
+			}
+
+			if aInt > bInt {
+				return 1
+			}
+
+			return 0
+		}
+
+		if aVal.AsFloat() < bVal.AsFloat() {
 			return -1
-		} else if aVal.Value > bVal.Value {
+		}
+
+		if aVal.AsFloat() > bVal.AsFloat() {
 			return 1
 		}
 

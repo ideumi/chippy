@@ -2,8 +2,34 @@
 
 ''getterm()''
 
-Returns the current termios state as bytes.
+Returns the current termios state for the controlling terminal.
 
 *Returns:*
-- Bytes: Serialized termios struct (little-endian)
+- Map: termios state
 - ''err'' on failure
+
+*Map fields:*
+- ''"iflag"'' (Number): input mode flags
+- ''"oflag"'' (Number): output mode flags
+- ''"cflag"'' (Number): control mode flags
+- ''"lflag"'' (Number): local mode flags
+- ''"line"'' (Number): line discipline
+- ''"ispeed"'' (Number): input baud rate
+- ''"ospeed"'' (Number): output baud rate
+- ''"VINTR"'' (Number): interrupt character
+- ''"VQUIT"'' (Number): quit character
+- ''"VERASE"'' (Number): erase character
+- ''"VKILL"'' (Number): kill character
+- ''"VEOF"'' (Number): end-of-file character
+- ''"VTIME"'' (Number): non-canonical read timeout (deciseconds)
+- ''"VMIN"'' (Number): non-canonical minimum characters per read
+- ''"VSWTC"'' (Number): switch character
+- ''"VSTART"'' (Number): start-output character
+- ''"VSTOP"'' (Number): stop-output character
+- ''"VSUSP"'' (Number): suspend character
+- ''"VEOL"'' (Number): end-of-line character
+- ''"VREPRINT"'' (Number): reprint character
+- ''"VDISCARD"'' (Number): discard character
+- ''"VWERASE"'' (Number): word-erase character
+- ''"VLNEXT"'' (Number): literal-next character
+- ''"VEOL2"'' (Number): alternate end-of-line character

@@ -12,7 +12,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func errorFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func errorFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -24,9 +24,7 @@ func errorFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("error", 1, "error message"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("error", 1, "error message")))
 	}
 
 	message, ok := args[0].(*values.String)
@@ -36,16 +34,12 @@ func errorFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("error", shared.TypeString, "error message"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("error", shared.TypeString, "error message")))
 	}
 
 	posStart, posEnd := args[0].GetPos()
 
 	return res.Failure(errors.NewRTError(
 		posStart, posEnd,
-		message.Value,
-		ctx,
-	))
+		message.Value))
 }

@@ -9,7 +9,6 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/context"
 	"chip-go/internal/errors"
 	"chip-go/internal/optional"
 	"chip-go/internal/orchestrator"
@@ -28,7 +27,7 @@ import (
 //
 // Used both by loadopt(optional) and by actor spawn to inherit the spawner's
 // loaded optionals.
-func InstallOpt(opt *optional.Optional, globalCtx *context.Context) {
+func InstallOpt(opt *optional.Optional, globalCtx values.Ctx) {
 	for name, fn := range opt.Functions {
 		if existing := globalCtx.SymbolTable.Get(name); existing == nil {
 			fn.SetContext(globalCtx)
@@ -44,7 +43,7 @@ func InstallOpt(opt *optional.Optional, globalCtx *context.Context) {
 	}
 }
 
-func loadoptFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func loadoptFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -56,9 +55,7 @@ func loadoptFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("loadopt", 1, "optional"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("loadopt", 1, "optional")))
 	}
 
 	optionalName, ok := args[0].(*values.String)
@@ -68,9 +65,7 @@ func loadoptFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("loadopt", shared.TypeString, "optional"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("loadopt", shared.TypeString, "optional")))
 	}
 
 	opt, exists := optional.GetOptional(optionalName.Value)
@@ -80,28 +75,24 @@ func loadoptFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			"Optional \""+optionalName.Value+"\" does not exist",
-			ctx,
-		))
+			"Optional \""+optionalName.Value+"\" does not exist"))
 	}
 
-	roadRunner := orchestrator.Get().GetRR2ForContext(ctx)
+	roadRunner := orchestrator.Get().GetRR2ForContext(ctx.InstanceID)
 
 	if roadRunner == nil {
 		posStart, posEnd := args[0].GetPos()
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			"RoadRunner2 not available",
-			ctx,
-		))
+			"RoadRunner2 not available"))
 	}
 
 	globalCtx := roadRunner.GetGlobalContext()
 
 	InstallOpt(opt, globalCtx)
 
-	instanceID := context.GetInstanceID(ctx)
+	instanceID := ctx.InstanceID
 	orch := orchestrator.Get()
 
 	if inst := orch.GetInstance(instanceID); inst != nil {

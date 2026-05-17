@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-func splitFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func splitFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
@@ -25,9 +25,7 @@ func splitFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("split", 2, "string, delimiter"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("split", 2, "string, delimiter")))
 	}
 
 	stringArg, ok := args[0].(*values.String)
@@ -37,9 +35,7 @@ func splitFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("split", shared.PositionFirst, shared.TypeString, "string"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("split", shared.PositionFirst, shared.TypeString, "string")))
 	}
 
 	delimiterArg, ok := args[1].(*values.String)
@@ -49,9 +45,7 @@ func splitFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("split", shared.PositionSecond, shared.TypeString, "delimiter"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("split", shared.PositionSecond, shared.TypeString, "delimiter")))
 	}
 
 	str := stringArg.Value
@@ -62,9 +56,7 @@ func splitFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			"Delimiter cannot be empty",
-			ctx,
-		))
+			"Delimiter cannot be empty"))
 	}
 
 	parts := strings.Split(str, delimiter)

@@ -13,7 +13,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func iserrFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func iserrFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -25,9 +25,7 @@ func iserrFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("iserr", 1, "value"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("iserr", 1, "value")))
 	}
 
 	value := args[0]

@@ -14,7 +14,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func dcloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func dcloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -26,9 +26,7 @@ func dcloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("dclose", 1, "handle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("dclose", 1, "handle")))
 	}
 
 	handleNum, ok := args[0].(*values.Number)
@@ -37,13 +35,17 @@ func dcloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("dclose", shared.TypeNumber, "handle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("dclose", shared.TypeNumber, "handle")))
 	}
 
-	handleID := int(handleNum.Value)
-	registry := orchestrator.Get().GetRegistry(ctx)
+	handle64, err := handleNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	handleID := int(handle64)
+	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
 	handle, exists := registry.Dirs.Extract(handleID)
 
 	if !exists {
@@ -51,14 +53,12 @@ func dcloseFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid directory handle"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Invalid directory handle")))
 	}
 
 	registry.Alloc.Free(handleID)
 
-	err := handle.DirFile.Close()
+	err = handle.DirFile.Close()
 
 	if err != nil {
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))

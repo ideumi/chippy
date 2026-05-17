@@ -7,8 +7,11 @@
 package values
 
 import (
+	"chip-go/internal/context"
 	"chip-go/internal/errors"
 )
+
+type Ctx = *context.Context[Value]
 
 type RuntimeResult struct {
 	Value              Value
@@ -83,9 +86,9 @@ func (rr *RuntimeResult) ShouldReturn() bool {
 type Value interface {
 	String() string
 	SetPos(posStart, posEnd *errors.Position) Value
-	SetContext(context interface{}) Value
+	SetContext(ctx Ctx) Value
 	GetPos() (*errors.Position, *errors.Position)
-	GetContext() interface{}
+	GetContext() Ctx
 
 	AddedTo(other Value) (Value, error)
 	SubbedBy(other Value) (Value, error)
@@ -121,7 +124,7 @@ type Value interface {
 type BaseValue struct {
 	posStart *errors.Position
 	posEnd   *errors.Position
-	context  interface{}
+	context  Ctx
 }
 
 func NewBaseValue() *BaseValue {
@@ -134,8 +137,8 @@ func (bv *BaseValue) SetPos(posStart, posEnd *errors.Position) Value {
 	return bv
 }
 
-func (bv *BaseValue) SetContext(context interface{}) Value {
-	bv.context = context
+func (bv *BaseValue) SetContext(ctx Ctx) Value {
+	bv.context = ctx
 	return bv
 }
 
@@ -143,7 +146,7 @@ func (bv *BaseValue) GetPos() (*errors.Position, *errors.Position) {
 	return bv.posStart, bv.posEnd
 }
 
-func (bv *BaseValue) GetContext() interface{} {
+func (bv *BaseValue) GetContext() Ctx {
 	return bv.context
 }
 
@@ -152,18 +155,16 @@ func IllegalOperation(left, right Value) error {
 		leftPos, leftEnd := left.GetPos()
 		return errors.NewRTError(
 			leftPos, leftEnd,
-			"Illegal operation",
-			left.GetContext(),
-		)
+			"Illegal operation")
+
 	}
 
 	leftPos, _ := left.GetPos()
 	_, rightPos := right.GetPos()
 	return errors.NewRTError(
 		leftPos, rightPos,
-		"Illegal operation",
-		left.GetContext(),
-	)
+		"Illegal operation")
+
 }
 
 func (bv *BaseValue) AddedTo(other Value) (Value, error) {

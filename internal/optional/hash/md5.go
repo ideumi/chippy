@@ -15,7 +15,7 @@ import (
 	"crypto/md5"
 )
 
-func md5Function(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func md5Function(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -27,9 +27,7 @@ func md5Function(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "md5"), 1, "bytes"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "md5"), 1, "bytes")))
 	}
 
 	bytesVal, ok := args[0].(*values.Bytes)
@@ -39,9 +37,7 @@ func md5Function(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint(optional.Prefixed(OptionalName, "md5"), shared.TypeBytes, "bytes"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint(optional.Prefixed(OptionalName, "md5"), shared.TypeBytes, "bytes")))
 	}
 
 	hash := md5.Sum(bytesVal.Data)

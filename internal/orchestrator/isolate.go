@@ -14,7 +14,7 @@ import (
 // IsolateForTransfer snapshots every closure's captured environment onto a fresh
 // detached context so calls on the receiving actor don't race the sender's writes.
 // cycles dedupes shared captures and terminates recursion.
-func IsolateForTransfer(v values.Value, cycles map[*context.Context]*context.Context) {
+func IsolateForTransfer(v values.Value, cycles map[values.Ctx]values.Ctx) {
 	if v == nil {
 		return
 	}
@@ -33,10 +33,10 @@ func IsolateForTransfer(v values.Value, cycles map[*context.Context]*context.Con
 	}
 }
 
-func isolateTransferFunction(fn *values.Function, cycles map[*context.Context]*context.Context) {
-	origCtx, ok := fn.GetContext().(*context.Context)
+func isolateTransferFunction(fn *values.Function, cycles map[values.Ctx]values.Ctx) {
+	origCtx := fn.GetContext()
 
-	if !ok || origCtx == nil {
+	if origCtx == nil {
 		return
 	}
 
@@ -45,10 +45,10 @@ func isolateTransferFunction(fn *values.Function, cycles map[*context.Context]*c
 		return
 	}
 
-	detached := context.NewContext("<sent>", nil, nil)
+	detached := context.NewContext[values.Value]("<sent>", nil, nil)
 	cycles[origCtx] = detached
 
-	var chain []*context.Context
+	var chain []values.Ctx
 
 	for c := origCtx; c != nil; c = c.Parent {
 		chain = append(chain, c)
@@ -60,20 +60,13 @@ func isolateTransferFunction(fn *values.Function, cycles map[*context.Context]*c
 			continue
 		}
 
-		chain[i].SymbolTable.ForEach(func(name string, raw interface{}) {
+		chain[i].SymbolTable.ForEach(func(name string, val values.Value) {
 			if name == "CHIPRT" {
 				return
 			}
 
-			val, ok := raw.(values.Value)
-
-			if !ok {
-				return
-			}
-
-			// Builtins are stateless; the receiver reaches its own
-			// copies through its globals once the detached context
-			// is parented.
+			// Builtins are stateless; the receiver reaches its own copies
+			// through its globals once the detached context is parented.
 			if _, isBuiltin := val.(*values.BuiltInFunction); isBuiltin {
 				return
 			}
@@ -90,7 +83,7 @@ func isolateTransferFunction(fn *values.Function, cycles map[*context.Context]*c
 // DeepRebindContext stamps ctx onto every non-function value in the graph.
 // Functions are skipped; their context is the closure capture, handled by
 // IsolateForTransfer.
-func DeepRebindContext(v values.Value, ctx interface{}) {
+func DeepRebindContext(v values.Value, ctx values.Ctx) {
 	if v == nil {
 		return
 	}
@@ -119,28 +112,28 @@ func DeepRebindContext(v values.Value, ctx interface{}) {
 
 // BindValuesToGlobals parents every detached closure context onto the receiver's
 // globals so sent functions can resolve builtins and see the receiver's InstanceID.
-func BindValuesToGlobals(items []values.Value, globals *context.Context) {
+func BindValuesToGlobals(items []values.Value, globals values.Ctx) {
 	if globals == nil {
 		return
 	}
 
-	visited := make(map[*context.Context]bool)
+	visited := make(map[values.Ctx]bool)
 
 	for _, item := range items {
 		bindValueToGlobals(item, globals, visited)
 	}
 }
 
-func bindValueToGlobals(v values.Value, globals *context.Context, visited map[*context.Context]bool) {
+func bindValueToGlobals(v values.Value, globals values.Ctx, visited map[values.Ctx]bool) {
 	if v == nil {
 		return
 	}
 
 	switch val := v.(type) {
 	case *values.Function:
-		c, ok := val.GetContext().(*context.Context)
+		c := val.GetContext()
 
-		if !ok || c == nil || visited[c] {
+		if c == nil || visited[c] {
 			return
 		}
 
@@ -153,10 +146,8 @@ func bindValueToGlobals(v values.Value, globals *context.Context, visited map[*c
 		}
 
 		if c.SymbolTable != nil {
-			c.SymbolTable.ForEach(func(name string, raw interface{}) {
-				if inner, ok := raw.(values.Value); ok {
-					bindValueToGlobals(inner, globals, visited)
-				}
+			c.SymbolTable.ForEach(func(name string, inner values.Value) {
+				bindValueToGlobals(inner, globals, visited)
 			})
 		}
 

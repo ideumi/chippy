@@ -1,0 +1,270 @@
+#!/usr/bin/chippy
+#
+# snake - main.chp
+#
+
+# 2026-04-26: My highscore is 235, try to beat me!
+
+load("libterm.chh");
+load("librandom.chh");
+load("libhandles.chh");
+
+var KEYUP = b[27, 91, 65];
+var KEYDOWN = b[27, 91, 66];
+var KEYLEFT = b[27, 91, 68];
+var KEYRIGHT = b[27, 91, 67];
+var KEYESC = b[27];
+
+var UP = "up";
+var DOWN = "down";
+var LEFT = "left";
+var RIGHT = "right";
+var SESC = "esc";
+
+# - rows ["rows"] | columns ["columns"]
+var CANVASSIZE = winsize();
+
+var TICKRATE = 125;
+
+var APPLE = "█";
+var PLAYER = "█";
+
+func GetDirection(keyHandler, movingDirection)
+{
+	var inbox = receive(false);
+
+	if len(inbox) == 0 { return movingDirection; }
+
+	# Most recent keypress
+	return inbox[len(inbox)];
+}
+
+func KeyHandler(spawner)
+{
+	while true
+	{
+		var key = getch();
+
+		if key == KEYUP
+		{
+			send(spawner, UP);
+		}
+		elseif key == KEYDOWN
+		{
+			send(spawner, DOWN);
+		}
+		elseif key == KEYLEFT
+		{
+			send(spawner, LEFT);
+		}
+		elseif key == KEYRIGHT
+		{
+			send(spawner, RIGHT);
+		}
+		elseif key == KEYESC
+		{
+			send(spawner, SESC);
+		}
+	}
+
+	return ok;
+}
+
+func Draw(chara, row, col, attr)
+{
+	CursorTo(row, col);
+
+	SetAttribute(attr);
+	fwrite(pack(chara), STDOUT);
+	SetAttribute(COLORRESET);
+}
+
+func DrawApple(playerPosition, body)
+{
+	var applePosRow = 0;
+	var applePosCol = 0;
+
+	while true
+	{
+		applePosRow = RandomInt(2, CANVASSIZE["rows"]);
+		applePosCol = RandomInt(1, CANVASSIZE["columns"]);
+
+		if playerPosition["row"] == applePosRow and playerPosition["col"] == applePosCol
+		{
+			continue;
+		}
+
+		var collission = false;
+
+		for x = 1 to len(body)
+		{
+			if body[x]["col"] == applePosCol
+			and body[x]["row"] == applePosRow
+			{
+				collission = true;
+				break;
+			}
+		}
+
+		if collission { continue; }
+
+		break;
+	}
+
+	Draw(APPLE, applePosRow, applePosCol, COLORRED);
+
+	return m[
+		"row": applePosRow,
+		"col": applePosCol
+	];
+}
+
+func MoveAndDrawPlayer(direction, playerPosition)
+{
+	if direction == UP
+	{
+		var newPos = playerPosition["row"] - 1;
+
+		Draw(PLAYER, newPos, playerPosition["col"], COLORGREEN);
+
+		return playerPosition = playerPosition["row"] = newPos;
+	}
+	elseif direction == DOWN
+	{
+		var newPos = playerPosition["row"] + 1;
+
+		Draw(PLAYER, newPos, playerPosition["col"], COLORGREEN);
+
+		return playerPosition = playerPosition["row"] = newPos;
+	}
+	elseif direction == LEFT
+	{
+		var newPos = playerPosition["col"] - 1;
+
+		Draw(PLAYER, playerPosition["row"], newPos, COLORGREEN);
+
+		return playerPosition = playerPosition["col"] = newPos;
+	}
+	elseif direction == RIGHT
+	{
+		var newPos = playerPosition["col"] + 1;
+
+		Draw(PLAYER, playerPosition["row"], newPos, COLORGREEN);
+
+		return playerPosition = playerPosition["col"] = newPos;
+	}
+}
+
+func Main()
+{
+	var initialPlayerPos = m[
+		"row": int(CANVASSIZE["rows"] / 2),
+		"col": int(CANVASSIZE["columns"] / 2),
+	];
+
+	var state = getterm();
+	HideCursor();
+	ClearScreen();
+
+	var game = m[
+		"applePosition": DrawApple(initialPlayerPos, []),
+		"moving": "up",
+		"playerPosition": initialPlayerPos,
+		"applesEaten": 0,
+		"body": []
+	];
+
+	var keyHandler = actor(KeyHandler, CHIPRT);
+
+	# Initial score draw
+	Draw("Score: " + str(game["applesEaten"]), 0, 0, COLORRESET);
+
+	while true
+	{
+		sleep(TICKRATE);
+
+		var direction = GetDirection(keyHandler, game["moving"]);
+		if direction == SESC { break; }
+
+		if game["applesEaten"] > 0
+		{
+			if not (game["moving"] == UP and direction == DOWN)
+				and not (game["moving"] == DOWN and direction == UP)
+				and not (game["moving"] == LEFT and direction == RIGHT)
+				and not (game["moving"] == RIGHT and direction == LEFT)
+			{
+				game = game["moving"] = direction;
+			}
+			else
+			{
+				direction = game["moving"];
+			}
+		}
+		else
+		{
+			game = game["moving"] = direction;
+		}
+
+		# Append last position
+		game = game["body"] = append(game["body"], game["playerPosition"]);
+
+		if len(game["body"]) > game["applesEaten"]
+		{
+			Draw(" ", game["body"][1]["row"], game["body"][1]["col"], COLORRESET);
+
+			# chippy doc listops
+			game = game["body"] = (game["body"] - 1);
+		}
+
+		game = game["playerPosition"] = MoveAndDrawPlayer(direction, game["playerPosition"]);
+
+		var selfCol = false;
+
+		# Self collission
+		for x = 1 to len(game["body"])
+		{
+			if game["body"][x]["col"] == game["playerPosition"]["col"]
+				and game["body"][x]["row"] == game["playerPosition"]["row"]
+			{
+				selfCol = true;
+				break;
+			}
+		}
+
+		if selfCol { break; }
+
+		# Wall
+		if game["playerPosition"]["row"] == 1
+			or game["playerPosition"]["col"] == 0
+			or game["playerPosition"]["row"] == CANVASSIZE["rows"] + 1
+			or game["playerPosition"]["col"] == CANVASSIZE["columns"] + 1
+		{ break; }
+
+		# nom
+		if game["playerPosition"]["row"] == game["applePosition"]["row"]
+			and game["playerPosition"]["col"] == game["applePosition"]["col"]
+		{
+			game = game["applePosition"] = DrawApple(game["playerPosition"], game["body"]);
+
+			game = game["applesEaten"] = (game["applesEaten"] + 5);
+
+			# Redraw score
+			Draw("Score: " + str(game["applesEaten"]), 0, 0, COLORRESET);
+
+			if TICKRATE > 50
+			{
+				TICKRATE = TICKRATE - 1;
+			}
+		}
+	}
+
+	setterm(state);
+	ClearScreen();
+
+	CursorTo(0, 0);
+	fwrite(pack("GAME OVER! Your score was: " + str(game["applesEaten"]) + ", thanks for playing!\n"), STDOUT);
+
+	ShowCursor();
+}
+
+Main();

@@ -15,7 +15,7 @@ import (
 	"io"
 )
 
-func tlsreadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func tlsreadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
@@ -27,9 +27,7 @@ func tlsreadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "read"), 2, "handle, maxBytes"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "read"), 2, "handle, maxBytes")))
 	}
 
 	handleNum, ok := args[0].(*values.Number)
@@ -40,9 +38,7 @@ func tlsreadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
 			shared.Errors.InvalidArgTypePositionalWithHint(
-				optional.Prefixed(OptionalName, "read"), shared.PositionFirst, shared.TypeNumber, "handle"),
-			ctx,
-		))
+				optional.Prefixed(OptionalName, "read"), shared.PositionFirst, shared.TypeNumber, "handle")))
 	}
 
 	maxBytesNum, ok := args[1].(*values.Number)
@@ -53,24 +49,32 @@ func tlsreadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
 			shared.Errors.InvalidArgTypePositionalWithHint(
-				optional.Prefixed(OptionalName, "read"), shared.PositionSecond, shared.TypeNumber, "maxBytes"),
-			ctx,
-		))
+				optional.Prefixed(OptionalName, "read"), shared.PositionSecond, shared.TypeNumber, "maxBytes")))
 	}
 
-	maxBytes := int(maxBytesNum.Value)
+	max64, err := maxBytesNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	maxBytes := int(max64)
 
 	if maxBytes <= 0 {
 		posStart, posEnd := args[1].GetPos()
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("maxBytes must be greater than 0"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("maxBytes must be greater than 0")))
 	}
 
-	handle := int(handleNum.Value)
+	handle64, err := handleNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	handle := int(handle64)
 	tlsHandle, ok := getTLSHandle(ctx, handle)
 
 	if !ok {
@@ -78,9 +82,7 @@ func tlsreadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid TLS handle"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Invalid TLS handle")))
 	}
 
 	if tlsHandle.Closed {
@@ -88,9 +90,7 @@ func tlsreadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("TLS connection is closed"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("TLS connection is closed")))
 	}
 
 	buffer := make([]byte, maxBytes)

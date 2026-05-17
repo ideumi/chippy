@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-func sleepFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func sleepFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -26,9 +26,7 @@ func sleepFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("sleep", 1, "milliseconds"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("sleep", 1, "milliseconds")))
 	}
 
 	millisecondsNum, ok := args[0].(*values.Number)
@@ -38,21 +36,17 @@ func sleepFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("sleep", shared.TypeNumber, "milliseconds to sleep"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("sleep", shared.TypeNumber, "milliseconds to sleep")))
 	}
 
-	milliseconds := millisecondsNum.Value
+	milliseconds := millisecondsNum.AsFloat()
 
 	if milliseconds < 0 {
 		posStart, posEnd := args[0].GetPos()
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Sleep duration must be non-negative"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Sleep duration must be non-negative")))
 	}
 
 	duration := time.Duration(milliseconds) * time.Millisecond

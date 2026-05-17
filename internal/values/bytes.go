@@ -45,8 +45,8 @@ func (b *Bytes) SetPos(posStart, posEnd *errors.Position) Value {
 	return b
 }
 
-func (b *Bytes) SetContext(context interface{}) Value {
-	b.BaseValue.SetContext(context)
+func (b *Bytes) SetContext(ctx Ctx) Value {
+	b.BaseValue.SetContext(ctx)
 
 	return b
 }
@@ -75,7 +75,7 @@ func (b *Bytes) GetElement(index int) *Number {
 		return nil
 	}
 
-	return NewNumber(float64(b.Data[index-1])).SetContext(b.context).(*Number)
+	return NewNumber(b.Data[index-1]).SetContext(b.context).(*Number)
 }
 
 func (b *Bytes) AppendByte(value int) *Bytes {
@@ -96,7 +96,7 @@ func (b *Bytes) ToList() *List {
 	elements := make([]Value, len(b.Data))
 
 	for i, byteVal := range b.Data {
-		elements[i] = NewNumber(float64(byteVal)).SetContext(b.context)
+		elements[i] = NewNumber(byteVal).SetContext(b.context)
 	}
 
 	return NewList(elements).SetPos(b.posStart, b.posEnd).SetContext(b.context).(*List)
@@ -104,7 +104,7 @@ func (b *Bytes) ToList() *List {
 
 func (b *Bytes) GetComparisonEe(other Value) (Value, error) {
 	if otherBytes, ok := other.(*Bytes); ok {
-		var result float64
+		result := constants.NUM_FAL
 
 		if len(b.Data) == len(otherBytes.Data) {
 			equal := true
@@ -118,11 +118,7 @@ func (b *Bytes) GetComparisonEe(other Value) (Value, error) {
 
 			if equal {
 				result = constants.NUM_TRU
-			} else {
-				result = constants.NUM_FAL
 			}
-		} else {
-			result = constants.NUM_FAL
 		}
 
 		return NewNumber(result).SetContext(b.context), nil
@@ -133,7 +129,7 @@ func (b *Bytes) GetComparisonEe(other Value) (Value, error) {
 
 func (b *Bytes) GetComparisonNe(other Value) (Value, error) {
 	if otherBytes, ok := other.(*Bytes); ok {
-		var result float64
+		result := constants.NUM_TRU
 
 		if len(b.Data) == len(otherBytes.Data) {
 			equal := true
@@ -147,11 +143,7 @@ func (b *Bytes) GetComparisonNe(other Value) (Value, error) {
 
 			if equal {
 				result = constants.NUM_FAL
-			} else {
-				result = constants.NUM_TRU
 			}
-		} else {
-			result = constants.NUM_TRU
 		}
 
 		return NewNumber(result).SetContext(b.context), nil
@@ -161,24 +153,20 @@ func (b *Bytes) GetComparisonNe(other Value) (Value, error) {
 }
 
 func (b *Bytes) Notted() (Value, error) {
-	var result float64
+	result := constants.NUM_TRU
 
 	if b.IsTrue() {
 		result = constants.NUM_FAL
-	} else {
-		result = constants.NUM_TRU
 	}
 
 	return NewNumber(result).SetContext(b.context), nil
 }
 
 func (b *Bytes) XoredBy(other Value) (Value, error) {
-	var result float64
+	result := constants.NUM_FAL
 
 	if b.IsTrue() != other.IsTrue() {
 		result = constants.NUM_TRU
-	} else {
-		result = constants.NUM_FAL
 	}
 
 	return NewNumber(result).SetContext(b.context), nil
@@ -187,15 +175,21 @@ func (b *Bytes) XoredBy(other Value) (Value, error) {
 func (b *Bytes) MultedBy(other Value) (Value, error) {
 	if otherNum, ok := other.(*Number); ok {
 
-		if otherNum.Value < 0 {
+		if !otherNum.IsInt() {
 			return nil, errors.NewRTError(
 				otherNum.posStart, otherNum.posEnd,
-				"Cannot repeat bytes negative times",
-				b.context,
-			)
+				"Repeat count must be an integer")
+
 		}
 
-		repeatCount := int(otherNum.Value)
+		if otherNum.iVal < 0 {
+			return nil, errors.NewRTError(
+				otherNum.posStart, otherNum.posEnd,
+				"Cannot repeat bytes negative times")
+
+		}
+
+		repeatCount := int(otherNum.iVal)
 		newData := make([]byte, len(b.Data)*repeatCount)
 
 		for i := 0; i < repeatCount; i++ {
@@ -211,14 +205,20 @@ func (b *Bytes) MultedBy(other Value) (Value, error) {
 func (b *Bytes) SubbedBy(other Value) (Value, error) {
 	if otherNum, ok := other.(*Number); ok {
 
-		index := int(otherNum.Value)
+		if !otherNum.IsInt() {
+			return nil, errors.NewRTError(
+				otherNum.posStart, otherNum.posEnd,
+				"Index must be an integer")
+
+		}
+
+		index := int(otherNum.iVal)
 
 		if index < 1 || index > len(b.Data) {
 			return nil, errors.NewRTError(
 				otherNum.posStart, otherNum.posEnd,
-				"Byte at this index could not be removed from bytes because index is out of bounds",
-				b.context,
-			)
+				"Byte at this index could not be removed from bytes because index is out of bounds")
+
 		}
 
 		newData := make([]byte, len(b.Data)-1)

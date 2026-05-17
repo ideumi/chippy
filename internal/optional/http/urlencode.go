@@ -14,7 +14,7 @@ import (
 	"net/url"
 )
 
-func urlencodeFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func urlencodeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -26,9 +26,7 @@ func urlencodeFunction(args []values.Value, ctx interface{}) *values.RuntimeResu
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "urlencode"), 1, "text"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "urlencode"), 1, "text")))
 	}
 
 	str, ok := args[0].(*values.String)
@@ -38,9 +36,7 @@ func urlencodeFunction(args []values.Value, ctx interface{}) *values.RuntimeResu
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint(optional.Prefixed(OptionalName, "urlencode"), shared.TypeString, "text"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint(optional.Prefixed(OptionalName, "urlencode"), shared.TypeString, "text")))
 	}
 
 	encoded := url.QueryEscape(str.Value)

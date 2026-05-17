@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-func replaceFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func replaceFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 3 {
@@ -25,9 +25,7 @@ func replaceFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("replace", 3, "haystack, needle, replacement"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("replace", 3, "haystack, needle, replacement")))
 	}
 
 	haystackArg, ok := args[0].(*values.String)
@@ -37,9 +35,7 @@ func replaceFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("replace", shared.PositionFirst, shared.TypeString, "haystack"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("replace", shared.PositionFirst, shared.TypeString, "haystack")))
 	}
 
 	needleArg, ok := args[1].(*values.String)
@@ -49,9 +45,7 @@ func replaceFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("replace", shared.PositionSecond, shared.TypeString, "needle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("replace", shared.PositionSecond, shared.TypeString, "needle")))
 	}
 
 	replacementArg, ok := args[2].(*values.String)
@@ -61,9 +55,7 @@ func replaceFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("replace", shared.PositionThird, shared.TypeString, "replacement"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("replace", shared.PositionThird, shared.TypeString, "replacement")))
 	}
 
 	haystack := haystackArg.Value
@@ -75,9 +67,7 @@ func replaceFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			"Cannot replace empty string",
-			ctx,
-		))
+			"Cannot replace empty string"))
 	}
 
 	result := strings.ReplaceAll(haystack, needle, replacement)

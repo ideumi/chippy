@@ -16,7 +16,7 @@ import (
 	"crypto/tls"
 )
 
-func tlsacceptFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func tlsacceptFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 3 {
@@ -28,9 +28,7 @@ func tlsacceptFunction(args []values.Value, ctx interface{}) *values.RuntimeResu
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "accept"), 3, "serverHandle, certPath, keyPath"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "accept"), 3, "serverHandle, certPath, keyPath")))
 	}
 
 	handleNum, ok := args[0].(*values.Number)
@@ -41,9 +39,7 @@ func tlsacceptFunction(args []values.Value, ctx interface{}) *values.RuntimeResu
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
 			shared.Errors.InvalidArgTypePositionalWithHint(
-				optional.Prefixed(OptionalName, "accept"), shared.PositionFirst, shared.TypeNumber, "serverHandle"),
-			ctx,
-		))
+				optional.Prefixed(OptionalName, "accept"), shared.PositionFirst, shared.TypeNumber, "serverHandle")))
 	}
 
 	certPathStr, ok := args[1].(*values.String)
@@ -54,9 +50,7 @@ func tlsacceptFunction(args []values.Value, ctx interface{}) *values.RuntimeResu
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
 			shared.Errors.InvalidArgTypePositionalWithHint(
-				optional.Prefixed(OptionalName, "accept"), shared.PositionSecond, shared.TypeString, "certPath"),
-			ctx,
-		))
+				optional.Prefixed(OptionalName, "accept"), shared.PositionSecond, shared.TypeString, "certPath")))
 	}
 
 	keyPathStr, ok := args[2].(*values.String)
@@ -67,13 +61,17 @@ func tlsacceptFunction(args []values.Value, ctx interface{}) *values.RuntimeResu
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
 			shared.Errors.InvalidArgTypePositionalWithHint(
-				optional.Prefixed(OptionalName, "accept"), shared.PositionThird, shared.TypeString, "keyPath"),
-			ctx,
-		))
+				optional.Prefixed(OptionalName, "accept"), shared.PositionThird, shared.TypeString, "keyPath")))
 	}
 
-	serverHandle := int(handleNum.Value)
-	registry := orchestrator.Get().GetRegistry(ctx)
+	handle64, err := handleNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	serverHandle := int(handle64)
+	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
 	serverSocket, exists := registry.Sockets.Get(serverHandle)
 
 	if !exists {
@@ -81,9 +79,7 @@ func tlsacceptFunction(args []values.Value, ctx interface{}) *values.RuntimeResu
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid server socket handle"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Invalid server socket handle")))
 	}
 
 	if serverSocket.Mode != "listen" {
@@ -91,9 +87,7 @@ func tlsacceptFunction(args []values.Value, ctx interface{}) *values.RuntimeResu
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Socket is not in listening mode"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Socket is not in listening mode")))
 	}
 
 	if serverSocket.Listener == nil {
@@ -101,9 +95,7 @@ func tlsacceptFunction(args []values.Value, ctx interface{}) *values.RuntimeResu
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Listening socket is closed"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Listening socket is closed")))
 	}
 
 	cert, err := tls.LoadX509KeyPair(certPathStr.Value, keyPathStr.Value)
@@ -137,5 +129,5 @@ func tlsacceptFunction(args []values.Value, ctx interface{}) *values.RuntimeResu
 		Closed: false,
 	})
 
-	return res.Success(values.NewNumber(float64(clientHandle)).SetContext(ctx))
+	return res.Success(values.NewNumber(clientHandle).SetContext(ctx))
 }

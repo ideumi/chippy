@@ -15,7 +15,7 @@ import (
 	"io"
 )
 
-func dreadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func dreadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -27,9 +27,7 @@ func dreadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("dread", 1, "handle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("dread", 1, "handle")))
 	}
 
 	handleNum, ok := args[0].(*values.Number)
@@ -39,13 +37,17 @@ func dreadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("dread", shared.TypeNumber, "handle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("dread", shared.TypeNumber, "handle")))
 	}
 
-	handleID := int(handleNum.Value)
-	registry := orchestrator.Get().GetRegistry(ctx)
+	handle64, err := handleNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	handleID := int(handle64)
+	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
 	handle, exists := registry.Dirs.Get(handleID)
 
 	if !exists {
@@ -53,16 +55,14 @@ func dreadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid directory handle"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Invalid directory handle")))
 	}
 
 	// Read next directory entry
-	entries, err := handle.DirFile.Readdir(1)
+	entries, readErr := handle.DirFile.Readdir(1)
 
-	if err != nil {
-		if err == io.EOF {
+	if readErr != nil {
+		if readErr == io.EOF {
 			// End of directory
 			return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
 		}

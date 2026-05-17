@@ -13,7 +13,7 @@ import (
 	"os"
 )
 
-func getpidFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func getpidFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 0 {
@@ -25,12 +25,10 @@ func getpidFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCount("getpid", 0),
-			ctx,
-		))
+			shared.Errors.InvalidArgCount("getpid", 0)))
 	}
 
 	pid := os.Getpid()
 
-	return res.Success(values.NewNumber(float64(pid)).SetContext(ctx))
+	return res.Success(values.NewNumber(pid).SetContext(ctx))
 }

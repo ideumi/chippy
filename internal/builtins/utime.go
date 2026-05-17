@@ -15,7 +15,7 @@ import (
 	"syscall"
 )
 
-func utimeFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func utimeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 3 {
@@ -27,9 +27,7 @@ func utimeFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("utime", 3, "path, atime, mtime"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("utime", 3, "path, atime, mtime")))
 	}
 
 	pathStr, ok := args[0].(*values.String)
@@ -39,9 +37,7 @@ func utimeFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("utime", shared.PositionFirst, shared.TypeString, "path"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("utime", shared.PositionFirst, shared.TypeString, "path")))
 	}
 
 	atimeNum, ok := args[1].(*values.Number)
@@ -51,9 +47,7 @@ func utimeFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("utime", shared.PositionSecond, shared.TypeNumber, "atime"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("utime", shared.PositionSecond, shared.TypeNumber, "atime")))
 	}
 
 	mtimeNum, ok := args[2].(*values.Number)
@@ -63,9 +57,7 @@ func utimeFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("utime", shared.PositionThird, shared.TypeNumber, "mtime"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("utime", shared.PositionThird, shared.TypeNumber, "mtime")))
 	}
 
 	toTimespec := func(ts float64) syscall.Timespec {
@@ -75,8 +67,8 @@ func utimeFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 	}
 
 	ts := []syscall.Timespec{
-		toTimespec(atimeNum.Value),
-		toTimespec(mtimeNum.Value),
+		toTimespec(atimeNum.AsFloat()),
+		toTimespec(mtimeNum.AsFloat()),
 	}
 
 	err := syscall.UtimesNano(pathStr.Value, ts)

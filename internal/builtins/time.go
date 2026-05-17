@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-func timeFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func timeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 0 {
@@ -25,13 +25,17 @@ func timeFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCount("time", 0),
-			ctx,
-		))
+			shared.Errors.InvalidArgCount("time", 0)))
 	}
 
 	// Return high-precision timestamp
 	timestamp := float64(time.Now().UnixNano()) / 1e9
 
-	return res.Success(values.NewNumber(timestamp).SetContext(ctx))
+	num, err := values.NewNumberFromFloat(timestamp)
+
+	if err != nil {
+		return res.Failure(errors.NewRTError(nil, nil, err.Error()))
+	}
+
+	return res.Success(num.SetContext(ctx))
 }

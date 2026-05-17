@@ -12,7 +12,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func intFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func intFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -24,9 +24,7 @@ func intFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("int", 1, "value"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("int", 1, "value")))
 	}
 
 	num, ok := args[0].(*values.Number)
@@ -35,12 +33,14 @@ func intFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("int", shared.TypeNumber, "value"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("int", shared.TypeNumber, "value")))
 	}
 
-	result := float64(int64(num.Value))
+	intVal, err := num.AsInt()
 
-	return res.Success(values.NewNumber(result).SetContext(ctx))
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	return res.Success(values.NewNumber(intVal).SetContext(ctx))
 }

@@ -14,7 +14,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func fsyncFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func fsyncFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -26,9 +26,7 @@ func fsyncFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("fsync", 1, "handle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("fsync", 1, "handle")))
 	}
 
 	handleNum, ok := args[0].(*values.Number)
@@ -38,13 +36,17 @@ func fsyncFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("fsync", shared.TypeNumber, "handle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("fsync", shared.TypeNumber, "handle")))
 	}
 
-	handle := int(handleNum.Value)
-	registry := orchestrator.Get().GetRegistry(ctx)
+	handle64, err := handleNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	handle := int(handle64)
+	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
 	file, exists := registry.Files.Get(handle)
 
 	if !exists {
@@ -52,12 +54,10 @@ func fsyncFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid handle"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Invalid handle")))
 	}
 
-	err := file.Sync()
+	err = file.Sync()
 
 	if err != nil {
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))

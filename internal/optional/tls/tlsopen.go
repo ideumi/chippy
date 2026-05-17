@@ -16,7 +16,7 @@ import (
 	"fmt"
 )
 
-func tlsopenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func tlsopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 3 {
@@ -28,9 +28,7 @@ func tlsopenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "open"), 3, "host, port, verify"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "open"), 3, "host, port, verify")))
 	}
 
 	hostStr, ok := args[0].(*values.String)
@@ -41,9 +39,7 @@ func tlsopenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
 			shared.Errors.InvalidArgTypePositionalWithHint(
-				optional.Prefixed(OptionalName, "open"), shared.PositionFirst, shared.TypeString, "host"),
-			ctx,
-		))
+				optional.Prefixed(OptionalName, "open"), shared.PositionFirst, shared.TypeString, "host")))
 	}
 
 	portNum, ok := args[1].(*values.Number)
@@ -54,21 +50,23 @@ func tlsopenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
 			shared.Errors.InvalidArgTypePositionalWithHint(
-				optional.Prefixed(OptionalName, "open"), shared.PositionSecond, shared.TypeNumber, "port"),
-			ctx,
-		))
+				optional.Prefixed(OptionalName, "open"), shared.PositionSecond, shared.TypeNumber, "port")))
 	}
 
-	port := int(portNum.Value)
+	port64, err := portNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	port := int(port64)
 
 	if port < 1 || port > 65535 {
 		posStart, posEnd := args[1].GetPos()
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Port must be between 1 and 65535"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Port must be between 1 and 65535")))
 	}
 
 	verify := true
@@ -79,7 +77,7 @@ func tlsopenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 			verify = false
 		}
 	case *values.Number:
-		if v.Value == constants.NUM_FAL {
+		if !v.IsTrue() {
 			verify = false
 		}
 	}
@@ -104,5 +102,5 @@ func tlsopenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 		Closed: false,
 	})
 
-	return res.Success(values.NewNumber(float64(handle)).SetContext(ctx))
+	return res.Success(values.NewNumber(handle).SetContext(ctx))
 }

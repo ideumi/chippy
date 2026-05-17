@@ -15,7 +15,7 @@ import (
 	"syscall"
 )
 
-func fileModeToChmod(mode os.FileMode) float64 {
+func fileModeToChmod(mode os.FileMode) int {
 	perm := mode.Perm()
 	owner := (perm >> 6) & 7
 	group := (perm >> 3) & 7
@@ -32,10 +32,10 @@ func fileModeToChmod(mode os.FileMode) float64 {
 		special += 1
 	}
 
-	return float64(special*1000 + int(owner)*100 + int(group)*10 + int(other))
+	return special*1000 + int(owner)*100 + int(group)*10 + int(other)
 }
 
-func statFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func statFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -47,9 +47,7 @@ func statFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("stat", 1, "path"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("stat", 1, "path")))
 	}
 
 	pathStr, ok := args[0].(*values.String)
@@ -59,9 +57,7 @@ func statFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("stat", shared.TypeString, "path"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("stat", shared.TypeString, "path")))
 	}
 
 	fileInfo, err := os.Stat(pathStr.Value)
@@ -70,26 +66,23 @@ func statFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 	}
 
-	// Format: [size, mtime, atime, ctime, mode, uid, gid, nlink, ino, dev, type]
-
-	// Get underlying syscall.Stat_t
-	var uid, gid, nlink, ino, dev float64
+	var uid, gid uint32
+	var nlink, ino, dev uint64
 	atime := fileInfo.ModTime().Unix()
 	mtime := fileInfo.ModTime().Unix()
 	ctime := fileInfo.ModTime().Unix()
 
 	if stat, ok := fileInfo.Sys().(*syscall.Stat_t); ok {
-		uid = float64(stat.Uid)
-		gid = float64(stat.Gid)
-		nlink = float64(stat.Nlink)
-		ino = float64(stat.Ino)
-		dev = float64(stat.Dev)
+		uid = stat.Uid
+		gid = stat.Gid
+		nlink = uint64(stat.Nlink)
+		ino = stat.Ino
+		dev = stat.Dev
 		atime = stat.Atim.Sec
 		mtime = stat.Mtim.Sec
 		ctime = stat.Ctim.Sec
 	}
 
-	// Determine file type
 	var fileType string
 	mode := fileInfo.Mode()
 
@@ -121,20 +114,35 @@ func statFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 		fileType = "unknown"
 	}
 
-	statElements := []values.Value{
-		values.NewNumber(float64(fileInfo.Size())).SetContext(ctx),         // size
-		values.NewNumber(float64(mtime)).SetContext(ctx),                   // mtime
-		values.NewNumber(float64(atime)).SetContext(ctx),                   // atime
-		values.NewNumber(float64(ctime)).SetContext(ctx),                   // ctime
-		values.NewNumber(fileModeToChmod(fileInfo.Mode())).SetContext(ctx), // mode (permissions)
-		values.NewNumber(uid).SetContext(ctx),                              // uid
-		values.NewNumber(gid).SetContext(ctx),                              // gid
-		values.NewNumber(nlink).SetContext(ctx),                            // nlink
-		values.NewNumber(ino).SetContext(ctx),                              // inode
-		values.NewNumber(dev).SetContext(ctx),                              // device
-		values.NewString(fileType).SetContext(ctx),                         // type
+	keys := []string{
+		"size",
+		"modified",
+		"accessed",
+		"changed",
+		"mode",
+		"userId",
+		"groupId",
+		"links",
+		"inode",
+		"device",
+		"type",
 	}
 
-	result := values.NewList(statElements)
+	entries := map[string]values.Value{
+		"size":     values.NewNumber(fileInfo.Size()).SetContext(ctx),
+		"modified": values.NewNumber(mtime).SetContext(ctx),
+		"accessed": values.NewNumber(atime).SetContext(ctx),
+		"changed":  values.NewNumber(ctime).SetContext(ctx),
+		"mode":     values.NewNumber(fileModeToChmod(fileInfo.Mode())).SetContext(ctx),
+		"userId":   values.NewNumber(uid).SetContext(ctx),
+		"groupId":  values.NewNumber(gid).SetContext(ctx),
+		"links":    values.NewNumber(nlink).SetContext(ctx),
+		"inode":    values.NewNumber(ino).SetContext(ctx),
+		"device":   values.NewNumber(dev).SetContext(ctx),
+		"type":     values.NewString(fileType).SetContext(ctx),
+	}
+
+	result := values.NewMapFromEntries(keys, entries)
+
 	return res.Success(result.SetContext(ctx))
 }

@@ -8,13 +8,12 @@ package builtins
 
 import (
 	"chip-go/internal/builtins/shared"
-	"chip-go/internal/context"
 	"chip-go/internal/errors"
 	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 )
 
-func receiveFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func receiveFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -26,9 +25,7 @@ func receiveFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("receive", 1, "blocking"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("receive", 1, "blocking")))
 	}
 
 	blockArg, ok := args[0].(*values.Number)
@@ -38,23 +35,19 @@ func receiveFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("receive", shared.TypeNumber, "blocking"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("receive", shared.TypeNumber, "blocking")))
 	}
 
-	blocking := blockArg.Value != 0
+	blocking := blockArg.IsTrue()
 
-	instanceID := context.GetInstanceID(ctx)
+	instanceID := ctx.InstanceID
 	orch := orchestrator.Get()
 	inst := orch.GetInstance(instanceID)
 
 	if inst == nil {
 		return res.Failure(errors.NewRTError(
 			nil, nil,
-			shared.Errors.InvalidValue("Invalid actor handle"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Invalid actor handle")))
 	}
 
 	globals := inst.RR.GetGlobalContext()
@@ -70,9 +63,7 @@ func receiveFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				shared.Errors.InvalidValue("Deadlock: receive(true) blocked with no possible sender"),
-				ctx,
-			))
+				shared.Errors.InvalidValue("Deadlock: receive(true) blocked with no possible sender")))
 		}
 	} else {
 		items = inst.Inbox.ReceiveNonBlocking(globals)

@@ -14,7 +14,7 @@ import (
 	"os"
 )
 
-func chdirFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func chdirFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -26,9 +26,7 @@ func chdirFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("chdir", 1, "path"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("chdir", 1, "path")))
 	}
 
 	pathStr, ok := args[0].(*values.String)
@@ -37,9 +35,7 @@ func chdirFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("chdir", shared.TypeString, "path"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("chdir", shared.TypeString, "path")))
 	}
 
 	err := os.Chdir(pathStr.Value)

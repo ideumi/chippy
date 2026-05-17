@@ -16,7 +16,7 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-func winsizeFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func winsizeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 0 {
@@ -28,9 +28,7 @@ func winsizeFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCount("winsize", 0),
-			ctx,
-		))
+			shared.Errors.InvalidArgCount("winsize", 0)))
 	}
 
 	fd := int(os.Stdin.Fd())
@@ -41,8 +39,16 @@ func winsizeFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 	}
 
-	rows := values.NewNumber(float64(ws.Row)).SetContext(ctx)
-	cols := values.NewNumber(float64(ws.Col)).SetContext(ctx)
+	rows := values.NewNumber(ws.Row).SetContext(ctx)
+	cols := values.NewNumber(ws.Col).SetContext(ctx)
 
-	return res.Success(values.NewList([]values.Value{rows, cols}).SetContext(ctx))
+	result := values.NewMapFromEntries(
+		[]string{"rows", "columns"},
+		map[string]values.Value{
+			"rows":    rows,
+			"columns": cols,
+		},
+	)
+
+	return res.Success(result.SetContext(ctx))
 }

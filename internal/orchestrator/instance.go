@@ -7,14 +7,13 @@
 package orchestrator
 
 import (
-	"chip-go/internal/context"
 	"chip-go/internal/handles"
 	"chip-go/internal/values"
 )
 
 type RR2Interface interface {
 	Run(filename, text string) (values.Value, error)
-	GetGlobalContext() *context.Context
+	GetGlobalContext() values.Ctx
 }
 
 type RR2Factory func(instanceID int) RR2Interface

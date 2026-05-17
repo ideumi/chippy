@@ -9,13 +9,12 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/context"
 	"chip-go/internal/errors"
 	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 )
 
-func waitFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func waitFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -27,9 +26,7 @@ func waitFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("wait", 1, "handle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("wait", 1, "handle")))
 	}
 
 	handleNum, ok := args[0].(*values.Number)
@@ -39,21 +36,23 @@ func waitFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("wait", shared.TypeNumber, "handle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("wait", shared.TypeNumber, "handle")))
 	}
 
-	instanceID := int(handleNum.Value)
+	id64, err := handleNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	instanceID := int(id64)
 
 	if instanceID == 0 {
 		posStart, posEnd := args[0].GetPos()
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Cannot wait on the main actor (handle 0)"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Cannot wait on the main actor (handle 0)")))
 	}
 
 	orch := orchestrator.Get()
@@ -64,9 +63,7 @@ func waitFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid actor handle"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Invalid actor handle")))
 	}
 
 	if !orch.MarkWaited(inst) {
@@ -74,12 +71,10 @@ func waitFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Actor has already been waited on"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Actor has already been waited on")))
 	}
 
-	selfID := context.GetInstanceID(ctx)
+	selfID := ctx.InstanceID
 	selfInst := orch.GetInstance(selfID)
 
 	cancelCh := orch.BeginBlocking(selfInst, orchestrator.StateBlockedWait)
@@ -109,9 +104,7 @@ func waitFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Deadlock: wait() target cannot finish"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Deadlock: wait() target cannot finish")))
 	}
 
 	orch.RemoveInstance(instanceID)
@@ -128,9 +121,7 @@ func waitFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			result.Err.Error(),
-			ctx,
-		))
+			result.Err.Error()))
 	}
 
 	if result.Value != nil {

@@ -14,7 +14,7 @@ import (
 	"os"
 )
 
-func getcwdFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func getcwdFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 0 {
@@ -26,9 +26,7 @@ func getcwdFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCount("getcwd", 0),
-			ctx,
-		))
+			shared.Errors.InvalidArgCount("getcwd", 0)))
 	}
 
 	cwd, err := os.Getwd()

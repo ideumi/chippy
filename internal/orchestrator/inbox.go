@@ -7,7 +7,6 @@
 package orchestrator
 
 import (
-	"chip-go/internal/context"
 	"chip-go/internal/values"
 	"sync"
 )
@@ -36,7 +35,7 @@ func (in *Inbox) HasItems() bool {
 // Send takes ownership of val: callers must not touch val afterwards because
 // isolation rebinds any closures inside it.
 func (in *Inbox) Send(val values.Value) {
-	IsolateForTransfer(val, make(map[*context.Context]*context.Context))
+	IsolateForTransfer(val, make(map[values.Ctx]values.Ctx))
 
 	in.mu.Lock()
 	in.items = append(in.items, val)
@@ -62,7 +61,7 @@ func (in *Inbox) drain() []values.Value {
 	return items
 }
 
-func (in *Inbox) ReceiveNonBlocking(globals *context.Context) []values.Value {
+func (in *Inbox) ReceiveNonBlocking(globals values.Ctx) []values.Value {
 	items := in.drain()
 
 	if items == nil {

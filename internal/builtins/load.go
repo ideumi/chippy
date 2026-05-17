@@ -15,7 +15,7 @@ import (
 	"os"
 )
 
-func loadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func loadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -27,9 +27,7 @@ func loadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("load", 1, "filename"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("load", 1, "filename")))
 	}
 
 	filename, ok := args[0].(*values.String)
@@ -39,9 +37,7 @@ func loadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("load", shared.TypeString, "filename"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("load", shared.TypeString, "filename")))
 	}
 
 	content, err := os.ReadFile(filename.Value)
@@ -51,21 +47,17 @@ func loadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			"Failed to load file \""+filename.Value+"\": "+err.Error(),
-			ctx,
-		))
+			"Failed to load file \""+filename.Value+"\": "+err.Error()))
 	}
 
-	roadRunner := orchestrator.Get().GetRR2ForContext(ctx)
+	roadRunner := orchestrator.Get().GetRR2ForContext(ctx.InstanceID)
 
 	if roadRunner == nil {
 		posStart, posEnd := args[0].GetPos()
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			"RoadRunner2 not available",
-			ctx,
-		))
+			"RoadRunner2 not available"))
 	}
 
 	_, err = roadRunner.Run(filename.Value, string(content))
@@ -75,9 +67,7 @@ func loadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			"Failed to execute file \""+filename.Value+"\":\n"+err.Error(),
-			ctx,
-		))
+			"Failed to execute file \""+filename.Value+"\":\n"+err.Error()))
 	}
 
 	return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))

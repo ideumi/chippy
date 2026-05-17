@@ -6,16 +6,11 @@
 
 package orchestrator
 
-import (
-	"chip-go/internal/context"
-	"chip-go/internal/handles"
-)
+import "chip-go/internal/handles"
 
-// Transfer moves a handle from the caller's actor to dstID's registry. Returns
-// the new destination handle ID on success, or (-1, reason) on failure.
-func (o *Orchestrator) Transfer(srcCtx interface{}, dstID, handleID int) (int, string) {
-	srcInstanceID := context.GetInstanceID(srcCtx)
-
+// Transfer moves a handle from srcInstanceID's registry to dstID's. Returns the
+// new destination handle ID on success, or (-1, reason) on failure.
+func (o *Orchestrator) Transfer(srcInstanceID, dstID, handleID int) (int, string) {
 	o.mu.RLock()
 
 	src := o.instances[srcInstanceID]
@@ -30,9 +25,7 @@ func (o *Orchestrator) Transfer(srcCtx interface{}, dstID, handleID int) (int, s
 	return src.Registry.TransferTo(dst.Registry, handleID)
 }
 
-func (o *Orchestrator) GetRegistry(ctx interface{}) *handles.HandleRegistry {
-	instanceID := context.GetInstanceID(ctx)
-
+func (o *Orchestrator) GetRegistry(instanceID int) *handles.HandleRegistry {
 	o.mu.RLock()
 
 	inst := o.instances[instanceID]
@@ -46,9 +39,7 @@ func (o *Orchestrator) GetRegistry(ctx interface{}) *handles.HandleRegistry {
 	return nil
 }
 
-func (o *Orchestrator) GetRR2ForContext(ctx interface{}) RR2Interface {
-	instanceID := context.GetInstanceID(ctx)
-
+func (o *Orchestrator) GetRR2ForContext(instanceID int) RR2Interface {
 	o.mu.RLock()
 
 	inst := o.instances[instanceID]

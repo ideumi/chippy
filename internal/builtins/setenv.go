@@ -14,7 +14,7 @@ import (
 	"os"
 )
 
-func setenvFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func setenvFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
@@ -26,9 +26,7 @@ func setenvFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("setenv", 2, "name, value"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("setenv", 2, "name, value")))
 	}
 
 	nameStr, ok := args[0].(*values.String)
@@ -38,9 +36,7 @@ func setenvFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("setenv", shared.PositionFirst, shared.TypeString, "name"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("setenv", shared.PositionFirst, shared.TypeString, "name")))
 	}
 
 	valueStr, ok := args[1].(*values.String)
@@ -50,9 +46,7 @@ func setenvFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("setenv", shared.PositionSecond, shared.TypeString, "value"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("setenv", shared.PositionSecond, shared.TypeString, "value")))
 	}
 
 	// Set environment variable
@@ -63,9 +57,7 @@ func setenvFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			"Failed to set environment variable: "+err.Error(),
-			ctx,
-		))
+			"Failed to set environment variable: "+err.Error()))
 	}
 
 	return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))

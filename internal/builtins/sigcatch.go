@@ -15,7 +15,7 @@ import (
 	"syscall"
 )
 
-func sigcatchFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func sigcatchFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -27,9 +27,7 @@ func sigcatchFunction(args []values.Value, ctx interface{}) *values.RuntimeResul
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("sigcatch", 1, "signums"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("sigcatch", 1, "signums")))
 	}
 
 	listArg, ok := args[0].(*values.List)
@@ -39,9 +37,7 @@ func sigcatchFunction(args []values.Value, ctx interface{}) *values.RuntimeResul
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("sigcatch", shared.TypeList, "signums"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("sigcatch", shared.TypeList, "signums")))
 	}
 
 	sigs := make([]syscall.Signal, 0, len(listArg.Elements))
@@ -54,12 +50,16 @@ func sigcatchFunction(args []values.Value, ctx interface{}) *values.RuntimeResul
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				shared.Errors.InvalidValue("All signums must be numbers"),
-				ctx,
-			))
+				shared.Errors.InvalidValue("All signums must be numbers")))
 		}
 
-		sigs = append(sigs, syscall.Signal(int(num.Value)))
+		sig64, err := num.AsInt()
+
+		if err != nil {
+			return res.Failure(err)
+		}
+
+		sigs = append(sigs, syscall.Signal(int(sig64)))
 	}
 
 	signalMu.Lock()

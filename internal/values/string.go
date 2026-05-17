@@ -34,8 +34,8 @@ func (s *String) SetPos(posStart, posEnd *errors.Position) Value {
 	return s
 }
 
-func (s *String) SetContext(context interface{}) Value {
-	s.BaseValue.SetContext(context)
+func (s *String) SetContext(ctx Ctx) Value {
+	s.BaseValue.SetContext(ctx)
 	return s
 }
 
@@ -64,14 +64,21 @@ func (s *String) AddedTo(other Value) (Value, error) {
 
 func (s *String) MultedBy(other Value) (Value, error) {
 	if otherNum, ok := other.(*Number); ok {
-		if otherNum.Value < 0 {
+		if !otherNum.IsInt() {
 			return nil, errors.NewRTError(
 				otherNum.posStart, otherNum.posEnd,
-				"Cannot repeat string negative times",
-				s.context,
-			)
+				"Repeat count must be an integer")
+
 		}
-		result := NewString(strings.Repeat(s.Value, int(otherNum.Value)))
+
+		if otherNum.iVal < 0 {
+			return nil, errors.NewRTError(
+				otherNum.posStart, otherNum.posEnd,
+				"Cannot repeat string negative times")
+
+		}
+
+		result := NewString(strings.Repeat(s.Value, int(otherNum.iVal)))
 		result.SetContext(s.context)
 
 		return result, nil
@@ -82,11 +89,10 @@ func (s *String) MultedBy(other Value) (Value, error) {
 
 func (s *String) GetComparisonEe(other Value) (Value, error) {
 	if otherStr, ok := other.(*String); ok {
-		var result float64
+		result := constants.NUM_FAL
+
 		if s.Value == otherStr.Value {
 			result = constants.NUM_TRU
-		} else {
-			result = constants.NUM_FAL
 		}
 
 		return NewNumber(result).SetContext(s.context), nil
@@ -97,11 +103,10 @@ func (s *String) GetComparisonEe(other Value) (Value, error) {
 
 func (s *String) GetComparisonNe(other Value) (Value, error) {
 	if otherStr, ok := other.(*String); ok {
-		var result float64
+		result := constants.NUM_FAL
+
 		if s.Value != otherStr.Value {
 			result = constants.NUM_TRU
-		} else {
-			result = constants.NUM_FAL
 		}
 
 		return NewNumber(result).SetContext(s.context), nil
@@ -111,23 +116,20 @@ func (s *String) GetComparisonNe(other Value) (Value, error) {
 }
 
 func (s *String) Notted() (Value, error) {
-	var result float64
+	result := constants.NUM_TRU
+
 	if s.IsTrue() {
 		result = constants.NUM_FAL
-	} else {
-		result = constants.NUM_TRU
 	}
 
 	return NewNumber(result).SetContext(s.context), nil
 }
 
 func (s *String) XoredBy(other Value) (Value, error) {
-	var result float64
+	result := constants.NUM_FAL
 
 	if s.IsTrue() != other.IsTrue() {
 		result = constants.NUM_TRU
-	} else {
-		result = constants.NUM_FAL
 	}
 
 	return NewNumber(result).SetContext(s.context), nil

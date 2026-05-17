@@ -13,7 +13,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func transferFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func transferFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
@@ -25,9 +25,7 @@ func transferFunction(args []values.Value, ctx interface{}) *values.RuntimeResul
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("transfer", 2, "actor, handle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("transfer", 2, "actor, handle")))
 	}
 
 	targetNum, ok := args[0].(*values.Number)
@@ -37,9 +35,7 @@ func transferFunction(args []values.Value, ctx interface{}) *values.RuntimeResul
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("transfer", shared.PositionFirst, shared.TypeNumber, "actor"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("transfer", shared.PositionFirst, shared.TypeNumber, "actor")))
 	}
 
 	handleNum, ok := args[1].(*values.Number)
@@ -49,25 +45,33 @@ func transferFunction(args []values.Value, ctx interface{}) *values.RuntimeResul
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("transfer", shared.PositionSecond, shared.TypeNumber, "handle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("transfer", shared.PositionSecond, shared.TypeNumber, "handle")))
 	}
 
-	targetID := int(targetNum.Value)
-	handleID := int(handleNum.Value)
+	target64, err := targetNum.AsInt()
 
-	newID, errMsg := orchestrator.Get().Transfer(ctx, targetID, handleID)
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	handle64, err := handleNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	targetID := int(target64)
+	handleID := int(handle64)
+
+	newID, errMsg := orchestrator.Get().Transfer(ctx.InstanceID, targetID, handleID)
 
 	if errMsg != "" {
 		posStart, posEnd := args[1].GetPos()
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue(errMsg),
-			ctx,
-		))
+			shared.Errors.InvalidValue(errMsg)))
 	}
 
-	return res.Success(values.NewNumber(float64(newID)).SetContext(ctx))
+	return res.Success(values.NewNumber(newID).SetContext(ctx))
 }

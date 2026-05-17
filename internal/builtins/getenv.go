@@ -14,7 +14,7 @@ import (
 	"os"
 )
 
-func getenvFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func getenvFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -26,9 +26,7 @@ func getenvFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("getenv", 1, "variable name"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("getenv", 1, "variable name")))
 	}
 
 	nameStr, ok := args[0].(*values.String)
@@ -38,9 +36,7 @@ func getenvFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("getenv", shared.TypeString, "variable name"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("getenv", shared.TypeString, "variable name")))
 	}
 
 	value, exists := os.LookupEnv(nameStr.Value)

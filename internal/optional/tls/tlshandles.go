@@ -12,6 +12,7 @@ package tls
 import (
 	"chip-go/internal/handles"
 	"chip-go/internal/orchestrator"
+	"chip-go/internal/values"
 	"crypto/tls"
 )
 
@@ -30,19 +31,19 @@ func (h *TLSHandle) Close() error {
 	return nil
 }
 
-func getRegistry(ctx interface{}) *handles.HandleRegistry {
-	return orchestrator.Get().GetRegistry(ctx)
+func getRegistry(ctx values.Ctx) *handles.HandleRegistry {
+	return orchestrator.Get().GetRegistry(ctx.InstanceID)
 }
 
-func getNextTLSHandle(ctx interface{}) int {
+func getNextTLSHandle(ctx values.Ctx) int {
 	return getRegistry(ctx).Alloc.Alloc()
 }
 
-func storeTLSHandle(ctx interface{}, handle int, tlsHandle *TLSHandle) {
+func storeTLSHandle(ctx values.Ctx, handle int, tlsHandle *TLSHandle) {
 	getRegistry(ctx).Optional.Store(handle, tlsHandle)
 }
 
-func getTLSHandle(ctx interface{}, handle int) (*TLSHandle, bool) {
+func getTLSHandle(ctx values.Ctx, handle int) (*TLSHandle, bool) {
 	opt, ok := getRegistry(ctx).Optional.Get(handle)
 
 	if !ok {
@@ -54,7 +55,7 @@ func getTLSHandle(ctx interface{}, handle int) (*TLSHandle, bool) {
 	return tlsHandle, ok
 }
 
-func removeTLSHandle(ctx interface{}, handle int) {
+func removeTLSHandle(ctx values.Ctx, handle int) {
 	reg := getRegistry(ctx)
 	reg.Optional.Remove(handle)
 	reg.Alloc.Free(handle)

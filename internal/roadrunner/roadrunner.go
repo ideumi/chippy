@@ -32,7 +32,7 @@ import (
 
 type RoadRunner2 struct {
 	interpreter   *interpreter.Interpreter
-	globalContext *context.Context
+	globalContext values.Ctx
 }
 
 var sharedInterpreter *interpreter.Interpreter
@@ -80,12 +80,12 @@ func (rr *RoadRunner2) Run(filename, text string) (values.Value, error) {
 	return result.Value, nil
 }
 
-func (rr *RoadRunner2) GetGlobalContext() *context.Context {
+func (rr *RoadRunner2) GetGlobalContext() values.Ctx {
 	return rr.globalContext
 }
 
 func newRR2(instanceID int, displayName string) *RoadRunner2 {
-	globalCtx := context.NewContext(displayName, nil, nil)
+	globalCtx := context.NewContext[values.Value](displayName, nil, nil)
 	globalCtx.InstanceID = instanceID
 
 	rr := &RoadRunner2{
@@ -103,7 +103,7 @@ func newRR2(instanceID int, displayName string) *RoadRunner2 {
 		globalCtx.SymbolTable.Set(name, constant)
 	}
 
-	globalCtx.SymbolTable.Set("CHIPRT", values.NewNumber(float64(instanceID)).SetContext(globalCtx))
+	globalCtx.SymbolTable.Set("CHIPRT", values.NewNumber(instanceID).SetContext(globalCtx))
 
 	return rr
 }

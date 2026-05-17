@@ -16,7 +16,7 @@ import (
 	"strings"
 )
 
-func popenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func popenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
@@ -28,9 +28,7 @@ func popenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("popen", 2, "command, mode"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("popen", 2, "command, mode")))
 	}
 
 	commandStr, ok := args[0].(*values.String)
@@ -40,9 +38,7 @@ func popenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("popen", shared.PositionFirst, shared.TypeString, "command"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("popen", shared.PositionFirst, shared.TypeString, "command")))
 	}
 
 	modeStr, ok := args[1].(*values.String)
@@ -52,9 +48,7 @@ func popenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("popen", shared.PositionSecond, shared.TypeString, "mode"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("popen", shared.PositionSecond, shared.TypeString, "mode")))
 	}
 
 	command := commandStr.Value
@@ -78,9 +72,7 @@ func popenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				"Failed to create stdin pipe: "+err.Error(),
-				ctx,
-			))
+				"Failed to create stdin pipe: "+err.Error()))
 		}
 	}
 
@@ -92,9 +84,7 @@ func popenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				"Failed to create stdout pipe: "+err.Error(),
-				ctx,
-			))
+				"Failed to create stdout pipe: "+err.Error()))
 		}
 	}
 
@@ -106,15 +96,13 @@ func popenFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			"Failed to start process: "+err.Error(),
-			ctx,
-		))
+			"Failed to start process: "+err.Error()))
 	}
 
 	// Allocate handle using recycling system
-	registry := orchestrator.Get().GetRegistry(ctx)
+	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
 	handle := registry.Alloc.Alloc()
 	registry.Processes.Store(handle, &procHandle)
 
-	return res.Success(values.NewNumber(float64(handle)).SetContext(ctx))
+	return res.Success(values.NewNumber(handle).SetContext(ctx))
 }

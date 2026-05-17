@@ -12,7 +12,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func charatFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func charatFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
@@ -24,9 +24,7 @@ func charatFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("charat", 2, "string, index"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("charat", 2, "string, index")))
 	}
 
 	stringArg, ok := args[0].(*values.String)
@@ -36,9 +34,7 @@ func charatFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("charat", shared.PositionFirst, shared.TypeString, "string"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("charat", shared.PositionFirst, shared.TypeString, "string")))
 	}
 
 	indexNum, ok := args[1].(*values.Number)
@@ -48,12 +44,16 @@ func charatFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("charat", shared.PositionSecond, shared.TypeNumber, "index"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("charat", shared.PositionSecond, shared.TypeNumber, "index")))
 	}
 
-	index := int(indexNum.Value)
+	idx64, err := indexNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	index := int(idx64)
 	str := stringArg.Value
 
 	// UTF8
@@ -64,9 +64,7 @@ func charatFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			"Index out of bounds",
-			ctx,
-		))
+			"Index out of bounds"))
 	}
 
 	char := string(runes[index-1])

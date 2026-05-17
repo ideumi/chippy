@@ -17,7 +17,7 @@ import (
 	"strings"
 )
 
-func dechunkFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func dechunkFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -29,9 +29,7 @@ func dechunkFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "dechunk"), 1, "chunkedBytes"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "dechunk"), 1, "chunkedBytes")))
 	}
 
 	chunkedBytes, ok := args[0].(*values.Bytes)
@@ -42,9 +40,7 @@ func dechunkFunction(args []values.Value, ctx interface{}) *values.RuntimeResult
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
 			shared.Errors.InvalidArgTypeWithHint(
-				optional.Prefixed(OptionalName, "dechunk"), shared.TypeBytes, "chunkedBytes"),
-			ctx,
-		))
+				optional.Prefixed(OptionalName, "dechunk"), shared.TypeBytes, "chunkedBytes")))
 	}
 
 	data := chunkedBytes.Data

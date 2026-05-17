@@ -2,12 +2,24 @@
 
 ''stat(path)''
 
-Returns file status information as a list, following symbolic links.
+Returns file status information, following symbolic links.
 
 *Parameters:*
 - ''path'': String file path
 
 *Returns:*
-- List: [size, mtime, atime, ctime, mode, uid, gid, nlink, ino, dev, type]
-  - ''mode'' is a 3 or 4 digit permission number (e.g. 755, 4755)
+- Map: file status
 - ''err'' on failure
+
+*Map fields:*
+- ''"size"'' (Number): file size in bytes
+- ''"modified"'' (Number): last modification time (Unix timestamp)
+- ''"accessed"'' (Number): last access time (Unix timestamp)
+- ''"changed"'' (Number): last status-change time (Unix timestamp)
+- ''"mode"'' (Number): permissions as a 3 or 4 digit number (e.g. 755, 4755)
+- ''"userId"'' (Number): owner user ID
+- ''"groupId"'' (Number): owner group ID
+- ''"links"'' (Number): number of hard links
+- ''"inode"'' (Number): inode number
+- ''"device"'' (Number): device ID
+- ''"type"'' (String): file type, one of ''TYPEFILE'', ''TYPEDIR'', ''TYPESYMLINK'', ''TYPECHAR'', ''TYPEBLOCK'', ''TYPEFIFO'', ''TYPESOCKET'', ''TYPEUNKNOWN'' (defined in ''libstat.chh'')

@@ -13,7 +13,7 @@ import (
 	"os"
 )
 
-func getuidFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func getuidFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 0 {
@@ -25,12 +25,10 @@ func getuidFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCount("getuid", 0),
-			ctx,
-		))
+			shared.Errors.InvalidArgCount("getuid", 0)))
 	}
 
 	uid := os.Getuid()
 
-	return res.Success(values.NewNumber(float64(uid)).SetContext(ctx))
+	return res.Success(values.NewNumber(uid).SetContext(ctx))
 }

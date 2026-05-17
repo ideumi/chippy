@@ -12,7 +12,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func unpackFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func unpackFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -24,9 +24,7 @@ func unpackFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("unpack", 1, "bytes"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("unpack", 1, "bytes")))
 	}
 
 	bytesVal, ok := args[0].(*values.Bytes)
@@ -36,9 +34,7 @@ func unpackFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("unpack", shared.TypeBytes, shared.TypeBytes),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("unpack", shared.TypeBytes, shared.TypeBytes)))
 	}
 
 	// Convert bytes to string without UTF-8 validation

@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-func upperFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func upperFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -25,9 +25,7 @@ func upperFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("upper", 1, "string"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("upper", 1, "string")))
 	}
 
 	stringArg, ok := args[0].(*values.String)
@@ -37,9 +35,7 @@ func upperFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("upper", shared.TypeString, "string"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("upper", shared.TypeString, "string")))
 	}
 
 	str := stringArg.Value

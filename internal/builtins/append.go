@@ -12,7 +12,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func appendFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func appendFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
@@ -24,9 +24,7 @@ func appendFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("append", 2, "list, value"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("append", 2, "list, value")))
 	}
 
 	value := args[0]
@@ -39,20 +37,22 @@ func appendFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 			posStart, posEnd := args[1].GetPos()
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("append", shared.PositionSecond, shared.TypeNumber, "value"),
-				ctx,
-			))
+				shared.Errors.InvalidArgTypePositionalWithHint("append", shared.PositionSecond, shared.TypeNumber, "value")))
 		}
 
-		byteValue := int(valueNum.Value)
+		byte64, err := valueNum.AsInt()
+
+		if err != nil {
+			return res.Failure(err)
+		}
+
+		byteValue := int(byte64)
 
 		if byteValue < 0 || byteValue > 255 {
 			posStart, posEnd := args[1].GetPos()
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				"Byte values must be between 0 and 255",
-				ctx,
-			))
+				"Byte values must be between 0 and 255"))
 		}
 
 		newBytes := v.AppendByte(byteValue)
@@ -68,8 +68,6 @@ func appendFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 		posStart, posEnd := args[0].GetPos()
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("append", shared.PositionFirst, shared.TypeListOrBytes, shared.TypeListOrBytes),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("append", shared.PositionFirst, shared.TypeListOrBytes, shared.TypeListOrBytes)))
 	}
 }

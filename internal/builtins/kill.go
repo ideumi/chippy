@@ -14,7 +14,7 @@ import (
 	"syscall"
 )
 
-func killFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func killFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
@@ -26,9 +26,7 @@ func killFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("kill", 2, "pid, signal"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("kill", 2, "pid, signal")))
 	}
 
 	pidNum, ok := args[0].(*values.Number)
@@ -38,9 +36,7 @@ func killFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("kill", shared.PositionFirst, shared.TypeNumber, "pid"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("kill", shared.PositionFirst, shared.TypeNumber, "pid")))
 	}
 
 	signalNum, ok := args[1].(*values.Number)
@@ -50,15 +46,25 @@ func killFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("kill", shared.PositionSecond, shared.TypeNumber, "signal"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("kill", shared.PositionSecond, shared.TypeNumber, "signal")))
 	}
 
-	pid := int(pidNum.Value)
-	signal := syscall.Signal(signalNum.Value)
+	pid64, err := pidNum.AsInt()
 
-	err := syscall.Kill(pid, signal)
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	sig64, err := signalNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	pid := int(pid64)
+	signal := syscall.Signal(sig64)
+
+	err = syscall.Kill(pid, signal)
 
 	if err != nil {
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))

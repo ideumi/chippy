@@ -15,7 +15,7 @@ import (
 	"io"
 )
 
-func freadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func freadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
@@ -27,9 +27,7 @@ func freadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("fread", 2, "handle, count"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("fread", 2, "handle, count")))
 	}
 
 	handleNum, ok := args[0].(*values.Number)
@@ -39,9 +37,7 @@ func freadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("fread", shared.PositionFirst, shared.TypeNumber, "handle"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("fread", shared.PositionFirst, shared.TypeNumber, "handle")))
 	}
 
 	countNum, ok := args[1].(*values.Number)
@@ -51,26 +47,33 @@ func freadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("fread", shared.PositionSecond, shared.TypeNumber, "count"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("fread", shared.PositionSecond, shared.TypeNumber, "count")))
 	}
 
-	handle := int(handleNum.Value)
+	handle64, err := handleNum.AsInt()
 
-	count := int(countNum.Value)
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	count64, err := countNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	handle := int(handle64)
+	count := int(count64)
 
 	if count < 0 {
 		posStart, posEnd := args[1].GetPos()
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Count must be non-negative"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Count must be non-negative")))
 	}
 
-	registry := orchestrator.Get().GetRegistry(ctx)
+	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
 	file, fileExists := registry.Files.Get(handle)
 	procHandle, procExists := registry.Processes.Get(handle)
 
@@ -85,14 +88,11 @@ func freadFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid handle"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Invalid handle")))
 	}
 
 	var buffer []byte
 	var n int
-	var err error
 
 	if count == 0 {
 		buffer, err = io.ReadAll(reader)

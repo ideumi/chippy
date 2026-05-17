@@ -59,8 +59,8 @@ func (m *Map) SetPos(posStart, posEnd *errors.Position) Value {
 	return m
 }
 
-func (m *Map) SetContext(context interface{}) Value {
-	m.BaseValue.SetContext(context)
+func (m *Map) SetContext(ctx Ctx) Value {
+	m.BaseValue.SetContext(ctx)
 
 	return m
 }
@@ -193,7 +193,7 @@ func (m *Map) GetComparisonEe(other Value) (Value, error) {
 		}
 
 		if compNum, ok := comparison.(*Number); ok {
-			if compNum.Value == constants.NUM_FAL {
+			if !compNum.IsTrue() {
 				return NewNumber(constants.NUM_FAL).SetContext(m.context), nil
 			}
 		}
@@ -210,12 +210,10 @@ func (m *Map) GetComparisonNe(other Value) (Value, error) {
 	}
 
 	if compNum, ok := comparison.(*Number); ok {
-		var result float64
+		result := constants.NUM_TRU
 
-		if compNum.Value == constants.NUM_TRU {
+		if compNum.IsTrue() {
 			result = constants.NUM_FAL
-		} else {
-			result = constants.NUM_TRU
 		}
 
 		return NewNumber(result).SetContext(m.context), nil
@@ -225,24 +223,20 @@ func (m *Map) GetComparisonNe(other Value) (Value, error) {
 }
 
 func (m *Map) Notted() (Value, error) {
-	var result float64
+	result := constants.NUM_TRU
 
 	if m.IsTrue() {
 		result = constants.NUM_FAL
-	} else {
-		result = constants.NUM_TRU
 	}
 
 	return NewNumber(result).SetContext(m.context), nil
 }
 
 func (m *Map) XoredBy(other Value) (Value, error) {
-	var result float64
+	result := constants.NUM_FAL
 
 	if m.IsTrue() != other.IsTrue() {
 		result = constants.NUM_TRU
-	} else {
-		result = constants.NUM_FAL
 	}
 
 	return NewNumber(result).SetContext(m.context), nil

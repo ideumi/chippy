@@ -18,7 +18,7 @@ func SetGlobalArgs(arguments []string) {
 	globalArgs = arguments
 }
 
-func argsFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func argsFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 0 {
@@ -30,9 +30,7 @@ func argsFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCount("args", 0),
-			ctx,
-		))
+			shared.Errors.InvalidArgCount("args", 0)))
 	}
 
 	// To String

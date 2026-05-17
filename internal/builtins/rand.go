@@ -14,7 +14,7 @@ import (
 	"crypto/rand"
 )
 
-func randFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func randFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -26,9 +26,7 @@ func randFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("rand", 1, "count"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("rand", 1, "count")))
 	}
 
 	bytesNum, ok := args[0].(*values.Number)
@@ -38,25 +36,27 @@ func randFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("rand", shared.TypeNumber, "count"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("rand", shared.TypeNumber, "count")))
 	}
 
-	numBytes := int(bytesNum.Value)
+	count64, err := bytesNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	numBytes := int(count64)
 
 	if numBytes <= 0 {
 		posStart, posEnd := args[0].GetPos()
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidValue("Byte count must be positive"),
-			ctx,
-		))
+			shared.Errors.InvalidValue("Byte count must be positive")))
 	}
 
 	buf := make([]byte, numBytes)
-	_, err := rand.Read(buf)
+	_, err = rand.Read(buf)
 
 	if err != nil {
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))

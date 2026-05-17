@@ -4,7 +4,7 @@
 #
 
 #@ <Basename(path)>
-#@ V-1.0.0 (2025-08-13)
+#@ V-1.0.1 (2026-05-16)
 #@
 #@ Returns the filename portion of ''path''.
 
@@ -14,10 +14,19 @@ func Basename(path)
 
 	if path == "/" { return "/"; }
 
+	var endIdx = len(path);
+
+	while endIdx > 1 and slice(path, endIdx, endIdx) == "/"
+	{
+		endIdx = endIdx - 1;
+	}
+
+	if endIdx == 1 and slice(path, 1, 1) == "/" { return "/"; }
+
 	var lastSlash = -1;
 	var i = 1;
 
-	while i <= len(path)
+	while i <= endIdx
 	{
 		var currentChar = slice(path, i, i);
 
@@ -26,23 +35,32 @@ func Basename(path)
 		i = i + 1;
 	}
 
-	if lastSlash == -1 { return path; }
+	if lastSlash == -1 { return slice(path, 1, endIdx); }
 
-	return slice(path, lastSlash + 1, len(path));
+	return slice(path, lastSlash + 1, endIdx);
 }
 
 #@ <Dirname(path)>
-#@ V-1.0.0 (2025-08-13)
+#@ V-1.0.1 (2026-05-16)
 #@
 #@ Returns the directory portion of ''path'' or ''"."'' if no directory separator
 #@ found.
 
 func Dirname(path)
 {
+	if len(path) == 0 { return "."; }
+
+	var endIdx = len(path);
+
+	while endIdx > 1 and slice(path, endIdx, endIdx) == "/"
+	{
+		endIdx = endIdx - 1;
+	}
+
 	var lastSlash = -1;
 	var i = 1;
 
-	while i <= len(path)
+	while i <= endIdx
 	{
 		var currentChar = slice(path, i, i);
 

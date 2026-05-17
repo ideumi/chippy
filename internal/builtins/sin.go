@@ -13,7 +13,7 @@ import (
 	"math"
 )
 
-func sinFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func sinFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -25,9 +25,7 @@ func sinFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("sin", 1, "radians"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("sin", 1, "radians")))
 	}
 
 	radiansArg, ok := args[0].(*values.Number)
@@ -37,13 +35,18 @@ func sinFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("sin", shared.TypeNumber, "radians"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypeWithHint("sin", shared.TypeNumber, "radians")))
 	}
 
-	radians := radiansArg.Value
-	result := math.Sin(radians)
+	radians := radiansArg.AsFloat()
 
-	return res.Success(values.NewNumber(result).SetContext(ctx))
+	num, err := values.NewNumberFromFloat(math.Sin(radians))
+
+	if err != nil {
+		posStart, posEnd := args[0].GetPos()
+
+		return res.Failure(errors.NewRTError(posStart, posEnd, err.Error()))
+	}
+
+	return res.Success(num.SetContext(ctx))
 }

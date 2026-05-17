@@ -4,47 +4,11 @@
 #
 
 # https://invisible-island.net/xterm/ctlseqs/ctlseqs.html
+# /usr/include/x86_64-linux-gnu/bits/termios-struct.h
+# /usr/include/x86_64-linux-gnu/bits/termios-c_cc.h
+# man 3 termios
 
 load("libhandles.chh");
-load("libbytes.chh");
-
-# --- Termios field byte offsets ---
-
-#@ <TIFLAG>
-#@ (2026-04-02)
-#@ Byte offset of Iflag in termios state
-
-var TIFLAG = 1;
-
-#@ <TOFLAG>
-#@ (2026-04-02)
-#@ Byte offset of Oflag in termios state
-
-var TOFLAG = 5;
-
-#@ <TCFLAG>
-#@ (2026-04-02)
-#@ Byte offset of Cflag in termios state
-
-var TCFLAG = 9;
-
-#@ <TLFLAG>
-#@ (2026-04-02)
-#@ Byte offset of Lflag in termios state
-
-var TLFLAG = 13;
-
-#@ <TVMIN>
-#@ (2026-04-03)
-#@ Byte offset of VMIN in termios state
-
-var TVMIN = 24;
-
-#@ <TVTIME>
-#@ (2026-04-03)
-#@ Byte offset of VTIME in termios state
-
-var TVTIME = 23;
 
 # --- Termios Iflag constants ---
 
@@ -501,25 +465,12 @@ func HideCursor()
 
 func MakeRaw(state)
 {
-	var iflag = GetInt(state, TIFLAG);
-	iflag = iflag band bnot (IGNBRK bor BRKINT bor PARMRK bor ISTRIP bor INLCR bor IGNCR bor ICRNL bor IXON);
-	state = SetInt(state, TIFLAG, iflag);
-
-	var oflag = GetInt(state, TOFLAG);
-	oflag = oflag band bnot OPOST;
-	state = SetInt(state, TOFLAG, oflag);
-
-	var lflag = GetInt(state, TLFLAG);
-	lflag = lflag band bnot (ECHO bor ECHONL bor ICANON bor ISIG bor IEXTEN);
-	state = SetInt(state, TLFLAG, lflag);
-
-	var cflag = GetInt(state, TCFLAG);
-	cflag = cflag band bnot (CSIZE bor PARENB);
-	cflag = cflag bor CS8;
-	state = SetInt(state, TCFLAG, cflag);
-
-	state = state[TVMIN] = 1;
-	state = state[TVTIME] = 0;
+	state = state["iflag"] = state["iflag"] band bnot (IGNBRK bor BRKINT bor PARMRK bor ISTRIP bor INLCR bor IGNCR bor ICRNL bor IXON);
+	state = state["oflag"] = state["oflag"] band bnot OPOST;
+	state = state["lflag"] = state["lflag"] band bnot (ECHO bor ECHONL bor ICANON bor ISIG bor IEXTEN);
+	state = state["cflag"] = (state["cflag"] band bnot (CSIZE bor PARENB)) bor CS8;
+	state = state["VMIN"] = 1;
+	state = state["VTIME"] = 0;
 
 	return state;
 }

@@ -16,7 +16,7 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-func lutimeFunction(args []values.Value, ctx interface{}) *values.RuntimeResult {
+func lutimeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 3 {
@@ -28,9 +28,7 @@ func lutimeFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("lutime", 3, "path, atime, mtime"),
-			ctx,
-		))
+			shared.Errors.InvalidArgCountWithHint("lutime", 3, "path, atime, mtime")))
 	}
 
 	pathStr, ok := args[0].(*values.String)
@@ -40,9 +38,7 @@ func lutimeFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("lutime", shared.PositionFirst, shared.TypeString, "path"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("lutime", shared.PositionFirst, shared.TypeString, "path")))
 	}
 
 	atimeNum, ok := args[1].(*values.Number)
@@ -52,9 +48,7 @@ func lutimeFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("lutime", shared.PositionSecond, shared.TypeNumber, "atime"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("lutime", shared.PositionSecond, shared.TypeNumber, "atime")))
 	}
 
 	mtimeNum, ok := args[2].(*values.Number)
@@ -64,9 +58,7 @@ func lutimeFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("lutime", shared.PositionThird, shared.TypeNumber, "mtime"),
-			ctx,
-		))
+			shared.Errors.InvalidArgTypePositionalWithHint("lutime", shared.PositionThird, shared.TypeNumber, "mtime")))
 	}
 
 	toTimespec := func(ts float64) unix.Timespec {
@@ -76,8 +68,8 @@ func lutimeFunction(args []values.Value, ctx interface{}) *values.RuntimeResult 
 	}
 
 	ts := []unix.Timespec{
-		toTimespec(atimeNum.Value),
-		toTimespec(mtimeNum.Value),
+		toTimespec(atimeNum.AsFloat()),
+		toTimespec(mtimeNum.AsFloat()),
 	}
 
 	err := unix.UtimesNanoAt(unix.AT_FDCWD, pathStr.Value, ts, unix.AT_SYMLINK_NOFOLLOW)
