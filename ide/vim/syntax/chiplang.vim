@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: ChipLang
 " Maintainer: ideumi
-" Latest Revision: 2026-04-24
+" Latest Revision: 2026-05-19
 
 if exists("b:current_syntax")
   finish
@@ -32,7 +32,7 @@ syn keyword chipBuiltin num
 syn keyword chipBuiltin off
 syn keyword chipBuiltin pack pclose popen
 syn keyword chipBuiltin rand readlink receive rename replace
-syn keyword chipBuiltin saccept sclose seek send setenv setterm sigcatch sigfree signal sin sleep slice sopen sort spawn split sread stat str swrite symlink
+syn keyword chipBuiltin saccept sclose seek send setenv setterm sigcatch sigfree signal sin sinfo sleep slice sopen sort spawn split sread stat str swrite symlink
 syn keyword chipBuiltin tan time transfer type
 syn keyword chipBuiltin unlink unpack upper utime wait winsize
 

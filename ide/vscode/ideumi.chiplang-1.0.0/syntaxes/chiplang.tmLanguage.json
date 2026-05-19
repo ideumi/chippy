@@ -78,7 +78,7 @@
       ]
     },
     "builtins": {
-      "match": "\\b(actor|append|args|charat|chdir|chmod|cos|dclose|dopen|dread|error|exec|fclose|fopen|fread|fsync|fwrite|getch|getcwd|getenv|getpid|getterm|getuid|has|indexof|int|iserr|isok|join|keys|kill|len|lenv|list|load|loadopt|lower|lstat|lutime|mkdir|num|off|pack|pclose|popen|rand|readlink|receive|rename|replace|saccept|sclose|seek|send|setenv|setterm|sigcatch|sigfree|signal|sin|sleep|slice|sopen|sort|spawn|split|sread|stat|str|swrite|symlink|tan|time|transfer|type|unlink|unpack|upper|utime|wait|winsize)\\b",
+      "match": "\\b(actor|append|args|charat|chdir|chmod|cos|dclose|dopen|dread|error|exec|fclose|fopen|fread|fsync|fwrite|getch|getcwd|getenv|getpid|getterm|getuid|has|indexof|int|iserr|isok|join|keys|kill|len|lenv|list|load|loadopt|lower|lstat|lutime|mkdir|num|off|pack|pclose|popen|rand|readlink|receive|rename|replace|saccept|sclose|seek|send|setenv|setterm|sigcatch|sigfree|signal|sin|sinfo|sleep|slice|sopen|sort|spawn|split|sread|stat|str|swrite|symlink|tan|time|transfer|type|unlink|unpack|upper|utime|wait|winsize)\\b",
       "name": "support.function.builtin.chiplang"
     },
     "function-call": {
