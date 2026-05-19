@@ -15,6 +15,8 @@ I aim to make ChipLang maintain a clean separation between builtins and librarie
 
 ### Installation for [Supported Platforms](#supported-platforms)
 
+ChipLang can be installed or updated to the latest version by running the following command in your terminal:
+
 ```bash
 curl -fsSL https://codeberg.org/ideumi/chip-go/raw/branch/main/scripts/net-install.sh | sh
 ```
@@ -88,9 +90,9 @@ Println("Hello World");
 - x86_64
 - aarch64
 
-## Installation
+## Installation / Updating
 
-ChipLang can be installed by running the following command in your terminal.
+ChipLang can be installed or updated to the latest version by running the following command in your terminal:
 
 ```bash
 curl -fsSL https://codeberg.org/ideumi/chip-go/raw/branch/main/scripts/net-install.sh | sh
