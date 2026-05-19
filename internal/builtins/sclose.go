@@ -37,7 +37,7 @@ func scloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("sclose", shared.PositionFirst, shared.TypeNumber, "handle")))
+			shared.Errors.InvalidArgTypeWithHint("sclose", shared.TypeNumber, "handle")))
 	}
 
 	handle64, err := handleNum.AsInt()

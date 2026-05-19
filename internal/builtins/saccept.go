@@ -38,7 +38,7 @@ func sacceptFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("saccept", shared.PositionFirst, shared.TypeNumber, "serverHandle")))
+			shared.Errors.InvalidArgTypeWithHint("saccept", shared.TypeNumber, "serverHandle")))
 	}
 
 	handle64, err := handleNum.AsInt()
