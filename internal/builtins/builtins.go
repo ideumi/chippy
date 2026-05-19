@@ -86,6 +86,7 @@ func GetBuiltins() map[string]*values.BuiltInFunction {
 		"swrite":  values.NewBuiltInFunction("swrite", swriteFunction),
 		"sclose":  values.NewBuiltInFunction("sclose", scloseFunction),
 		"saccept": values.NewBuiltInFunction("saccept", sacceptFunction),
+		"sinfo":   values.NewBuiltInFunction("sinfo", sinfoFunction),
 
 		// Processes
 		"popen":  values.NewBuiltInFunction("popen", popenFunction),
