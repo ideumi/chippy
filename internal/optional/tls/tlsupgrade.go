@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/optional/tls/tlswrap.go
+ * RR2 - internal/optional/tls/tlsupgrade.go
  *
  */
 
@@ -16,7 +16,7 @@ import (
 	"crypto/tls"
 )
 
-func tlswrapFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func tlsupgradeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 3 {
@@ -29,7 +29,7 @@ func tlswrapFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
 			shared.Errors.InvalidArgCountWithHint(
-				optional.Prefixed(OptionalName, "wrap"), 3, "socketHandle, certPath, keyPath")))
+				optional.Prefixed(OptionalName, "upgrade"), 3, "socketHandle, certPath, keyPath")))
 	}
 
 	handleNum, ok := args[0].(*values.Number)
@@ -40,7 +40,7 @@ func tlswrapFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
 			shared.Errors.InvalidArgTypePositionalWithHint(
-				optional.Prefixed(OptionalName, "wrap"), shared.PositionFirst, shared.TypeNumber, "socketHandle")))
+				optional.Prefixed(OptionalName, "upgrade"), shared.PositionFirst, shared.TypeNumber, "socketHandle")))
 	}
 
 	certPathStr, ok := args[1].(*values.String)
@@ -51,7 +51,7 @@ func tlswrapFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
 			shared.Errors.InvalidArgTypePositionalWithHint(
-				optional.Prefixed(OptionalName, "wrap"), shared.PositionSecond, shared.TypeString, "certPath")))
+				optional.Prefixed(OptionalName, "upgrade"), shared.PositionSecond, shared.TypeString, "certPath")))
 	}
 
 	keyPathStr, ok := args[2].(*values.String)
@@ -62,7 +62,7 @@ func tlswrapFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
 			shared.Errors.InvalidArgTypePositionalWithHint(
-				optional.Prefixed(OptionalName, "wrap"), shared.PositionThird, shared.TypeString, "keyPath")))
+				optional.Prefixed(OptionalName, "upgrade"), shared.PositionThird, shared.TypeString, "keyPath")))
 	}
 
 	handle64, err := handleNum.AsInt()

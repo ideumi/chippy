@@ -977,7 +977,7 @@ func _HttpConnectionTLSWorker_(handler, state, certPath, keyPath)
 	var msgs = receive(true);
 	var client = msgs[1];
 
-	var tlsClient = TlsWrap(client, certPath, keyPath);
+	var tlsClient = TlsUpgrade(client, certPath, keyPath);
 
 	if iserr(tlsClient)
 	{

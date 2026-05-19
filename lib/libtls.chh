@@ -63,10 +63,10 @@ func TlsAccept(socketHandle, certPath, keyPath)
 
 	if iserr(client) { return err; }
 
-	return TlsWrap(client, certPath, keyPath);
+	return TlsUpgrade(client, certPath, keyPath);
 }
 
-#@ <TlsWrap(socketHandle, certPath, keyPath)>
+#@ <TlsUpgrade(socketHandle, certPath, keyPath)>
 #@ V-1.0.0 (2026-05-19)
 #@
 #@ Upgrades an already-accepted TCP ''socketHandle'' to TLS using certificates
@@ -75,9 +75,9 @@ func TlsAccept(socketHandle, certPath, keyPath)
 #@ socket handle is consumed and no longer valid after this call. Returns a TLS
 #@ handle on success, ''err'' on failure.
 
-func TlsWrap(socketHandle, certPath, keyPath)
+func TlsUpgrade(socketHandle, certPath, keyPath)
 {
-	return _tls_wrap_(socketHandle, certPath, keyPath);
+	return _tls_upgrade_(socketHandle, certPath, keyPath);
 }
 
 #@ <TlsInfo(handle)>
