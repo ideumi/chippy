@@ -51,7 +51,7 @@ func TlsClose(handle)
 }
 
 #@ <TlsAccept(socketHandle, certPath, keyPath)>
-#@ V-1.0.0 (2026-01-08)
+#@ V-1.0.1 (2026-05-19)
 #@
 #@ Accepts a TLS connection on server ''socketHandle'' using certificates at
 #@ ''certPath'' and ''keyPath''. Returns a TLS client handle on success, ''err''
@@ -59,5 +59,35 @@ func TlsClose(handle)
 
 func TlsAccept(socketHandle, certPath, keyPath)
 {
-	return _tls_accept_(socketHandle, certPath, keyPath);
+	var client = saccept(socketHandle);
+
+	if iserr(client) { return err; }
+
+	return TlsWrap(client, certPath, keyPath);
+}
+
+#@ <TlsWrap(socketHandle, certPath, keyPath)>
+#@ V-1.0.0 (2026-05-19)
+#@
+#@ Upgrades an already-accepted TCP ''socketHandle'' to TLS using certificates
+#@ at ''certPath'' and ''keyPath''. Performs only the TLS handshake; the caller
+#@ is responsible for the TCP accept via ''saccept(serverHandle)''. The plain
+#@ socket handle is consumed and no longer valid after this call. Returns a TLS
+#@ handle on success, ''err'' on failure.
+
+func TlsWrap(socketHandle, certPath, keyPath)
+{
+	return _tls_wrap_(socketHandle, certPath, keyPath);
+}
+
+#@ <TlsInfo(handle)>
+#@ V-1.0.0 (2026-05-19)
+#@
+#@ Returns connection information for the open TLS ''handle'' as a map with
+#@ ''"mode"'' (''"tls-server"'' or ''"tls-client"''), ''"localIp"'',
+#@ ''"localPort"'', ''"remoteIp"'', ''"remotePort"'', and ''"serverName"''.
+
+func TlsInfo(handle)
+{
+	return _tls_info_(handle);
 }
