@@ -50,3 +50,5 @@ EXTRACTED="$TMPDIR/${PREFIX}-${VERSION}-linux-${ARCH}"
 
 cd "$EXTRACTED"
 $SUDO sh ./install.sh
+
+echo "Run 'chippy --help' to get started."
