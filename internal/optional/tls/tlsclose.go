@@ -36,8 +36,8 @@ func tlscloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint(
-				optional.Prefixed(OptionalName, "close"), shared.PositionFirst, shared.TypeNumber, "handle")))
+			shared.Errors.InvalidArgTypeWithHint(
+				optional.Prefixed(OptionalName, "close"), shared.TypeNumber, "handle")))
 	}
 
 	handle64, err := handleNum.AsInt()

@@ -1,0 +1,133 @@
+/*
+ *
+ * RR2 - internal/builtins/sinfo.go
+ *
+ */
+
+package builtins
+
+import (
+	"chip-go/internal/builtins/shared"
+	"chip-go/internal/errors"
+	"chip-go/internal/orchestrator"
+	"chip-go/internal/values"
+	"net"
+	"strconv"
+)
+
+func sinfoFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+	res := values.NewRuntimeResult()
+
+	if len(args) != 1 {
+		var posStart, posEnd *errors.Position
+
+		if len(args) > 0 {
+			posStart, posEnd = args[0].GetPos()
+		}
+
+		return res.Failure(errors.NewRTError(
+			posStart, posEnd,
+			shared.Errors.InvalidArgCountWithHint("sinfo", 1, "handle")))
+	}
+
+	handleNum, ok := args[0].(*values.Number)
+
+	if !ok {
+		posStart, posEnd := args[0].GetPos()
+
+		return res.Failure(errors.NewRTError(
+			posStart, posEnd,
+			shared.Errors.InvalidArgTypeWithHint("sinfo", shared.TypeNumber, "handle")))
+	}
+
+	handle64, err := handleNum.AsInt()
+
+	if err != nil {
+		return res.Failure(err)
+	}
+
+	handle := int(handle64)
+
+	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
+	socket, exists := registry.Sockets.Get(handle)
+
+	if !exists {
+		posStart, posEnd := args[0].GetPos()
+
+		return res.Failure(errors.NewRTError(
+			posStart, posEnd,
+			shared.Errors.InvalidValue("Invalid socket handle")))
+	}
+
+	var localIp, remoteIp string
+	var localPort, remotePort int
+
+	switch socket.Mode {
+
+	case "tcp":
+		if socket.Conn != nil {
+			localIp, localPort = addrToIPPort(socket.Conn.LocalAddr())
+			remoteIp, remotePort = addrToIPPort(socket.Conn.RemoteAddr())
+		}
+
+	case "udp":
+		if socket.UdpConn != nil {
+			localIp, localPort = addrToIPPort(socket.UdpConn.LocalAddr())
+			remoteIp, remotePort = addrToIPPort(socket.UdpConn.RemoteAddr())
+		}
+
+	case "listen":
+		if socket.Listener != nil {
+			localIp, localPort = addrToIPPort(socket.Listener.Addr())
+		}
+	}
+
+	keys := []string{
+		"mode",
+		"localIp",
+		"localPort",
+		"remoteIp",
+		"remotePort",
+	}
+
+	entries := map[string]values.Value{
+		"mode":       values.NewString(socket.Mode).SetContext(ctx),
+		"localIp":    values.NewString(localIp).SetContext(ctx),
+		"localPort":  values.NewNumber(localPort).SetContext(ctx),
+		"remoteIp":   values.NewString(remoteIp).SetContext(ctx),
+		"remotePort": values.NewNumber(remotePort).SetContext(ctx),
+	}
+
+	result := values.NewMapFromEntries(keys, entries)
+
+	return res.Success(result.SetContext(ctx))
+}
+
+func addrToIPPort(addr net.Addr) (string, int) {
+	if addr == nil {
+		return "", 0
+	}
+
+	switch a := addr.(type) {
+
+	case *net.TCPAddr:
+		return a.IP.String(), a.Port
+
+	case *net.UDPAddr:
+		return a.IP.String(), a.Port
+	}
+
+	host, portStr, err := net.SplitHostPort(addr.String())
+
+	if err != nil {
+		return addr.String(), 0
+	}
+
+	port, err := strconv.Atoi(portStr)
+
+	if err != nil {
+		return host, 0
+	}
+
+	return host, port
+}

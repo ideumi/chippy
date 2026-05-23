@@ -12,10 +12,10 @@ load("libstrings.chh");
 #@ <HttpGet(url, headers)>
 #@ V-1.0.1 (2026-01-22)
 #@
-#@ Performs an HTTP GET request to ''url'' with ''headers''. Supports
-#@ HTTP/1.0 and HTTP/1.1 only. Automatically follows redirects up to 10 times.
-#@ Returns a response map with ''statusCode'', ''statusText'', ''headers'',
-#@ and ''body''. Returns ''err'' on failure.
+#@ Performs an HTTP GET request to ''url'' with ''headers''. Supports HTTP/1.0
+#@ and HTTP/1.1 only. Automatically follows redirects up to 10 times. Returns a
+#@ response map with ''statusCode'', ''statusText'', ''headers'', and ''body''.
+#@ Returns ''err'' on failure.
 
 func HttpGet(url, headers)
 {
@@ -25,10 +25,10 @@ func HttpGet(url, headers)
 #@ <HttpPost(url, headers, body)>
 #@ V-1.0.2 (2026-03-13)
 #@
-#@ Performs an HTTP POST request to ''url'' with ''headers'' and ''body''.
-#@ The ''body'' can be a string or bytes. Supports HTTP/1.0 and HTTP/1.1
-#@ only. Automatically follows redirects up to 10 times (note: 303 redirects
-#@ convert to GET). Returns a response map with ''statusCode'', ''statusText'',
+#@ Performs an HTTP POST request to ''url'' with ''headers'' and ''body''. The
+#@ ''body'' can be a string or bytes. Supports HTTP/1.0 and HTTP/1.1 only.
+#@ Automatically follows redirects up to 10 times (note: 303 redirects convert
+#@ to GET). Returns a response map with ''statusCode'', ''statusText'',
 #@ ''headers'', and ''body''. Returns ''err'' on failure.
 
 func HttpPost(url, headers, body)
@@ -39,10 +39,10 @@ func HttpPost(url, headers, body)
 #@ <HttpGetNoRedirect(url, headers)>
 #@ V-1.0.0 (2026-01-22)
 #@
-#@ Performs an HTTP GET request without following redirects. Returns the
-#@ response as-is, including 3xx redirect responses with Location header.
-#@ Returns a response map with ''statusCode'', ''statusText'', ''headers'',
-#@ and ''body''. Returns ''err'' on failure.
+#@ Performs an HTTP GET request without following redirects. Returns the response
+#@ as-is, including 3xx redirect responses with Location header. Returns a
+#@ response map with ''statusCode'', ''statusText'', ''headers'', and ''body''.
+#@ Returns ''err'' on failure.
 #@
 #@ See: https://datatracker.ietf.org/doc/html/rfc9110 (15.4.).
 
@@ -54,11 +54,10 @@ func HttpGetNoRedirect(url, headers)
 #@ <HttpPostNoRedirect(url, headers, body)>
 #@ V-1.0.1 (2026-03-13)
 #@
-#@ Performs an HTTP POST request without following redirects. Returns the
-#@ response as-is, including 3xx redirect responses with Location header.
-#@ The ''body'' can be a string or bytes. Returns a response map with
-#@ ''statusCode'', ''statusText'', ''headers'', and ''body''. Returns ''err''
-#@ on failure.
+#@ Performs an HTTP POST request without following redirects. Returns the response
+#@ as-is, including 3xx redirect responses with Location header. The ''body'' can
+#@ be a string or bytes. Returns a response map with ''statusCode'', ''statusText'',
+#@ ''headers'', and ''body''. Returns ''err'' on failure.
 #@
 #@ See: https://datatracker.ietf.org/doc/html/rfc9110 (15.4.).
 
@@ -70,11 +69,11 @@ func HttpPostNoRedirect(url, headers, body)
 #@ <HttpRequest(method, url, headers, body)>
 #@ V-1.0.1 (2026-01-22)
 #@
-#@ Performs an HTTP request with specified ''method'', ''url'', ''headers'',
-#@ and ''body''. Supports both HTTP and HTTPS. Supports HTTP/1.0 and HTTP/1.1
-#@ only. Automatically follows redirects (301, 302, 303, 307, 308) up to 10
-#@ times. Returns a response map with ''statusCode'', ''statusText'', ''headers'',
-#@ and ''body''. Returns ''err'' on failure.
+#@ Performs an HTTP request with specified ''method'', ''url'', ''headers'', and
+#@ ''body''. Supports both HTTP and HTTPS. Supports HTTP/1.0 and HTTP/1.1 only.
+#@ Automatically follows redirects (301, 302, 303, 307, 308) up to 10 times.
+#@ Returns a response map with ''statusCode'', ''statusText'', ''headers'', and
+#@ ''body''. Returns ''err'' on failure.
 #@
 #@ See: https://datatracker.ietf.org/doc/html/rfc9110 (15.4.).
 
@@ -224,10 +223,10 @@ func _HttpResolveLocation_(location, url)
 # V-1.0.1 (2026-03-13)
 #
 # Filters ''headers'' for a redirect from ''origUrl'' to ''targetUrl''. Strips
-# the host header, strips sensitive headers (Authorization, Cookie,
-# Proxy-Authorization) on cross-origin redirects, and strips body-related
-# headers (Content-Type, Content-Length) for 303 redirects. Returns the
-# filtered headers list, or ''err'' on failure.
+# the host header, strips sensitive headers (Authorization, Cookie, Proxy-
+# Authorization) on cross-origin redirects, and strips body-related headers
+# (Content-Type, Content-Length) for 303 redirects. Returns the filtered headers
+# list, or ''err'' on failure.
 
 func _HttpFilterRedirectHeaders_(headers, origUrl, targetUrl, statusCode)
 {
@@ -292,8 +291,8 @@ func _HttpFilterRedirectHeaders_(headers, origUrl, targetUrl, statusCode)
 # <_HttpRead_(conn, isTLS, nBytes)>
 # V-1.0.0 (2026-03-12)
 #
-# Reads up to ''nBytes'' from ''conn''. Dispatches to TLS or plain socket
-# based on ''isTLS''.
+# Reads up to ''nBytes'' from ''conn''. Dispatches to TLS or plain socket based
+# on ''isTLS''.
 
 func _HttpRead_(conn, isTLS, nBytes)
 {
@@ -364,9 +363,9 @@ func _HttpParseHex_(hexString)
 # <_HttpReadHeaders_(conn, isTLS, bufSize)>
 # V-1.0.0 (2026-03-12)
 #
-# Reads from ''conn'' until the HTTP header terminator is found. Uses
-# ''bufSize'' for each read chunk. Returns the raw bytes read, or ''err''
-# if the connection closes before headers are complete.
+# Reads from ''conn'' until the HTTP header terminator is found. Uses ''bufSize''
+# for each read chunk. Returns the raw bytes read, or ''err'' if the connection
+# closes before headers are complete.
 
 func _HttpReadHeaders_(conn, isTLS, bufSize)
 {
@@ -395,8 +394,8 @@ func _HttpReadHeaders_(conn, isTLS, bufSize)
 #@ Performs an HTTP request with redirect control. ''maxRedirects'' specifies
 #@ the maximum number of redirects to follow (0 to disable). When the limit is
 #@ reached, returns the redirect response (3xx status) instead of following.
-#@ Returns a response map with ''statusCode'', ''statusText'', ''headers'',
-#@ and ''body''. Returns ''err'' on failure.
+#@ Returns a response map with ''statusCode'', ''statusText'', ''headers'', and
+#@ ''body''. Returns ''err'' on failure.
 #@
 #@ See: https://datatracker.ietf.org/doc/html/rfc9110 (15.4.).
 
@@ -820,8 +819,8 @@ func HttpParseRequest(requestBytes)
 # <_HttpReadRequest_(conn, isTLS)>
 # V-1.0.0 (2026-03-10)
 #
-# Reads a complete HTTP request from ''conn''. Returns the raw request bytes,
-# or ''err'' on failure.
+# Reads a complete HTTP request from ''conn''. Returns the raw request bytes, or
+# ''err'' on failure.
 
 func _HttpReadRequest_(conn, isTLS)
 {
@@ -872,8 +871,8 @@ func _HttpReadRequest_(conn, isTLS)
 # <_HttpFormatServerResponse_(statusCode, headers, body, label)>
 # V-1.0.0 (2026-03-12)
 #
-# Formats an HTTP/1.1 response with ''statusCode'', ''headers'', ''body'',
-# and server ''label''. Returns the complete response as bytes.
+# Formats an HTTP/1.1 response with ''statusCode'', ''headers'', ''body'', and
+# server ''label''. Returns the complete response as bytes.
 
 func _HttpFormatServerResponse_(statusCode, headers, body, label)
 {
@@ -898,24 +897,155 @@ func _HttpFormatServerResponse_(statusCode, headers, body, label)
 	return pack(responseStr) + body;
 }
 
-#@ <HttpServe(port, handler)>
-#@ V-1.0.1 (2026-03-10)
+# <_HttpConnectionReaper_()>
+# V-1.0.0 (2026-05-19)
+#
+# Actor that drains finished connection-worker handles. Never returns.
+
+func _HttpConnectionReaper_()
+{
+	while true
+	{
+		var msgs = receive(true);
+
+		for i = 1 to len(msgs)
+		{
+			wait(msgs[i]);
+		}
+	}
+}
+
+# <_HttpConnectionWorker_(handler, state)>
+# V-1.0.0 (2026-05-19)
+#
+# Per-connection actor for plain HTTP. Receives a transferred client socket,
+# parses the request, populates ''remoteIp''/''remotePort'', calls
+# ''handler(state, request)'', and writes the response.
+
+func _HttpConnectionWorker_(handler, state)
+{
+	var msgs = receive(true);
+	var client = msgs[1];
+
+	var info = sinfo(client);
+	var requestBytes = _HttpReadRequest_(client, false);
+
+	if iserr(requestBytes)
+	{
+		sclose(client);
+
+		return ok;
+	}
+
+	var request = HttpParseRequest(requestBytes);
+
+	if iserr(request)
+	{
+		sclose(client);
+
+		return ok;
+	}
+
+	request = request["remoteIp"] = info["remoteIp"];
+	request = request["remotePort"] = info["remotePort"];
+
+	var response = handler(state, request);
+
+	if iserr(response)
+	{
+		swrite(_HttpFormatServerResponse_(500, [], pack("Handler returned err."), "HttpServe"), client);
+		sclose(client);
+
+		return ok;
+	}
+
+	swrite(_HttpFormatServerResponse_(response["statusCode"], response["headers"], response["body"], "HttpServe"), client);
+	sclose(client);
+
+	return ok;
+}
+
+# <_HttpConnectionTLSWorker_(handler, state, certPath, keyPath)>
+# V-1.0.0 (2026-05-19)
+#
+# Per-connection actor for HTTPS. Receives a transferred plain client socket,
+# performs the TLS handshake, parses the request, populates ''remoteIp''/
+# ''remotePort'', calls ''handler(state, request)'', and writes the response.
+
+func _HttpConnectionTLSWorker_(handler, state, certPath, keyPath)
+{
+	var msgs = receive(true);
+	var client = msgs[1];
+
+	var tlsClient = TlsUpgrade(client, certPath, keyPath);
+
+	if iserr(tlsClient)
+	{
+		return ok;
+	}
+
+	var info = TlsInfo(tlsClient);
+	var requestBytes = _HttpReadRequest_(tlsClient, true);
+
+	if iserr(requestBytes)
+	{
+		TlsClose(tlsClient);
+
+		return ok;
+	}
+
+	var request = HttpParseRequest(requestBytes);
+
+	if iserr(request)
+	{
+		TlsClose(tlsClient);
+
+		return ok;
+	}
+
+	request = request["remoteIp"] = info["remoteIp"];
+	request = request["remotePort"] = info["remotePort"];
+	request = request["serverName"] = info["serverName"];
+
+	var response = handler(state, request);
+
+	if iserr(response)
+	{
+		TlsWrite(_HttpFormatServerResponse_(500, [], pack("Handler returned err."), "HttpServeTLS"), tlsClient);
+		TlsClose(tlsClient);
+
+		return ok;
+	}
+
+	TlsWrite(_HttpFormatServerResponse_(response["statusCode"], response["headers"], response["body"], "HttpServeTLS"), tlsClient);
+	TlsClose(tlsClient);
+
+	return ok;
+}
+
+#@ <HttpServe(port, handler, state)>
+#@ V-1.0.2 (2026-05-19)
 #@
-#@ *!!WARNING!!: This is a single-threaded, blocking server intended for LOCAL*
-#@ *USAGE IN TRUSTED NETWORKS, DEVELOPMENT AND TESTING ONLY. DO NOT expose this*
-#@ *to the public internet EVER. Use a proper web server!!!*
+#@ *!!WARNING!!: This server is intended for LOCAL USAGE IN TRUSTED NETWORKS,*
+#@ *DEVELOPMENT AND TESTING ONLY. DO NOT expose this to the public internet*
+#@ *EVER. Use a proper web server!!!*
 #@
 #@ Starts an HTTP server on ''port'' with the specified ''handler'' function.
-#@ The ''handler'' receives a request map and must return a response map.
-#@ This function does not return unless an error occurs.
+#@ The ''handler'' is called as ''handler(state, request)'' and must return a
+#@ response map. The ''request'' map includes ''remoteIp'' and ''remotePort''.
+#@ This function does not return unless an error occurs. See
+#@ ''HttpResponse(statusCode, body)''.
 
-func HttpServe(port, handler)
+func HttpServe(port, handler, state)
 {
+	# Yes Rico, kaboom
 	if getuid() == 0 { return error("Will NOT run HTTP server as root, are you insane?"); }
 
 	var server = sopen("0.0.0.0", port, SOCKLISTEN);
 
 	if iserr(server) { return err; }
+
+	var reaper = actor(_HttpConnectionReaper_);
 
 	while true
 	{
@@ -923,99 +1053,49 @@ func HttpServe(port, handler)
 
 		if iserr(client) { continue; }
 
-		var requestBytes = _HttpReadRequest_(client, false);
+		var worker = actor(_HttpConnectionWorker_, handler, state);
+		var workerClient = transfer(worker, client);
 
-		if iserr(requestBytes)
-		{
-			sclose(client);
-			continue;
-		}
-
-		var request = HttpParseRequest(requestBytes);
-
-		if iserr(request)
-		{
-			sclose(client);
-			continue;
-		}
-
-		var response = handler(request);
-
-		if iserr(response)
-		{
-			var errorBytes = _HttpFormatServerResponse_(500, [], pack("Handler returned err."), "HttpServe");
-			swrite(errorBytes, client);
-			sclose(client);
-			continue;
-		}
-
-		var statusCode = response["statusCode"];
-		var headers = response["headers"];
-		var body = response["body"];
-
-		swrite(_HttpFormatServerResponse_(statusCode, headers, body, "HttpServe"), client);
-		sclose(client);
+		send(worker, workerClient);
+		send(reaper, worker);
 	}
 }
 
-#@ <HttpServeTLS(port, certPath, keyPath, handler)>
-#@ V-1.0.1 (2026-03-10)
+#@ <HttpServeTLS(port, certPath, keyPath, handler, state)>
+#@ V-1.0.2 (2026-05-19)
 #@
-#@ *!!WARNING!!: This is a single-threaded, blocking server intended for LOCAL*
-#@ *USAGE IN TRUSTED NETWORKS, DEVELOPMENT AND TESTING ONLY. DO NOT expose this*
-#@ *to the public internet EVER. Use a proper web server!!!*
+#@ *!!WARNING!!: This server is intended for LOCAL USAGE IN TRUSTED NETWORKS,*
+#@ *DEVELOPMENT AND TESTING ONLY. DO NOT expose this to the public internet*
+#@ *EVER. Use a proper web server!!!*
 #@
-#@ Starts an HTTPS server on ''port'' using TLS certificates at ''certPath''
-#@ and ''keyPath''. The ''handler'' function receives a request map and must
-#@ return a response map. This function does not return unless an error occurs.
+#@ Starts an HTTPS server on ''port'' using TLS certificates at ''certPath'' and
+#@ ''keyPath''. The ''handler'' function is called as ''handler(state, request)''
+#@ and must return a response map. The ''request'' map includes ''remoteIp'',
+#@ ''remotePort'', and ''serverName''. This function does not return unless an
+#@ error occurs. See ''HttpResponse(statusCode, body)''.
 
-func HttpServeTLS(port, certPath, keyPath, handler)
+func HttpServeTLS(port, certPath, keyPath, handler, state)
 {
+	# Yes Rico, kaboom
 	if getuid() == 0 { return error("Will NOT run HTTP server as root, are you insane?"); }
 
 	var server = sopen("0.0.0.0", port, SOCKLISTEN);
 
 	if iserr(server) { return err; }
 
+	var reaper = actor(_HttpConnectionReaper_);
+
 	while true
 	{
-		var tlsClient = TlsAccept(server, certPath, keyPath);
+		var client = saccept(server);
 
-		if iserr(tlsClient) { continue; }
+		if iserr(client) { continue; }
 
-		var requestBytes = _HttpReadRequest_(tlsClient, true);
+		var worker = actor(_HttpConnectionTLSWorker_, handler, state, certPath, keyPath);
+		var workerClient = transfer(worker, client);
 
-		if iserr(requestBytes)
-		{
-			TlsClose(tlsClient);
-			continue;
-		}
-
-		var request = HttpParseRequest(requestBytes);
-
-		if iserr(request)
-		{
-			TlsClose(tlsClient);
-			continue;
-		}
-
-		var response = handler(request);
-
-		if iserr(response)
-		{
-			var errorBytes = _HttpFormatServerResponse_(500, [], pack("Handler returned err."), "HttpServeTLS");
-			TlsWrite(errorBytes, tlsClient);
-			TlsClose(tlsClient);
-
-			continue;
-		}
-
-		var statusCode = response["statusCode"];
-		var headers = response["headers"];
-		var body = response["body"];
-
-		TlsWrite(_HttpFormatServerResponse_(statusCode, headers, body, "HttpServeTLS"), tlsClient);
-		TlsClose(tlsClient);
+		send(worker, workerClient);
+		send(reaper, worker);
 	}
 }
 
@@ -1082,8 +1162,8 @@ func HttpFormatRequest(method, path, headers, body)
 #@ V-1.0.0 (2026-01-08)
 #@
 #@ Parses a complete HTTP response from ''responseBytes''. Returns a map with
-#@ ''statusCode'', ''statusText'', ''headers'', ''body'', and ''chunked''.
-#@ The ''chunked'' field is ''true'' if Transfer-Encoding: chunked, ''false''
+#@ ''statusCode'', ''statusText'', ''headers'', ''body'', and ''chunked''. The
+#@ ''chunked'' field is ''true'' if Transfer-Encoding: chunked, ''false''
 #@ otherwise. Returns ''err'' if the response is malformed.
 #@
 #@ See: https://datatracker.ietf.org/doc/html/rfc9110 (15.).

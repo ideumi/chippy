@@ -86,6 +86,7 @@ func GetBuiltins() map[string]*values.BuiltInFunction {
 		"swrite":  values.NewBuiltInFunction("swrite", swriteFunction),
 		"sclose":  values.NewBuiltInFunction("sclose", scloseFunction),
 		"saccept": values.NewBuiltInFunction("saccept", sacceptFunction),
+		"sinfo":   values.NewBuiltInFunction("sinfo", sinfoFunction),
 
 		// Processes
 		"popen":  values.NewBuiltInFunction("popen", popenFunction),
@@ -145,6 +146,7 @@ func GetConstants() map[string]values.Value {
 		"CHIPCN": values.NewString(constants.STR_LPLCN),
 		"CHIPOS": values.NewString(constants.STR_LPLOS),
 		"CHIPAR": values.NewString(constants.STR_LPLAR),
+		// CHIPRT is bound per actor in roadrunner.go and not here
 
 		"null":  values.NewNumber(constants.NUM_NUL),
 		"false": values.NewNumber(constants.NUM_FAL),

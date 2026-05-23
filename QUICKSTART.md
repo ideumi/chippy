@@ -1,4 +1,4 @@
-# Quick Start
+# Developer Quick Start Guide
 
 ChipLang programs can generally be categorized in two types: those that use `load("libprint.chh")` (without a path) to load the core library, and those that don't use library dependencies or specify paths manually like `load("lib/libxxx.chh")`. Programs that load the core library need the `combine` tool to bundle dependencies. Programs without library dependencies can run directly.
 

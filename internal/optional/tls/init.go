@@ -23,11 +23,12 @@ func GetSection() (map[string]*values.BuiltInFunction, map[string]values.Value) 
 
 func getFunctions() map[string]*values.BuiltInFunction {
 	return map[string]*values.BuiltInFunction{
-		optional.Prefixed(OptionalName, "open"):   values.NewBuiltInFunction(optional.Prefixed(OptionalName, "open"), tlsopenFunction),
-		optional.Prefixed(OptionalName, "read"):   values.NewBuiltInFunction(optional.Prefixed(OptionalName, "read"), tlsreadFunction),
-		optional.Prefixed(OptionalName, "write"):  values.NewBuiltInFunction(optional.Prefixed(OptionalName, "write"), tlswriteFunction),
-		optional.Prefixed(OptionalName, "close"):  values.NewBuiltInFunction(optional.Prefixed(OptionalName, "close"), tlscloseFunction),
-		optional.Prefixed(OptionalName, "accept"): values.NewBuiltInFunction(optional.Prefixed(OptionalName, "accept"), tlsacceptFunction),
+		optional.Prefixed(OptionalName, "open"):    values.NewBuiltInFunction(optional.Prefixed(OptionalName, "open"), tlsopenFunction),
+		optional.Prefixed(OptionalName, "read"):    values.NewBuiltInFunction(optional.Prefixed(OptionalName, "read"), tlsreadFunction),
+		optional.Prefixed(OptionalName, "write"):   values.NewBuiltInFunction(optional.Prefixed(OptionalName, "write"), tlswriteFunction),
+		optional.Prefixed(OptionalName, "close"):   values.NewBuiltInFunction(optional.Prefixed(OptionalName, "close"), tlscloseFunction),
+		optional.Prefixed(OptionalName, "upgrade"): values.NewBuiltInFunction(optional.Prefixed(OptionalName, "upgrade"), tlsupgradeFunction),
+		optional.Prefixed(OptionalName, "info"):    values.NewBuiltInFunction(optional.Prefixed(OptionalName, "info"), tlsinfoFunction),
 	}
 }
 

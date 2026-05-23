@@ -8,17 +8,19 @@ load("libprint.chh");
 
 var PORT = 8080;
 
-func Handler(request)
+func Handler(state, request)
 {
 	var method = request["method"];
 	var path = request["path"];
+	var peer = request["remoteIp"] + ":" + str(request["remotePort"]);
 
-	Println("Request: " + method + " " + path);
+	Println("Request: " + method + " " + path + " from " + peer);
 
 	var html = "<html><body>";
 	html = html + "<h1>libhttp.chh HTTP Server</h1>";
 	html = html + "<p>Method: " + method + "</p>";
 	html = html + "<p>Path: " + path + "</p>";
+	html = html + "<p>Peer: " + peer + "</p>";
 	html = html + "<p>Time: " + str(time()) + "</p>";
 	html = html + "</body></html>";
 
@@ -28,4 +30,4 @@ func Handler(request)
 Println("Visit: http://localhost:" + str(PORT) + "/");
 Println("Ctrl+C to stop");
 
-HttpServe(PORT, Handler);
+HttpServe(PORT, Handler, null);

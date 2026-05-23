@@ -2,19 +2,25 @@
   <img src="media/ChipLogo.svg" alt="ChipLang Logo" width="200"/>
 </p>
 
+<p align="center">
+  <a href="https://codeberg.org/ideumi/chip-go/releases"><img src="https://img.shields.io/gitea/v/release/ideumi/chip-go?gitea_url=https%3A%2F%2Fcodeberg.org&label=release" alt="Latest release"/></a>
+  <img src="https://img.shields.io/badge/license-BSD--2--Clause-green" alt="License"/>
+</p>
+
 # ChipLang
 
-ChipLang (Chipmunk language) is an interpreted scripting / programming language project written in Go, it has the goal of creating a simple, modular, low profile, understandable and hackable programming language for scripting and tooling that would be hard to write, maintain, architect and deploy in shell.
+ChipLang (Chipmunk language, or simply `chippy`) is an interpreted scripting and programming language written in Go. It aims to be simple, modular, and hackable: explicit over abstract, imperative, easy to trace, with direct access to the operating system. It's built for tooling that has outgrown the shell.
 
-I aim to make ChipLang maintain a clean separation between builtins and libraries where possible. Builtins provide fundamental primitives for common operations that require performance or cannot be implemented cleanly in Chip itself. The native core library (`lib/`) abstracts these primitives for convenience. The codebase is to stay simple and accessible on both the Go and Chip sides.
+### Installation for [Supported Platforms](#supported-platforms)
 
-### [Download ChipLang](https://codeberg.org/ideumi/chip-go/releases) | [Quick Start](QUICKSTART.md)
+ChipLang can be installed or updated to the latest version by running the following command in your terminal:
 
-### Hello World
-```chiplang
-load("libprint.chh");
-Println("Hello World");
+```bash
+curl -fsSL https://codeberg.org/ideumi/chip-go/raw/branch/main/scripts/net-install.sh | sh
 ```
+> It is best practice to review any script before running it in your terminal. You can read it [here](scripts/net-install.sh).
+
+### [View Releases](https://codeberg.org/ideumi/chip-go/releases) | [Getting Started](#getting-started) | [Developer Quick Start Guide](QUICKSTART.md)
 
 ## Features
 
@@ -67,44 +73,77 @@ Println("Hello World");
 - Build system (`chippy combine`) with dependency resolution and bundling
     - Syntax validation and symbol collision detection
 
+**Hello World Sample**
+```chiplang
+load("libprint.chh");
+Println("Hello World");
+```
+
 ## Supported Platforms
 
 - Any reasonably modern FHS-compliant Linux distro
 - Android (via Termux)
 
-## Installation
+## Supported Architectures
 
-1. Build the release package: `make release` (see "Building from Source" below)
-2. Extract the generated archive from the `rel/` directory
-3. Run the installer: `install.sh` with elevated permissions
+- x86_64
+- aarch64
+
+## Installation / Updating
+
+ChipLang can be installed or updated to the latest version by running the following command in your terminal:
+
+```bash
+curl -fsSL https://codeberg.org/ideumi/chip-go/raw/branch/main/scripts/net-install.sh | sh
+```
+> It is best practice to review any script before running it in your terminal. You can read it [here](scripts/net-install.sh).
+
+or by using the...
+
+### Manual Method
+
+1. Download the tarball matching your architecture from the [releases page](https://codeberg.org/ideumi/chip-go/releases).
+2. Extract: `tar -xf chiplang-<version>-linux-<arch>.tar.xz`.
+3. Run `sudo ./install.sh` (or `./install.sh` on Termux) from inside the extracted directory.
+
+## Getting Started
+
+Once installed, the interpreter is `chippy`. Run `chippy --help` for an overview of the available commands.
+
+### For Users
+
+To run a ChipLang program, run it either directly with `./<program>` or by using `chippy <program>`.
+
+### For Developers
+
+To start writing your own ChipLang programs, read the [Developer Quick Start Guide](QUICKSTART.md).
 
 ## Uninstallation
 
-1. Run the uninstaller: `uninstall.sh` with elevated permissions
+Run `sudo ./uninstall.sh` from the extracted tarball directory (or `./uninstall.sh` on Termux).
 
 ## Building from Source
 
 Requirements:
-- Go 1.24.0 or later
+- Go 1.24.4 or later
+- git
 - make
 
 ```bash
+git clone https://codeberg.org/ideumi/chip-go
+cd chip-go
 make
 ```
 
 ## Building the Release Package
 
 ```bash
-# Build release your current platform
-make release    
+# Build release for your current platform
+make release
 
 # Build releases for x86_64 and aarch64
 make release-all
 ```
-
-## Quick Start
-
-Please read the [QUICKSTART](QUICKSTART.md) Guide.
 
 ## License
 

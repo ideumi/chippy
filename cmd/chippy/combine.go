@@ -117,7 +117,7 @@ var homePath = getenv("HOME");
 
 if not iserr(homePath)
 {
-    Paths = Paths + [homePath + "/.local/share/chiplang/lib"];
+	Paths = Paths + [homePath + "/.local/share/chiplang/lib"];
 }
 
 Paths = Paths + ["/usr/lib/chiplang"];

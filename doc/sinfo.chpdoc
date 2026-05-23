@@ -1,0 +1,22 @@
+*sinfo* | V-$CHIPVR ($CHIPCN)
+
+''sinfo(handle)''
+
+Returns connection information for an open socket handle.
+
+*Parameters:*
+- ''handle'': Socket handle
+
+*Returns:*
+- Map: connection information
+
+*Map fields:*
+- ''"mode"'' (String): socket mode, one of ''"tcp"'', ''"udp"'', or ''"listen"''
+- ''"localIp"'' (String): local IP address
+- ''"localPort"'' (Number): local port
+- ''"remoteIp"'' (String): peer IP address, or ''""'' for listening sockets
+- ''"remotePort"'' (Number): peer port, or ''0'' for listening sockets
+
+*Errors:*
+- Runtime error if handle is not a number
+- Runtime error if handle is invalid socket handle

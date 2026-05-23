@@ -32,7 +32,7 @@ func actorFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("actor", shared.PositionFirst, shared.TypeFunction, "handler")))
+			shared.Errors.InvalidArgTypeWithHint("actor", shared.TypeFunction, "handler")))
 	}
 
 	fnArgs := args[1:]
