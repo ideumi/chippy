@@ -63,18 +63,36 @@ func (p *Parser) updateCurrentTok() {
 	}
 }
 
+func isWhitespace(tok *lexer.Token) bool {
+	return tok != nil && (tok.Type == constants.TT_NEWLINE || tok.Type == constants.TT_COMMENT || tok.Type == constants.TT_DOC_COMMENT)
+}
+
+func (p *Parser) skipWhitespace(res *ParseResult) {
+	for isWhitespace(p.currentTok) {
+		res.RegisterAdvancement()
+		p.advance()
+	}
+}
+
+func (p *Parser) peekPastWhitespace() *lexer.Token {
+	for i := p.tokIdx; i >= 0 && i < len(p.tokens); i++ {
+		if !isWhitespace(p.tokens[i]) {
+			return p.tokens[i]
+		}
+	}
+
+	return nil
+}
+
 func (p *Parser) Parse() *ParseResult {
 	res := p.statements()
 	if res.error != nil {
 		return res
 	}
 
-	// Skip any trailing newlines
-	for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-		p.advance()
-	}
+	p.skipWhitespace(res)
 
-	// Only error if there are non-EOF tokens remaining that aren't newlines
+	// Only error if there are non-EOF tokens remaining that aren't newlines or comments
 	if p.currentTok != nil && p.currentTok.Type != constants.TT_EOF {
 		return res.Failure(errors.NewInvalidSyntaxError(
 			p.currentTok.PosStart, p.currentTok.PosEnd,
@@ -98,11 +116,7 @@ func (p *Parser) statements() *ParseResult {
 
 	posStart := p.currentTok.PosStart.Copy()
 
-	// Skip any leading newlines
-	for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-		res.RegisterAdvancement()
-		p.advance()
-	}
+	p.skipWhitespace(res)
 
 	// Parse statements until we hit a closing brace or EOF
 	for p.currentTok != nil && p.currentTok.Type != constants.TT_RBRACE && p.currentTok.Type != constants.TT_EOF {
@@ -142,11 +156,7 @@ func (p *Parser) statements() *ParseResult {
 			}
 		}
 
-		// Optional newlines
-		for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-			res.RegisterAdvancement()
-			p.advance()
-		}
+		p.skipWhitespace(res)
 	}
 
 	if len(statements) == 0 {
@@ -164,11 +174,7 @@ func (p *Parser) statement() *ParseResult {
 		res.RegisterAdvancement()
 		p.advance()
 
-		// Skip optional newlines after return
-		for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-			res.RegisterAdvancement()
-			p.advance()
-		}
+		p.skipWhitespace(res)
 
 		expr := res.TryRegister(p.expr())
 
@@ -211,11 +217,7 @@ func (p *Parser) expr() *ParseResult {
 		res.RegisterAdvancement()
 		p.advance()
 
-		// Skip optional newlines after var
-		for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-			res.RegisterAdvancement()
-			p.advance()
-		}
+		p.skipWhitespace(res)
 
 		if p.currentTok.Type != constants.TT_IDENTIFIER {
 			return res.Failure(errors.NewInvalidSyntaxError(
@@ -228,11 +230,7 @@ func (p *Parser) expr() *ParseResult {
 		res.RegisterAdvancement()
 		p.advance()
 
-		// Skip optional newlines after identifier
-		for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-			res.RegisterAdvancement()
-			p.advance()
-		}
+		p.skipWhitespace(res)
 
 		if p.currentTok.Type != constants.TT_EQ {
 			return res.Failure(errors.NewInvalidSyntaxError(
@@ -244,11 +242,7 @@ func (p *Parser) expr() *ParseResult {
 		res.RegisterAdvancement()
 		p.advance()
 
-		// Skip optional newlines after =
-		for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-			res.RegisterAdvancement()
-			p.advance()
-		}
+		p.skipWhitespace(res)
 
 		expr := res.Register(p.expr())
 
@@ -283,10 +277,7 @@ func (p *Parser) compExpr() *ParseResult {
 		res.RegisterAdvancement()
 		p.advance()
 
-		for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-			res.RegisterAdvancement()
-			p.advance()
-		}
+		p.skipWhitespace(res)
 
 		node := res.Register(p.compExpr())
 		if res.error != nil {
@@ -328,11 +319,7 @@ func (p *Parser) factor() *ParseResult {
 		res.RegisterAdvancement()
 		p.advance()
 
-		// Skip optional newlines after unary operator
-		for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-			res.RegisterAdvancement()
-			p.advance()
-		}
+		p.skipWhitespace(res)
 
 		factor := res.Register(p.factor())
 
@@ -362,21 +349,13 @@ func (p *Parser) call() *ParseResult {
 	for {
 		// Handle index assignment: catches IndexAccessNode from mapExpr() or a previous [].
 		if indexAccess, ok := atom.(*ast.IndexAccessNode); ok {
-			// Skip optional newlines before '='
-			for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-				res.RegisterAdvancement()
-				p.advance()
-			}
+			p.skipWhitespace(res)
 
 			if p.currentTok != nil && p.currentTok.Type == constants.TT_EQ {
 				res.RegisterAdvancement()
 				p.advance()
 
-				// Skip optional newlines after '='
-				for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-					res.RegisterAdvancement()
-					p.advance()
-				}
+				p.skipWhitespace(res)
 
 				value := res.Register(p.expr())
 				if res.error != nil {
@@ -397,11 +376,7 @@ func (p *Parser) call() *ParseResult {
 			p.advance()
 			argNodes := []ast.Node{}
 
-			// Skip optional newlines after opening parenthesis
-			for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-				res.RegisterAdvancement()
-				p.advance()
-			}
+			p.skipWhitespace(res)
 
 			if p.currentTok.Type == constants.TT_RPAREN {
 				res.RegisterAdvancement()
@@ -420,11 +395,7 @@ func (p *Parser) call() *ParseResult {
 					res.RegisterAdvancement()
 					p.advance()
 
-					// Skip optional newlines after comma
-					for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-						res.RegisterAdvancement()
-						p.advance()
-					}
+					p.skipWhitespace(res)
 
 					// Allow trailing comma (closing paren after comma)
 					if p.currentTok.Type == constants.TT_RPAREN {
@@ -437,11 +408,7 @@ func (p *Parser) call() *ParseResult {
 					}
 				}
 
-				// Skip optional newlines before closing parenthesis
-				for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-					res.RegisterAdvancement()
-					p.advance()
-				}
+				p.skipWhitespace(res)
 
 				if p.currentTok.Type != constants.TT_RPAREN {
 					return res.Failure(errors.NewInvalidSyntaxError(
@@ -464,22 +431,14 @@ func (p *Parser) call() *ParseResult {
 			res.RegisterAdvancement()
 			p.advance()
 
-			// Skip optional newlines after opening bracket
-			for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-				res.RegisterAdvancement()
-				p.advance()
-			}
+			p.skipWhitespace(res)
 
 			indexNode := res.Register(p.expr())
 			if res.error != nil {
 				return res
 			}
 
-			// Skip optional newlines before closing bracket
-			for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-				res.RegisterAdvancement()
-				p.advance()
-			}
+			p.skipWhitespace(res)
 
 			if p.currentTok.Type != constants.TT_RSQUARE {
 				return res.Failure(errors.NewInvalidSyntaxError(
@@ -525,22 +484,14 @@ func (p *Parser) atom() *ParseResult {
 		res.RegisterAdvancement()
 		p.advance()
 
-		// Skip optional newlines before checking for assignment
-		for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-			res.RegisterAdvancement()
-			p.advance()
-		}
+		p.skipWhitespace(res)
 
 		// Check if this is an assignment (identifier = value)
 		if p.currentTok.Type == constants.TT_EQ {
 			res.RegisterAdvancement()
 			p.advance()
 
-			// Skip optional newlines after =
-			for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-				res.RegisterAdvancement()
-				p.advance()
-			}
+			p.skipWhitespace(res)
 
 			valueExpr := res.Register(p.expr())
 
@@ -558,11 +509,7 @@ func (p *Parser) atom() *ParseResult {
 		res.RegisterAdvancement()
 		p.advance()
 
-		// Skip optional newlines after opening parenthesis
-		for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-			res.RegisterAdvancement()
-			p.advance()
-		}
+		p.skipWhitespace(res)
 
 		expr := res.Register(p.expr())
 
@@ -570,11 +517,7 @@ func (p *Parser) atom() *ParseResult {
 			return res
 		}
 
-		// Skip optional newlines before closing parenthesis
-		for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-			res.RegisterAdvancement()
-			p.advance()
-		}
+		p.skipWhitespace(res)
 
 		if p.currentTok.Type == constants.TT_RPAREN {
 			res.RegisterAdvancement()
@@ -684,11 +627,7 @@ func (p *Parser) listExpr() *ParseResult {
 	res.RegisterAdvancement()
 	p.advance()
 
-	// Skip optional newlines after opening bracket
-	for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-		res.RegisterAdvancement()
-		p.advance()
-	}
+	p.skipWhitespace(res)
 
 	if p.currentTok.Type == constants.TT_RSQUARE {
 		res.RegisterAdvancement()
@@ -707,11 +646,7 @@ func (p *Parser) listExpr() *ParseResult {
 			res.RegisterAdvancement()
 			p.advance()
 
-			// Skip optional newlines after comma
-			for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-				res.RegisterAdvancement()
-				p.advance()
-			}
+			p.skipWhitespace(res)
 
 			// Allow trailing comma (closing bracket after comma)
 			if p.currentTok.Type == constants.TT_RSQUARE {
@@ -724,11 +659,7 @@ func (p *Parser) listExpr() *ParseResult {
 			}
 		}
 
-		// Skip optional newlines before closing bracket
-		for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-			res.RegisterAdvancement()
-			p.advance()
-		}
+		p.skipWhitespace(res)
 
 		if p.currentTok.Type != constants.TT_RSQUARE {
 			return res.Failure(errors.NewInvalidSyntaxError(
@@ -765,11 +696,7 @@ func (p *Parser) mapExpr() *ParseResult {
 	res.RegisterAdvancement()
 	p.advance()
 
-	// Skip optional newlines after opening bracket
-	for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-		res.RegisterAdvancement()
-		p.advance()
-	}
+	p.skipWhitespace(res)
 
 	// Empty map: m[]
 	if p.currentTok == nil || p.currentTok.Type == constants.TT_RSQUARE {
@@ -793,11 +720,7 @@ func (p *Parser) mapExpr() *ParseResult {
 		return res
 	}
 
-	// Skip optional newlines after first key
-	for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-		res.RegisterAdvancement()
-		p.advance()
-	}
+	p.skipWhitespace(res)
 
 	if p.currentTok != nil && p.currentTok.Type == constants.TT_COLON {
 		keyNodes := []ast.Node{firstExpr}
@@ -807,11 +730,7 @@ func (p *Parser) mapExpr() *ParseResult {
 			res.RegisterAdvancement()
 			p.advance()
 
-			// Skip optional newlines after ':'
-			for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-				res.RegisterAdvancement()
-				p.advance()
-			}
+			p.skipWhitespace(res)
 
 			valNode := res.Register(p.expr())
 
@@ -821,11 +740,7 @@ func (p *Parser) mapExpr() *ParseResult {
 
 			valueNodes = append(valueNodes, valNode)
 
-			// Skip optional newlines after value
-			for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-				res.RegisterAdvancement()
-				p.advance()
-			}
+			p.skipWhitespace(res)
 
 			if p.currentTok == nil || p.currentTok.Type == constants.TT_RSQUARE {
 				break
@@ -841,11 +756,7 @@ func (p *Parser) mapExpr() *ParseResult {
 			res.RegisterAdvancement()
 			p.advance()
 
-			// Skip optional newlines after ','
-			for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-				res.RegisterAdvancement()
-				p.advance()
-			}
+			p.skipWhitespace(res)
 
 			// Allow trailing comma
 			if p.currentTok == nil || p.currentTok.Type == constants.TT_RSQUARE {
@@ -860,11 +771,7 @@ func (p *Parser) mapExpr() *ParseResult {
 
 			keyNodes = append(keyNodes, keyNode)
 
-			// Skip optional newlines after key
-			for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-				res.RegisterAdvancement()
-				p.advance()
-			}
+			p.skipWhitespace(res)
 
 			if p.currentTok == nil || p.currentTok.Type != constants.TT_COLON {
 				if p.currentTok != nil {
@@ -931,11 +838,7 @@ func (p *Parser) byteArrayExpr() *ParseResult {
 	res.RegisterAdvancement()
 	p.advance()
 
-	// Skip optional newlines after opening bracket
-	for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-		res.RegisterAdvancement()
-		p.advance()
-	}
+	p.skipWhitespace(res)
 
 	if p.currentTok.Type == constants.TT_RSQUARE {
 		res.RegisterAdvancement()
@@ -950,11 +853,7 @@ func (p *Parser) byteArrayExpr() *ParseResult {
 			res.RegisterAdvancement()
 			p.advance()
 
-			// Skip optional newlines after comma
-			for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-				res.RegisterAdvancement()
-				p.advance()
-			}
+			p.skipWhitespace(res)
 
 			// Allow trailing comma (closing bracket after comma)
 			if p.currentTok.Type == constants.TT_RSQUARE {
@@ -968,11 +867,7 @@ func (p *Parser) byteArrayExpr() *ParseResult {
 			}
 		}
 
-		// Skip optional newlines before closing bracket
-		for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-			res.RegisterAdvancement()
-			p.advance()
-		}
+		p.skipWhitespace(res)
 
 		if p.currentTok.Type != constants.TT_RSQUARE {
 			return res.Failure(errors.NewInvalidSyntaxError(
@@ -1023,11 +918,7 @@ func (p *Parser) ifExprCases(caseKeyword string) *ParseResult {
 	res.RegisterAdvancement()
 	p.advance()
 
-	// Skip optional newlines after if/elseif keyword
-	for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-		res.RegisterAdvancement()
-		p.advance()
-	}
+	p.skipWhitespace(res)
 
 	condition := res.Register(p.expr())
 	if res.error != nil {
@@ -1038,7 +929,7 @@ func (p *Parser) ifExprCases(caseKeyword string) *ParseResult {
 		return res.Failure(err)
 	}
 
-	if p.currentTok.Type == constants.TT_NEWLINE {
+	if isWhitespace(p.currentTok) {
 		res.RegisterAdvancement()
 		p.advance()
 
@@ -1065,7 +956,7 @@ func (p *Parser) ifExprCases(caseKeyword string) *ParseResult {
 		p.advance()
 
 		// Check for elseif/else continuation
-		result := p.tryParseElseifElse(res)
+		result := p.tryParseElseifElse()
 
 		if result != nil {
 			if result.error != nil {
@@ -1099,7 +990,7 @@ func (p *Parser) ifExprCases(caseKeyword string) *ParseResult {
 		p.advance()
 
 		// Check for elseif/else continuation
-		result := p.tryParseElseifElse(res)
+		result := p.tryParseElseifElse()
 		if result != nil {
 			if result.error != nil {
 				return result
@@ -1118,69 +1009,38 @@ func (p *Parser) ifExprCases(caseKeyword string) *ParseResult {
 	})
 }
 
-func (p *Parser) tryParseElseifElse(res *ParseResult) *ParseResult {
-	if p.currentTok == nil {
+func (p *Parser) tryParseElseifElse() *ParseResult {
+	// Peek past whitespace so a non-continuation leaves the token stream untouched.
+	next := p.peekPastWhitespace()
+	if next == nil {
 		return nil
 	}
 
-	newlineCount := 0
-
-	for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-		res.RegisterAdvancement()
-		p.advance()
-		newlineCount++
-	}
-
-	if p.currentTok != nil && (p.currentTok.Matches(constants.TT_KEYWORD, "elseif") || p.currentTok.Matches(constants.TT_KEYWORD, "else")) {
-		return p.ifExprBOrC()
-	}
-
-	// If no elseif/else, reverse the newline consumption
-	if newlineCount > 0 {
-		p.reverse(newlineCount)
-	}
-
-	return nil
-}
-
-func (p *Parser) ifExprBOrC() *ParseResult {
 	res := NewParseResult()
-	cases := []ast.IfCase{}
 
-	var elseCase ast.Node
+	if next.Matches(constants.TT_KEYWORD, "elseif") {
+		p.skipWhitespace(res)
 
-	// Skip newlines
-	for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-		res.RegisterAdvancement()
-		p.advance()
+		return p.ifExprCases("elseif")
 	}
 
-	if p.currentTok != nil && p.currentTok.Matches(constants.TT_KEYWORD, "elseif") {
+	if next.Matches(constants.TT_KEYWORD, "else") {
+		p.skipWhitespace(res)
 
-		result := p.ifExprCases("elseif")
-
-		if result.error != nil {
-			return result
-		}
-
-		ifResult := result.node.(*ifExprResult)
-
-		cases = ifResult.cases
-		elseCase = ifResult.elseCase
-
-	} else if p.currentTok != nil && p.currentTok.Matches(constants.TT_KEYWORD, "else") {
-		elseCase = res.Register(p.ifExprC())
+		elseCase := res.Register(p.ifExprC())
 
 		if res.error != nil {
 			return res
 		}
+
+		return res.Success(&ifExprResult{
+			BaseNode: ast.NewBaseNode(nil, nil),
+			cases:    nil,
+			elseCase: elseCase,
+		})
 	}
 
-	return res.Success(&ifExprResult{
-		BaseNode: ast.NewBaseNode(nil, nil),
-		cases:    cases,
-		elseCase: elseCase,
-	})
+	return nil
 }
 
 func (p *Parser) ifExprC() *ParseResult {
@@ -1195,7 +1055,7 @@ func (p *Parser) ifExprC() *ParseResult {
 			return res.Failure(err)
 		}
 
-		if p.currentTok.Type == constants.TT_NEWLINE {
+		if isWhitespace(p.currentTok) {
 			res.RegisterAdvancement()
 			p.advance()
 
@@ -1253,11 +1113,7 @@ func (p *Parser) forExpr() *ParseResult {
 	res.RegisterAdvancement()
 	p.advance()
 
-	// Skip optional newlines after for keyword
-	for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-		res.RegisterAdvancement()
-		p.advance()
-	}
+	p.skipWhitespace(res)
 
 	if p.currentTok.Type != constants.TT_IDENTIFIER {
 		return res.Failure(errors.NewInvalidSyntaxError(
@@ -1270,11 +1126,7 @@ func (p *Parser) forExpr() *ParseResult {
 	res.RegisterAdvancement()
 	p.advance()
 
-	// Skip optional newlines after identifier
-	for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-		res.RegisterAdvancement()
-		p.advance()
-	}
+	p.skipWhitespace(res)
 
 	if p.currentTok.Type != constants.TT_EQ {
 		return res.Failure(errors.NewInvalidSyntaxError(
@@ -1286,11 +1138,7 @@ func (p *Parser) forExpr() *ParseResult {
 	res.RegisterAdvancement()
 	p.advance()
 
-	// Skip optional newlines after =
-	for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-		res.RegisterAdvancement()
-		p.advance()
-	}
+	p.skipWhitespace(res)
 
 	startValue := res.Register(p.expr())
 	if res.error != nil {
@@ -1307,11 +1155,7 @@ func (p *Parser) forExpr() *ParseResult {
 	res.RegisterAdvancement()
 	p.advance()
 
-	// Skip optional newlines after to
-	for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-		res.RegisterAdvancement()
-		p.advance()
-	}
+	p.skipWhitespace(res)
 
 	endValue := res.Register(p.expr())
 	if res.error != nil {
@@ -1323,11 +1167,7 @@ func (p *Parser) forExpr() *ParseResult {
 		res.RegisterAdvancement()
 		p.advance()
 
-		// Skip optional newlines after step
-		for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-			res.RegisterAdvancement()
-			p.advance()
-		}
+		p.skipWhitespace(res)
 
 		stepValue = res.Register(p.expr())
 
@@ -1340,7 +1180,7 @@ func (p *Parser) forExpr() *ParseResult {
 		return res.Failure(err)
 	}
 
-	if p.currentTok.Type == constants.TT_NEWLINE {
+	if isWhitespace(p.currentTok) {
 
 		res.RegisterAdvancement()
 		p.advance()
@@ -1395,11 +1235,7 @@ func (p *Parser) whileExpr() *ParseResult {
 	res.RegisterAdvancement()
 	p.advance()
 
-	// Skip optional newlines after while keyword
-	for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-		res.RegisterAdvancement()
-		p.advance()
-	}
+	p.skipWhitespace(res)
 
 	condition := res.Register(p.expr())
 	if res.error != nil {
@@ -1410,7 +1246,7 @@ func (p *Parser) whileExpr() *ParseResult {
 		return res.Failure(err)
 	}
 
-	if p.currentTok.Type == constants.TT_NEWLINE {
+	if isWhitespace(p.currentTok) {
 		res.RegisterAdvancement()
 		p.advance()
 
@@ -1464,11 +1300,7 @@ func (p *Parser) funcDef() *ParseResult {
 	res.RegisterAdvancement()
 	p.advance()
 
-	// Skip optional newlines after func keyword
-	for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-		res.RegisterAdvancement()
-		p.advance()
-	}
+	p.skipWhitespace(res)
 
 	var varNameTok *lexer.Token
 	if p.currentTok.Type == constants.TT_IDENTIFIER {
@@ -1477,11 +1309,7 @@ func (p *Parser) funcDef() *ParseResult {
 		res.RegisterAdvancement()
 		p.advance()
 
-		// Skip optional newlines after function name
-		for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-			res.RegisterAdvancement()
-			p.advance()
-		}
+		p.skipWhitespace(res)
 
 		if p.currentTok.Type != constants.TT_LPAREN {
 			return res.Failure(errors.NewInvalidSyntaxError(
@@ -1501,11 +1329,7 @@ func (p *Parser) funcDef() *ParseResult {
 	res.RegisterAdvancement()
 	p.advance()
 
-	// Skip optional newlines after (
-	for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-		res.RegisterAdvancement()
-		p.advance()
-	}
+	p.skipWhitespace(res)
 
 	argNameToks := []*lexer.Token{}
 
@@ -1519,11 +1343,7 @@ func (p *Parser) funcDef() *ParseResult {
 			res.RegisterAdvancement()
 			p.advance()
 
-			// Skip optional newlines after comma
-			for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-				res.RegisterAdvancement()
-				p.advance()
-			}
+			p.skipWhitespace(res)
 
 			// Allow trailing comma (closing paren after comma)
 			if p.currentTok.Type == constants.TT_RPAREN {
@@ -1542,11 +1362,7 @@ func (p *Parser) funcDef() *ParseResult {
 			p.advance()
 		}
 
-		// Skip optional newlines before )
-		for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-			res.RegisterAdvancement()
-			p.advance()
-		}
+		p.skipWhitespace(res)
 
 		if p.currentTok.Type != constants.TT_RPAREN {
 			return res.Failure(errors.NewInvalidSyntaxError(
@@ -1566,11 +1382,7 @@ func (p *Parser) funcDef() *ParseResult {
 	res.RegisterAdvancement()
 	p.advance()
 
-	// Skip optional newlines before {
-	for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-		res.RegisterAdvancement()
-		p.advance()
-	}
+	p.skipWhitespace(res)
 
 	if p.currentTok.Type != constants.TT_LBRACE {
 		return res.Failure(errors.NewInvalidSyntaxError(
@@ -1607,22 +1419,14 @@ func (p *Parser) binOp(leftFunc func() *ParseResult, ops []string, opValues []in
 		return res
 	}
 
-	// Skip optional newlines before checking for operator
-	for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-		res.RegisterAdvancement()
-		p.advance()
-	}
+	p.skipWhitespace(res)
 
 	for p.containsOp(ops, opValues) {
 		opTok := p.currentTok
 		res.RegisterAdvancement()
 		p.advance()
 
-		// Skip optional newlines after operator
-		for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-			res.RegisterAdvancement()
-			p.advance()
-		}
+		p.skipWhitespace(res)
 
 		right := res.Register(leftFunc())
 
@@ -1632,11 +1436,7 @@ func (p *Parser) binOp(leftFunc func() *ParseResult, ops []string, opValues []in
 
 		left = ast.NewBinOpNode(left, opTok, right)
 
-		// Skip optional newlines before checking for next operator
-		for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-			res.RegisterAdvancement()
-			p.advance()
-		}
+		p.skipWhitespace(res)
 	}
 
 	return res.Success(left)
@@ -1662,11 +1462,7 @@ func (p *Parser) containsOp(ops []string, opValues []interface{}) bool {
 }
 
 func (p *Parser) expectLBraceWithOptionalNewline(res *ParseResult) error {
-	// Skip optional newlines before {
-	for p.currentTok != nil && p.currentTok.Type == constants.TT_NEWLINE {
-		res.RegisterAdvancement()
-		p.advance()
-	}
+	p.skipWhitespace(res)
 
 	if p.currentTok.Type != constants.TT_LBRACE {
 		return errors.NewInvalidSyntaxError(

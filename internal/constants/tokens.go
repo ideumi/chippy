@@ -55,7 +55,9 @@ const (
 
 	// Special
 
-	TT_EOF = "__~eof~__" // End of file
+	TT_EOF         = "__~eof~__" // End of file
+	TT_COMMENT     = "__~cmt~__" // # comment
+	TT_DOC_COMMENT = "__~dcm~__" // #@ doc comment
 )
 
 var Keywords = []string{
