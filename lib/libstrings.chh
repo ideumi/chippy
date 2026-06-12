@@ -6,7 +6,8 @@
 #@ <StartsWith(value, prefix)>
 #@ V-1.0.0 (2025-08-13)
 #@
-#@ Returns ''true'' if ''value'' starts with the given ''prefix'', ''false'' otherwise.
+#@ Returns ''true'' if ''value'' starts with the given ''prefix'', ''false''
+#@ otherwise.
 
 func StartsWith(value, prefix)
 {
@@ -18,7 +19,8 @@ func StartsWith(value, prefix)
 #@ <EndsWith(value, suffix)>
 #@ V-1.0.0 (2025-08-13)
 #@
-#@ Returns ''true'' if ''value'' ends with the given ''suffix'', ''false'' otherwise.
+#@ Returns ''true'' if ''value'' ends with the given ''suffix'', ''false''
+#@ otherwise.
 
 func EndsWith(value, suffix)
 {
@@ -32,8 +34,8 @@ func EndsWith(value, suffix)
 #@ <Left(value, count)>
 #@ V-1.0.0 (2025-08-13)
 #@
-#@ Returns the leftmost ''count'' characters from ''value'', or
-#@ ''err'' if ''count'' is negative.
+#@ Returns the leftmost ''count'' characters from ''value'', or ''err'' if
+#@ ''count'' is negative.
 
 func Left(value, count)
 {
@@ -47,8 +49,8 @@ func Left(value, count)
 #@ <Right(value, count)>
 #@ V-1.0.0 (2025-08-13)
 #@
-#@ Returns the rightmost ''count'' characters from ''value'', or
-#@ ''err'' if ''count'' is negative.
+#@ Returns the rightmost ''count'' characters from ''value'', or ''err'' if
+#@ ''count'' is negative.
 
 func Right(value, count)
 {
@@ -78,6 +80,20 @@ func Reverse(value)
 	}
 
 	return result;
+}
+
+#@ <ReplaceCharAt(value, idx, char)>
+#@ V-1.0.0 (2026-06-09)
+#@
+#@ Returns ''value'' with the character at ''idx'' replaced by ''char'', or ''err''
+#@ if ''char'' is not exactly one character or ''idx'' is out of bounds.
+
+func ReplaceCharAt(value, idx, char)
+{
+	if len(char) != 1 { return err; }
+	if idx < 1 or idx > len(value) { return err; }
+
+	return slice(value, 1, idx - 1) + char + slice(value, idx + 1, len(value));
 }
 
 #@ <TrimLeft(value)>
@@ -160,7 +176,7 @@ func SplitCollapse(value, delimiter)
 
 		if part != ""
 		{
-			result = append(result, part);
+			append(result, part);
 		}
 	}
 
@@ -196,7 +212,7 @@ func Format(value, values)
 
 				if next == "%"
 				{
-					parts = append(parts, "%");
+					append(parts, "%");
 
 					i = i + 2;
 				}
@@ -204,7 +220,7 @@ func Format(value, values)
 				{
 					if valIndex > len(values) { return err; }
 
-					parts = append(parts, str(values[valIndex]));
+					append(parts, str(values[valIndex]));
 
 					valIndex = valIndex + 1;
 					i = i + 2;
@@ -213,7 +229,7 @@ func Format(value, values)
 				{
 					if valIndex > len(values) { return err; }
 
-					parts = append(parts, str(int(values[valIndex])));
+					append(parts, str(int(values[valIndex])));
 
 					valIndex = valIndex + 1;
 					i = i + 2;
@@ -222,7 +238,7 @@ func Format(value, values)
 				{
 					if valIndex > len(values) { return err; }
 
-					parts = append(parts, str(num(values[valIndex])));
+					append(parts, str(num(values[valIndex])));
 
 					valIndex = valIndex + 1;
 					i = i + 2;
@@ -239,7 +255,7 @@ func Format(value, values)
 		}
 		else
 		{
-			parts = append(parts, ch);
+			append(parts, ch);
 
 			i = i + 1;
 		}

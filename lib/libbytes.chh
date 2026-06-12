@@ -45,8 +45,8 @@ func GetShort(data, idx)
 
 func SetShort(data, idx, value)
 {
-	data = data[idx] = int(value) band 255;
-	data = data[idx + 1] = int(value / 256) band 255;
+	data[idx] = int(value) band 255;
+	data[idx + 1] = int(value / 256) band 255;
 
 	return data;
 }
@@ -71,10 +71,10 @@ func GetInt(data, idx)
 
 func SetInt(data, idx, value)
 {
-	data = data[idx] = int(value) band 255;
-	data = data[idx + 1] = int(value / 256) band 255;
-	data = data[idx + 2] = int(value / 256 ^ 2) band 255;
-	data = data[idx + 3] = int(value / 256 ^ 3) band 255;
+	data[idx] = int(value) band 255;
+	data[idx + 1] = int(value / 256) band 255;
+	data[idx + 2] = int(value / 256 ^ 2) band 255;
+	data[idx + 3] = int(value / 256 ^ 3) band 255;
 
 	return data;
 }
@@ -96,8 +96,8 @@ func GetShortBE(data, idx)
 
 func SetShortBE(data, idx, value)
 {
-	data = data[idx] = int(value / 256) band 255;
-	data = data[idx + 1] = int(value) band 255;
+	data[idx] = int(value / 256) band 255;
+	data[idx + 1] = int(value) band 255;
 
 	return data;
 }
@@ -122,10 +122,10 @@ func GetIntBE(data, idx)
 
 func SetIntBE(data, idx, value)
 {
-	data = data[idx] = int(value / 256 ^ 3) band 255;
-	data = data[idx + 1] = int(value / 256 ^ 2) band 255;
-	data = data[idx + 2] = int(value / 256) band 255;
-	data = data[idx + 3] = int(value) band 255;
+	data[idx] = int(value / 256 ^ 3) band 255;
+	data[idx + 1] = int(value / 256 ^ 2) band 255;
+	data[idx + 2] = int(value / 256) band 255;
+	data[idx + 3] = int(value) band 255;
 
 	return data;
 }

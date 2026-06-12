@@ -202,7 +202,7 @@ func _HttpResolveLocation_(location, url)
 
 				for j = 1 to len(normalized) - 1
 				{
-					newNorm = append(newNorm, normalized[j]);
+					append(newNorm, normalized[j]);
 				}
 
 				normalized = newNorm;
@@ -210,7 +210,7 @@ func _HttpResolveLocation_(location, url)
 		}
 		else
 		{
-			normalized = append(normalized, seg);
+			append(normalized, seg);
 		}
 	}
 
@@ -263,7 +263,7 @@ func _HttpFilterRedirectHeaders_(headers, origUrl, targetUrl, statusCode)
 			if hKey == "proxy-authorization" { continue; }
 		}
 
-		cleanHeaders = append(cleanHeaders, hPair);
+		append(cleanHeaders, hPair);
 	}
 
 	# Strip body-related headers on 303
@@ -279,7 +279,7 @@ func _HttpFilterRedirectHeaders_(headers, origUrl, targetUrl, statusCode)
 			if hKey == "content-type" { continue; }
 			if hKey == "content-length" { continue; }
 
-			filteredHeaders = append(filteredHeaders, hPair);
+			append(filteredHeaders, hPair);
 		}
 
 		return filteredHeaders;
@@ -434,11 +434,11 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 	{
 		if (scheme == "http" and port == 80) or (scheme == "https" and port == 443)
 		{
-			headers = append(headers, ["Host", host]);
+			headers = headers + [["Host", host]];
 		}
 		else
 		{
-			headers = append(headers, ["Host", host + ":" + str(int(port))]);
+			headers = headers + [["Host", host + ":" + str(int(port))]];
 		}
 	}
 
@@ -636,7 +636,7 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 
 		if iserr(decodedBody) { return err; }
 
-		response = response["body"] = decodedBody;
+		response["body"] = decodedBody;
 	}
 
 	# Follow redirects
@@ -792,7 +792,7 @@ func HttpParseRequest(requestBytes)
 		{
 			var key = Trim(slice(line, 1, colonPos - 1));
 			var val = Trim(slice(line, colonPos + 1, len(line)));
-			headers = append(headers, [key, val]);
+			append(headers, [key, val]);
 		}
 	}
 
@@ -946,8 +946,8 @@ func _HttpConnectionWorker_(handler, state)
 		return ok;
 	}
 
-	request = request["remoteIp"] = info["remoteIp"];
-	request = request["remotePort"] = info["remotePort"];
+	request["remoteIp"] = info["remoteIp"];
+	request["remotePort"] = info["remotePort"];
 
 	var response = handler(state, request);
 
@@ -1003,9 +1003,9 @@ func _HttpConnectionTLSWorker_(handler, state, certPath, keyPath)
 		return ok;
 	}
 
-	request = request["remoteIp"] = info["remoteIp"];
-	request = request["remotePort"] = info["remotePort"];
-	request = request["serverName"] = info["serverName"];
+	request["remoteIp"] = info["remoteIp"];
+	request["remotePort"] = info["remotePort"];
+	request["serverName"] = info["serverName"];
 
 	var response = handler(state, request);
 

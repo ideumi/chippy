@@ -461,16 +461,19 @@ func HideCursor()
 #@ <MakeRaw(state)>
 #@ V-1.0.0 (2026-04-03)
 #@
-#@ Sets raw mode flags on termios ''state''. Returns the modified state.
+#@ Returns a copy of termios ''state'' with raw mode flags set.
 
 func MakeRaw(state)
 {
-	state = state["iflag"] = state["iflag"] band bnot (IGNBRK bor BRKINT bor PARMRK bor ISTRIP bor INLCR bor IGNCR bor ICRNL bor IXON);
-	state = state["oflag"] = state["oflag"] band bnot OPOST;
-	state = state["lflag"] = state["lflag"] band bnot (ECHO bor ECHONL bor ICANON bor ISIG bor IEXTEN);
-	state = state["cflag"] = (state["cflag"] band bnot (CSIZE bor PARENB)) bor CS8;
-	state = state["VMIN"] = 1;
-	state = state["VTIME"] = 0;
+	var raw = copy(state);
 
-	return state;
+	raw["iflag"] = raw["iflag"] band bnot (IGNBRK bor BRKINT bor PARMRK bor ISTRIP bor INLCR bor IGNCR bor ICRNL bor IXON);
+	raw["oflag"] = raw["oflag"] band bnot OPOST;
+	raw["lflag"] = raw["lflag"] band bnot (ECHO bor ECHONL bor ICANON bor ISIG bor IEXTEN);
+	raw["cflag"] = raw["cflag"] band bnot (CSIZE bor PARENB);
+	raw["cflag"] = raw["cflag"] bor CS8;
+	raw["VMIN"] = 1;
+	raw["VTIME"] = 0;
+
+	return raw;
 }
