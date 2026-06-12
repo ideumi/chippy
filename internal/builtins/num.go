@@ -41,21 +41,13 @@ func numFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			num, err := values.NewNumberFromFloat(f)
 
 			if err != nil {
-				posStart, posEnd := args[0].GetPos()
-
-				return res.Failure(errors.NewRTError(
-					posStart, posEnd,
-					shared.Errors.CannotConvert("string to number", ": "+err.Error())))
+				return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 			}
 
 			return res.Success(num.SetContext(ctx))
-		} else {
-			posStart, posEnd := args[0].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.CannotConvert("string to number", ": "+parseErr.Error())))
 		}
+
+		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 
 	case *values.List:
 		// Trying our best
@@ -70,17 +62,9 @@ func numFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			}
 		}
 
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.CannotConvert("list to number", "")))
+		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 
 	default:
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.CannotConvert("value to number", "")))
+		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 	}
 }

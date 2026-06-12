@@ -12,8 +12,7 @@ Converts a value to number.
   - Number: Returns copy of original
   - String: Parses as floating point number
   - List: Returns 0 for empty list, single number element if list has one number
+- ''err'' if the value cannot be converted to a number
 
 *Errors:*
-- Runtime error if string cannot be parsed as number
-- Runtime error if list cannot be converted to number
-- Runtime error if value type cannot be converted
+- Runtime error if wrong number of arguments

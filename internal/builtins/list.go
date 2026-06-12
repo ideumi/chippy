@@ -7,8 +7,7 @@
 package builtins
 
 import (
-	"chip-go/internal/builtins/shared"
-	"chip-go/internal/errors"
+	"chip-go/internal/constants"
 	"chip-go/internal/values"
 )
 
@@ -26,7 +25,7 @@ func listFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		switch v := value.(type) {
 
 		case *values.List:
-			return res.Success(v.Copy().SetContext(ctx))
+			return res.Success(v.ShallowCopy().SetContext(ctx))
 
 		case *values.String:
 			// Convert string to runes
@@ -41,21 +40,17 @@ func listFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 		case *values.Number:
 			// Create single-element list
-			return res.Success(values.NewList([]values.Value{v.Copy().SetContext(ctx)}).SetContext(ctx))
+			return res.Success(values.NewList([]values.Value{v.SetContext(ctx)}).SetContext(ctx))
 
 		default:
-			posStart, posEnd := args[0].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.CannotConvert("value to list", "")))
+			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 		}
 	} else {
 		// Create list from multiple arguments
 		elements := make([]values.Value, len(args))
 
 		for i, arg := range args {
-			elements[i] = arg.Copy().SetContext(ctx)
+			elements[i] = arg.SetContext(ctx)
 		}
 
 		return res.Success(values.NewList(elements).SetContext(ctx))
