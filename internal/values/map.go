@@ -35,21 +35,25 @@ func NewMapFromEntries(keys []string, entries map[string]Value) *Map {
 }
 
 func (m *Map) String() string {
+	return m.stringWalk(map[Value]bool{}, 0)
+}
+
+func (m *Map) stringWalk(seen map[Value]bool, depth int) string {
+	if depth > constants.MAX_VALUE_DEPTH || seen[m] {
+		return "m[...]"
+	}
+
+	seen[m] = true
+	defer delete(seen, m)
+
 	pairs := make([]string, len(m.Keys))
 
 	for i, key := range m.Keys {
-		val := m.Entries[key]
-
-		var valStr string
-
-		if val != nil {
-			valStr = val.String()
-		} else {
-			valStr = "null"
-		}
+		valStr := walkString(m.Entries[key], seen, depth+1)
 
 		pairs[i] = "\"" + key + "\": " + valStr
 	}
+
 	return "m[" + strings.Join(pairs, ", ") + "]"
 }
 
@@ -66,16 +70,40 @@ func (m *Map) SetContext(ctx Ctx) Value {
 }
 
 func (m *Map) Copy() Value {
+	return m.copyWalk(map[Value]bool{}, 0)
+}
+
+func (m *Map) copyWalk(seen map[Value]bool, depth int) Value {
+	defer EnterWalk(m, seen, depth)()
+
 	newKeys := make([]string, len(m.Keys))
 	copy(newKeys, m.Keys)
 	newEntries := make(map[string]Value, len(m.Entries))
 
 	for k, v := range m.Entries {
-		if v != nil {
-			newEntries[k] = v.Copy()
-		} else {
-			newEntries[k] = nil
-		}
+		newEntries[k] = walkCopy(v, seen, depth+1)
+	}
+
+	result := &Map{
+		BaseValue: NewBaseValue(),
+		Keys:      newKeys,
+		Entries:   newEntries,
+	}
+
+	result.SetPos(m.posStart, m.posEnd)
+	result.SetContext(m.context)
+
+	return result
+}
+
+func (m *Map) ShallowCopy() *Map {
+	newKeys := make([]string, len(m.Keys))
+	copy(newKeys, m.Keys)
+
+	newEntries := make(map[string]Value, len(m.Entries))
+
+	for k, v := range m.Entries {
+		newEntries[k] = v
 	}
 
 	result := &Map{
@@ -94,13 +122,7 @@ func (m *Map) IsTrue() bool {
 	return len(m.Keys) > 0
 }
 
-func (m *Map) MapSet(key string, val Value) *Map {
-	newMap := m.Copy().(*Map)
-	newMap.setEntry(key, val)
-	return newMap
-}
-
-func (m *Map) setEntry(key string, val Value) {
+func (m *Map) Set(key string, val Value) {
 	if _, exists := m.Entries[key]; !exists {
 		m.Keys = append(m.Keys, key)
 	}
@@ -113,7 +135,7 @@ func (m *Map) MapRemove(key string) (*Map, bool) {
 		return nil, false
 	}
 
-	newMap := m.Copy().(*Map)
+	newMap := m.ShallowCopy()
 	delete(newMap.Entries, key)
 	newKeys := make([]string, 0, len(newMap.Keys)-1)
 
@@ -135,10 +157,10 @@ func (m *Map) AddedTo(other Value) (Value, error) {
 		return nil, IllegalOperation(m, other)
 	}
 
-	result := m.Copy().(*Map)
+	result := m.ShallowCopy()
 
 	for _, key := range otherMap.Keys {
-		result.setEntry(key, otherMap.Entries[key])
+		result.Set(key, otherMap.Entries[key])
 	}
 
 	return result, nil
@@ -161,6 +183,12 @@ func (m *Map) SubbedBy(other Value) (Value, error) {
 }
 
 func (m *Map) GetComparisonEe(other Value) (Value, error) {
+	return m.eqWalk(other, map[Value]bool{}, 0)
+}
+
+func (m *Map) eqWalk(other Value, seen map[Value]bool, depth int) (Value, error) {
+	defer EnterWalk(m, seen, depth)()
+
 	otherMap, ok := other.(*Map)
 
 	if !ok {
@@ -186,7 +214,7 @@ func (m *Map) GetComparisonEe(other Value) (Value, error) {
 			return NewNumber(constants.NUM_FAL).SetContext(m.context), nil
 		}
 
-		comparison, err := val.GetComparisonEe(otherVal)
+		comparison, err := walkEqual(val, otherVal, seen, depth+1)
 
 		if err != nil {
 			return nil, err

@@ -6,7 +6,7 @@
 ''-'' - Remove element at index
 
 ''container[index]'' - Access element at index (available for lists, bytes and strings)
-''container[index] = value'' - Assign element at index (returns a new copy)
+''container[index] = value'' - Assign element at index in place (lists and bytes)
 
 Indices are 1-based.
 
@@ -18,6 +18,6 @@ Indices are 1-based.
 ''-'' - Remove a key by string: ''map - "key"''
 
 ''map["key"]'' - Access value by key (''err'' if key not found)
-''map["key"] = value'' - Set key to value (returns a new copy)
+''map["key"] = value'' - Set key to value in place
 
-See ''chippy doc keys'' and ''chippy doc has''.
+See ''chippy doc mutability'', ''chippy doc keys'' and ''chippy doc has''.

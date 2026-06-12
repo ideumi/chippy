@@ -199,20 +199,6 @@ func (p *Parser) statement() *ParseResult {
 		return res.Success(ast.NewBreakNode(posStart, p.currentTok.PosStart.Copy()))
 	}
 
-	expr := res.Register(p.expr())
-	if res.error != nil {
-		return res.Failure(errors.NewInvalidSyntaxError(
-			p.currentTok.PosStart, p.currentTok.PosEnd,
-			"Expected 'return', 'continue', 'break', 'var', 'if', 'for', 'while', 'func', int, float, identifier, '+', '-', '(', '[' or 'not'",
-		))
-	}
-
-	return res.Success(expr)
-}
-
-func (p *Parser) expr() *ParseResult {
-	res := NewParseResult()
-
 	if p.currentTok.Matches(constants.TT_KEYWORD, "var") {
 		res.RegisterAdvancement()
 		p.advance()
@@ -244,14 +230,62 @@ func (p *Parser) expr() *ParseResult {
 
 		p.skipWhitespace(res)
 
-		expr := res.Register(p.expr())
+		valueExpr := res.Register(p.expr())
 
 		if res.error != nil {
 			return res
 		}
 
-		return res.Success(ast.NewVarAssignNode(varName, expr))
+		return res.Success(ast.NewVarAssignNode(varName, valueExpr))
 	}
+
+	node := res.Register(p.expr())
+	if res.error != nil {
+		return res.Failure(errors.NewInvalidSyntaxError(
+			p.currentTok.PosStart, p.currentTok.PosEnd,
+			"Expected 'return', 'continue', 'break', 'var', 'if', 'for', 'while', 'func', int, float, identifier, '+', '-', '(', '[' or 'not'",
+		))
+	}
+
+	p.skipWhitespace(res)
+
+	if p.currentTok != nil && p.currentTok.Type == constants.TT_EQ {
+		switch target := node.(type) {
+		case *ast.VarAccessNode:
+			res.RegisterAdvancement()
+			p.advance()
+
+			p.skipWhitespace(res)
+
+			valueExpr := res.Register(p.expr())
+
+			if res.error != nil {
+				return res
+			}
+
+			return res.Success(ast.NewVarUpdateNode(target.VarNameToken, valueExpr))
+
+		case *ast.IndexAccessNode:
+			res.RegisterAdvancement()
+			p.advance()
+
+			p.skipWhitespace(res)
+
+			valueExpr := res.Register(p.expr())
+
+			if res.error != nil {
+				return res
+			}
+
+			return res.Success(ast.NewIndexAssignNode(target.CollectionNode, target.IndexNode, valueExpr))
+		}
+	}
+
+	return res.Success(node)
+}
+
+func (p *Parser) expr() *ParseResult {
+	res := NewParseResult()
 
 	node := res.Register(p.binOp(p.bitwiseExpr, []string{constants.TT_KEYWORD}, []interface{}{"and", "or", "xor"}))
 
@@ -347,29 +381,6 @@ func (p *Parser) call() *ParseResult {
 
 	// Handle function calls with () and indexing with []
 	for {
-		// Handle index assignment: catches IndexAccessNode from mapExpr() or a previous [].
-		if indexAccess, ok := atom.(*ast.IndexAccessNode); ok {
-			p.skipWhitespace(res)
-
-			if p.currentTok != nil && p.currentTok.Type == constants.TT_EQ {
-				res.RegisterAdvancement()
-				p.advance()
-
-				p.skipWhitespace(res)
-
-				value := res.Register(p.expr())
-				if res.error != nil {
-					return res
-				}
-
-				return res.Success(ast.NewIndexAssignNode(
-					indexAccess.CollectionNode,
-					indexAccess.IndexNode,
-					value,
-				))
-			}
-		}
-
 		// Handle function calls with ()
 		if p.currentTok.Type == constants.TT_LPAREN {
 			res.RegisterAdvancement()
@@ -485,22 +496,6 @@ func (p *Parser) atom() *ParseResult {
 		p.advance()
 
 		p.skipWhitespace(res)
-
-		// Check if this is an assignment (identifier = value)
-		if p.currentTok.Type == constants.TT_EQ {
-			res.RegisterAdvancement()
-			p.advance()
-
-			p.skipWhitespace(res)
-
-			valueExpr := res.Register(p.expr())
-
-			if res.error != nil {
-				return res
-			}
-
-			return res.Success(ast.NewVarUpdateNode(tok, valueExpr))
-		}
 
 		return res.Success(ast.NewVarAccessNode(tok))
 	}

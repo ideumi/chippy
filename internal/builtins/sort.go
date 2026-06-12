@@ -39,24 +39,20 @@ func sortFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			shared.Errors.InvalidArgTypeWithHint("sort", shared.TypeList, "list")))
 	}
 
-	// Immutable
-	elements := make([]values.Value, len(listArg.Elements))
-	copy(elements, listArg.Elements)
+	// Reuse seen across all compares
+	// EnterWalk's defer empties it between them.
+	seen := map[values.Value]bool{}
 
-	sort.SliceStable(elements, func(i, j int) bool {
-		return compareValues(elements[i], elements[j]) < 0
+	sort.SliceStable(listArg.Elements, func(i, j int) bool {
+		return compareValues(listArg.Elements[i], listArg.Elements[j], seen, 0) < 0
 	})
 
-	result := values.NewList(elements)
-
-	return res.Success(result.SetContext(ctx))
+	return res.Success(listArg.SetContext(ctx))
 }
 
 // compareValues implements type-aware comparison with precedence:
 // Number < String < List < Bytes < Function < Map
-func compareValues(a, b values.Value) int {
-	// Get type precedence values
-
+func compareValues(a, b values.Value, seen map[values.Value]bool, depth int) int {
 	aType := getTypePrecedence(a)
 	bType := getTypePrecedence(b)
 
@@ -103,7 +99,7 @@ func compareValues(a, b values.Value) int {
 	case *values.List:
 		bVal := b.(*values.List)
 
-		return compareLists(aVal, bVal)
+		return compareLists(aVal, bVal, seen, depth)
 
 	case *values.Bytes:
 		bVal := b.(*values.Bytes)
@@ -136,17 +132,19 @@ func getTypePrecedence(v values.Value) int {
 	}
 }
 
-// compareLists compares two lists element by element
-func compareLists(a, b *values.List) int {
+// compareLists compares two lists element by element.
+func compareLists(a, b *values.List, seen map[values.Value]bool, depth int) int {
+	// Catch cyclic lists
+	defer values.EnterWalk(a, seen, depth)()
+
 	minLen := len(a.Elements)
 
 	if len(b.Elements) < minLen {
 		minLen = len(b.Elements)
 	}
 
-	// Compare elements pairwise
 	for i := 0; i < minLen; i++ {
-		cmp := compareValues(a.Elements[i], b.Elements[i])
+		cmp := compareValues(a.Elements[i], b.Elements[i], seen, depth+1)
 
 		if cmp != 0 {
 			return cmp

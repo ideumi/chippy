@@ -35,6 +35,7 @@ func appendFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 		if !ok {
 			posStart, posEnd := args[1].GetPos()
+
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
 				shared.Errors.InvalidArgTypePositionalWithHint("append", shared.PositionSecond, shared.TypeNumber, "value")))
@@ -50,6 +51,7 @@ func appendFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 		if byteValue < 0 || byteValue > 255 {
 			posStart, posEnd := args[1].GetPos()
+
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
 				"Byte values must be between 0 and 255"))
@@ -60,12 +62,13 @@ func appendFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		return res.Success(newBytes.SetContext(ctx))
 
 	case *values.List:
-		newList := v.Copy().(*values.List)
-		newList.Elements = append(newList.Elements, args[1].SetContext(ctx))
-		return res.Success(newList)
+		v.Elements = append(v.Elements, args[1].SetContext(ctx))
+
+		return res.Success(v)
 
 	default:
 		posStart, posEnd := args[0].GetPos()
+
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
 			shared.Errors.InvalidArgTypePositionalWithHint("append", shared.PositionFirst, shared.TypeListOrBytes, shared.TypeListOrBytes)))

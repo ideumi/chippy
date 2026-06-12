@@ -1,0 +1,55 @@
+*Mutability and References* | V-$CHIPVR ($CHIPCN)
+
+ChipLang has two kinds of values: immutable values, and mutable reference types.
+
+*Immutable values*
+
+Numbers and strings are immutable. Nothing changes them in place, and assigning one gives an independent value.
+
+*Reference types*
+
+Lists, maps and bytes are mutable reference types. Assigning one does not copy it. Both names refer to the same value, and a change through one name shows through the others.
+
+'''
+var numbers = [1, 2, 3];
+var alias = numbers; # same list, not a copy
+
+append(numbers, 4); # alias is [1, 2, 3, 4] too
+'''
+
+Operations that modify a container change it in place. See ''chippy doc listops''.
+
+*Copying*
+
+''copy(value)'' returns an independent copy of a reference type:
+
+'''
+var original = [[1], [2]];
+var clone = copy(original);
+
+append(clone[1], 9); # original stays [[1], [2]]
+'''
+
+An operator or ''slice(container, start, end)'' return a shallow copy, aka a new outer container, but the inner elements are still shared. Use ''copy(value)'' for a fully independent copy.
+
+*Self-referential (aka cyclic) values*
+
+A reference type can be made to contain itself:
+
+'''
+var node = [1];
+append(node, node); # node now contains itself
+'''
+
+Such a value prints as ''[...]'' or ''m[...]'' for maps:
+
+'''
+str(node); # "[1, [...]]"
+copy(node); # raises a runtime error
+'''
+
+The engine limits nesting to 100000 levels, so even a non-cyclic value that goes deeper raises a runtime error rather than overflowing the stack.
+
+Printing is always safe. Copying, comparing or sorting a cyclic value raises a runtime error.
+
+See ''chippy doc listops'' and ''chippy doc copy''.

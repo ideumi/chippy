@@ -55,7 +55,9 @@ func NewRoadRunner2() *RoadRunner2 {
 	return rr
 }
 
-func (rr *RoadRunner2) Run(filename, text string) (values.Value, error) {
+func (rr *RoadRunner2) Run(filename, text string) (retVal values.Value, retErr error) {
+	defer values.RecoverCyclic(&retErr)
+
 	lexer := lexer.NewLexer(filename, text)
 	tokens, err := lexer.MakeTokens()
 

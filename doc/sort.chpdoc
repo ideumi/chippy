@@ -2,13 +2,13 @@
 
 ''sort(list)''
 
-Sorts a list and returns a new sorted list. The original list is not modified.
+Sorts a list in place and returns it.
 
 *Parameters:*
 - ''list'': List to sort
 
 *Returns:*
-- List: New sorted list with elements in ascending order
+- ''list'' with elements sorted in ascending order
 
 *Sorting Rules:*
 - Numbers are sorted numerically (1 < 2 < 10)

@@ -852,9 +852,9 @@ func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx values
 				"Map index must be a string"))
 		}
 
-		newMap := mapVal.MapSet(indexStr.Value, value.SetContext(ctx))
+		mapVal.Set(indexStr.Value, value.SetContext(ctx))
 
-		return res.Success(newMap)
+		return res.Success(mapVal)
 	}
 
 	indexNum, ok := index.(*values.Number)
@@ -887,10 +887,9 @@ func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx values
 				"Index out of bounds"))
 		}
 
-		newList := coll.Copy().(*values.List)
-		newList.Elements[idx-1] = value.SetContext(ctx)
+		coll.Elements[idx-1] = value.SetContext(ctx)
 
-		return res.Success(newList)
+		return res.Success(coll)
 
 	case *values.Bytes:
 		valueNum, ok := value.(*values.Number)
@@ -920,47 +919,13 @@ func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx values
 				"Index out of bounds"))
 		}
 
-		newBytes := coll.Copy().(*values.Bytes)
-		newBytes.Data[idx-1] = byte(byteValue)
+		coll.Data[idx-1] = byte(byteValue)
 
-		return res.Success(newBytes.SetContext(ctx))
-
-	case *values.String:
-		valueStr, ok := value.(*values.String)
-
-		if !ok {
-			return res.Failure(errors.NewRTError(
-				node.ValueNode.GetPosStart(), node.ValueNode.GetPosEnd(),
-				"String character value must be a string"))
-		}
-
-		// Check if the value is a single character
-		valueRunes := []rune(valueStr.Value)
-
-		if len(valueRunes) != 1 {
-			return res.Failure(errors.NewRTError(
-				node.ValueNode.GetPosStart(), node.ValueNode.GetPosEnd(),
-				"String assignment value must be a single character"))
-		}
-
-		runes := []rune(coll.Value)
-
-		if idx < 1 || idx > len(runes) {
-			return res.Failure(errors.NewRTError(
-				node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
-				"Index out of bounds"))
-		}
-
-		// Create new string with replaced character
-		newRunes := make([]rune, len(runes))
-		copy(newRunes, runes)
-		newRunes[idx-1] = valueRunes[0]
-
-		return res.Success(values.NewString(string(newRunes)).SetContext(ctx))
+		return res.Success(coll.SetContext(ctx))
 
 	default:
 		return res.Failure(errors.NewRTError(
 			node.CollectionNode.GetPosStart(), node.CollectionNode.GetPosEnd(),
-			"Can only assign to list, map, bytes, or string indices"))
+			"Can only assign to list, map, or bytes indices"))
 	}
 }
