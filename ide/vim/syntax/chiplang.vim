@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: ChipLang
 " Maintainer: ideumi
-" Latest Revision: 2026-05-19
+" Latest Revision: 2026-06-13
 
 if exists("b:current_syntax")
   finish
@@ -18,7 +18,7 @@ syn keyword chipError err
 syn keyword chipSuccess ok
 
 " Built-in functions
-syn keyword chipBuiltin actor append args charat chdir chmod cos
+syn keyword chipBuiltin actor append args charat chdir chmod copy cos
 syn keyword chipBuiltin dclose dopen dread
 syn keyword chipBuiltin error exec
 syn keyword chipBuiltin fclose fopen fread fsync fwrite
