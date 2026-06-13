@@ -241,5 +241,11 @@ func walkAST(node ast.Node, filename string, symbols *[]SymbolInfo) {
 		for _, elem := range n.ElementNodes {
 			walkAST(elem, filename, symbols)
 		}
+
+	case *ast.BlockNode:
+		// Block bodies and the top-level program are file scope, keep walking
+		for _, elem := range n.ElementNodes {
+			walkAST(elem, filename, symbols)
+		}
 	}
 }

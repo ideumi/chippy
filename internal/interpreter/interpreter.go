@@ -29,6 +29,8 @@ func (i *Interpreter) Visit(node ast.Node, ctx values.Ctx) *values.RuntimeResult
 		return i.visitStringNode(n, ctx)
 	case *ast.ListNode:
 		return i.visitListNode(n, ctx)
+	case *ast.BlockNode:
+		return i.visitBlockNode(n, ctx)
 	case *ast.ByteArrayNode:
 		return i.visitByteArrayNode(n, ctx)
 	case *ast.MapNode:
@@ -121,6 +123,21 @@ func (i *Interpreter) visitListNode(node *ast.ListNode, ctx values.Ctx) *values.
 	return res.Success(
 		values.NewList(elements).SetContext(ctx).SetPos(node.PosStart, node.PosEnd),
 	)
+}
+
+func (i *Interpreter) visitBlockNode(node *ast.BlockNode, ctx values.Ctx) *values.RuntimeResult {
+	res := values.NewRuntimeResult()
+	var last values.Value = values.NewNumber(constants.NUM_NUL)
+
+	for _, statementNode := range node.ElementNodes {
+		last = res.Register(i.Visit(statementNode, ctx))
+
+		if res.ShouldReturn() {
+			return res
+		}
+	}
+
+	return res.Success(last)
 }
 
 func (i *Interpreter) visitByteArrayNode(node *ast.ByteArrayNode, ctx values.Ctx) *values.RuntimeResult {
@@ -660,7 +677,7 @@ func (i *Interpreter) visitFuncDefNode(node *ast.FuncDefNode, ctx values.Ctx) *v
 		argNames[i] = token.Value.(string)
 	}
 
-	funcValue := values.NewFunction(funcName, node.BodyNode, argNames, node.ShouldAutoReturn)
+	funcValue := values.NewFunction(funcName, node.BodyNode, argNames)
 	funcValue.SetContext(ctx).SetPos(node.PosStart, node.PosEnd)
 
 	if node.VarNameToken != nil {

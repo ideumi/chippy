@@ -160,10 +160,10 @@ func (p *Parser) statements() *ParseResult {
 	}
 
 	if len(statements) == 0 {
-		return res.Success(ast.NewListNode(statements, posStart, posStart))
+		return res.Success(ast.NewBlockNode(statements, posStart, posStart))
 	}
 
-	return res.Success(ast.NewListNode(statements, posStart, statements[len(statements)-1].GetPosEnd()))
+	return res.Success(ast.NewBlockNode(statements, posStart, statements[len(statements)-1].GetPosEnd()))
 }
 
 func (p *Parser) statement() *ParseResult {
@@ -1404,7 +1404,7 @@ func (p *Parser) funcDef() *ParseResult {
 	res.RegisterAdvancement()
 	p.advance()
 
-	return res.Success(ast.NewFuncDefNode(varNameTok, argNameToks, body, false))
+	return res.Success(ast.NewFuncDefNode(varNameTok, argNameToks, body))
 }
 
 func (p *Parser) binOp(leftFunc func() *ParseResult, ops []string, opValues []interface{}) *ParseResult {

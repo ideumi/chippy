@@ -67,6 +67,28 @@ func (n *ListNode) String() string {
 	return "[" + strings.Join(elements, ", ") + "]"
 }
 
+type BlockNode struct {
+	*BaseNode
+	ElementNodes []Node
+}
+
+func NewBlockNode(elementNodes []Node, posStart, posEnd *errors.Position) *BlockNode {
+	return &BlockNode{
+		BaseNode:     NewBaseNode(posStart, posEnd),
+		ElementNodes: elementNodes,
+	}
+}
+
+func (n *BlockNode) String() string {
+	statements := make([]string, len(n.ElementNodes))
+
+	for i, node := range n.ElementNodes {
+		statements[i] = node.String()
+	}
+
+	return strings.Join(statements, "; ")
+}
+
 type ByteArrayNode struct {
 	*BaseNode
 	ElementNodes []Node
@@ -288,13 +310,12 @@ func (n *WhileNode) String() string {
 
 type FuncDefNode struct {
 	*BaseNode
-	VarNameToken     *lexer.Token
-	ArgNameTokens    []*lexer.Token
-	BodyNode         Node
-	ShouldAutoReturn bool
+	VarNameToken  *lexer.Token
+	ArgNameTokens []*lexer.Token
+	BodyNode      Node
 }
 
-func NewFuncDefNode(varNameToken *lexer.Token, argNameTokens []*lexer.Token, bodyNode Node, shouldAutoReturn bool) *FuncDefNode {
+func NewFuncDefNode(varNameToken *lexer.Token, argNameTokens []*lexer.Token, bodyNode Node) *FuncDefNode {
 	var posStart *errors.Position
 	if varNameToken != nil {
 		posStart = varNameToken.PosStart
@@ -305,11 +326,10 @@ func NewFuncDefNode(varNameToken *lexer.Token, argNameTokens []*lexer.Token, bod
 	}
 
 	return &FuncDefNode{
-		BaseNode:         NewBaseNode(posStart, bodyNode.GetPosEnd()),
-		VarNameToken:     varNameToken,
-		ArgNameTokens:    argNameTokens,
-		BodyNode:         bodyNode,
-		ShouldAutoReturn: shouldAutoReturn,
+		BaseNode:      NewBaseNode(posStart, bodyNode.GetPosEnd()),
+		VarNameToken:  varNameToken,
+		ArgNameTokens: argNameTokens,
+		BodyNode:      bodyNode,
 	}
 }
 

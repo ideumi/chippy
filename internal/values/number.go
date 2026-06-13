@@ -600,26 +600,6 @@ func (n *Number) GetComparisonGte(other Value) (Value, error) {
 	return newBoolNumber(!compareLess(n, otherNum)).SetContext(n.context), nil
 }
 
-func (n *Number) AndedBy(other Value) (Value, error) {
-	otherNum, ok := other.(*Number)
-
-	if !ok {
-		return nil, IllegalOperation(n, other)
-	}
-
-	return newBoolNumber(n.IsTrue() && otherNum.IsTrue()).SetContext(n.context), nil
-}
-
-func (n *Number) OredBy(other Value) (Value, error) {
-	otherNum, ok := other.(*Number)
-
-	if !ok {
-		return nil, IllegalOperation(n, other)
-	}
-
-	return newBoolNumber(n.IsTrue() || otherNum.IsTrue()).SetContext(n.context), nil
-}
-
 func (n *Number) Notted() (Value, error) {
 	return newBoolNumber(!n.IsTrue()).SetContext(n.context), nil
 }
