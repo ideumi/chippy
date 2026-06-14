@@ -83,13 +83,9 @@ func (b *Bytes) AppendByte(value int) *Bytes {
 		return b
 	}
 
-	newData := append(b.Data, byte(value))
-	newBytes := NewBytes(newData)
+	b.Data = append(b.Data, byte(value))
 
-	newBytes.SetPos(b.posStart, b.posEnd)
-	newBytes.SetContext(b.context)
-
-	return newBytes
+	return b
 }
 
 func (b *Bytes) ToList() *List {

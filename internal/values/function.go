@@ -16,19 +16,17 @@ import (
 
 type Function struct {
 	*BaseValue
-	Name             string
-	BodyNode         ast.Node
-	ArgNames         []string
-	ShouldAutoReturn bool
+	Name     string
+	BodyNode ast.Node
+	ArgNames []string
 }
 
-func NewFunction(name string, bodyNode ast.Node, argNames []string, shouldAutoReturn bool) *Function {
+func NewFunction(name string, bodyNode ast.Node, argNames []string) *Function {
 	return &Function{
-		BaseValue:        NewBaseValue(),
-		Name:             name,
-		BodyNode:         bodyNode,
-		ArgNames:         argNames,
-		ShouldAutoReturn: shouldAutoReturn,
+		BaseValue: NewBaseValue(),
+		Name:      name,
+		BodyNode:  bodyNode,
+		ArgNames:  argNames,
 	}
 }
 
@@ -55,7 +53,7 @@ func (f *Function) SetContext(ctx Ctx) Value {
 // visible across calls. Cross-actor isolation is the exception, and is
 // handled separately by orchestrator.IsolateForTransfer.
 func (f *Function) Copy() Value {
-	copy := NewFunction(f.Name, f.BodyNode, f.ArgNames, f.ShouldAutoReturn)
+	copy := NewFunction(f.Name, f.BodyNode, f.ArgNames)
 	copy.SetPos(f.posStart, f.posEnd)
 	copy.SetContext(f.context)
 
@@ -97,19 +95,13 @@ func (f *Function) Execute(args []Value) *RuntimeResult {
 		execCtx.SymbolTable.Set(argName, args[i])
 	}
 
-	value := res.Register(globalInterpreter.Visit(f.BodyNode, execCtx))
+	res.Register(globalInterpreter.Visit(f.BodyNode, execCtx))
 	if res.ShouldReturn() && res.FuncReturnValue == nil {
 		return res
 	}
 
-	var returnValue Value
-	if res.FuncReturnValue != nil || f.ShouldAutoReturn {
-		if res.FuncReturnValue != nil {
-			returnValue = res.FuncReturnValue
-		} else {
-			returnValue = value
-		}
-	} else {
+	returnValue := res.FuncReturnValue
+	if returnValue == nil {
 		returnValue = NewNumber(constants.NUM_NUL)
 	}
 

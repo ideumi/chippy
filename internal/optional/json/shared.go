@@ -75,7 +75,7 @@ func unmarshalValue(val interface{}, ctx values.Ctx) values.Value {
 }
 
 // marshalValue converts ChipLang values to Go JSON values
-func marshalValue(val values.Value) (interface{}, error) {
+func marshalValue(val values.Value, seen map[values.Value]bool, depth int) (interface{}, error) {
 	switch v := val.(type) {
 	case *values.Number:
 		if v.IsInt() {
@@ -102,6 +102,8 @@ func marshalValue(val values.Value) (interface{}, error) {
 			return v.Value, nil
 		}
 	case *values.Map:
+		defer values.EnterWalk(v, seen, depth)()
+
 		result := make(map[string]interface{})
 
 		for _, key := range v.Keys {
@@ -112,7 +114,7 @@ func marshalValue(val values.Value) (interface{}, error) {
 				continue
 			}
 
-			goVal, err := marshalValue(val)
+			goVal, err := marshalValue(val, seen, depth+1)
 
 			if err != nil {
 				return nil, err
@@ -123,10 +125,12 @@ func marshalValue(val values.Value) (interface{}, error) {
 
 		return result, nil
 	case *values.List:
+		defer values.EnterWalk(v, seen, depth)()
+
 		result := make([]interface{}, len(v.Elements))
 
 		for i, elem := range v.Elements {
-			goVal, err := marshalValue(elem)
+			goVal, err := marshalValue(elem, seen, depth+1)
 
 			if err != nil {
 				return nil, err

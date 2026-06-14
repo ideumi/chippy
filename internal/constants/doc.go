@@ -28,9 +28,8 @@ const (
 
 	// Symbol documentation constants
 
-	DOC_COMMENT_PREFIX = "#@"
-	SYMBOL_DECL_OPEN   = "<"
-	SYMBOL_DECL_CLOSE  = ">"
+	SYMBOL_DECL_OPEN  = "<"
+	SYMBOL_DECL_CLOSE = ">"
 
 	SYMBOL_FILTER_ALL = "all"
 )

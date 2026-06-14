@@ -30,7 +30,7 @@ func stringifyFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResul
 			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "stringify"), 1, "value")))
 	}
 
-	goValue, err := marshalValue(args[0])
+	goValue, err := marshalValue(args[0], map[values.Value]bool{}, 0)
 
 	if err != nil {
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))

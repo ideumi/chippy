@@ -128,11 +128,11 @@ The runtime tracks every blocking call (''receive(true)'', ''wait(handle)'', ''s
 |  ResultCh   |    |  ResultCh   |    |  ResultCh   |
 +-------------+    +-------------+    +-------------+
 
-send(h, v)   -->   target Inbox
-receive(t)   -->   drain own Inbox
-wait(h)      -->   read target ResultCh
-transfer     -->   move handle between registries
-signal()     -->   block until forwarder broadcast
+send(handle, value)       -->   target Inbox
+receive(blocking)         -->   drain own Inbox
+wait(handle)              -->   read target ResultCh
+transfer(actor, handle)   -->   move handle between registries
+signal()                  -->   block until forwarder broadcast
 '''
 
 *Recommended Reading*

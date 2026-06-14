@@ -4,6 +4,9 @@
 
 Returns the command line arguments passed to the program as a list of strings.
 
+The script name is not included. ''args()[1]'' is the first argument after the script, not the script path itself.
+An empty list is returned when no arguments are passed.
+
 *Returns:*
 - List of strings containing command line arguments
 - ''err'' on failure

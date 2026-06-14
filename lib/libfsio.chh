@@ -133,7 +133,7 @@ func ListDir(path)
 
 		if entry != "." and entry != ".."
 		{
-			entries = append(entries, entry);
+			append(entries, entry);
 		}
 
 		entry = dread(dir);

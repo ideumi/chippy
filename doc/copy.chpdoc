@@ -1,0 +1,15 @@
+*copy* | V-$CHIPVR ($CHIPCN)
+
+''copy(value)''
+
+Returns an independent (deep) copy of ''value''. Numbers and strings are immutable and are returned unchanged.
+
+*Parameters:*
+- ''value'': Any value
+
+*Returns:*
+- An independent copy of ''value''
+
+*Errors:*
+- Runtime error if wrong number of arguments
+- Runtime error if ''value'' contains itself

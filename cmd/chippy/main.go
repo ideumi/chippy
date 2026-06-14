@@ -10,7 +10,6 @@ import (
 	"chip-go/internal/builtins"
 	"chip-go/internal/constants"
 	"chip-go/internal/roadrunner"
-	"chip-go/internal/values"
 	"chip-go/thirdparty/readline"
 	"fmt"
 	"os"
@@ -159,11 +158,7 @@ func runREPL(rr *roadrunner.RoadRunner2) {
 			fmt.Println(err.Error())
 		} else if result != nil {
 			// Print result immediately and clear reference for GC
-			if list, ok := result.(*values.List); ok && len(list.Elements) == 1 {
-				fmt.Println(list.Elements[0].String())
-			} else {
-				fmt.Println(result.String())
-			}
+			fmt.Println(result.String())
 
 			// Clear the result reference immediately after printing
 			result = nil
@@ -203,11 +198,7 @@ func runCommand(rr *roadrunner.RoadRunner2, command string) {
 
 	// Print result if not null and not empty
 	if result != nil {
-		if list, ok := result.(*values.List); ok && len(list.Elements) == 1 {
-			fmt.Println(list.Elements[0].String())
-		} else {
-			fmt.Println(result.String())
-		}
+		fmt.Println(result.String())
 
 		// Clear the result reference immediately after printing
 		result = nil

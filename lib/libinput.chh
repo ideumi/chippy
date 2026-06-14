@@ -27,7 +27,7 @@ func Input()
 
 		# 10 = \n
 		if byte == 10 { keepReading = false; }
-		else { result = append(result, byte); }
+		else { append(result, byte); }
 	}
 
 	return unpack(pack(result));
@@ -45,8 +45,7 @@ func InputPw()
 
 	if iserr(saved) { return err; }
 
-	var noecho = saved;
-	noecho = noecho["lflag"] = noecho["lflag"] band bnot ECHO;
+	var noecho = saved + m["lflag": saved["lflag"] band bnot ECHO];
 
 	setterm(noecho);
 

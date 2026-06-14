@@ -92,8 +92,8 @@ func RandomShuffle(elements)
 		var temp = elements[x];
 		var swapValue = elements[newIndex];
 
-		elements = elements[x] = swapValue;
-		elements = elements[newIndex] = temp;
+		elements[x] = swapValue;
+		elements[newIndex] = temp;
 	}
 
 	return elements;

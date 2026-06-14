@@ -9,7 +9,7 @@ package constants
 import "runtime"
 
 const (
-	VERSION_DATE = "2026-05-19"
+	VERSION_DATE = "2026-06-13"
 	HIST_FILE    = ".ChipLangHistory"
 
 	RR_CONTEXT_DISPLAY_NAME     = "<ChipLangProgram>"
@@ -23,7 +23,7 @@ const (
 	FILE_EXT_PROG   = ".chp"
 	FILE_EXT_HEADER = ".chh"
 
-	STR_LPLVR = "1.0.18"
+	STR_LPLVR = "1.0.19"
 	STR_LPLCN = "pardalote"
 	STR_LPLOS = runtime.GOOS
 	STR_LPLAR = runtime.GOARCH
@@ -35,9 +35,13 @@ const (
 	NUM_FAL = 0
 	NUM_TRU = 1
 
+	MAX_VALUE_DEPTH = 100000
+
 	RT_ERROR_TITLE           = "Runtime Error"
 	RT_ERROR_DEBUGGER_PREFIX = "ChipLang Debugger (Trace):"
 	E_INVALID_SYNTAX         = "Syntax Error"
 	E_ILLEGAL_CHAR           = "Illegal Character"
 	E_EXPECTED_CHAR          = "Expected Character"
+	E_CYCLIC_VALUE           = "A value cannot contain itself"
+	E_VALUE_TOO_DEEP         = "Value is nested too deeply to process"
 )

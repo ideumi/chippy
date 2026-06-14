@@ -29,6 +29,8 @@ func (i *Interpreter) Visit(node ast.Node, ctx values.Ctx) *values.RuntimeResult
 		return i.visitStringNode(n, ctx)
 	case *ast.ListNode:
 		return i.visitListNode(n, ctx)
+	case *ast.BlockNode:
+		return i.visitBlockNode(n, ctx)
 	case *ast.ByteArrayNode:
 		return i.visitByteArrayNode(n, ctx)
 	case *ast.MapNode:
@@ -121,6 +123,21 @@ func (i *Interpreter) visitListNode(node *ast.ListNode, ctx values.Ctx) *values.
 	return res.Success(
 		values.NewList(elements).SetContext(ctx).SetPos(node.PosStart, node.PosEnd),
 	)
+}
+
+func (i *Interpreter) visitBlockNode(node *ast.BlockNode, ctx values.Ctx) *values.RuntimeResult {
+	res := values.NewRuntimeResult()
+	var last values.Value = values.NewNumber(constants.NUM_NUL)
+
+	for _, statementNode := range node.ElementNodes {
+		last = res.Register(i.Visit(statementNode, ctx))
+
+		if res.ShouldReturn() {
+			return res
+		}
+	}
+
+	return res.Success(last)
 }
 
 func (i *Interpreter) visitByteArrayNode(node *ast.ByteArrayNode, ctx values.Ctx) *values.RuntimeResult {
@@ -660,7 +677,7 @@ func (i *Interpreter) visitFuncDefNode(node *ast.FuncDefNode, ctx values.Ctx) *v
 		argNames[i] = token.Value.(string)
 	}
 
-	funcValue := values.NewFunction(funcName, node.BodyNode, argNames, node.ShouldAutoReturn)
+	funcValue := values.NewFunction(funcName, node.BodyNode, argNames)
 	funcValue.SetContext(ctx).SetPos(node.PosStart, node.PosEnd)
 
 	if node.VarNameToken != nil {
@@ -852,9 +869,9 @@ func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx values
 				"Map index must be a string"))
 		}
 
-		newMap := mapVal.MapSet(indexStr.Value, value.SetContext(ctx))
+		mapVal.Set(indexStr.Value, value.SetContext(ctx))
 
-		return res.Success(newMap)
+		return res.Success(mapVal)
 	}
 
 	indexNum, ok := index.(*values.Number)
@@ -887,10 +904,9 @@ func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx values
 				"Index out of bounds"))
 		}
 
-		newList := coll.Copy().(*values.List)
-		newList.Elements[idx-1] = value.SetContext(ctx)
+		coll.Elements[idx-1] = value.SetContext(ctx)
 
-		return res.Success(newList)
+		return res.Success(coll)
 
 	case *values.Bytes:
 		valueNum, ok := value.(*values.Number)
@@ -920,47 +936,13 @@ func (i *Interpreter) visitIndexAssignNode(node *ast.IndexAssignNode, ctx values
 				"Index out of bounds"))
 		}
 
-		newBytes := coll.Copy().(*values.Bytes)
-		newBytes.Data[idx-1] = byte(byteValue)
+		coll.Data[idx-1] = byte(byteValue)
 
-		return res.Success(newBytes.SetContext(ctx))
-
-	case *values.String:
-		valueStr, ok := value.(*values.String)
-
-		if !ok {
-			return res.Failure(errors.NewRTError(
-				node.ValueNode.GetPosStart(), node.ValueNode.GetPosEnd(),
-				"String character value must be a string"))
-		}
-
-		// Check if the value is a single character
-		valueRunes := []rune(valueStr.Value)
-
-		if len(valueRunes) != 1 {
-			return res.Failure(errors.NewRTError(
-				node.ValueNode.GetPosStart(), node.ValueNode.GetPosEnd(),
-				"String assignment value must be a single character"))
-		}
-
-		runes := []rune(coll.Value)
-
-		if idx < 1 || idx > len(runes) {
-			return res.Failure(errors.NewRTError(
-				node.IndexNode.GetPosStart(), node.IndexNode.GetPosEnd(),
-				"Index out of bounds"))
-		}
-
-		// Create new string with replaced character
-		newRunes := make([]rune, len(runes))
-		copy(newRunes, runes)
-		newRunes[idx-1] = valueRunes[0]
-
-		return res.Success(values.NewString(string(newRunes)).SetContext(ctx))
+		return res.Success(coll.SetContext(ctx))
 
 	default:
 		return res.Failure(errors.NewRTError(
 			node.CollectionNode.GetPosStart(), node.CollectionNode.GetPosEnd(),
-			"Can only assign to list, map, bytes, or string indices"))
+			"Can only assign to list, map, or bytes indices"))
 	}
 }

@@ -25,13 +25,21 @@ func NewList(elements []Value) *List {
 }
 
 func (l *List) String() string {
+	return l.stringWalk(map[Value]bool{}, 0)
+}
+
+func (l *List) stringWalk(seen map[Value]bool, depth int) string {
+	if depth > constants.MAX_VALUE_DEPTH || seen[l] {
+		return "[...]"
+	}
+
+	seen[l] = true
+	defer delete(seen, l)
+
 	elements := make([]string, len(l.Elements))
+
 	for i, element := range l.Elements {
-		if element != nil {
-			elements[i] = element.String()
-		} else {
-			elements[i] = "null"
-		}
+		elements[i] = walkString(element, seen, depth+1)
 	}
 
 	return "[" + strings.Join(elements, ", ") + "]"
@@ -50,17 +58,34 @@ func (l *List) SetContext(ctx Ctx) Value {
 }
 
 func (l *List) Copy() Value {
+	return l.copyWalk(map[Value]bool{}, 0)
+}
+
+func (l *List) copyWalk(seen map[Value]bool, depth int) Value {
+	defer EnterWalk(l, seen, depth)()
+
 	newElements := make([]Value, len(l.Elements))
+
 	for i, element := range l.Elements {
-		if element != nil {
-			newElements[i] = element.Copy()
-		}
+		newElements[i] = walkCopy(element, seen, depth+1)
 	}
+
 	copy := NewList(newElements)
 	copy.SetPos(l.posStart, l.posEnd)
 	copy.SetContext(l.context)
 
 	return copy
+}
+
+func (l *List) ShallowCopy() *List {
+	newElements := make([]Value, len(l.Elements))
+	copy(newElements, l.Elements)
+
+	result := NewList(newElements)
+	result.SetPos(l.posStart, l.posEnd)
+	result.SetContext(l.context)
+
+	return result
 }
 
 func (l *List) IsTrue() bool {
@@ -69,7 +94,7 @@ func (l *List) IsTrue() bool {
 
 func (l *List) AddedTo(other Value) (Value, error) {
 	if otherList, ok := other.(*List); ok {
-		newList := l.Copy().(*List)
+		newList := l.ShallowCopy()
 		newList.Elements = append(newList.Elements, otherList.Elements...)
 
 		return newList, nil
@@ -87,7 +112,7 @@ func (l *List) SubbedBy(other Value) (Value, error) {
 
 		}
 
-		newList := l.Copy().(*List)
+		newList := l.ShallowCopy()
 		index := int(otherNum.iVal)
 
 		if index < 1 || index > len(newList.Elements) {
@@ -123,13 +148,7 @@ func (l *List) MultedBy(other Value) (Value, error) {
 
 		newElements := []Value{}
 		for i := int64(0); i < otherNum.iVal; i++ {
-			for _, element := range l.Elements {
-				if element != nil {
-					newElements = append(newElements, element.Copy())
-				} else {
-					newElements = append(newElements, nil)
-				}
-			}
+			newElements = append(newElements, l.Elements...)
 		}
 
 		result := NewList(newElements)
@@ -142,6 +161,12 @@ func (l *List) MultedBy(other Value) (Value, error) {
 }
 
 func (l *List) GetComparisonEe(other Value) (Value, error) {
+	return l.eqWalk(other, map[Value]bool{}, 0)
+}
+
+func (l *List) eqWalk(other Value, seen map[Value]bool, depth int) (Value, error) {
+	defer EnterWalk(l, seen, depth)()
+
 	if otherList, ok := other.(*List); ok {
 		result := constants.NUM_TRU
 
@@ -160,7 +185,7 @@ func (l *List) GetComparisonEe(other Value) (Value, error) {
 					break
 				}
 
-				comparison, err := element.GetComparisonEe(otherElement)
+				comparison, err := walkEqual(element, otherElement, seen, depth+1)
 				if err != nil {
 					return nil, err
 				}

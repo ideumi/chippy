@@ -57,7 +57,8 @@ func (l *Lexer) MakeTokens() ([]*Token, error) {
 			l.advance()
 
 		case l.currentChar == '#':
-			l.skipComment()
+			token := l.makeComment()
+			tokens = append(tokens, token)
 
 		case l.currentChar == '\n' || l.currentChar == '\r':
 			tokens = append(tokens, NewToken(constants.TT_NEWLINE, nil, l.pos.Copy(), nil))
@@ -177,12 +178,26 @@ func (l *Lexer) MakeTokens() ([]*Token, error) {
 	return tokens, nil
 }
 
-func (l *Lexer) skipComment() {
+func (l *Lexer) makeComment() *Token {
+	posStart := l.pos.Copy()
 	l.advance()
 
+	tokenType := constants.TT_COMMENT
+
+	// Walk over '@' and upgrade to doc comment
+	if l.currentChar == '@' {
+		l.advance()
+		tokenType = constants.TT_DOC_COMMENT
+	}
+
+	comment := ""
+
 	for l.currentChar != 0 && l.currentChar != '\n' {
+		comment += string(l.currentChar)
 		l.advance()
 	}
+
+	return NewToken(tokenType, comment, posStart, l.pos.Copy())
 }
 
 func (l *Lexer) makeNumber() (*Token, error) {
@@ -195,6 +210,7 @@ func (l *Lexer) makeNumber() (*Token, error) {
 			if dotCount == 1 {
 				break
 			}
+
 			dotCount++
 		}
 

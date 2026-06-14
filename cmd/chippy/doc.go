@@ -8,6 +8,7 @@ package main
 
 import (
 	"chip-go/internal/constants"
+	"chip-go/internal/lexer"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -21,7 +22,6 @@ var (
 	inlineCodeRegex = regexp.MustCompile(regexp.QuoteMeta(constants.INLINE_CODE_MARKER) + `([^']+)` + regexp.QuoteMeta(constants.INLINE_CODE_MARKER))
 	boldTextRegex   = regexp.MustCompile(regexp.QuoteMeta(constants.BOLD_MARKER) + `([^*]+)` + regexp.QuoteMeta(constants.BOLD_MARKER))
 	variableRegex   = regexp.MustCompile(`\$CHIP(VR|CN)`)
-	symbolDeclRegex = regexp.MustCompile(regexp.QuoteMeta(constants.DOC_COMMENT_PREFIX) + `\s*` + regexp.QuoteMeta(constants.SYMBOL_DECL_OPEN) + `(.+)` + regexp.QuoteMeta(constants.SYMBOL_DECL_CLOSE))
 )
 
 func renderChpDoc(content string) string {
@@ -280,16 +280,22 @@ type SymbolDoc struct {
 	DocBlock  string
 }
 
-func parseSymbolDeclaration(line string) (signature string, ok bool) {
-	matches := symbolDeclRegex.FindStringSubmatch(line)
+func parseSymbolDeclaration(docContent string) (signature string, ok bool) {
+	trimmed := strings.TrimSpace(docContent)
 
-	if matches == nil {
+	if !strings.HasPrefix(trimmed, constants.SYMBOL_DECL_OPEN) {
 		return "", false
 	}
 
-	signature = strings.TrimSpace(matches[1])
+	remaining := strings.TrimPrefix(trimmed, constants.SYMBOL_DECL_OPEN)
 
-	return signature, true
+	closeIdx := strings.LastIndex(remaining, constants.SYMBOL_DECL_CLOSE)
+
+	if closeIdx <= 0 {
+		return "", false
+	}
+
+	return strings.TrimSpace(remaining[:closeIdx]), true
 }
 
 func extractDocumentation(filepath string) ([]SymbolDoc, error) {
@@ -299,42 +305,47 @@ func extractDocumentation(filepath string) ([]SymbolDoc, error) {
 		return nil, err
 	}
 
-	lines := strings.Split(string(content), "\n")
+	l := lexer.NewLexer(filepath, string(content))
+	tokens, err := l.MakeTokens()
+
+	if err != nil {
+		return nil, err
+	}
+
 	var symbols []SymbolDoc
 
-	for i := 0; i < len(lines); i++ {
-		line := lines[i]
-
-		trimmed := strings.TrimSpace(line)
-
-		if !strings.HasPrefix(trimmed, constants.DOC_COMMENT_PREFIX) {
+	for i := 0; i < len(tokens); i++ {
+		if tokens[i].Type != constants.TT_DOC_COMMENT {
 			continue
 		}
 
-		sig, ok := parseSymbolDeclaration(trimmed)
+		docContent, ok := tokens[i].Value.(string)
 
 		if !ok {
 			continue
 		}
 
-		i++
+		sig, isDeclaration := parseSymbolDeclaration(docContent)
 
+		if !isDeclaration {
+			continue
+		}
+
+		// Collect the doc block: doc comments directly below the
+		// declaration separated by a newline. A blank line or any other
+		// token ends the block.
 		var docLines []string
 
-		for i < len(lines) {
-			nextLine := lines[i]
-			nextTrimmed := strings.TrimSpace(nextLine)
+		for i+2 < len(tokens) && tokens[i+1].Type == constants.TT_NEWLINE && tokens[i+2].Type == constants.TT_DOC_COMMENT {
+			bodyContent, ok := tokens[i+2].Value.(string)
 
-			if !strings.HasPrefix(nextTrimmed, constants.DOC_COMMENT_PREFIX) {
+			if !ok {
 				break
 			}
 
-			lineContent := strings.TrimPrefix(nextTrimmed, constants.DOC_COMMENT_PREFIX)
+			docLines = append(docLines, strings.TrimLeft(bodyContent, " "))
 
-			// Trim spaces
-			lineContent = strings.TrimLeft(lineContent, " ")
-			docLines = append(docLines, lineContent)
-			i++
+			i += 2
 		}
 
 		symbols = append(symbols, SymbolDoc{

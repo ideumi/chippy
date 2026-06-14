@@ -220,5 +220,6 @@ For more information on the corelib, see `chippy doc corelib`
 - `chippy doc iserr`
 - `chippy doc isok`
 - `chippy doc scoping`
+- `chippy doc mutability`
 - `chippy doc listops`
 - `chippy doc operators`

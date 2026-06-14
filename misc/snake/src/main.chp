@@ -127,7 +127,7 @@ func MoveAndDrawPlayer(direction, playerPosition)
 
 		Draw(PLAYER, newPos, playerPosition["col"], COLORGREEN);
 
-		return playerPosition = playerPosition["row"] = newPos;
+		return playerPosition + m["row": newPos];
 	}
 	elseif direction == DOWN
 	{
@@ -135,7 +135,7 @@ func MoveAndDrawPlayer(direction, playerPosition)
 
 		Draw(PLAYER, newPos, playerPosition["col"], COLORGREEN);
 
-		return playerPosition = playerPosition["row"] = newPos;
+		return playerPosition + m["row": newPos];
 	}
 	elseif direction == LEFT
 	{
@@ -143,7 +143,7 @@ func MoveAndDrawPlayer(direction, playerPosition)
 
 		Draw(PLAYER, playerPosition["row"], newPos, COLORGREEN);
 
-		return playerPosition = playerPosition["col"] = newPos;
+		return playerPosition + m["col": newPos];
 	}
 	elseif direction == RIGHT
 	{
@@ -151,7 +151,7 @@ func MoveAndDrawPlayer(direction, playerPosition)
 
 		Draw(PLAYER, playerPosition["row"], newPos, COLORGREEN);
 
-		return playerPosition = playerPosition["col"] = newPos;
+		return playerPosition + m["col": newPos];
 	}
 }
 
@@ -193,7 +193,7 @@ func Main()
 				and not (game["moving"] == LEFT and direction == RIGHT)
 				and not (game["moving"] == RIGHT and direction == LEFT)
 			{
-				game = game["moving"] = direction;
+				game["moving"] = direction;
 			}
 			else
 			{
@@ -202,21 +202,20 @@ func Main()
 		}
 		else
 		{
-			game = game["moving"] = direction;
+			game["moving"] = direction;
 		}
 
 		# Append last position
-		game = game["body"] = append(game["body"], game["playerPosition"]);
+		append(game["body"], game["playerPosition"]);
 
 		if len(game["body"]) > game["applesEaten"]
 		{
 			Draw(" ", game["body"][1]["row"], game["body"][1]["col"], COLORRESET);
 
-			# chippy doc listops
-			game = game["body"] = (game["body"] - 1);
+			game["body"] = game["body"] - 1;
 		}
 
-		game = game["playerPosition"] = MoveAndDrawPlayer(direction, game["playerPosition"]);
+		game["playerPosition"] = MoveAndDrawPlayer(direction, game["playerPosition"]);
 
 		var selfCol = false;
 
@@ -244,9 +243,9 @@ func Main()
 		if game["playerPosition"]["row"] == game["applePosition"]["row"]
 			and game["playerPosition"]["col"] == game["applePosition"]["col"]
 		{
-			game = game["applePosition"] = DrawApple(game["playerPosition"], game["body"]);
+			game["applePosition"] = DrawApple(game["playerPosition"], game["body"]);
 
-			game = game["applesEaten"] = (game["applesEaten"] + 5);
+			game["applesEaten"] = game["applesEaten"] + 5;
 
 			# Redraw score
 			Draw("Score: " + str(game["applesEaten"]), 0, 0, COLORRESET);

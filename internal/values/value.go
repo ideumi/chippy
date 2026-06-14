@@ -104,8 +104,6 @@ type Value interface {
 	GetComparisonLte(other Value) (Value, error)
 	GetComparisonGte(other Value) (Value, error)
 
-	AndedBy(other Value) (Value, error)
-	OredBy(other Value) (Value, error)
 	Notted() (Value, error)
 	XoredBy(other Value) (Value, error)
 
@@ -212,14 +210,6 @@ func (bv *BaseValue) GetComparisonLte(other Value) (Value, error) {
 }
 
 func (bv *BaseValue) GetComparisonGte(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
-}
-
-func (bv *BaseValue) AndedBy(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
-}
-
-func (bv *BaseValue) OredBy(other Value) (Value, error) {
 	return nil, IllegalOperation(bv, other)
 }
 

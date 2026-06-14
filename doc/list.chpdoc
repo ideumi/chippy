@@ -13,6 +13,4 @@ Creates a list from the given arguments.
 
 *Returns:*
 - List: New list based on arguments
-
-*Errors:*
-- Runtime error if single argument cannot be converted to list
+- ''err'' if a single argument cannot be converted to a list
