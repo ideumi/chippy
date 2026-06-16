@@ -2,7 +2,7 @@
 
 Chip's build system
 
-Bundles multiple ChipLang source files into a single executable program based on the configuration in ''combine.chp''.
+Bundles multiple Chippy source files into a single executable program based on the configuration in ''combine.chp''.
 Programs, properly built using combine have no dependencies outside of the ''chippy'' interpreter itself.
 
 *Usage:*

@@ -1,7 +1,7 @@
 {
-  "name": "chiplang",
-  "displayName": "ChipLang",
-  "description": "Syntax highlighting for ChipLang",
+  "name": "chippy",
+  "displayName": "Chippy",
+  "description": "Syntax highlighting for Chippy",
   "version": "1.0.0",
   "publisher": "ideumi",
   "icon": "icon.png",
@@ -14,17 +14,17 @@
   "contributes": {
     "languages": [
       {
-        "id": "chiplang",
-        "aliases": ["ChipLang", "chiplang"],
+        "id": "chippy",
+        "aliases": ["Chippy", "chippy"],
         "extensions": [".chp", ".chh"],
         "configuration": "./language-configuration.json"
       }
     ],
     "grammars": [
       {
-        "language": "chiplang",
-        "scopeName": "source.chiplang",
-        "path": "./syntaxes/chiplang.tmLanguage.json"
+        "language": "chippy",
+        "scopeName": "source.chippy",
+        "path": "./syntaxes/chippy.tmLanguage.json"
       }
     ]
   }

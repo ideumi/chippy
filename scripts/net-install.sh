@@ -4,7 +4,7 @@
 set -e
 
 REPO="ideumi/chip-go"
-PREFIX="chiplang"
+PREFIX="chippy"
 
 die() { echo "Error: $1" >&2; exit 1; }
 

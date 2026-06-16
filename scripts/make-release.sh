@@ -2,7 +2,7 @@
 set -e
 
 # Configuration
-RELEASE_NAME="chiplang"
+RELEASE_NAME="chippy"
 VERSION="1.0.19"
 ARCH=${TARGET_ARCH:-$(uname -m)}
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')

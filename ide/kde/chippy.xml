@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE language SYSTEM "language.dtd">
-<language name="ChipLang" version="1.0" kateversion="5.0" section="Scripts" 
-          extensions="*.chp;*.chh" mimetype="text/x-chiplang" casesensitive="1">
+<language name="Chippy" version="1.0" kateversion="5.0" section="Scripts" 
+          extensions="*.chp;*.chh" mimetype="text/x-chippy" casesensitive="1">
 
   <highlighting>
     <list name="keywords">

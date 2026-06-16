@@ -2,6 +2,6 @@
 
 Builtins are the core primitive functions implemented directly in the ''chippy'' interpreter (more specifically RoadRunner2) and available at runtime without anything else. These are backed by Go code and provide functionality for interfacing with the operating system (for example: system calls and handle management) that would otherwise be impossible to implement in Chip itself.
 
-Builtins should not be confused with the core library, which is written entirely in ChipLang and builds on top of these fundamental primitives to provide convenience to programmers and to avoid redundancy.
+Builtins should not be confused with the core library, which is written entirely in Chippy and builds on top of these fundamental primitives to provide convenience to programmers and to avoid redundancy.
 
-Every ChipLang program has access to all builtins without any ''load()''s or declarations. The source code for all builtins can be found in the ChipLang source in ''internal/builtins''.
+Every Chippy program has access to all builtins without any ''load()''s or declarations. The source code for all builtins can be found in the Chippy source in ''internal/builtins''.

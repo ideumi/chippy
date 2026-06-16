@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
-  "name": "ChipLang",
-  "scopeName": "source.chiplang",
+  "name": "Chippy",
+  "scopeName": "source.chippy",
   "patterns": [
     { "include": "#shebang" },
     { "include": "#comment" },
@@ -18,80 +18,80 @@
   "repository": {
     "shebang": {
       "match": "^#!/.*$",
-      "name": "comment.line.shebang.chiplang"
+      "name": "comment.line.shebang.chippy"
     },
     "comment": {
       "match": "#.*$",
-      "name": "comment.line.number-sign.chiplang",
+      "name": "comment.line.number-sign.chippy",
       "patterns": [
         {
           "match": "\\b(TODO|FIXME|NOTE|WARNING|HACK|BUG|XXX)\\b",
-          "name": "keyword.codetag.notation.chiplang"
+          "name": "keyword.codetag.notation.chippy"
         }
       ]
     },
     "string": {
       "begin": "\"",
       "end": "\"",
-      "name": "string.quoted.double.chiplang",
+      "name": "string.quoted.double.chippy",
       "patterns": [
         {
           "match": "\\\\[nrt\"\\\\]",
-          "name": "constant.character.escape.chiplang"
+          "name": "constant.character.escape.chippy"
         }
       ]
     },
     "byte-array": {
       "match": "b\\[[^\\]]*\\]",
-      "name": "storage.type.chiplang"
+      "name": "storage.type.chippy"
     },
     "number": {
       "patterns": [
         {
           "match": "\\b\\d+\\.\\d+\\b",
-          "name": "constant.numeric.float.chiplang"
+          "name": "constant.numeric.float.chippy"
         },
         {
           "match": "\\b\\d+\\b",
-          "name": "constant.numeric.integer.chiplang"
+          "name": "constant.numeric.integer.chippy"
         }
       ]
     },
     "keywords": {
       "match": "\\b(var|func|return|continue|break|if|elseif|else|for|while|to|step|and|or|not|xor|band|bor|bnot|bxor|b|m)\\b",
-      "name": "keyword.control.chiplang"
+      "name": "keyword.control.chippy"
     },
     "constants": {
       "patterns": [
         {
           "match": "\\b(null|true|false|CHIPAR|CHIPCN|CHIPOS|CHIPRT|CHIPVR)\\b",
-          "name": "constant.language.chiplang"
+          "name": "constant.language.chippy"
         },
         {
           "match": "\\berr\\b",
-          "name": "invalid.illegal.chiplang"
+          "name": "invalid.illegal.chippy"
         },
         {
           "match": "\\bok\\b",
-          "name": "string.unquoted.chiplang"
+          "name": "string.unquoted.chippy"
         }
       ]
     },
     "builtins": {
       "match": "\\b(actor|append|args|charat|chdir|chmod|copy|cos|dclose|dopen|dread|error|exec|fclose|fopen|fread|fsync|fwrite|getch|getcwd|getenv|getpid|getterm|getuid|has|indexof|int|iserr|isok|join|keys|kill|len|lenv|list|load|loadopt|lower|lstat|lutime|mkdir|num|off|pack|pclose|popen|rand|readlink|receive|rename|replace|saccept|sclose|seek|send|setenv|setterm|sigcatch|sigfree|signal|sin|sinfo|sleep|slice|sopen|sort|spawn|split|sread|stat|str|swrite|symlink|tan|time|transfer|type|unlink|unpack|upper|utime|wait|winsize)\\b",
-      "name": "support.function.builtin.chiplang"
+      "name": "support.function.builtin.chippy"
     },
     "function-call": {
       "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)(?=\\s*\\()",
-      "name": "entity.name.function.chiplang"
+      "name": "entity.name.function.chippy"
     },
     "operators": {
       "match": "(==|!=|<=|>=|<<|>>|[+\\-*/%^=!<>])",
-      "name": "keyword.operator.chiplang"
+      "name": "keyword.operator.chippy"
     },
     "variable": {
       "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b",
-      "name": "variable.other.chiplang"
+      "name": "variable.other.chippy"
     }
   }
 }

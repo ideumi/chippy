@@ -2,10 +2,10 @@
 
 ''load(filename)''
 
-Loads and executes a ChipLang program.
+Loads and executes a Chippy program.
 
 *Parameters:*
-- ''filename'': String path to ChipLang program
+- ''filename'': String path to Chippy program
 
 *Returns:*
 - ''ok'' on success

@@ -1,6 +1,6 @@
 *Mutability and References* | V-$CHIPVR ($CHIPCN)
 
-ChipLang has two kinds of values: immutable values, and mutable reference types.
+Chippy has two kinds of values: immutable values, and mutable reference types.
 
 *Immutable values*
 

@@ -1,14 +1,14 @@
 *Documentation System* | V-$CHIPVR ($CHIPCN)
 
-The ChipLang documentation system supports both static ''.chpdoc'' files and symbol extraction from source files.
+The Chippy documentation system supports both static ''.chpdoc'' files and symbol extraction from source files.
 
 *Search Order*
 
 The documentation system searches paths in the following priority order:
 
 1. ''doc/'' - Local development directory
-2. ''~/.local/share/chiplang/doc/'' - User-local documentation
-3. ''/usr/share/doc/chiplang'' - System documentation (managed by installer)
+2. ''~/.local/share/chippy/doc/'' - User-local documentation
+3. ''/usr/share/doc/chippy'' - System documentation (managed by installer)
 
 *Usage*
 
@@ -43,7 +43,7 @@ Like
 this
 '''
 
-I recommend you look at ''/usr/share/doc/chiplang'' for practical examples on how to use ''chpdoc'', it really is very simple.
+I recommend you look at ''/usr/share/doc/chippy'' for practical examples on how to use ''chpdoc'', it really is very simple.
 
 *Symbol Documentation*
 
@@ -69,4 +69,4 @@ Generally there is no fixed format for how these comments are to be structured, 
 
 *Third-party Integration*
 
-Third-party packages can install documentation to ''~/.local/share/chiplang/doc/'' without interfering with system documentation. This directory is not touched by the installer on reinstalls and upgrades. I don't recommend installing your documents to ''/usr/share/doc/chiplang''.
+Third-party packages can install documentation to ''~/.local/share/chippy/doc/'' without interfering with system documentation. This directory is not touched by the installer on reinstalls and upgrades. I don't recommend installing your documents to ''/usr/share/doc/chippy''.

@@ -19,7 +19,7 @@ const (
 	jsonNull  = "__~JSONNULL~__"
 )
 
-// unmarshalValue converts Go JSON values to ChipLang values
+// unmarshalValue converts Go JSON values to Chippy values
 func unmarshalValue(val interface{}, ctx values.Ctx) values.Value {
 	switch v := val.(type) {
 	case nil:
@@ -74,7 +74,7 @@ func unmarshalValue(val interface{}, ctx values.Ctx) values.Value {
 	}
 }
 
-// marshalValue converts ChipLang values to Go JSON values
+// marshalValue converts Chippy values to Go JSON values
 func marshalValue(val values.Value, seen map[values.Value]bool, depth int) (interface{}, error) {
 	switch v := val.(type) {
 	case *values.Number:

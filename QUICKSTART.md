@@ -1,10 +1,10 @@
 # Developer Quick Start Guide
 
-ChipLang programs can generally be categorized in two types: those that use `load("libprint.chh")` (without a path) to load the core library, and those that don't use library dependencies or specify paths manually like `load("lib/libxxx.chh")`. Programs that load the core library need the `combine` tool to bundle dependencies. Programs without library dependencies can run directly.
+Chippy programs can generally be categorized in two types: those that use `load("libprint.chh")` (without a path) to load the core library, and those that don't use library dependencies or specify paths manually like `load("lib/libxxx.chh")`. Programs that load the core library need the `combine` tool to bundle dependencies. Programs without library dependencies can run directly.
 
 ### What is `combine`:
 
-`combine` is ChipLangs "build"-system, its primary task is to create bundles of all dependencies that your program needs and your program itself. That way you do not need complex scripts to ship your program, you just ship the bundle and it will work if a `chippy` interpreter is installed on the target machine.
+`combine` is Chippy's "build"-system, its primary task is to create bundles of all dependencies that your program needs and your program itself. That way you do not need complex scripts to ship your program, you just ship the bundle and it will work if a `chippy` interpreter is installed on the target machine.
 
 See `chippy doc combine` for more information.
 
@@ -27,7 +27,7 @@ chippy combine new
 
 This creates a template combine file that is ready to use for this demonstration. e.g.
 
-```chiplang
+```chippy
 ...
 # Metadata
 
@@ -46,7 +46,7 @@ var Source = "main.chp";
 
 Create a file called `main.chp`, feel free to copy this example:
 
-```chiplang
+```chippy
 #!/usr/bin/chippy
 
 load("libprint.chh");
@@ -70,9 +70,9 @@ Bundling myprogram V-1.0.0:
 Output: myprogram
 
 Files bundled:
-  1. /usr/lib/chiplang/libhandles.chh
-  2. /usr/lib/chiplang/libstrings.chh
-  3. /usr/lib/chiplang/libprint.chh
+  1. /usr/lib/chippy/libhandles.chh
+  2. /usr/lib/chippy/libstrings.chh
+  3. /usr/lib/chippy/libprint.chh
   4. main.chp
 
 Total: 4 source(s)
@@ -114,7 +114,7 @@ Hello World
 ## Quick Reference
 
 ### Types
-```chiplang
+```chippy
 var text = "text";                                             # String
 var number = 42;                                               # Integer or floating point number
 var numCollection = [1, 2, 3];                                 # List
@@ -123,7 +123,7 @@ var map = m["key1": "value", "key2": 2, "key3": [1, 2, 3]];    # Map
 ```
 
 ### Functions
-```chiplang
+```chippy
 func Add(a, b)
 {
     return a + b;
@@ -133,7 +133,7 @@ var result = Add(10, 20);
 ```
 
 ### Control Structures
-```chiplang
+```chippy
 if condition
 {
     # code
@@ -180,14 +180,14 @@ band  bor  bnot  bxor   # Bitwise
 
 ## Core library
 
-ChipLang has a corelib that is located in `/usr/lib/chiplang/`.
+Chippy has a corelib that is located in `/usr/lib/chippy/`.
 ```bash
-ls /usr/lib/chiplang/
+ls /usr/lib/chippy/
 ```
 
 ## Documentation System
 
-ChipLang has wide reaching documentation in appropriate places:
+Chippy has wide reaching documentation in appropriate places:
 
 ```bash
 # List all documentation topics
@@ -197,14 +197,14 @@ chippy doc list
 chippy doc [topic]
 ```
 
-ChipLang's documentation system also allows you to document code and access it via `chippy doc`.
+Chippy's documentation system also allows you to document code and access it via `chippy doc`.
 
 ```bash
 # Show all documented symbols of the libprint.chh library
-chippy doc /usr/lib/chiplang/libprint.chh
+chippy doc /usr/lib/chippy/libprint.chh
 
 # Display documentation for the Print(text) symbol.
-chippy doc /usr/lib/chiplang/libprint.chh "Print(text)"
+chippy doc /usr/lib/chippy/libprint.chh "Print(text)"
 ```
 
 Generally, all symbols in the corelib are documented this way.

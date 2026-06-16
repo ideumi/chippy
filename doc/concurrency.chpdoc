@@ -2,9 +2,9 @@
 
 *The Model*
 
-ChipLang uses an actor model for concurrency. Actors are isolated units of execution that communicate through message passing.
+Chippy uses an actor model for concurrency. Actors are isolated units of execution that communicate through message passing.
 
-Every ChipLang program starts as the main actor (''CHIPRT == 0''). You spawn new actors with ''actor(function, arg1, arg2, ...)'', which returns a handle. The spawned actor runs that function in its own interpreter with its own I/O handles. When the function returns, the actor is completed.
+Every Chippy program starts as the main actor (''CHIPRT == 0''). You spawn new actors with ''actor(function, arg1, arg2, ...)'', which returns a handle. The spawned actor runs that function in its own interpreter with its own I/O handles. When the function returns, the actor is completed.
 
 Every runtime knows its own ID through the ''CHIPRT'' constant. Main is always ''0''. Each spawned actor has its own non-zero ID. ''CHIPRT'' is set per runtime actor and never inherited from the spawner.
 
@@ -101,7 +101,7 @@ Each incoming signal is delivered to exactly one ''signal()'' waiter, chosen arb
 
 *Deadlock Detection*
 
-The runtime tracks every blocking call (''receive(true)'', ''wait(handle)'', ''signal()''). When every actor is blocked and nothing outside the program can wake one up, the blocked calls are cancelled and each raises a runtime error. This prevents a ChipLang program from hanging silently on a programming mistake.
+The runtime tracks every blocking call (''receive(true)'', ''wait(handle)'', ''signal()''). When every actor is blocked and nothing outside the program can wake one up, the blocked calls are cancelled and each raises a runtime error. This prevents a Chippy program from hanging silently on a programming mistake.
 
 *Architecture*
 

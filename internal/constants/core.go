@@ -10,11 +10,11 @@ import "runtime"
 
 const (
 	VERSION_DATE = "2026-06-13"
-	HIST_FILE    = ".ChipLangHistory"
+	HIST_FILE    = ".ChippyHistory"
 
-	RR_CONTEXT_DISPLAY_NAME     = "<ChipLangProgram>"
-	CLI_CONTEXT_DISPLAY_NAME_FN = "<ChipLangREPL>"
-	BASE_FUNC_NAME_FN_ANON      = "<ChipLangAnon>"
+	RR_CONTEXT_DISPLAY_NAME     = "<ChippyProgram>"
+	CLI_CONTEXT_DISPLAY_NAME_FN = "<ChippyREPL>"
+	BASE_FUNC_NAME_FN_ANON      = "<ChippyAnon>"
 
 	DIGITS         = "0123456789"
 	LETTERS        = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -38,7 +38,7 @@ const (
 	MAX_VALUE_DEPTH = 100000
 
 	RT_ERROR_TITLE           = "Runtime Error"
-	RT_ERROR_DEBUGGER_PREFIX = "ChipLang Debugger (Trace):"
+	RT_ERROR_DEBUGGER_PREFIX = "Chippy Debugger (Trace):"
 	E_INVALID_SYNTAX         = "Syntax Error"
 	E_ILLEGAL_CHAR           = "Illegal Character"
 	E_EXPECTED_CHAR          = "Expected Character"
