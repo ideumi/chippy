@@ -5,8 +5,8 @@
 
 # Metadata
 
-var Project = "ChipLang Installer";
-var Version = "1.0.1";
+var Project = "Chippy Installer";
+var Version = "1.0.2";
 var Licence = "../LICENCE.txt";
 var Output = "out/installer";
 
@@ -25,7 +25,7 @@ var homePath = getenv("HOME");
 
 if not iserr(homePath)
 {
-    Paths = Paths + [homePath + "/.local/share/chiplang/lib"];
+    Paths = Paths + [homePath + "/.local/share/chippy/lib"];
 }
 
 Paths = Paths + ["../lib/"];

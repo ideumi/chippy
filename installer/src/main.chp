@@ -26,10 +26,10 @@ func GetInstallPaths()
 {
 	if IsTermux() == true
 	{
-		return ["/data/data/com.termux/files/usr/bin/chippy", "/data/data/com.termux/files/usr/lib/chiplang", "/data/data/com.termux/files/usr/share/doc/chiplang"];
+		return ["/data/data/com.termux/files/usr/bin/chippy", "/data/data/com.termux/files/usr/lib/chippy", "/data/data/com.termux/files/usr/share/doc/chippy"];
 	}
 
-	return ["/usr/bin/chippy", "/usr/lib/chiplang", "/usr/share/doc/chiplang"];
+	return ["/usr/bin/chippy", "/usr/lib/chippy", "/usr/share/doc/chippy"];
 }
 
 func CheckPermissions()
@@ -134,8 +134,22 @@ func RemoveDirectory(dirPath)
 	return true;
 }
 
+# TODO: Remove this after the naming change.
+
+func CleanLegacyInstallation()
+{
+	var legacyPaths = ["/usr/lib/chiplang", "/usr/share/doc/chiplang", "/data/data/com.termux/files/usr/lib/chiplang", "/data/data/com.termux/files/usr/share/doc/chiplang"];
+
+	for i = 1 to len(legacyPaths)
+	{
+		RemoveDirectory(legacyPaths[i]);
+	}
+}
+
 func CleanExistingInstallation()
 {
+	CleanLegacyInstallation();
+
 	var paths = GetInstallPaths();
 	var binaryPath = paths[1];
 	var libPath = paths[2];
@@ -212,7 +226,7 @@ func InstallDocumentation()
 
 func Uninstall()
 {
-	Println("ChipLang Uninstaller");
+	Println("Chippy Uninstaller");
 
 	if CheckPermissions() == false
 	{
@@ -222,7 +236,7 @@ func Uninstall()
 		return;
 	}
 
-	Println("Uninstalling ChipLang...");
+	Println("Uninstalling Chippy...");
 
 	var cleanResult = CleanExistingInstallation();
 
@@ -233,12 +247,12 @@ func Uninstall()
 		return;
 	}
 
-	Println("ChipLang has been uninstalled successfully.");
+	Println("Chippy has been uninstalled successfully.");
 }
 
 func Install()
 {
-	Println("ChipLang Installer");
+	Println("Chippy Installer");
 
 	if CheckPermissions() == false
 	{
@@ -293,7 +307,7 @@ func Install()
 		return;
 	}
 
-	Println("ChipLang has been installed successfully!");
+	Println("Chippy has been installed successfully!");
 }
 
 func Main()
