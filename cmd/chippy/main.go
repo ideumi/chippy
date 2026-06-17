@@ -58,6 +58,12 @@ func main() {
 		return
 	}
 
+	// Handle format command
+	if len(args) > 0 && args[0] == "format" {
+		handleFormatCommand(args[1:])
+		return
+	}
+
 	rr := roadrunner.NewRoadRunner2()
 
 	// Start REPL

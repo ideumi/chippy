@@ -7,6 +7,10 @@ build:
 	./chippy check all lib/
 	./chippy check all misc/
 
+	./chippy format check all installer/
+	./chippy format check all lib/
+	./chippy format check all misc/
+
 release:
 	@mkdir -p rel
 	@mkdir -p installer/out
