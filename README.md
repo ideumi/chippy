@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="https://codeberg.org/ideumi/chip-go/releases"><img src="https://img.shields.io/gitea/v/release/ideumi/chip-go?gitea_url=https%3A%2F%2Fcodeberg.org&label=release" alt="Latest release"/></a>
+  <a href="https://codeberg.org/ideumi/chippy/releases"><img src="https://img.shields.io/gitea/v/release/ideumi/chippy?gitea_url=https%3A%2F%2Fcodeberg.org&label=release" alt="Latest release"/></a>
   <img src="https://img.shields.io/badge/license-BSD--2--Clause-green" alt="License"/>
 </p>
 
@@ -16,11 +16,11 @@ Chippy is an interpreted scripting and programming language written in Go. It ai
 Chippy can be installed or updated to the latest version by running the following command in your terminal:
 
 ```bash
-curl -fsSL https://codeberg.org/ideumi/chip-go/raw/branch/main/scripts/net-install.sh | sh
+curl -fsSL https://codeberg.org/ideumi/chippy/raw/branch/main/scripts/net-install.sh | sh
 ```
 > It is best practice to review any script before running it in your terminal. You can read it [here](scripts/net-install.sh).
 
-### [View Releases](https://codeberg.org/ideumi/chip-go/releases) | [Getting Started](#getting-started) | [Developer Quick Start Guide](QUICKSTART.md)
+### [View Releases](https://codeberg.org/ideumi/chippy/releases) | [Getting Started](#getting-started) | [Developer Quick Start Guide](QUICKSTART.md)
 
 ## Features
 
@@ -94,7 +94,7 @@ Println("Hello World");
 Chippy can be installed or updated to the latest version by running the following command in your terminal:
 
 ```bash
-curl -fsSL https://codeberg.org/ideumi/chip-go/raw/branch/main/scripts/net-install.sh | sh
+curl -fsSL https://codeberg.org/ideumi/chippy/raw/branch/main/scripts/net-install.sh | sh
 ```
 > It is best practice to review any script before running it in your terminal. You can read it [here](scripts/net-install.sh).
 
@@ -102,7 +102,7 @@ or by using the...
 
 ### Manual Method
 
-1. Download the tarball matching your architecture from the [releases page](https://codeberg.org/ideumi/chip-go/releases).
+1. Download the tarball matching your architecture from the [releases page](https://codeberg.org/ideumi/chippy/releases).
 2. Extract: `tar -xf chippy-<version>-linux-<arch>.tar.xz`.
 3. Run `sudo ./install.sh` (or `./install.sh` on Termux) from inside the extracted directory.
 
@@ -130,8 +130,8 @@ Requirements:
 - make
 
 ```bash
-git clone https://codeberg.org/ideumi/chip-go
-cd chip-go
+git clone https://codeberg.org/ideumi/chippy
+cd chippy
 make
 ```
 
