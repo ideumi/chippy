@@ -9,36 +9,35 @@
 #@ Returns a random integer in the range ''min'' to ''max'', ''err''
 #@ on failure.
 
-func RandomInt(min, max)
-{
-	if min == max { return min; }
-	if min > max { return err; }
+func RandomInt(min, max) {
+	if min == max {
+		return min;
+	}
+	if min > max {
+		return err;
+	}
 
 	var range = max - min + 1;
 
 	var pool = 256;
 	var bytesNeeded = 1;
-	while pool < range
-	{
+	while pool < range {
 		pool = pool * 256;
 		bytesNeeded = bytesNeeded + 1;
 	}
 
 	var maxFair = pool - (pool % range);
 
-	while true
-	{
+	while true {
 		var bytes = rand(bytesNeeded);
 		var bigInt = 0;
 		var place = 1;
-		for i = 1 to bytesNeeded
-		{
+		for i = 1 to bytesNeeded {
 			bigInt = bigInt + bytes[i] * place;
 			place = place * 256;
 		}
 
-		if bigInt < maxFair
-		{
+		if bigInt < maxFair {
 			return min + (bigInt % range);
 		}
 	}
@@ -50,10 +49,13 @@ func RandomInt(min, max)
 #@ Generates a float using 4 bytes of random data in the
 #@ range ''min'' to ''max'', ''err'' on failure.
 
-func RandomFloat(min, max)
-{
-	if min == max { return min; }
-	if min > max { return err; }
+func RandomFloat(min, max) {
+	if min == max {
+		return min;
+	}
+	if min > max {
+		return err;
+	}
 
 	var bytes = rand(4);
 
@@ -69,9 +71,10 @@ func RandomFloat(min, max)
 #@
 #@ Returns a random element from ''elements'', ''err'' on failure.
 
-func RandomElement(elements)
-{
-	if len(elements) == 0 { return err; }
+func RandomElement(elements) {
+	if len(elements) == 0 {
+		return err;
+	}
 
 	return elements[RandomInt(1, len(elements))];
 }
@@ -81,12 +84,12 @@ func RandomElement(elements)
 #@
 #@ Shuffles ''elements'' in random order and returns it.
 
-func RandomShuffle(elements)
-{
-	if len(elements) == 0 { return elements; }
+func RandomShuffle(elements) {
+	if len(elements) == 0 {
+		return elements;
+	}
 
-	for x = len(elements) to 1 step -1
-	{
+	for x = len(elements) to 1 step -1 {
 		var newIndex = RandomInt(1, x);
 
 		var temp = elements[x];
@@ -105,27 +108,29 @@ func RandomShuffle(elements)
 #@ Creates a random string of ''length'' with elements from
 #@ ''chars'' and returns it, ''err'' on failure.
 
-func RandomString(length, chars)
-{
-	if type(chars) != "list" { return err; }
-	if length <= 0 { return err; }
-	if len(chars) == 0 { return err; }
+func RandomString(length, chars) {
+	if type(chars) != "list" {
+		return err;
+	}
+	if length <= 0 {
+		return err;
+	}
+	if len(chars) == 0 {
+		return err;
+	}
 
 	var finalString = "";
 
-	for x = 1 to length
-	{
+	for x = 1 to length {
 		var char = chars[RandomInt(1, len(chars))];
 
 		finalString = finalString + char;
 
-		if len(finalString) == length
-		{
+		if len(finalString) == length {
 			break;
 		}
 
-		if len(finalString) > length
-		{
+		if len(finalString) > length {
 			finalString = slice(finalString, 1, length);
 			break;
 		}

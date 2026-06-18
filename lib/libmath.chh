@@ -33,9 +33,10 @@ var INTMIN = -INTMAX - 1;
 #@
 #@ Returns the absolute value of number ''n''.
 
-func Abs(n)
-{
-	if n < 0 { return -n; }
+func Abs(n) {
+	if n < 0 {
+		return -n;
+	}
 
 	return n;
 }
@@ -45,13 +46,16 @@ func Abs(n)
 #@
 #@ Rounds the number ''n'' down to the nearest integer.
 
-func Floor(n)
-{
-	if n >= 0 { return int(n); }
+func Floor(n) {
+	if n >= 0 {
+		return int(n);
+	}
 
 	var truncated = int(n);
 
-	if n != truncated { return truncated - 1; }
+	if n != truncated {
+		return truncated - 1;
+	}
 
 	return truncated;
 }
@@ -61,8 +65,7 @@ func Floor(n)
 #@
 #@ Rounds the number ''n'' up to the nearest integer.
 
-func Ceil(n)
-{
+func Ceil(n) {
 	return -Floor(-n);
 }
 
@@ -72,9 +75,10 @@ func Ceil(n)
 #@ Returns the modulo of ''n1'' divided by ''n2''. ''err'' is returned if
 #@ ''n2'' is zero.
 
-func Mod(n1, n2)
-{
-	if n2 == 0 { return err; }
+func Mod(n1, n2) {
+	if n2 == 0 {
+		return err;
+	}
 
 	return n1 % n2;
 }
@@ -84,9 +88,10 @@ func Mod(n1, n2)
 #@
 #@ Rounds the number ''n'' to ''digits'' decimal points.
 
-func Round(n, digits)
-{
-	if digits == 0 { return Floor(n + 0.5); }
+func Round(n, digits) {
+	if digits == 0 {
+		return Floor(n + 0.5);
+	}
 
 	var multiplier = Pow(10, digits);
 
@@ -98,9 +103,10 @@ func Round(n, digits)
 #@
 #@ Returns the larger of ''n1'' and ''n2''.
 
-func Max(n1, n2)
-{
-	if n1 > n2 { return n1; }
+func Max(n1, n2) {
+	if n1 > n2 {
+		return n1;
+	}
 
 	return n2;
 }
@@ -110,9 +116,10 @@ func Max(n1, n2)
 #@
 #@ Returns the smaller of ''n1'' and ''n2''.
 
-func Min(n1, n2)
-{
-	if n1 < n2 { return n1; }
+func Min(n1, n2) {
+	if n1 < n2 {
+		return n1;
+	}
 
 	return n2;
 }
@@ -122,11 +129,14 @@ func Min(n1, n2)
 #@
 #@ Returns the sign of ''n''.
 
-func Sign(n)
-{
-	if n > 0 { return 1; }
+func Sign(n) {
+	if n > 0 {
+		return 1;
+	}
 
-	if n < 0 { return -1; }
+	if n < 0 {
+		return -1;
+	}
 
 	return 0;
 }
@@ -136,9 +146,10 @@ func Sign(n)
 #@
 #@ Returns the square root of ''n''.
 
-func Sqrt(n)
-{
-	if n < 0 { return err; }
+func Sqrt(n) {
+	if n < 0 {
+		return err;
+	}
 
 	return n ^ 0.5;
 }
@@ -148,11 +159,12 @@ func Sqrt(n)
 #@
 #@ Returns the cube root of ''n''.
 
-func Cbrt(n)
-{
-	if n < 0 { return -(Abs(n) ^ (1/3)); }
+func Cbrt(n) {
+	if n < 0 {
+		return -(Abs(n) ^ (1 / 3));
+	}
 
-	return n ^ (1/3);
+	return n ^ (1 / 3);
 }
 
 #@ <Pow(base, exp)>
@@ -160,10 +172,13 @@ func Cbrt(n)
 #@
 #@ Returns ''base'' raised to the power of ''exp''.
 
-func Pow(base, exp)
-{
-	if base < 0 and exp != int(exp) { return err; }
-	if base == 0 and exp < 0 { return err; }
+func Pow(base, exp) {
+	if base < 0 and exp != int(exp) {
+		return err;
+	}
+	if base == 0 and exp < 0 {
+		return err;
+	}
 
 	return base ^ exp;
 }
@@ -173,8 +188,7 @@ func Pow(base, exp)
 #@
 #@ Returns the square of ''n''.
 
-func Square(n)
-{
+func Square(n) {
 	return n * n;
 }
 
@@ -183,8 +197,7 @@ func Square(n)
 #@
 #@ Returns the cube of ''n''.
 
-func Cube(n)
-{
+func Cube(n) {
 	return n * n * n;
 }
 
@@ -194,15 +207,15 @@ func Cube(n)
 #@ Returns the factorial of ''n''. If ''n'' is negative, ''err''
 #@ is returned.
 
-func Factorial(n)
-{
-	if n < 0 { return err; }
+func Factorial(n) {
+	if n < 0 {
+		return err;
+	}
 
 	var result = 1;
 	var i = 1;
 
-	while i <= n
-	{
+	while i <= n {
 		result = result * i;
 		i = i + 1;
 	}
@@ -215,13 +228,11 @@ func Factorial(n)
 #@
 #@ Returns the greatest common divisor of ''n1'' and ''n2''.
 
-func Gcd(n1, n2)
-{
+func Gcd(n1, n2) {
 	n1 = Abs(n1);
 	n2 = Abs(n2);
 
-	while n2 != 0
-	{
+	while n2 != 0 {
 		var temp = n1 % n2;
 
 		n1 = n2;
@@ -236,8 +247,7 @@ func Gcd(n1, n2)
 #@
 #@ Constrains ''value'' to be between ''minVal'' and ''maxVal''.
 
-func Clamp(value, minVal, maxVal)
-{
+func Clamp(value, minVal, maxVal) {
 	return Min(Max(value, minVal), maxVal);
 }
 
@@ -246,8 +256,7 @@ func Clamp(value, minVal, maxVal)
 #@
 #@ Returns the Euclidean distance between two points ''(x1,y1)'' and ''(x2,y2)''.
 
-func Distance(x1, y1, x2, y2)
-{
+func Distance(x1, y1, x2, y2) {
 	var dx = x2 - x1;
 	var dy = y2 - y1;
 
@@ -259,8 +268,7 @@ func Distance(x1, y1, x2, y2)
 #@
 #@ Returns the hypotenuse of a right triangle with sides ''n1'' and ''n2''.
 
-func Hypotenuse(n1, n2)
-{
+func Hypotenuse(n1, n2) {
 	return Sqrt(n1 * n1 + n2 * n2);
 }
 
@@ -269,8 +277,7 @@ func Hypotenuse(n1, n2)
 #@
 #@ Returns ''true'' if ''n'' is even, ''false'' otherwise.
 
-func IsEven(n)
-{
+func IsEven(n) {
 	return n % 2 == 0;
 }
 
@@ -279,8 +286,7 @@ func IsEven(n)
 #@
 #@ Returns ''true'' if ''n'' is odd, ''false'' otherwise.
 
-func IsOdd(n)
-{
+func IsOdd(n) {
 	return n % 2 != 0;
 }
 
@@ -289,8 +295,7 @@ func IsOdd(n)
 #@
 #@ Converts an angle from radians to degrees.
 
-func Degrees(radians)
-{
+func Degrees(radians) {
 	return radians * 180 / PI;
 }
 
@@ -299,8 +304,7 @@ func Degrees(radians)
 #@
 #@ Converts an angle from degrees to radians.
 
-func Radians(degrees)
-{
+func Radians(degrees) {
 	return degrees * PI / 180;
 }
 
@@ -309,23 +313,25 @@ func Radians(degrees)
 #@
 #@ Converts the number ''n'' to its hexadecimal string representation.
 
-func Hex(n)
-{
+func Hex(n) {
 	var number = Floor(Abs(n));
 
-	if number == 0 { return "0"; }
+	if number == 0 {
+		return "0";
+	}
 
 	var digits = "0123456789ABCDEF";
 	var result = "";
 
-	while number > 0
-	{
+	while number > 0 {
 		var remainder = number % 16;
 		result = slice(digits, remainder + 1, remainder + 1) + result;
 		number = Floor(number / 16);
 	}
 
-	if n < 0 { result = "-" + result; }
+	if n < 0 {
+		result = "-" + result;
+	}
 
 	return result;
 }
@@ -336,9 +342,10 @@ func Hex(n)
 #@ Converts the number ''n'' to its hexadecimal string representation with
 #@ ''0x'' prefix.
 
-func Hex0x(n)
-{
-	if n < 0 { return "-0x" + Hex(Abs(n)); }
+func Hex0x(n) {
+	if n < 0 {
+		return "-0x" + Hex(Abs(n));
+	}
 	return "0x" + Hex(n);
 }
 
@@ -347,22 +354,24 @@ func Hex0x(n)
 #@
 #@ Converts the number ''n'' to its octal string representation.
 
-func Oct(n)
-{
+func Oct(n) {
 	var number = Floor(Abs(n));
 
-	if number == 0 { return "0"; }
+	if number == 0 {
+		return "0";
+	}
 
 	var result = "";
 
-	while number > 0
-	{
+	while number > 0 {
 		var remainder = number % 8;
 		result = str(remainder) + result;
 		number = Floor(number / 8);
 	}
 
-	if n < 0 { result = "-" + result; }
+	if n < 0 {
+		result = "-" + result;
+	}
 
 	return result;
 }
@@ -373,8 +382,9 @@ func Oct(n)
 #@ Converts the number ''n'' to its octal string representation with
 #@ ''0'' prefix.
 
-func Oct0(n)
-{
-	if n < 0 { return "-0" + Oct(Abs(n)); }
+func Oct0(n) {
+	if n < 0 {
+		return "-0" + Oct(Abs(n));
+	}
 	return "0" + Oct(n);
 }

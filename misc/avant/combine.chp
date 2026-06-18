@@ -23,9 +23,8 @@ Paths = Paths + ["src"];
 
 var homePath = getenv("HOME");
 
-if not iserr(homePath)
-{
-    Paths = Paths + [homePath + "/.local/share/chippy/lib"];
+if not iserr(homePath) {
+	Paths = Paths + [homePath + "/.local/share/chippy/lib"];
 }
 
 Paths = Paths + ["../../lib"];
