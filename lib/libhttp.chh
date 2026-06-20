@@ -17,8 +17,7 @@ load("libstrings.chh");
 #@ response map with ''statusCode'', ''statusText'', ''headers'', and ''body''.
 #@ Returns ''err'' on failure.
 
-func HttpGet(url, headers)
-{
+func HttpGet(url, headers) {
 	return HttpRequest("GET", url, headers, b[]);
 }
 
@@ -31,8 +30,7 @@ func HttpGet(url, headers)
 #@ to GET). Returns a response map with ''statusCode'', ''statusText'',
 #@ ''headers'', and ''body''. Returns ''err'' on failure.
 
-func HttpPost(url, headers, body)
-{
+func HttpPost(url, headers, body) {
 	return HttpRequest("POST", url, headers, _HttpPackBody_(body));
 }
 
@@ -46,8 +44,7 @@ func HttpPost(url, headers, body)
 #@
 #@ See: https://datatracker.ietf.org/doc/html/rfc9110 (15.4.).
 
-func HttpGetNoRedirect(url, headers)
-{
+func HttpGetNoRedirect(url, headers) {
 	return HttpRequestFollow("GET", url, headers, b[], 0);
 }
 
@@ -61,8 +58,7 @@ func HttpGetNoRedirect(url, headers)
 #@
 #@ See: https://datatracker.ietf.org/doc/html/rfc9110 (15.4.).
 
-func HttpPostNoRedirect(url, headers, body)
-{
+func HttpPostNoRedirect(url, headers, body) {
 	return HttpRequestFollow("POST", url, headers, _HttpPackBody_(body), 0);
 }
 
@@ -77,8 +73,7 @@ func HttpPostNoRedirect(url, headers, body)
 #@
 #@ See: https://datatracker.ietf.org/doc/html/rfc9110 (15.4.).
 
-func HttpRequest(method, url, headers, body)
-{
+func HttpRequest(method, url, headers, body) {
 	return HttpRequestFollow(method, url, headers, body, 10);
 }
 
@@ -90,13 +85,16 @@ func HttpRequest(method, url, headers, body)
 # relative paths (including . and ..). Returns the resolved absolute URL, or
 # ''err'' on failure.
 
-func _HttpResolveLocation_(location, url)
-{
-	if location == "" { return err; }
+func _HttpResolveLocation_(location, url) {
+	if location == "" {
+		return err;
+	}
 
 	var origParts = _http_parseurl_(url);
 
-	if iserr(origParts) { return err; }
+	if iserr(origParts) {
+		return err;
+	}
 
 	var origScheme = origParts["scheme"];
 	var origHost = origParts["host"];
@@ -106,50 +104,39 @@ func _HttpResolveLocation_(location, url)
 
 	var baseUrl = "";
 
-	if (origScheme == "http" and origPort == 80) or (origScheme == "https" and origPort == 443)
-	{
+	if (origScheme == "http" and origPort == 80) or (origScheme == "https" and origPort == 443) {
 		baseUrl = origScheme + "://" + origHost;
-	}
-	else
-	{
+	} else {
 		baseUrl = origScheme + "://" + origHost + ":" + str(int(origPort));
 	}
 
 	# Absolute URL
 	var isAbsoluteUrl = not iserr(indexof(location, "://"));
 
-	if isAbsoluteUrl
-	{
+	if isAbsoluteUrl {
 		return location;
 	}
 
 	# Protocol-relative
-	if len(location) >= 2 and charat(location, 1) == "/" and charat(location, 2) == "/"
-	{
+	if len(location) >= 2 and charat(location, 1) == "/" and charat(location, 2) == "/" {
 		return origScheme + ":" + location;
 	}
 
 	# Absolute path
-	if charat(location, 1) == "/"
-	{
+	if charat(location, 1) == "/" {
 		return baseUrl + location;
 	}
 
 	# Query-only
-	if charat(location, 1) == "?"
-	{
+	if charat(location, 1) == "?" {
 		return baseUrl + origPath + location;
 	}
 
 	# Fragment-only
-	if charat(location, 1) == "#"
-	{
-		if type(origQuery) == "string" and origQuery != ""
-		{
+	if charat(location, 1) == "#" {
+		if type(origQuery) == "string" and origQuery != "" {
 			return baseUrl + origPath + "?" + origQuery + location;
-		}
-		else
-		{
+		} else {
 			return baseUrl + origPath + location;
 		}
 	}
@@ -158,16 +145,13 @@ func _HttpResolveLocation_(location, url)
 	var baseDir = "/";
 	var lastSlash = 0;
 
-	for i = 1 to len(origPath)
-	{
-		if charat(origPath, i) == "/"
-		{
+	for i = 1 to len(origPath) {
+		if charat(origPath, i) == "/" {
 			lastSlash = i;
 		}
 	}
 
-	if lastSlash > 0
-	{
+	if lastSlash > 0 {
 		baseDir = slice(origPath, 1, lastSlash);
 	}
 
@@ -175,8 +159,7 @@ func _HttpResolveLocation_(location, url)
 	var locationQuery = "";
 	var qPos = indexof(location, "?");
 
-	if not iserr(qPos)
-	{
+	if not iserr(qPos) {
 		locationPath = slice(location, 1, qPos - 1);
 		locationQuery = slice(location, qPos, len(location));
 	}
@@ -186,30 +169,22 @@ func _HttpResolveLocation_(location, url)
 	var segments = split(combinedPath, "/");
 	var normalized = [];
 
-	for i = 1 to len(segments)
-	{
+	for i = 1 to len(segments) {
 		var seg = segments[i];
 
-		if seg == "" or seg == "."
-		{
+		if seg == "" or seg == "." {
 			continue;
-		}
-		elseif seg == ".."
-		{
-			if len(normalized) > 0
-			{
+		} elseif seg == ".." {
+			if len(normalized) > 0 {
 				var newNorm = [];
 
-				for j = 1 to len(normalized) - 1
-				{
+				for j = 1 to len(normalized) - 1 {
 					append(newNorm, normalized[j]);
 				}
 
 				normalized = newNorm;
 			}
-		}
-		else
-		{
+		} else {
 			append(normalized, seg);
 		}
 	}
@@ -228,12 +203,13 @@ func _HttpResolveLocation_(location, url)
 # (Content-Type, Content-Length) for 303 redirects. Returns the filtered headers
 # list, or ''err'' on failure.
 
-func _HttpFilterRedirectHeaders_(headers, origUrl, targetUrl, statusCode)
-{
+func _HttpFilterRedirectHeaders_(headers, origUrl, targetUrl, statusCode) {
 	var origParts = _http_parseurl_(origUrl);
 	var targetParts = _http_parseurl_(targetUrl);
 
-	if iserr(origParts) or iserr(targetParts) { return err; }
+	if iserr(origParts) or iserr(targetParts) {
+		return err;
+	}
 
 	var origHost = origParts["host"];
 	var origScheme = origParts["scheme"];
@@ -244,40 +220,48 @@ func _HttpFilterRedirectHeaders_(headers, origUrl, targetUrl, statusCode)
 
 	# RFC 6454: origin = scheme + host + port
 	var isCrossOrigin = (lower(origHost) != lower(targetHost))
-						or (origScheme != targetScheme)
-						or (origPort != targetPort);
+		or (origScheme != targetScheme)
+		or (origPort != targetPort);
 
 	var cleanHeaders = [];
 
-	for i = 1 to len(headers)
-	{
+	for i = 1 to len(headers) {
 		var hPair = headers[i];
 		var hKey = lower(hPair[1]);
 
-		if hKey == "host" { continue; }
+		if hKey == "host" {
+			continue;
+		}
 
-		if isCrossOrigin
-		{
-			if hKey == "authorization" { continue; }
-			if hKey == "cookie" { continue; }
-			if hKey == "proxy-authorization" { continue; }
+		if isCrossOrigin {
+			if hKey == "authorization" {
+				continue;
+			}
+			if hKey == "cookie" {
+				continue;
+			}
+			if hKey == "proxy-authorization" {
+				continue;
+			}
 		}
 
 		append(cleanHeaders, hPair);
 	}
 
 	# Strip body-related headers on 303
-	if statusCode == 303
-	{
+	if statusCode == 303 {
 		var filteredHeaders = [];
 
-		for i = 1 to len(cleanHeaders)
-		{
+		for i = 1 to len(cleanHeaders) {
 			var hPair = cleanHeaders[i];
 			var hKey = lower(hPair[1]);
 
-			if hKey == "content-type" { continue; }
-			if hKey == "content-length" { continue; }
+			if hKey == "content-type" {
+				continue;
+			}
+			if hKey == "content-length" {
+				continue;
+			}
 
 			append(filteredHeaders, hPair);
 		}
@@ -294,9 +278,10 @@ func _HttpFilterRedirectHeaders_(headers, origUrl, targetUrl, statusCode)
 # Reads up to ''nBytes'' from ''conn''. Dispatches to TLS or plain socket based
 # on ''isTLS''.
 
-func _HttpRead_(conn, isTLS, nBytes)
-{
-	if isTLS { return TlsRead(conn, nBytes); }
+func _HttpRead_(conn, isTLS, nBytes) {
+	if isTLS {
+		return TlsRead(conn, nBytes);
+	}
 	return sread(conn, nBytes);
 }
 
@@ -306,9 +291,10 @@ func _HttpRead_(conn, isTLS, nBytes)
 # Writes ''data'' to ''conn''. Dispatches to TLS or plain socket based on
 # ''isTLS''.
 
-func _HttpWrite_(data, conn, isTLS)
-{
-	if isTLS { return TlsWrite(data, conn); }
+func _HttpWrite_(data, conn, isTLS) {
+	if isTLS {
+		return TlsWrite(data, conn);
+	}
 	return swrite(data, conn);
 }
 
@@ -317,9 +303,10 @@ func _HttpWrite_(data, conn, isTLS)
 #
 # Closes ''conn''. Dispatches to TLS or plain socket based on ''isTLS''.
 
-func _HttpClose_(conn, isTLS)
-{
-	if isTLS { return TlsClose(conn); }
+func _HttpClose_(conn, isTLS) {
+	if isTLS {
+		return TlsClose(conn);
+	}
 	return sclose(conn);
 }
 
@@ -329,10 +316,13 @@ func _HttpClose_(conn, isTLS)
 # Converts ''body'' to bytes. Passes bytes through unchanged, packs strings
 # directly, and converts other types via ''str'' before packing.
 
-func _HttpPackBody_(body)
-{
-	if type(body) == "bytes" { return body; }
-	if type(body) == "string" { return pack(body); }
+func _HttpPackBody_(body) {
+	if type(body) == "bytes" {
+		return body;
+	}
+	if type(body) == "string" {
+		return pack(body);
+	}
 
 	return pack(str(body));
 }
@@ -342,17 +332,19 @@ func _HttpPackBody_(body)
 #
 # Parses ''hexString'' into a number. Returns ''err'' on invalid input.
 
-func _HttpParseHex_(hexString)
-{
-	if len(hexString) == 0 { return err; }
+func _HttpParseHex_(hexString) {
+	if len(hexString) == 0 {
+		return err;
+	}
 
 	var result = 0;
 
-	for i = 1 to len(hexString)
-	{
+	for i = 1 to len(hexString) {
 		var digit = indexof("0123456789abcdef", lower(charat(hexString, i)));
 
-		if iserr(digit) { return err; }
+		if iserr(digit) {
+			return err;
+		}
 
 		result = result * 16 + (digit - 1);
 	}
@@ -367,20 +359,19 @@ func _HttpParseHex_(hexString)
 # for each read chunk. Returns the raw bytes read, or ''err'' if the connection
 # closes before headers are complete.
 
-func _HttpReadHeaders_(conn, isTLS, bufSize)
-{
+func _HttpReadHeaders_(conn, isTLS, bufSize) {
 	var buf = b[];
 
-	while true
-	{
+	while true {
 		var chunk = _HttpRead_(conn, isTLS, bufSize);
 
-		if iserr(chunk) or len(chunk) == 0 { break; }
+		if iserr(chunk) or len(chunk) == 0 {
+			break;
+		}
 
 		buf = buf + chunk;
 
-		if not iserr(indexof(unpack(buf), "\r\n\r\n"))
-		{
+		if not iserr(indexof(unpack(buf), "\r\n\r\n")) {
 			return buf;
 		}
 	}
@@ -399,11 +390,12 @@ func _HttpReadHeaders_(conn, isTLS, bufSize)
 #@
 #@ See: https://datatracker.ietf.org/doc/html/rfc9110 (15.4.).
 
-func HttpRequestFollow(method, url, headers, body, maxRedirects)
-{
+func HttpRequestFollow(method, url, headers, body, maxRedirects) {
 	var urlParts = _http_parseurl_(url);
 
-	if iserr(urlParts) { return err; }
+	if iserr(urlParts) {
+		return err;
+	}
 
 	var scheme = urlParts["scheme"];
 	var host = urlParts["host"];
@@ -413,82 +405,76 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 
 	var fullPath = path;
 
-	if type(query) == "string" and query != ""
-	{
+	if type(query) == "string" and query != "" {
 		fullPath = fullPath + "?" + query;
 	}
 
 	var hasHost = false;
 
-	for i = 1 to len(headers)
-	{
+	for i = 1 to len(headers) {
 		var pair = headers[i];
 
-		if lower(pair[1]) == "host"
-		{
+		if lower(pair[1]) == "host" {
 			hasHost = true;
 		}
 	}
 
-	if not hasHost
-	{
-		if (scheme == "http" and port == 80) or (scheme == "https" and port == 443)
-		{
+	if not hasHost {
+		if (scheme == "http" and port == 80) or (scheme == "https" and port == 443) {
 			headers = headers + [["Host", host]];
-		}
-		else
-		{
+		} else {
 			headers = headers + [["Host", host + ":" + str(int(port))]];
 		}
 	}
 
 	var requestBytes = _http_formatrequest_(method, fullPath, headers, body);
 
-	if iserr(requestBytes) { return err; }
+	if iserr(requestBytes) {
+		return err;
+	}
 
 	var isTLS = (scheme == "https");
 	var conn = 0;
 
-	if isTLS { conn = TlsOpen(host, port, true); }
-	else { conn = sopen(host, port, SOCKTCP); }
+	if isTLS {
+		conn = TlsOpen(host, port, true);
+	} else {
+		conn = sopen(host, port, SOCKTCP);
+	}
 
-	if iserr(conn) { return err; }
+	if iserr(conn) {
+		return err;
+	}
 
 	var writeResult = _HttpWrite_(requestBytes, conn, isTLS);
 
-	if iserr(writeResult)
-	{
+	if iserr(writeResult) {
 		_HttpClose_(conn, isTLS);
 		return err;
 	}
 
 	var responseBytes = _HttpReadHeaders_(conn, isTLS, 1024);
 
-	if iserr(responseBytes)
-	{
+	if iserr(responseBytes) {
 		_HttpClose_(conn, isTLS);
 		return err;
 	}
 
 	var parsedResp = _http_parseresponse_(responseBytes);
 
-	if iserr(parsedResp)
-	{
+	if iserr(parsedResp) {
 		_HttpClose_(conn, isTLS);
 		return err;
 	}
 
 	# RFC 9110 15.2: skip 1xx informational responses
-	while parsedResp["statusCode"] >= 100 and parsedResp["statusCode"] < 200
-	{
+	while parsedResp["statusCode"] >= 100 and parsedResp["statusCode"] < 200 {
 		responseBytes = parsedResp["body"];
 
-		while iserr(indexof(unpack(responseBytes), "\r\n\r\n"))
-		{
+		while iserr(indexof(unpack(responseBytes), "\r\n\r\n")) {
 			var chunk = _HttpRead_(conn, isTLS, 1024);
 
-			if iserr(chunk) or len(chunk) == 0
-			{
+			if iserr(chunk) or len(chunk) == 0 {
 				_HttpClose_(conn, isTLS);
 				return err;
 			}
@@ -498,8 +484,7 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 
 		parsedResp = _http_parseresponse_(responseBytes);
 
-		if iserr(parsedResp)
-		{
+		if iserr(parsedResp) {
 			_HttpClose_(conn, isTLS);
 			return err;
 		}
@@ -509,20 +494,16 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 	var contentLength = -1;
 	var isChunked = false;
 
-	for i = 1 to len(respHeaders)
-	{
+	for i = 1 to len(respHeaders) {
 		var hPair = respHeaders[i];
 		var keyLower = lower(hPair[1]);
 
-		if keyLower == "content-length"
-		{
+		if keyLower == "content-length" {
 			contentLength = int(num(hPair[2]));
 		}
 
-		if keyLower == "transfer-encoding"
-		{
-			if not iserr(indexof(lower(hPair[2]), "chunked"))
-			{
+		if keyLower == "transfer-encoding" {
+			if not iserr(indexof(lower(hPair[2]), "chunked")) {
 				isChunked = true;
 			}
 		}
@@ -532,90 +513,95 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 	var bodyBytesNeeded = 0;
 
 	# RFC 9112 6.3: Transfer-Encoding overrides Content-Length
-	if contentLength >= 0 and not isChunked
-	{
+	if contentLength >= 0 and not isChunked {
 		bodyBytesNeeded = contentLength - len(currentBody);
 	}
 
-	while bodyBytesNeeded > 0
-	{
+	while bodyBytesNeeded > 0 {
 		var chunk = _HttpRead_(conn, isTLS, bodyBytesNeeded);
 
-		if iserr(chunk) or len(chunk) == 0 { break; }
+		if iserr(chunk) or len(chunk) == 0 {
+			break;
+		}
 
 		responseBytes = responseBytes + chunk;
 		bodyBytesNeeded = bodyBytesNeeded - len(chunk);
 	}
 
 	# RFC 9112 7.1: chunked framing
-	if isChunked
-	{
+	if isChunked {
 		var pos = 1;
 
-		while true
-		{
+		while true {
 			var crlfBytePos = 0;
 
-			while crlfBytePos == 0
-			{
-				for j = pos to len(currentBody) - 1
-				{
-					if currentBody[j] == 13 and currentBody[j + 1] == 10
-					{
+			while crlfBytePos == 0 {
+				for j = pos to len(currentBody) - 1 {
+					if currentBody[j] == 13 and currentBody[j + 1] == 10 {
 						crlfBytePos = j;
 						break;
 					}
 				}
 
-				if crlfBytePos > 0 { break; }
+				if crlfBytePos > 0 {
+					break;
+				}
 
 				var chunk = _HttpRead_(conn, isTLS, 4096);
 
-				if iserr(chunk) or len(chunk) == 0 { break; }
+				if iserr(chunk) or len(chunk) == 0 {
+					break;
+				}
 
 				responseBytes = responseBytes + chunk;
 				currentBody = currentBody + chunk;
 			}
 
-			if crlfBytePos == 0 { break; }
+			if crlfBytePos == 0 {
+				break;
+			}
 
 			var sizeLine = unpack(slice(currentBody, pos, crlfBytePos - 1));
 			var semiPos = indexof(sizeLine, ";");
 
-			if not iserr(semiPos)
-			{
+			if not iserr(semiPos) {
 				sizeLine = Trim(slice(sizeLine, 1, semiPos - 1));
 			}
 
 			var chunkSize = _HttpParseHex_(Trim(sizeLine));
 
-			if iserr(chunkSize) or chunkSize == 0 { break; }
+			if iserr(chunkSize) or chunkSize == 0 {
+				break;
+			}
 
 			var needed = crlfBytePos + 2 + chunkSize + 1;
 
-			while len(currentBody) < needed
-			{
+			while len(currentBody) < needed {
 				var chunk = _HttpRead_(conn, isTLS, 4096);
 
-				if iserr(chunk) or len(chunk) == 0 { break; }
+				if iserr(chunk) or len(chunk) == 0 {
+					break;
+				}
 
 				responseBytes = responseBytes + chunk;
 				currentBody = currentBody + chunk;
 			}
 
-			if len(currentBody) < needed { break; }
+			if len(currentBody) < needed {
+				break;
+			}
 
 			pos = crlfBytePos + 2 + chunkSize + 2;
 		}
 	}
 
-	if contentLength < 0 and not isChunked
-	{
-		while true
-		{
+	if contentLength < 0 and not isChunked {
+		while true {
 			var chunk = _HttpRead_(conn, isTLS, 4096);
 
-			if iserr(chunk) or len(chunk) == 0 { break; }
+			if iserr(chunk) or len(chunk) == 0 {
+				break;
+			}
 
 			responseBytes = responseBytes + chunk;
 		}
@@ -625,16 +611,19 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 
 	var response = _http_parseresponse_(responseBytes);
 
-	if iserr(response) { return err; }
+	if iserr(response) {
+		return err;
+	}
 
 	var chunked = response["chunked"];
 
-	if chunked == true
-	{
+	if chunked == true {
 		var respBody = response["body"];
 		var decodedBody = _http_dechunk_(respBody);
 
-		if iserr(decodedBody) { return err; }
+		if iserr(decodedBody) {
+			return err;
+		}
 
 		response["body"] = decodedBody;
 	}
@@ -643,22 +632,21 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 	var statusCode = response["statusCode"];
 
 	if statusCode == 301 or
-	   statusCode == 302 or
-	   statusCode == 303 or
-	   statusCode == 307 or
-	   statusCode == 308
-	{
-		if maxRedirects <= 0 { return response; }
+		statusCode == 302 or
+		statusCode == 303 or
+		statusCode == 307 or
+		statusCode == 308 {
+		if maxRedirects <= 0 {
+			return response;
+		}
 
 		var respHeadersRedir = response["headers"];
 		var location = "";
 
-		for i = 1 to len(respHeadersRedir)
-		{
+		for i = 1 to len(respHeadersRedir) {
 			var hPair = respHeadersRedir[i];
 
-			if lower(hPair[1]) == "location"
-			{
+			if lower(hPair[1]) == "location" {
 				location = hPair[2];
 
 				break;
@@ -668,21 +656,26 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 		# RFC 9110: whitespace is allowed around header values
 		location = Trim(location);
 
-		if location == "" { return err; }
+		if location == "" {
+			return err;
+		}
 
 		var targetUrl = _HttpResolveLocation_(location, url);
 
-		if iserr(targetUrl) { return err; }
+		if iserr(targetUrl) {
+			return err;
+		}
 
 		var cleanHeaders = _HttpFilterRedirectHeaders_(headers, url, targetUrl, statusCode);
 
-		if iserr(cleanHeaders) { cleanHeaders = []; }
+		if iserr(cleanHeaders) {
+			cleanHeaders = [];
+		}
 
 		var redirectMethod = method;
 		var redirectBody = body;
 
-		if statusCode == 303
-		{
+		if statusCode == 303 {
 			redirectMethod = "GET";
 			redirectBody = b[];
 		}
@@ -699,22 +692,27 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 #@ Downloads content from ''url'' and saves it to ''filename''. Returns ''ok''
 #@ on success, ''err'' on failure.
 
-func HttpDownloadToFile(url, filename)
-{
+func HttpDownloadToFile(url, filename) {
 	var response = HttpGet(url, []);
 
-	if iserr(response) { return err; }
+	if iserr(response) {
+		return err;
+	}
 
 	var body = response["body"];
 	var file = fopen(filename, "w");
 
-	if iserr(file) { return err; }
+	if iserr(file) {
+		return err;
+	}
 
 	var writeResult = fwrite(body, file);
 
 	fclose(file);
 
-	if iserr(writeResult) { return err; }
+	if iserr(writeResult) {
+		return err;
+	}
 
 	return ok;
 }
@@ -727,25 +725,58 @@ func HttpDownloadToFile(url, filename)
 #@
 #@ See: https://datatracker.ietf.org/doc/html/rfc9110 (15.).
 
-func HttpStatusText(statusCode)
-{
-	if statusCode == 200 { return "OK"; }
-	if statusCode == 201 { return "Created"; }
-	if statusCode == 204 { return "No Content"; }
-	if statusCode == 301 { return "Moved Permanently"; }
-	if statusCode == 302 { return "Found"; }
-	if statusCode == 303 { return "See Other"; }
-	if statusCode == 304 { return "Not Modified"; }
-	if statusCode == 307 { return "Temporary Redirect"; }
-	if statusCode == 308 { return "Permanent Redirect"; }
-	if statusCode == 400 { return "Bad Request"; }
-	if statusCode == 401 { return "Unauthorized"; }
-	if statusCode == 403 { return "Forbidden"; }
-	if statusCode == 404 { return "Not Found"; }
-	if statusCode == 405 { return "Method Not Allowed"; }
-	if statusCode == 500 { return "Internal Server Error"; }
-	if statusCode == 502 { return "Bad Gateway"; }
-	if statusCode == 503 { return "Service Unavailable"; }
+func HttpStatusText(statusCode) {
+	if statusCode == 200 {
+		return "OK";
+	}
+	if statusCode == 201 {
+		return "Created";
+	}
+	if statusCode == 204 {
+		return "No Content";
+	}
+	if statusCode == 301 {
+		return "Moved Permanently";
+	}
+	if statusCode == 302 {
+		return "Found";
+	}
+	if statusCode == 303 {
+		return "See Other";
+	}
+	if statusCode == 304 {
+		return "Not Modified";
+	}
+	if statusCode == 307 {
+		return "Temporary Redirect";
+	}
+	if statusCode == 308 {
+		return "Permanent Redirect";
+	}
+	if statusCode == 400 {
+		return "Bad Request";
+	}
+	if statusCode == 401 {
+		return "Unauthorized";
+	}
+	if statusCode == 403 {
+		return "Forbidden";
+	}
+	if statusCode == 404 {
+		return "Not Found";
+	}
+	if statusCode == 405 {
+		return "Method Not Allowed";
+	}
+	if statusCode == 500 {
+		return "Internal Server Error";
+	}
+	if statusCode == 502 {
+		return "Bad Gateway";
+	}
+	if statusCode == 503 {
+		return "Service Unavailable";
+	}
 
 	return "Unknown";
 }
@@ -757,39 +788,44 @@ func HttpStatusText(statusCode)
 #@ with ''method'', ''path'', ''headers'', and ''body'' (bytes). Returns ''err''
 #@ if the request is malformed.
 
-func HttpParseRequest(requestBytes)
-{
+func HttpParseRequest(requestBytes) {
 	var requestStr = unpack(requestBytes);
 	var headerEndPos = indexof(requestStr, "\r\n\r\n");
 
-	if iserr(headerEndPos) { return err; }
+	if iserr(headerEndPos) {
+		return err;
+	}
 
 	var headerSection = slice(requestStr, 1, headerEndPos - 1);
 	var headerLines = split(headerSection, "\r\n");
 
-	if len(headerLines) == 0 { return err; }
+	if len(headerLines) == 0 {
+		return err;
+	}
 
 	var firstLine = headerLines[1];
 	var methodEnd = indexof(firstLine, " ");
 
-	if iserr(methodEnd) { return err; }
+	if iserr(methodEnd) {
+		return err;
+	}
 
 	var method = slice(firstLine, 1, methodEnd - 1);
 	var restOfLine = slice(firstLine, methodEnd + 1, len(firstLine));
 	var spacePos = indexof(restOfLine, " ");
 
-	if iserr(spacePos) { return err; }
+	if iserr(spacePos) {
+		return err;
+	}
 
 	var path = slice(restOfLine, 1, spacePos - 1);
 	var headers = [];
 
-	for i = 2 to len(headerLines)
-	{
+	for i = 2 to len(headerLines) {
 		var line = headerLines[i];
 		var colonPos = indexof(line, ":");
 
-		if not iserr(colonPos)
-		{
+		if not iserr(colonPos) {
 			var key = Trim(slice(line, 1, colonPos - 1));
 			var val = Trim(slice(line, colonPos + 1, len(line)));
 			append(headers, [key, val]);
@@ -801,8 +837,7 @@ func HttpParseRequest(requestBytes)
 	var headerByteLen = len(pack(headerSection));
 	var bodyStartByte = headerByteLen + 5;
 
-	if bodyStartByte <= len(requestBytes)
-	{
+	if bodyStartByte <= len(requestBytes) {
 		body = slice(requestBytes, bodyStartByte, len(requestBytes));
 	}
 
@@ -822,11 +857,12 @@ func HttpParseRequest(requestBytes)
 # Reads a complete HTTP request from ''conn''. Returns the raw request bytes, or
 # ''err'' on failure.
 
-func _HttpReadRequest_(conn, isTLS)
-{
+func _HttpReadRequest_(conn, isTLS) {
 	var requestBytes = _HttpReadHeaders_(conn, isTLS, 4096);
 
-	if iserr(requestBytes) { return err; }
+	if iserr(requestBytes) {
+		return err;
+	}
 
 	var reqStr = unpack(requestBytes);
 	var headerEndPos = indexof(reqStr, "\r\n\r\n");
@@ -834,17 +870,14 @@ func _HttpReadRequest_(conn, isTLS)
 	var headerLines = split(headerSection, "\r\n");
 	var contentLength = 0;
 
-	for i = 2 to len(headerLines)
-	{
+	for i = 2 to len(headerLines) {
 		var line = headerLines[i];
 		var colonPos = indexof(line, ":");
 
-		if not iserr(colonPos)
-		{
+		if not iserr(colonPos) {
 			var key = lower(Trim(slice(line, 1, colonPos - 1)));
 
-			if key == "content-length"
-			{
+			if key == "content-length" {
 				var val = Trim(slice(line, colonPos + 1, len(line)));
 				contentLength = int(num(val));
 			}
@@ -855,11 +888,12 @@ func _HttpReadRequest_(conn, isTLS)
 	var bodyAlreadyRead = len(requestBytes) - (headerByteLen + 4);
 	var bodyNeeded = contentLength - bodyAlreadyRead;
 
-	while bodyNeeded > 0
-	{
+	while bodyNeeded > 0 {
 		var chunk = _HttpRead_(conn, isTLS, bodyNeeded);
 
-		if iserr(chunk) or len(chunk) == 0 { break; }
+		if iserr(chunk) or len(chunk) == 0 {
+			break;
+		}
 
 		requestBytes = requestBytes + chunk;
 		bodyNeeded = bodyNeeded - len(chunk);
@@ -874,19 +908,21 @@ func _HttpReadRequest_(conn, isTLS)
 # Formats an HTTP/1.1 response with ''statusCode'', ''headers'', ''body'', and
 # server ''label''. Returns the complete response as bytes.
 
-func _HttpFormatServerResponse_(statusCode, headers, body, label)
-{
+func _HttpFormatServerResponse_(statusCode, headers, body, label) {
 	var statusText = HttpStatusText(statusCode);
 	var responseStr = "HTTP/1.1 " + str(statusCode) + " " + statusText + "\r\n";
 	responseStr = responseStr + "Server: libhttp.chh (" + label + ") on chippy V-" + CHIPVR + "\r\n";
 
-	for i = 1 to len(headers)
-	{
+	for i = 1 to len(headers) {
 		var hPair = headers[i];
 		var hKey = lower(hPair[1]);
 
-		if hKey == "content-length" { continue; }
-		if hKey == "server" { continue; }
+		if hKey == "content-length" {
+			continue;
+		}
+		if hKey == "server" {
+			continue;
+		}
 
 		responseStr = responseStr + hPair[1] + ": " + hPair[2] + "\r\n";
 	}
@@ -902,14 +938,11 @@ func _HttpFormatServerResponse_(statusCode, headers, body, label)
 #
 # Actor that drains finished connection-worker handles. Never returns.
 
-func _HttpConnectionReaper_()
-{
-	while true
-	{
+func _HttpConnectionReaper_() {
+	while true {
 		var msgs = receive(true);
 
-		for i = 1 to len(msgs)
-		{
+		for i = 1 to len(msgs) {
 			wait(msgs[i]);
 		}
 	}
@@ -922,16 +955,14 @@ func _HttpConnectionReaper_()
 # parses the request, populates ''remoteIp''/''remotePort'', calls
 # ''handler(state, request)'', and writes the response.
 
-func _HttpConnectionWorker_(handler, state)
-{
+func _HttpConnectionWorker_(handler, state) {
 	var msgs = receive(true);
 	var client = msgs[1];
 
 	var info = sinfo(client);
 	var requestBytes = _HttpReadRequest_(client, false);
 
-	if iserr(requestBytes)
-	{
+	if iserr(requestBytes) {
 		sclose(client);
 
 		return ok;
@@ -939,8 +970,7 @@ func _HttpConnectionWorker_(handler, state)
 
 	var request = HttpParseRequest(requestBytes);
 
-	if iserr(request)
-	{
+	if iserr(request) {
 		sclose(client);
 
 		return ok;
@@ -951,8 +981,7 @@ func _HttpConnectionWorker_(handler, state)
 
 	var response = handler(state, request);
 
-	if iserr(response)
-	{
+	if iserr(response) {
 		swrite(_HttpFormatServerResponse_(500, [], pack("Handler returned err."), "HttpServe"), client);
 		sclose(client);
 
@@ -972,23 +1001,20 @@ func _HttpConnectionWorker_(handler, state)
 # performs the TLS handshake, parses the request, populates ''remoteIp''/
 # ''remotePort'', calls ''handler(state, request)'', and writes the response.
 
-func _HttpConnectionTLSWorker_(handler, state, certPath, keyPath)
-{
+func _HttpConnectionTLSWorker_(handler, state, certPath, keyPath) {
 	var msgs = receive(true);
 	var client = msgs[1];
 
 	var tlsClient = TlsUpgrade(client, certPath, keyPath);
 
-	if iserr(tlsClient)
-	{
+	if iserr(tlsClient) {
 		return ok;
 	}
 
 	var info = TlsInfo(tlsClient);
 	var requestBytes = _HttpReadRequest_(tlsClient, true);
 
-	if iserr(requestBytes)
-	{
+	if iserr(requestBytes) {
 		TlsClose(tlsClient);
 
 		return ok;
@@ -996,8 +1022,7 @@ func _HttpConnectionTLSWorker_(handler, state, certPath, keyPath)
 
 	var request = HttpParseRequest(requestBytes);
 
-	if iserr(request)
-	{
+	if iserr(request) {
 		TlsClose(tlsClient);
 
 		return ok;
@@ -1009,8 +1034,7 @@ func _HttpConnectionTLSWorker_(handler, state, certPath, keyPath)
 
 	var response = handler(state, request);
 
-	if iserr(response)
-	{
+	if iserr(response) {
 		TlsWrite(_HttpFormatServerResponse_(500, [], pack("Handler returned err."), "HttpServeTLS"), tlsClient);
 		TlsClose(tlsClient);
 
@@ -1036,22 +1060,26 @@ func _HttpConnectionTLSWorker_(handler, state, certPath, keyPath)
 #@ This function does not return unless an error occurs. See
 #@ ''HttpResponse(statusCode, body)''.
 
-func HttpServe(port, handler, state)
-{
+func HttpServe(port, handler, state) {
 	# Yes Rico, kaboom
-	if getuid() == 0 { return error("Will NOT run HTTP server as root, are you insane?"); }
+	if getuid() == 0 {
+		return error("Will NOT run HTTP server as root, are you insane?");
+	}
 
 	var server = sopen("0.0.0.0", port, SOCKLISTEN);
 
-	if iserr(server) { return err; }
+	if iserr(server) {
+		return err;
+	}
 
 	var reaper = actor(_HttpConnectionReaper_);
 
-	while true
-	{
+	while true {
 		var client = saccept(server);
 
-		if iserr(client) { continue; }
+		if iserr(client) {
+			continue;
+		}
 
 		var worker = actor(_HttpConnectionWorker_, handler, state);
 		var workerClient = transfer(worker, client);
@@ -1074,22 +1102,26 @@ func HttpServe(port, handler, state)
 #@ ''remotePort'', and ''serverName''. This function does not return unless an
 #@ error occurs. See ''HttpResponse(statusCode, body)''.
 
-func HttpServeTLS(port, certPath, keyPath, handler, state)
-{
+func HttpServeTLS(port, certPath, keyPath, handler, state) {
 	# Yes Rico, kaboom
-	if getuid() == 0 { return error("Will NOT run HTTP server as root, are you insane?"); }
+	if getuid() == 0 {
+		return error("Will NOT run HTTP server as root, are you insane?");
+	}
 
 	var server = sopen("0.0.0.0", port, SOCKLISTEN);
 
-	if iserr(server) { return err; }
+	if iserr(server) {
+		return err;
+	}
 
 	var reaper = actor(_HttpConnectionReaper_);
 
-	while true
-	{
+	while true {
 		var client = saccept(server);
 
-		if iserr(client) { continue; }
+		if iserr(client) {
+			continue;
+		}
 
 		var worker = actor(_HttpConnectionTLSWorker_, handler, state, certPath, keyPath);
 		var workerClient = transfer(worker, client);
@@ -1106,8 +1138,7 @@ func HttpServeTLS(port, certPath, keyPath, handler, state)
 #@ can be a string or bytes. Returns a map with ''statusCode'', ''headers''
 #@ (empty list), and ''body'' (as bytes).
 
-func HttpResponse(statusCode, body)
-{
+func HttpResponse(statusCode, body) {
 	var response = m[
 		"statusCode": statusCode,
 		"headers": [],
@@ -1124,8 +1155,7 @@ func HttpResponse(statusCode, body)
 #@ The ''body'' can be a string or bytes. Returns a map with ''statusCode'',
 #@ ''headers'', and ''body'' (as bytes).
 
-func HttpResponseWithHeaders(statusCode, headers, body)
-{
+func HttpResponseWithHeaders(statusCode, headers, body) {
 	var response = m[
 		"statusCode": statusCode,
 		"headers": headers,
@@ -1141,8 +1171,7 @@ func HttpResponseWithHeaders(statusCode, headers, body)
 #@ Parses ''url'' into components. Returns a map with ''scheme'', ''host'',
 #@ ''port'', ''path'', and ''query''. Returns ''err'' if the URL is invalid.
 
-func HttpParseUrl(url)
-{
+func HttpParseUrl(url) {
 	return _http_parseurl_(url);
 }
 
@@ -1153,8 +1182,7 @@ func HttpParseUrl(url)
 #@ into raw bytes. Returns HTTP/1.1 request bytes ready to send over a socket.
 #@ Returns ''err'' on failure.
 
-func HttpFormatRequest(method, path, headers, body)
-{
+func HttpFormatRequest(method, path, headers, body) {
 	return _http_formatrequest_(method, path, headers, body);
 }
 
@@ -1169,8 +1197,7 @@ func HttpFormatRequest(method, path, headers, body)
 #@ See: https://datatracker.ietf.org/doc/html/rfc9110 (15.).
 #@ See: https://datatracker.ietf.org/doc/html/rfc9112 (4.).
 
-func HttpParseResponse(responseBytes)
-{
+func HttpParseResponse(responseBytes) {
 	return _http_parseresponse_(responseBytes);
 }
 
@@ -1180,8 +1207,7 @@ func HttpParseResponse(responseBytes)
 #@ Decodes HTTP chunked transfer encoding from ''chunkedBytes''. Returns the
 #@ decoded bytes. Returns ''err'' if the chunked data is malformed.
 
-func HttpDechunk(chunkedBytes)
-{
+func HttpDechunk(chunkedBytes) {
 	return _http_dechunk_(chunkedBytes);
 }
 
@@ -1190,8 +1216,7 @@ func HttpDechunk(chunkedBytes)
 #@
 #@ Percent / URL-encodes ''text''. Returns the encoded string.
 
-func HttpUrlEncode(text)
-{
+func HttpUrlEncode(text) {
 	return _http_urlencode_(text);
 }
 
@@ -1201,8 +1226,7 @@ func HttpUrlEncode(text)
 #@ Percent / URL-decodes ''text''. Returns the decoded string on success or
 #@ ''err'' if the encoding is malformed.
 
-func HttpUrlDecode(text)
-{
+func HttpUrlDecode(text) {
 	return _http_urldecode_(text);
 }
 
@@ -1211,8 +1235,7 @@ func HttpUrlDecode(text)
 #@
 #@ Base64-encodes ''bytes''. Returns the encoded string.
 
-func HttpBase64Encode(bytes)
-{
+func HttpBase64Encode(bytes) {
 	return _http_base64encode_(bytes);
 }
 
@@ -1222,7 +1245,6 @@ func HttpBase64Encode(bytes)
 #@ Base64-decodes ''text''. Returns the decoded bytes on success or ''err'' if
 #@ the encoding is malformed.
 
-func HttpBase64Decode(text)
-{
+func HttpBase64Decode(text) {
 	return _http_base64decode_(text);
 }

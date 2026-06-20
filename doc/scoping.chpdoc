@@ -15,8 +15,7 @@ Chip's ''if'', ''while'', and ''for'' blocks do not create new scopes. Variables
 '''
 var x = 5;
 
-if true
-{
+if true {
     var y = 10;  # belongs to file scope
 }
 
@@ -28,8 +27,7 @@ var z = y;  # accessible here
 Only functions create new scopes. Variables declared in a function are isolated and inaccessible outside:
 
 '''
-func MyFunc()
-{
+func MyFunc() {
     var local = 20;
 }
 

@@ -1,6 +1,6 @@
 *chippy* | V-$CHIPVR ($CHIPCN)
 
-ChipLang interpreter and toolchain
+Chippy interpreter and toolchain
 
 *Usage:*
 
@@ -32,3 +32,8 @@ ChipLang interpreter and toolchain
 
   ''chippy check <files...>''         Check files for errors
   ''chippy check all [dir]''          Check ''.chp'' and ''.chh'' files recursively
+
+  ''chippy format <files...>''        Format files
+  ''chippy format all [dir]''         Format ''.chp'' and ''.chh'' files recursively
+  ''chippy format check <files...>''  Report which files need formatting
+  ''chippy format check all [dir]''   Report recursively which files need formatting

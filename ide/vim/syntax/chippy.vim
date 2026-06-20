@@ -1,5 +1,5 @@
 " Vim syntax file
-" Language: ChipLang
+" Language: Chippy
 " Maintainer: ideumi
 " Latest Revision: 2026-06-13
 
@@ -83,4 +83,4 @@ hi def link chipFloat Float
 hi def link chipDelimiter Delimiter
 hi def link chipShebang PreProc
 
-let b:current_syntax = "chiplang"
+let b:current_syntax = "chippy"

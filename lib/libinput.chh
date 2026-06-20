@@ -12,22 +12,25 @@ load("libterm.chh");
 #@ Reads STDIN until a newline byte is encountered and
 #@ returns the data in UTF-8 text.
 
-func Input()
-{
+func Input() {
 	var result = [];
 	var keepReading = true;
 
-	while keepReading
-	{
+	while keepReading {
 		var bytes = fread(STDIN, 1);
 
-		if iserr(bytes) { return err; }
+		if iserr(bytes) {
+			return err;
+		}
 
 		var byte = bytes[1];
 
 		# 10 = \n
-		if byte == 10 { keepReading = false; }
-		else { append(result, byte); }
+		if byte == 10 {
+			keepReading = false;
+		} else {
+			append(result, byte);
+		}
 	}
 
 	return unpack(pack(result));
@@ -39,11 +42,12 @@ func Input()
 #@ Reads STDIN until a newline byte is encountered without echoing
 #@ characters. Returns the data in UTF-8 text.
 
-func InputPw()
-{
+func InputPw() {
 	var saved = getterm();
 
-	if iserr(saved) { return err; }
+	if iserr(saved) {
+		return err;
+	}
 
 	var noecho = saved + m["lflag": saved["lflag"] band bnot ECHO];
 

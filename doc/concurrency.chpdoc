@@ -2,15 +2,14 @@
 
 *The Model*
 
-ChipLang uses an actor model for concurrency. Actors are isolated units of execution that communicate through message passing.
+Chippy uses an actor model for concurrency. Actors are isolated units of execution that communicate through message passing.
 
-Every ChipLang program starts as the main actor (''CHIPRT == 0''). You spawn new actors with ''actor(function, arg1, arg2, ...)'', which returns a handle. The spawned actor runs that function in its own interpreter with its own I/O handles. When the function returns, the actor is completed.
+Every Chippy program starts as the main actor (''CHIPRT == 0''). You spawn new actors with ''actor(function, arg1, arg2, ...)'', which returns a handle. The spawned actor runs that function in its own interpreter with its own I/O handles. When the function returns, the actor is completed.
 
 Every runtime knows its own ID through the ''CHIPRT'' constant. Main is always ''0''. Each spawned actor has its own non-zero ID. ''CHIPRT'' is set per runtime actor and never inherited from the spawner.
 
 '''
-func Worker(x)
-{
+func Worker(x) {
     return x * 2;
 }
 
@@ -35,8 +34,7 @@ Actors communicate with ''send(handle, value)'' and ''receive(blocking)''.
 If an actor needs to talk back to its spawner, the spawner passes its own ''CHIPRT'' as an argument:
 
 '''
-func Greeter(spawner)
-{
+func Greeter(spawner) {
     var msgs = receive(true);
     send(spawner, "Hello " + msgs[1]);
 
@@ -56,8 +54,7 @@ var ret = wait(a);
 ''receive(blocking)'' returns all messages that have accumulated since the last call. If three ''send(handle, value)'' calls happened before the actor called ''receive(blocking)'', the returned list has three elements. The inbox is emptied on each ''receive(blocking)''.
 
 '''
-func Collector()
-{
+func Collector() {
     sleep(100);
     var msgs = receive(true);
 
@@ -101,7 +98,7 @@ Each incoming signal is delivered to exactly one ''signal()'' waiter, chosen arb
 
 *Deadlock Detection*
 
-The runtime tracks every blocking call (''receive(true)'', ''wait(handle)'', ''signal()''). When every actor is blocked and nothing outside the program can wake one up, the blocked calls are cancelled and each raises a runtime error. This prevents a ChipLang program from hanging silently on a programming mistake.
+The runtime tracks every blocking call (''receive(true)'', ''wait(handle)'', ''signal()''). When every actor is blocked and nothing outside the program can wake one up, the blocked calls are cancelled and each raises a runtime error. This prevents a Chippy program from hanging silently on a programming mistake.
 
 *Architecture*
 

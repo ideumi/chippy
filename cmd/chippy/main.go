@@ -58,6 +58,12 @@ func main() {
 		return
 	}
 
+	// Handle format command
+	if len(args) > 0 && args[0] == "format" {
+		handleFormatCommand(args[1:])
+		return
+	}
+
 	rr := roadrunner.NewRoadRunner2()
 
 	// Start REPL
@@ -85,12 +91,12 @@ func main() {
 }
 
 func runREPL(rr *roadrunner.RoadRunner2) {
-	fmt.Printf("chippy (ChipLang) V-%s '%s' from %s on %s-%s.\n",
+	fmt.Printf("chippy V-%s '%s' from %s on %s-%s.\n",
 		constants.STR_LPLVR, constants.STR_LPLCN, constants.VERSION_DATE, runtime.GOOS, runtime.GOARCH)
 
 	if runtime.GOOS != "linux" && runtime.GOOS != "android" {
 		// TODO: Remove this, once testing on the other UNIXes is complete.
-		fmt.Printf("WARNING: ChipLang has not been tested on %s, tread lightly.\n", runtime.GOOS)
+		fmt.Printf("WARNING: Chippy has not been tested on %s, tread lightly.\n", runtime.GOOS)
 	}
 
 	homeDir, err := os.UserHomeDir()

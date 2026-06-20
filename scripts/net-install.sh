@@ -1,10 +1,10 @@
 #!/bin/sh
-# curl -fsSL https://codeberg.org/ideumi/chip-go/raw/branch/main/scripts/net-install.sh | sh
+# curl -fsSL https://codeberg.org/ideumi/chippy/raw/branch/main/scripts/net-install.sh | sh
 
 set -e
 
-REPO="ideumi/chip-go"
-PREFIX="chiplang"
+REPO="ideumi/chippy"
+PREFIX="chippy"
 
 die() { echo "Error: $1" >&2; exit 1; }
 

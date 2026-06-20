@@ -1,7 +1,7 @@
 *Core Library* | V-$CHIPVR ($CHIPCN)
 
-The ChipLang core library (corelib) is a comprehensive collection of libraries written in Chip that abstracts interpreter primitives to provide convenient, high-level functionality for common programming tasks.
+The Chippy core library (corelib) is a comprehensive collection of libraries written in Chip that abstracts interpreter primitives to provide convenient, high-level functionality for common programming tasks.
 
 Unlike builtins, which are implemented in Go and available automatically, core library modules must be explicitly loaded using ''load()'', see ''combine''.
 
-The core library is installed under ''/usr/lib/chiplang/'' and contains all necessary documentation. The source code for the core library can be found in the ChipLang source tree under ''lib/''.
+The core library is installed under ''/usr/lib/chippy/'' and contains all necessary documentation. The source code for the core library can be found in the Chippy source tree under ''lib/''.

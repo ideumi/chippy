@@ -1,26 +1,26 @@
 <p align="center">
-  <img src="media/ChipLogo.svg" alt="ChipLang Logo" width="200"/>
+  <img src="media/ChipLogo.svg" alt="Chippy Logo" width="200"/>
 </p>
 
 <p align="center">
-  <a href="https://codeberg.org/ideumi/chip-go/releases"><img src="https://img.shields.io/gitea/v/release/ideumi/chip-go?gitea_url=https%3A%2F%2Fcodeberg.org&label=release" alt="Latest release"/></a>
+  <a href="https://codeberg.org/ideumi/chippy/releases"><img src="https://img.shields.io/gitea/v/release/ideumi/chippy?gitea_url=https%3A%2F%2Fcodeberg.org&label=release" alt="Latest release"/></a>
   <img src="https://img.shields.io/badge/license-BSD--2--Clause-green" alt="License"/>
 </p>
 
-# ChipLang
+# Chippy
 
-ChipLang (Chipmunk language, or simply `chippy`) is an interpreted scripting and programming language written in Go. It aims to be simple, modular, and hackable: explicit over abstract, imperative, easy to trace, with direct access to the operating system. It's built for tooling that has outgrown the shell.
+Chippy is an interpreted scripting and programming language written in Go. It aims to be simple, modular, and hackable: explicit over abstract, imperative, easy to trace, with direct access to the operating system. It's built for tooling that has outgrown the shell.
 
 ### Installation for [Supported Platforms](#supported-platforms)
 
-ChipLang can be installed or updated to the latest version by running the following command in your terminal:
+Chippy can be installed or updated to the latest version by running the following command in your terminal:
 
 ```bash
-curl -fsSL https://codeberg.org/ideumi/chip-go/raw/branch/main/scripts/net-install.sh | sh
+curl -fsSL https://codeberg.org/ideumi/chippy/raw/branch/main/scripts/net-install.sh | sh
 ```
 > It is best practice to review any script before running it in your terminal. You can read it [here](scripts/net-install.sh).
 
-### [View Releases](https://codeberg.org/ideumi/chip-go/releases) | [Getting Started](#getting-started) | [Developer Quick Start Guide](QUICKSTART.md)
+### [View Releases](https://codeberg.org/ideumi/chippy/releases) | [Getting Started](#getting-started) | [Developer Quick Start Guide](QUICKSTART.md)
 
 ## Features
 
@@ -74,7 +74,7 @@ curl -fsSL https://codeberg.org/ideumi/chip-go/raw/branch/main/scripts/net-insta
     - Syntax validation and symbol collision detection
 
 **Hello World Sample**
-```chiplang
+```chippy
 load("libprint.chh");
 Println("Hello World");
 ```
@@ -91,10 +91,10 @@ Println("Hello World");
 
 ## Installation / Updating
 
-ChipLang can be installed or updated to the latest version by running the following command in your terminal:
+Chippy can be installed or updated to the latest version by running the following command in your terminal:
 
 ```bash
-curl -fsSL https://codeberg.org/ideumi/chip-go/raw/branch/main/scripts/net-install.sh | sh
+curl -fsSL https://codeberg.org/ideumi/chippy/raw/branch/main/scripts/net-install.sh | sh
 ```
 > It is best practice to review any script before running it in your terminal. You can read it [here](scripts/net-install.sh).
 
@@ -102,8 +102,8 @@ or by using the...
 
 ### Manual Method
 
-1. Download the tarball matching your architecture from the [releases page](https://codeberg.org/ideumi/chip-go/releases).
-2. Extract: `tar -xf chiplang-<version>-linux-<arch>.tar.xz`.
+1. Download the tarball matching your architecture from the [releases page](https://codeberg.org/ideumi/chippy/releases).
+2. Extract: `tar -xf chippy-<version>-linux-<arch>.tar.xz`.
 3. Run `sudo ./install.sh` (or `./install.sh` on Termux) from inside the extracted directory.
 
 ## Getting Started
@@ -112,11 +112,11 @@ Once installed, the interpreter is `chippy`. Run `chippy --help` for an overview
 
 ### For Users
 
-To run a ChipLang program, run it either directly with `./<program>` or by using `chippy <program>`.
+To run a Chippy program, run it either directly with `./<program>` or by using `chippy <program>`.
 
 ### For Developers
 
-To start writing your own ChipLang programs, read the [Developer Quick Start Guide](QUICKSTART.md).
+To start writing your own Chippy programs, read the [Developer Quick Start Guide](QUICKSTART.md).
 
 ## Uninstallation
 
@@ -130,8 +130,8 @@ Requirements:
 - make
 
 ```bash
-git clone https://codeberg.org/ideumi/chip-go
-cd chip-go
+git clone https://codeberg.org/ideumi/chippy
+cd chippy
 make
 ```
 
@@ -147,6 +147,6 @@ make release-all
 
 ## License
 
-ChipLang is licensed under the 2-Clause BSD License. See `LICENCE.txt`.
+Chippy is licensed under the 2-Clause BSD License. See `LICENCE.txt`.
 
 Third-party components are licensed under their respective licenses. See `LICENCES_THIRDPARTY.txt` and `thirdparty/`.

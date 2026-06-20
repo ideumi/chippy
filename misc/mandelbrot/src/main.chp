@@ -16,40 +16,34 @@ var SIZECOLS = TERMSZE["columns"];
 
 # Regular terminal columns to cartesian coordiates
 
-func CalcColCoord(maxCol, col)
-{
+func CalcColCoord(maxCol, col) {
 	return Scale(col, -2.0, 2.0, 0, maxCol);
 }
 
 # Regular terminal rows to cartesian coordiates
 
-func CalcRowCoord(maxRow, row)
-{
+func CalcRowCoord(maxRow, row) {
 	return Scale(row, -2.0, 2.0, 0, maxRow);
 }
 
-func Scale(unscaled, minAllowed, maxAllowed, min, max)
-{
+func Scale(unscaled, minAllowed, maxAllowed, min, max) {
 	return (maxAllowed - minAllowed) * (unscaled - min) / (max - min) + minAllowed;
 }
 
 # Determine if a number is part of the set
 
-func CalculateMB(col, row, iter)
-{
+func CalculateMB(col, row, iter) {
 	var cReal = CalcColCoord(SIZECOLS, col);
 	var cImag = -CalcRowCoord(SIZEROWS, row);
 
 	var zReal = 0;
 	var zImag = 0;
 
-	for x = 1 to iter
-	{
+	for x = 1 to iter {
 		var zRealNew = (zReal ^ 2) - (zImag ^ 2) + cReal;
 		var zImagNew = 2 * zReal * zImag + cImag;
 
-		if (zRealNew ^ 2) + (zImagNew ^ 2) > 4
-		{
+		if (zRealNew ^ 2) + (zImagNew ^ 2) > 4 {
 			return x;
 		}
 
@@ -60,21 +54,17 @@ func CalculateMB(col, row, iter)
 	return iter;
 }
 
-func Main()
-{
+func Main() {
 	HideCursor();
 	ClearScreen();
 
 	SetAttribute(COLORGREEN);
 
-	for row = 1 to SIZEROWS
-	{
-		for col = 1 to SIZECOLS
-		{
+	for row = 1 to SIZEROWS {
+		for col = 1 to SIZECOLS {
 			CursorTo(row, col);
 
-			if CalculateMB(col, row, 50) >= 50
-			{
+			if CalculateMB(col, row, 50) >= 50 {
 				fwrite(pack("█"), STDOUT);
 				continue;
 			}
