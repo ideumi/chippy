@@ -7,32 +7,34 @@ load("libprint.chh");
 load("libavantjien.chh");
 load("libmath.chh");
 
-func PrintHighlighted(text) {
+func PrintHighlighted(text)
+{
 	var escapeStart = b[27, 91, 55, 109];
 	var escapeEnd = b[27, 91, 48, 109];
-
+	
 	fwrite(escapeStart + pack(text) + escapeEnd, STDOUT);
 }
 
-func PrintTrueFalse(value) {
-	if value {
-		return "Yes";
-	}
+func PrintTrueFalse(value)
+{
+	if value { return "Yes"; }
 	return "No";
 }
 
-func PrintDetail(aDay, aMonth, aYear, cycle, timePeriod, isPrime, isNewMonth, isNewYear) {
+func PrintDetail(aDay, aMonth, aYear, cycle, timePeriod, isPrime, isNewMonth, isNewYear)
+{
 	var monthName = AvantjienMonthName(aMonth);
 	var monthShort = AvantjienMonthShort(aMonth);
-
+	
 	var daySymbol = "N";
 	var daySymbolVerbose = "Nighttime";
 
-	if cycle == 1 {
+	if cycle == 1
+	{
 		daySymbol = "D";
 		daySymbolVerbose = "Daytime";
 	}
-
+	
 	Println(str(aDay) + ". " + monthName + " of year " + str(aYear));
 	Println("Current Time: " + str(timePeriod) + " at " + daySymbolVerbose);
 	Println("");
@@ -41,40 +43,43 @@ func PrintDetail(aDay, aMonth, aYear, cycle, timePeriod, isPrime, isNewMonth, is
 	Println("New month:\t\t" + PrintTrueFalse(isNewMonth));
 	Println("New year:\t\t" + PrintTrueFalse(isNewYear));
 	Println("");
-
+	
 	Println(monthName + ":");
-
+	
 	var x = 1;
-
-	while x <= 90 {
+	
+	while x <= 90
+	{
 		var sep = "  ";
 
-		if len(str(x)) == 2 {
+		if len(str(x)) == 2
+		{
 			sep = " ";
 		}
-
-		if x == aDay {
+		
+		if x == aDay
+		{
 			PrintHighlighted(str(x));
 			Print(sep);
-		} else {
+		}
+		else
+		{
 			Print(str(x) + sep);
 		}
-
-		if Mod(x, 10) == 0 {
+		
+		if Mod(x, 10) == 0
+		{
 			Println("");
 		}
-
+		
 		x = x + 1;
 	}
-
+	
 	var specialSuffix = "";
 
-	if isNewYear {
-		specialSuffix = " (NY)";
-	} elseif isNewMonth {
-		specialSuffix = " (NM)";
-	}
-
+	if isNewYear { specialSuffix = " (NY)"; }
+	elseif isNewMonth { specialSuffix = " (NM)"; }
+	
 	Println("");
 	Println(str(aDay) + "." + str(aMonth) + "." + str(aYear) + " " + monthShort + " ‒ " + daySymbol + str(timePeriod) + specialSuffix);
 }

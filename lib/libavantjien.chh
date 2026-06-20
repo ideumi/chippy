@@ -60,13 +60,10 @@ var AVANTJIENPOCHTIMESTAMP = 1545350400;
 #@
 #@ Calculates days since epoch from ''timestamp''.
 
-func DaysSinceAvantjienEpoch(timestamp) {
-	if timestamp < 0 {
-		return err;
-	}
-	if timestamp < AVANTJIENPOCHTIMESTAMP {
-		return err;
-	}
+func DaysSinceAvantjienEpoch(timestamp)
+{
+	if timestamp < 0 { return err; }
+	if timestamp < AVANTJIENPOCHTIMESTAMP { return err; }
 
 	var secondsDelta = timestamp - AVANTJIENPOCHTIMESTAMP;
 
@@ -78,18 +75,18 @@ func DaysSinceAvantjienEpoch(timestamp) {
 #@
 #@ Calculates date ''[day, month, year]'' from ''timestamp''.
 
-func AvantjienDate(timestamp) {
+func AvantjienDate(timestamp)
+{
 	var daysDelta = DaysSinceAvantjienEpoch(timestamp);
 
-	if iserr(daysDelta) {
-		return err;
-	}
+	if iserr(daysDelta) { return err; }
 
 	var avantYear = int(daysDelta / DAYSINAVANTYEAR) + 1;
 	var avantMonth = int((daysDelta / DAYSINAVANTMONTH) + 1);
 	var avantDay = int((daysDelta - (DAYSINAVANTMONTH * avantMonth)) + (DAYSINAVANTMONTH + 1));
 
-	while avantMonth > MONTHSINAVANTYEAR {
+	while avantMonth > MONTHSINAVANTYEAR
+	{
 		avantMonth = avantMonth - MONTHSINAVANTYEAR;
 	}
 
@@ -101,7 +98,8 @@ func AvantjienDate(timestamp) {
 #@
 #@ Returns the current day from ''timestamp''.
 
-func AvantjienDay(timestamp) {
+func AvantjienDay(timestamp)
+{
 	return AvantjienDate(timestamp)[1];
 }
 
@@ -110,7 +108,8 @@ func AvantjienDay(timestamp) {
 #@
 #@ Returns the current month from ''timestamp''.
 
-func AvantjienMonth(timestamp) {
+func AvantjienMonth(timestamp)
+{
 	return AvantjienDate(timestamp)[2];
 }
 
@@ -119,7 +118,8 @@ func AvantjienMonth(timestamp) {
 #@
 #@ Returns the current year from ''timestamp''.
 
-func AvantjienYear(timestamp) {
+func AvantjienYear(timestamp)
+{
 	return AvantjienDate(timestamp)[3];
 }
 
@@ -128,10 +128,9 @@ func AvantjienYear(timestamp) {
 #@
 #@ Returns the long name of ''month''.
 
-func AvantjienMonthName(month) {
-	if month < 1 or month > MONTHSINAVANTYEAR {
-		return err;
-	}
+func AvantjienMonthName(month)
+{
+	if month < 1 or month > MONTHSINAVANTYEAR { return err; }
 
 	return AVANTMONTHS[month];
 }
@@ -141,10 +140,9 @@ func AvantjienMonthName(month) {
 #@
 #@ Returns the short name of ''month''.
 
-func AvantjienMonthShort(month) {
-	if month < 1 or month > MONTHSINAVANTYEAR {
-		return err;
-	}
+func AvantjienMonthShort(month)
+{
+	if month < 1 or month > MONTHSINAVANTYEAR { return err; }
 
 	return AVANTMONTHSSHORT[month];
 }
@@ -154,22 +152,17 @@ func AvantjienMonthShort(month) {
 #@
 #@ Returns current cycle at ''timestamp'' (1 = day, 0 = night).
 
-func AvantjienCycle(timestamp) {
-	if timestamp < 0 {
-		return err;
-	}
+func AvantjienCycle(timestamp)
+{
+	if timestamp < 0 { return err; }
 
 	var timeComponents = GregorianParseTime(timestamp);
 
-	if iserr(timeComponents) {
-		return err;
-	}
+	if iserr(timeComponents) { return err; }
 
 	var hour = timeComponents[4];
 
-	if hour >= AVANTCYCLESTART and hour < AVANTCYCLEEND {
-		return 1;
-	}
+	if hour >= AVANTCYCLESTART and hour < AVANTCYCLEEND { return 1; }
 
 	return 0;
 }
@@ -179,46 +172,27 @@ func AvantjienCycle(timestamp) {
 #@
 #@ Returns time period at ''timestamp''. See HERA's 60.2.5, Page 3.
 
-func AvantjienTime(timestamp) {
-	if timestamp < 0 {
-		return err;
-	}
+func AvantjienTime(timestamp)
+{
+	if timestamp < 0 { return err; }
 
 	var timeComponents = GregorianParseTime(timestamp);
 
-	if iserr(timeComponents) {
-		return err;
-	}
+	if iserr(timeComponents) { return err; }
 
 	var hour = timeComponents[4];
 
 	# Day periods (cycle 1): 8AM-8PM
-	if hour >= 8 and hour < 11 {
-		return 1;
-	} # 8AM-11AM
-	if hour >= 11 and hour < 14 {
-		return 2;
-	} # 11AM-2PM
-	if hour >= 14 and hour < 17 {
-		return 3;
-	} # 2PM-5PM
-	if hour >= 17 and hour < 20 {
-		return 4;
-	} # 5PM-8PM
+	if hour >= 8 and hour < 11 { return 1; }   # 8AM-11AM
+	if hour >= 11 and hour < 14 { return 2; }  # 11AM-2PM
+	if hour >= 14 and hour < 17 { return 3; }  # 2PM-5PM
+	if hour >= 17 and hour < 20 { return 4; }  # 5PM-8PM
 
 	# Night periods (cycle 0): 8PM-8AM
-	if hour >= 20 and hour < 23 {
-		return 1;
-	} # 8PM-11PM
-	if hour >= 23 or hour < 2 {
-		return 2;
-	} # 11PM-2AM
-	if hour >= 2 and hour < 5 {
-		return 3;
-	} # 2AM-5AM
-	if hour >= 5 and hour < 8 {
-		return 4;
-	} # 5AM-8AM
+	if hour >= 20 and hour < 23 { return 1; }  # 8PM-11PM
+	if hour >= 23 or hour < 2 { return 2; }    # 11PM-2AM
+	if hour >= 2 and hour < 5 { return 3; }    # 2AM-5AM
+	if hour >= 5 and hour < 8 { return 4; }    # 5AM-8AM
 
 	return err;
 }
@@ -229,56 +203,38 @@ func AvantjienTime(timestamp) {
 #@ Converts Avantjien date and cycle to UNIX timestamp. Normal time is
 #@ returned as the start time of the relevant cycle according to 60.2.5.
 
-func AvantjienDateToTimestamp(aYear, aMonth, aDay, cycle, timePeriod) {
-	if aDay < 1 or aDay > DAYSINAVANTMONTH {
-		return err;
-	}
+func AvantjienDateToTimestamp(aYear, aMonth, aDay, cycle, timePeriod)
+{
+	if aDay < 1 or aDay > DAYSINAVANTMONTH { return err; }
 
-	if aMonth < 1 or aMonth > MONTHSINAVANTYEAR {
-		return err;
-	}
+	if aMonth < 1 or aMonth > MONTHSINAVANTYEAR { return err; }
 
-	if aYear < 1 {
-		return err;
-	}
+	if aYear < 1 { return err; }
 
-	if cycle < 0 or cycle > 1 {
-		return err;
-	}
+	if cycle < 0 or cycle > 1 { return err; }
 
-	if timePeriod < 1 or timePeriod > 4 {
-		return err;
-	}
+	if timePeriod < 1 or timePeriod > 4 { return err; }
 
 	var daysDelta = (DAYSINAVANTYEAR * (aYear - 1)) + (DAYSINAVANTMONTH * (aMonth - 1)) + (aDay - 1);
 	var baseTimestamp = AVANTJIENPOCHTIMESTAMP + (daysDelta * SECONDSPERDAY);
 
 	var hour = 0;
 
-	if cycle == 1 {
-		if timePeriod == 1 {
-			hour = 8;
-		} elseif timePeriod == 2 {
-			hour = 11;
-		} elseif timePeriod == 3 {
-			hour = 14;
-		} elseif timePeriod == 4 {
-			hour = 17;
-		} else {
-			return err;
-		}
-	} else {
-		if timePeriod == 1 {
-			hour = 20;
-		} elseif timePeriod == 2 {
-			hour = 23;
-		} elseif timePeriod == 3 {
-			hour = 2;
-		} elseif timePeriod == 4 {
-			hour = 5;
-		} else {
-			return err;
-		}
+	if cycle == 1
+	{
+		if timePeriod == 1 { hour = 8; }
+		elseif timePeriod == 2 { hour = 11; }
+		elseif timePeriod == 3 { hour = 14; }
+		elseif timePeriod == 4 { hour = 17; }
+		else { return err; }
+	}
+	else
+	{
+		if timePeriod == 1 { hour = 20; }
+		elseif timePeriod == 2 { hour = 23; }
+		elseif timePeriod == 3 { hour = 2; }
+		elseif timePeriod == 4 { hour = 5; }
+		else { return err; }
 	}
 
 	return baseTimestamp + (hour * SECONDSPERHOUR);
@@ -289,14 +245,11 @@ func AvantjienDateToTimestamp(aYear, aMonth, aDay, cycle, timePeriod) {
 #@
 #@ Checks if ''day'' and ''month'' constitute prime (falame) day.
 
-func IsAvantjienPrime(day, month) {
-	if day < 1 or day > DAYSINAVANTMONTH {
-		return err;
-	}
+func IsAvantjienPrime(day, month)
+{
+	if day < 1 or day > DAYSINAVANTMONTH { return err; }
 
-	if month < 1 or month > MONTHSINAVANTYEAR {
-		return err;
-	}
+	if month < 1 or month > MONTHSINAVANTYEAR { return err; }
 
 	return (Mod(day, 10) == 0 and day != 1);
 }
@@ -306,14 +259,11 @@ func IsAvantjienPrime(day, month) {
 #@
 #@ Checks if ''day'' and ''month'' constitute a new month.
 
-func IsAvantjienNewMonth(day, month) {
-	if day < 1 or day > DAYSINAVANTMONTH {
-		return err;
-	}
+func IsAvantjienNewMonth(day, month)
+{
+	if day < 1 or day > DAYSINAVANTMONTH { return err; }
 
-	if month < 1 or month > MONTHSINAVANTYEAR {
-		return err;
-	}
+	if month < 1 or month > MONTHSINAVANTYEAR { return err; }
 
 	return (day == 1 and month != 1);
 }
@@ -323,14 +273,11 @@ func IsAvantjienNewMonth(day, month) {
 #@
 #@ Checks if ''day'' and ''month'' constitute an new year.
 
-func IsAvantjienNewYear(day, month) {
-	if day < 1 or day > DAYSINAVANTMONTH {
-		return err;
-	}
+func IsAvantjienNewYear(day, month)
+{
+	if day < 1 or day > DAYSINAVANTMONTH { return err; }
 
-	if month < 1 or month > MONTHSINAVANTYEAR {
-		return err;
-	}
+	if month < 1 or month > MONTHSINAVANTYEAR { return err; }
 
 	return (day == 1 and month == 1);
 }
@@ -340,12 +287,11 @@ func IsAvantjienNewYear(day, month) {
 #@
 #@ Returns ''timestamp'' as date string "D.M.Y".
 
-func FormatAvantjienDate(timestamp) {
+func FormatAvantjienDate(timestamp)
+{
 	var avantDate = AvantjienDate(timestamp);
 
-	if iserr(avantDate) {
-		return err;
-	}
+	if iserr(avantDate) { return err; }
 
 	var aDay = avantDate[1];
 	var aMonth = avantDate[2];

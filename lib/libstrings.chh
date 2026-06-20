@@ -9,10 +9,9 @@
 #@ Returns ''true'' if ''value'' starts with the given ''prefix'', ''false''
 #@ otherwise.
 
-func StartsWith(value, prefix) {
-	if len(prefix) > len(value) {
-		return false;
-	}
+func StartsWith(value, prefix)
+{
+	if len(prefix) > len(value) { return false; }
 
 	return slice(value, 1, len(prefix)) == prefix;
 }
@@ -23,10 +22,9 @@ func StartsWith(value, prefix) {
 #@ Returns ''true'' if ''value'' ends with the given ''suffix'', ''false''
 #@ otherwise.
 
-func EndsWith(value, suffix) {
-	if len(suffix) > len(value) {
-		return false;
-	}
+func EndsWith(value, suffix)
+{
+	if len(suffix) > len(value) { return false; }
 
 	var start = len(value) - len(suffix) + 1;
 
@@ -39,14 +37,11 @@ func EndsWith(value, suffix) {
 #@ Returns the leftmost ''count'' characters from ''value'', or ''err'' if
 #@ ''count'' is negative.
 
-func Left(value, count) {
-	if count < 0 {
-		return err;
-	}
+func Left(value, count)
+{
+	if count < 0 { return err; }
 
-	if count > len(value) {
-		return value;
-	}
+	if count > len(value) { return value; }
 
 	return slice(value, 1, count);
 }
@@ -57,14 +52,11 @@ func Left(value, count) {
 #@ Returns the rightmost ''count'' characters from ''value'', or ''err'' if
 #@ ''count'' is negative.
 
-func Right(value, count) {
-	if count < 0 {
-		return err;
-	}
+func Right(value, count)
+{
+	if count < 0 { return err; }
 
-	if count > len(value) {
-		return value;
-	}
+	if count > len(value) { return value; }
 
 	var start = len(value) - count + 1;
 
@@ -76,11 +68,13 @@ func Right(value, count) {
 #@
 #@ Returns ''value'' with characters in reverse order.
 
-func Reverse(value) {
+func Reverse(value)
+{
 	var result = "";
 	var i = len(value);
 
-	while i >= 1 {
+	while i >= 1
+	{
 		result = result + charat(value, i);
 		i = i - 1;
 	}
@@ -94,13 +88,10 @@ func Reverse(value) {
 #@ Returns ''value'' with the character at ''idx'' replaced by ''char'', or ''err''
 #@ if ''char'' is not exactly one character or ''idx'' is out of bounds.
 
-func ReplaceCharAt(value, idx, char) {
-	if len(char) != 1 {
-		return err;
-	}
-	if idx < 1 or idx > len(value) {
-		return err;
-	}
+func ReplaceCharAt(value, idx, char)
+{
+	if len(char) != 1 { return err; }
+	if idx < 1 or idx > len(value) { return err; }
 
 	return slice(value, 1, idx - 1) + char + slice(value, idx + 1, len(value));
 }
@@ -110,13 +101,16 @@ func ReplaceCharAt(value, idx, char) {
 #@
 #@ Removes whitespace characters from the beginning of ''value''.
 
-func TrimLeft(value) {
+func TrimLeft(value)
+{
 	var i = 1;
 
-	while i <= len(value) {
+	while i <= len(value)
+	{
 		var ch = charat(value, i);
 
-		if ch != " " and ch != "\t" and ch != "\n" and ch != "\r" {
+		if ch != " " and ch != "\t" and ch != "\n" and ch != "\r"
+		{
 			break;
 		}
 
@@ -131,13 +125,16 @@ func TrimLeft(value) {
 #@
 #@ Removes whitespace characters from the end of ''value''.
 
-func TrimRight(value) {
+func TrimRight(value)
+{
 	var i = len(value);
 
-	while i >= 1 {
+	while i >= 1
+	{
 		var ch = charat(value, i);
 
-		if ch != " " and ch != "\t" and ch != "\n" and ch != "\r" {
+		if ch != " " and ch != "\t" and ch != "\n" and ch != "\r"
+		{
 			break;
 		}
 
@@ -152,7 +149,8 @@ func TrimRight(value) {
 #@
 #@ Removes whitespace characters from the beginning and end of ''value''.
 
-func Trim(value) {
+func Trim(value)
+{
 	return TrimLeft(TrimRight(value));
 }
 
@@ -162,23 +160,22 @@ func Trim(value) {
 #@ Splits ''value'' on ''delimiter'' and collapses repeated delimiters.
 #@ Returns a list of non-empty strings.
 
-func SplitCollapse(value, delimiter) {
-	if delimiter == "" {
-		return err;
-	}
+func SplitCollapse(value, delimiter)
+{
+	if delimiter == "" { return err; }
 
 	var trimmed = Trim(value);
-	if trimmed == "" {
-		return [];
-	}
+	if trimmed == "" { return []; }
 
 	var parts = split(trimmed, delimiter);
 	var result = [];
 
-	for i = 1 to len(parts) {
+	for i = 1 to len(parts)
+	{
 		var part = parts[i];
 
-		if part != "" {
+		if part != ""
+		{
 			append(result, part);
 		}
 	}
@@ -195,69 +192,76 @@ func SplitCollapse(value, delimiter) {
 #@ Returns ''err'' if specifiers don't match values count or if format is
 #@ invalid.
 
-func Format(value, values) {
-	if type(values) != "list" {
-		return err;
-	}
+func Format(value, values)
+{
+	if type(values) != "list" { return err; }
 
 	var parts = [];
 	var valIndex = 1;
 	var i = 1;
 
-	while i <= len(value) {
+	while i <= len(value)
+	{
 		var ch = charat(value, i);
 
-		if ch == "%" {
-			if i + 1 <= len(value) {
+		if ch == "%"
+		{
+			if i + 1 <= len(value)
+			{
 				var next = charat(value, i + 1);
 
-				if next == "%" {
+				if next == "%"
+				{
 					append(parts, "%");
 
 					i = i + 2;
-				} elseif next == "s" {
-					if valIndex > len(values) {
-						return err;
-					}
+				}
+				elseif next == "s"
+				{
+					if valIndex > len(values) { return err; }
 
 					append(parts, str(values[valIndex]));
 
 					valIndex = valIndex + 1;
 					i = i + 2;
-				} elseif next == "i" {
-					if valIndex > len(values) {
-						return err;
-					}
+				}
+				elseif next == "i"
+				{
+					if valIndex > len(values) { return err; }
 
 					append(parts, str(int(values[valIndex])));
 
 					valIndex = valIndex + 1;
 					i = i + 2;
-				} elseif next == "n" {
-					if valIndex > len(values) {
-						return err;
-					}
+				}
+				elseif next == "n"
+				{
+					if valIndex > len(values) { return err; }
 
 					append(parts, str(num(values[valIndex])));
 
 					valIndex = valIndex + 1;
 					i = i + 2;
-				} else {
+				}
+				else
+				{
 					return err;
 				}
-			} else {
+			}
+			else
+			{
 				return err;
 			}
-		} else {
+		}
+		else
+		{
 			append(parts, ch);
 
 			i = i + 1;
 		}
 	}
 
-	if valIndex != len(values) + 1 {
-		return err;
-	}
+	if valIndex != len(values) + 1 { return err; }
 
 	return join(parts, "");
 }

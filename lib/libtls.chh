@@ -12,7 +12,8 @@ loadopt("tls");
 #@ to skip certificate verification. Returns a TLS handle on success, ''err''
 #@ on failure.
 
-func TlsOpen(host, port, verify) {
+func TlsOpen(host, port, verify)
+{
 	return _tls_open_(host, port, verify);
 }
 
@@ -22,7 +23,8 @@ func TlsOpen(host, port, verify) {
 #@ Reads up to ''maxBytes'' from TLS connection ''handle''. Returns the read
 #@ bytes on success, ''err'' on failure.
 
-func TlsRead(handle, maxBytes) {
+func TlsRead(handle, maxBytes)
+{
 	return _tls_read_(handle, maxBytes);
 }
 
@@ -32,7 +34,8 @@ func TlsRead(handle, maxBytes) {
 #@ Writes ''data'' (bytes) to TLS connection ''handle''. Returns the number of
 #@ bytes written on success, ''err'' on failure.
 
-func TlsWrite(data, handle) {
+func TlsWrite(data, handle)
+{
 	return _tls_write_(data, handle);
 }
 
@@ -42,7 +45,8 @@ func TlsWrite(data, handle) {
 #@ Closes TLS connection ''handle''. Returns ''ok'' on success, ''err'' on
 #@ failure.
 
-func TlsClose(handle) {
+func TlsClose(handle)
+{
 	return _tls_close_(handle);
 }
 
@@ -53,12 +57,11 @@ func TlsClose(handle) {
 #@ ''certPath'' and ''keyPath''. Returns a TLS client handle on success, ''err''
 #@ on failure.
 
-func TlsAccept(socketHandle, certPath, keyPath) {
+func TlsAccept(socketHandle, certPath, keyPath)
+{
 	var client = saccept(socketHandle);
 
-	if iserr(client) {
-		return err;
-	}
+	if iserr(client) { return err; }
 
 	return TlsUpgrade(client, certPath, keyPath);
 }
@@ -72,7 +75,8 @@ func TlsAccept(socketHandle, certPath, keyPath) {
 #@ socket handle is consumed and no longer valid after this call. Returns a TLS
 #@ handle on success, ''err'' on failure.
 
-func TlsUpgrade(socketHandle, certPath, keyPath) {
+func TlsUpgrade(socketHandle, certPath, keyPath)
+{
 	return _tls_upgrade_(socketHandle, certPath, keyPath);
 }
 
@@ -83,6 +87,7 @@ func TlsUpgrade(socketHandle, certPath, keyPath) {
 #@ ''"mode"'' (''"tls-server"'' or ''"tls-client"''), ''"localIp"'',
 #@ ''"localPort"'', ''"remoteIp"'', ''"remotePort"'', and ''"serverName"''.
 
-func TlsInfo(handle) {
+func TlsInfo(handle)
+{
 	return _tls_info_(handle);
 }

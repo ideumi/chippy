@@ -11,10 +11,9 @@ load("libstrings.chh");
 #@
 #@ Prints ''text'' to STDOUT.
 
-func Print(text) {
-	if type(text) != "string" {
-		text = str(text);
-	}
+func Print(text)
+{
+	if type(text) != "string" { text = str(text); }
 
 	fwrite(pack(text), STDOUT);
 }
@@ -24,10 +23,9 @@ func Print(text) {
 #@
 #@ Prints ''text'' to STDOUT with trailing newline.
 
-func Println(text) {
-	if type(text) != "string" {
-		text = str(text);
-	}
+func Println(text)
+{
+	if type(text) != "string" { text = str(text); }
 
 	Print(text + "\n");
 }
@@ -37,10 +35,9 @@ func Println(text) {
 #@
 #@ Prints ''text'' to STDERR.
 
-func Printe(text) {
-	if type(text) != "string" {
-		text = str(text);
-	}
+func Printe(text)
+{
+	if type(text) != "string" { text = str(text); }
 
 	fwrite(pack(text), STDERR);
 }
@@ -50,10 +47,9 @@ func Printe(text) {
 #@
 #@ Prints ''text'' to STDERR with trailing newline.
 
-func Printeln(text) {
-	if type(text) != "string" {
-		text = str(text);
-	}
+func Printeln(text)
+{
+	if type(text) != "string" { text = str(text); }
 
 	Printe(text + "\n");
 }
@@ -64,15 +60,12 @@ func Printeln(text) {
 #@ Prints ''text'' formatted with ''values'' to STDOUT.
 #@ See libstrings.chh ''Format(value, values)''.
 
-func Printf(text, values) {
-	if type(text) != "string" {
-		text = str(text);
-	}
+func Printf(text, values)
+{
+	if type(text) != "string" { text = str(text); }
 
 	var fmtStr = Format(text, values);
-	if iserr(fmtStr) {
-		return err;
-	}
+	if iserr(fmtStr) { return err; }
 
 	Print(fmtStr);
 }
@@ -84,10 +77,9 @@ func Printf(text, values) {
 #@ trailing newline.
 #@ See libstrings.chh ''Format(value, values)''.
 
-func Printfln(text, values) {
-	if type(text) != "string" {
-		text = str(text);
-	}
+func Printfln(text, values)
+{
+	if type(text) != "string" { text = str(text); }
 
 	return Printf(text + "\n", values);
 }
@@ -98,15 +90,12 @@ func Printfln(text, values) {
 #@ Prints ''text'' formatted with ''values'' to STDERR.
 #@ See libstrings.chh ''Format(value, values)''.
 
-func Printef(text, values) {
-	if type(text) != "string" {
-		text = str(text);
-	}
+func Printef(text, values)
+{
+	if type(text) != "string" { text = str(text); }
 
 	var fmtStr = Format(text, values);
-	if iserr(fmtStr) {
-		return err;
-	}
+	if iserr(fmtStr) { return err; }
 
 	Printe(fmtStr);
 }
@@ -118,10 +107,10 @@ func Printef(text, values) {
 #@ trailing newline.
 #@ See libstrings.chh ''Format(value, values)''.
 
-func Printefln(text, values) {
-	if type(text) != "string" {
-		text = str(text);
-	}
+func Printefln(text, values)
+{
+	if type(text) != "string" { text = str(text); }
 
 	return Printef(text + "\n", values);
 }
+

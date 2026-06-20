@@ -19,25 +19,26 @@ TIMEZONEOFFSET = CalculateTimezone();
 
 load("libhandles.chh");
 
-func Main() {
+func Main()
+{
 	var currentTime = time();
 	var gregorianDate = GregorianFormatTime(currentTime);
-
+	
 	Println("Avantjien eval for gregorian date " + gregorianDate + ":");
 	Println("");
-
+	
 	var avantComponents = AvantjienDate(currentTime);
 	var aDay = avantComponents[1];
 	var aMonth = avantComponents[2];
 	var aYear = avantComponents[3];
-
+	
 	var cycle = AvantjienCycle(currentTime);
 	var timePeriod = AvantjienTime(currentTime);
-
+	
 	var isPrime = IsAvantjienPrime(aDay, aMonth);
 	var isNewMonth = IsAvantjienNewMonth(aDay, aMonth);
 	var isNewYear = IsAvantjienNewYear(aDay, aMonth);
-
+	
 	PrintDetail(aDay, aMonth, aYear, cycle, timePeriod, isPrime, isNewMonth, isNewYear);
 	Println("");
 }

@@ -13,16 +13,16 @@ load("libstrings.chh");
 #@ code or ''err'', and ''output'' is the command's STDOUT as a
 #@ string. Returns ''err'' in case of severe failure.
 
-func Run(command) {
+func Run(command)
+{
 	var handle = popen(command, "r");
 
-	if iserr(handle) {
-		return err;
-	}
+	if iserr(handle) { return err; }
 
 	var rawOutput = fread(handle, 0);
 
-	if iserr(rawOutput) {
+	if iserr(rawOutput)
+	{
 		pclose(handle);
 		return err;
 	}
@@ -39,21 +39,16 @@ func Run(command) {
 #@ Executes a shell command and returns STDOUT on success.
 #@ Returns ''err'' if the command fails or cannot be started.
 
-func RunCapture(command) {
+func RunCapture(command)
+{
 	var result = Run(command);
 
-	if iserr(result) {
-		return err;
-	}
+	if iserr(result) { return err; }
 
 	var exitcode = result[1];
 
-	if iserr(exitcode) {
-		return err;
-	}
-	if exitcode != 0 {
-		return err;
-	}
+	if iserr(exitcode) { return err; }
+	if exitcode != 0 { return err; }
 
 	return result[2];
 }
@@ -64,21 +59,16 @@ func RunCapture(command) {
 #@ Executes a shell command and returns ''ok'' or ''err'' based
 #@ on exit status.
 
-func RunCheck(command) {
+func RunCheck(command)
+{
 	var result = Run(command);
 
-	if iserr(result) {
-		return err;
-	}
+	if iserr(result) { return err; }
 
 	var exitcode = result[1];
 
-	if iserr(exitcode) {
-		return err;
-	}
-	if exitcode == 0 {
-		return ok;
-	}
+	if iserr(exitcode) { return err; }
+	if exitcode == 0 { return ok; }
 
 	return err;
 }
@@ -92,6 +82,7 @@ func RunCheck(command) {
 #@ of the parent. Output to STDOUT or STDERR is discarded. Use
 #@ ''kill(pid, signal)'' to terminate it when no longer needed.
 
-func Spawn(command) {
+func Spawn(command)
+{
 	return spawn(["/bin/sh", "-c", command]);
 }

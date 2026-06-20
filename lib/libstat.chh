@@ -59,10 +59,10 @@ var TYPEUNKNOWN = "unknown";
 #@
 #@ Extracts the file type from ''stat()'' result map ''statResult''.
 
-func StatType(statResult) {
-	if type(statResult) == "map" and has(statResult, "type") {
-		return statResult["type"];
-	}
+func StatType(statResult)
+{
+	if type(statResult) == "map" and has(statResult, "type")
+	{ return statResult["type"]; }
 
 	return TYPEUNKNOWN;
 }
@@ -73,7 +73,8 @@ func StatType(statResult) {
 #@ Returns ''true'' if ''path'' exists (file, directory, or any other
 #@ type), ''false'' otherwise.
 
-func PathExists(path) {
+func PathExists(path)
+{
 	var info = stat(path);
 
 	return type(info) == "map";
@@ -84,7 +85,8 @@ func PathExists(path) {
 #@
 #@ Returns ''true'' if file at ''path'' exists, ''false'' otherwise.
 
-func IsFile(path) {
+func IsFile(path)
+{
 	var info = stat(path);
 
 	return StatType(info) == TYPEFILE;
@@ -95,7 +97,8 @@ func IsFile(path) {
 #@
 #@ Returns ''true'' if directory at ''path'' exists, ''false'' otherwise.
 
-func IsDir(path) {
+func IsDir(path)
+{
 	var info = stat(path);
 
 	return StatType(info) == TYPEDIR;
@@ -106,7 +109,8 @@ func IsDir(path) {
 #@
 #@ Returns ''true'' if symlink at ''path'' exists, ''false'' otherwise.
 
-func IsSymlink(path) {
+func IsSymlink(path)
+{
 	var info = lstat(path);
 
 	return StatType(info) == TYPESYMLINK;
@@ -118,12 +122,11 @@ func IsSymlink(path) {
 #@ Returns a formatted string with detailed filesystem object information
 #@ of the object at ''path'', or ''err'' if ''path'' is invalid.
 
-func StatInfo(path) {
+func StatInfo(path)
+{
 	var info = stat(path);
 
-	if type(info) != "map" {
-		return err;
-	}
+	if type(info) != "map" { return err; }
 
 	var result = "Path: " + path + "\n";
 

@@ -39,7 +39,8 @@ var JSONNULL = _json_NULL_;
 #@ This function is deterministic, object keys are sorted
 #@ alphabetically.
 
-func JsonParse(jsonStr) {
+func JsonParse(jsonStr)
+{
 	return _json_parse_(jsonStr);
 }
 
@@ -59,6 +60,7 @@ func JsonParse(jsonStr) {
 #@ This function is deterministic, object keys are sorted
 #@ alphabetically.
 
-func JsonStringify(value) {
+func JsonStringify(value)
+{
 	return _json_stringify_(value);
 }

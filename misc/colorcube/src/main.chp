@@ -10,8 +10,10 @@ load("libterm.chh");
 load("libhandles.chh");
 load("libprint.chh");
 
-func PrintRow(start, count) {
-	for i = start to start + count - 1 {
+func PrintRow(start, count)
+{
+	for i = start to start + count - 1
+	{
 		SetBGColor256(i);
 		Print("  ");
 	}
@@ -19,7 +21,8 @@ func PrintRow(start, count) {
 	SetAttribute(COLORRESET);
 }
 
-func Main() {
+func Main()
+{
 	Println("Standard colors");
 	PrintRow(0, 8);
 	Println("");
@@ -30,8 +33,10 @@ func Main() {
 
 	Println("216 colors");
 
-	for row = 0 to 5 {
-		for col = 0 to 5 {
+	for row = 0 to 5
+	{
+		for col = 0 to 5
+		{
 			PrintRow(16 + row * 36 + col * 6, 6);
 		}
 

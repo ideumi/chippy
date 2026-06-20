@@ -263,7 +263,8 @@ var COLORBGWHITE = 47;
 #@
 #@ Changes the terminal session title.
 
-func SetTitle(title) {
+func SetTitle(title)
+{
 	fwrite(OSC + pack("0;" + str(title)) + BEL, STDOUT);
 }
 
@@ -272,7 +273,8 @@ func SetTitle(title) {
 #@
 #@ Moves cursor up ''n'' lines.
 
-func CursorUp(n) {
+func CursorUp(n)
+{
 	fwrite(CSI + pack(str(num(n))) + b[65], STDOUT);
 }
 
@@ -281,7 +283,8 @@ func CursorUp(n) {
 #@
 #@ Moves cursor down ''n'' lines.
 
-func CursorDown(n) {
+func CursorDown(n)
+{
 	fwrite(CSI + pack(str(num(n))) + b[66], STDOUT);
 }
 
@@ -290,7 +293,8 @@ func CursorDown(n) {
 #@
 #@ Moves cursor right ''n'' columns.
 
-func CursorRight(n) {
+func CursorRight(n)
+{
 	fwrite(CSI + pack(str(num(n))) + b[67], STDOUT);
 }
 
@@ -299,7 +303,8 @@ func CursorRight(n) {
 #@
 #@ Moves cursor left ''n'' columns.
 
-func CursorLeft(n) {
+func CursorLeft(n)
+{
 	fwrite(CSI + pack(str(num(n))) + b[68], STDOUT);
 }
 
@@ -308,7 +313,8 @@ func CursorLeft(n) {
 #@
 #@ Moves cursor to position ''row'', ''col''.
 
-func CursorTo(row, col) {
+func CursorTo(row, col)
+{
 	fwrite(CSI + pack(str(num(row))) + b[59] + pack(str(num(col))) + b[72], STDOUT);
 }
 
@@ -317,7 +323,8 @@ func CursorTo(row, col) {
 #@
 #@ Moves cursor to position ''x'', ''y''.
 
-func CursorToXY(x, y) {
+func CursorToXY(x, y)
+{
 	CursorTo(y, x);
 }
 
@@ -326,7 +333,8 @@ func CursorToXY(x, y) {
 #@
 #@ Saves current cursor position.
 
-func SaveCursor() {
+func SaveCursor()
+{
 	fwrite(CSI + b[115], STDOUT);
 }
 
@@ -335,7 +343,8 @@ func SaveCursor() {
 #@
 #@ Restores saved cursor position.
 
-func RestoreCursor() {
+func RestoreCursor()
+{
 	fwrite(CSI + b[117], STDOUT);
 }
 
@@ -344,7 +353,8 @@ func RestoreCursor() {
 #@
 #@ Clears the screen.
 
-func ClearScreen() {
+func ClearScreen()
+{
 	fwrite(CSI + b[50, 74], STDOUT);
 }
 
@@ -353,7 +363,8 @@ func ClearScreen() {
 #@
 #@ Erases from cursor to end of line.
 
-func ClearToEOL() {
+func ClearToEOL()
+{
 	fwrite(CSI + b[75], STDOUT);
 }
 
@@ -362,7 +373,8 @@ func ClearToEOL() {
 #@
 #@ Sets text attribute / color mode.
 
-func SetAttribute(mode) {
+func SetAttribute(mode)
+{
 	fwrite(CSI + pack(str(mode)) + b[109], STDOUT);
 }
 
@@ -371,7 +383,8 @@ func SetAttribute(mode) {
 #@
 #@ Sets background to the 8-bit ''color''.
 
-func SetBGColor256(color) {
+func SetBGColor256(color)
+{
 	fwrite(CSI + b[52, 56, 59, 53, 59] + pack(str(color)) + b[109], STDOUT);
 }
 
@@ -380,7 +393,8 @@ func SetBGColor256(color) {
 #@
 #@ Sets foreground to the 8-bit ''color''.
 
-func SetFGColor256(color) {
+func SetFGColor256(color)
+{
 	fwrite(CSI + b[51, 56, 59, 53, 59] + pack(str(color)) + b[109], STDOUT);
 }
 
@@ -389,11 +403,12 @@ func SetFGColor256(color) {
 #@
 #@ Sets background to ''red'', ''green'', ''blue''.
 
-func SetBGColorRGB(red, green, blue) {
+func SetBGColorRGB(red, green, blue)
+{
 	fwrite(CSI + b[52, 56, 59, 50, 59] +
-		pack(str(red)) + b[59] +
-		pack(str(green)) + b[59] +
-		pack(str(blue)) + b[109], STDOUT);
+			pack(str(red)) + b[59] +
+			pack(str(green)) + b[59] +
+			pack(str(blue)) + b[109], STDOUT);
 }
 
 #@ <SetFGColorRGB(red, green, blue)>
@@ -401,11 +416,12 @@ func SetBGColorRGB(red, green, blue) {
 #@
 #@ Sets foreground to ''red'', ''green'', ''blue''.
 
-func SetFGColorRGB(red, green, blue) {
+func SetFGColorRGB(red, green, blue)
+{
 	fwrite(CSI + b[51, 56, 59, 50, 59] +
-		pack(str(red)) + b[59] +
-		pack(str(green)) + b[59] +
-		pack(str(blue)) + b[109], STDOUT);
+			pack(str(red)) + b[59] +
+			pack(str(green)) + b[59] +
+			pack(str(blue)) + b[109], STDOUT);
 }
 
 #@ <ShowCursor()>
@@ -413,7 +429,8 @@ func SetFGColorRGB(red, green, blue) {
 #@
 #@ Makes cursor visible.
 
-func ShowCursor() {
+func ShowCursor()
+{
 	fwrite(CSI + b[63, 50, 53, 104], STDOUT);
 }
 
@@ -422,7 +439,8 @@ func ShowCursor() {
 #@
 #@ Makes cursor invisible.
 
-func HideCursor() {
+func HideCursor()
+{
 	fwrite(CSI + b[63, 50, 53, 108], STDOUT);
 }
 
@@ -445,7 +463,8 @@ func HideCursor() {
 #@
 #@ Returns a copy of termios ''state'' with raw mode flags set.
 
-func MakeRaw(state) {
+func MakeRaw(state)
+{
 	var raw = copy(state);
 
 	raw["iflag"] = raw["iflag"] band bnot (IGNBRK bor BRKINT bor PARMRK bor ISTRIP bor INLCR bor IGNCR bor ICRNL bor IXON);
