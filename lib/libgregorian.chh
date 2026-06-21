@@ -119,7 +119,10 @@ func GregorianYear(days)
 			remainingDays = remainingDays - daysInYear;
 			year = year + 1;
 		}
-		else { break; }
+		else
+		{
+			break;
+		}
 	}
 
 	return [year, remainingDays];
@@ -147,7 +150,10 @@ func GregorianMonthAndDay(year, remainingDays)
 			daysLeft = daysLeft - daysInMonth;
 			month = month + 1;
 		}
-		else { break; }
+		else
+		{
+			break;
+		}
 	}
 
 	return [month, daysLeft + 1];
@@ -171,7 +177,8 @@ func GregorianFormatTime(timestamp)
 	var minutes = components[5];
 	var seconds = components[6];
 
-	var pad = func(val) {
+	var pad = func(val)
+	{
 		if val < 10 { return "0" + str(val); }
 
 		return str(val);

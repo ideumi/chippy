@@ -54,15 +54,9 @@ func ReadLines(filename)
 
 func WriteFile(filename, bytesOrText, text, overwrite)
 {
-	if text and type(bytesOrText) != "string"
-	{
-		return err;
-	}
+	if text and type(bytesOrText) != "string" { return err; }
 
-	if not text and type(bytesOrText) != "bytes"
-	{
-		return err;
-	}
+	if not text and type(bytesOrText) != "bytes" { return err; }
 
 	var result = "";
 	var mode = "a";
@@ -131,10 +125,7 @@ func ListDir(path)
 	{
 		if isok(entry) { break; } # EOF
 
-		if entry != "." and entry != ".."
-		{
-			append(entries, entry);
-		}
+		if entry != "." and entry != ".." { append(entries, entry); }
 
 		entry = dread(dir);
 	}

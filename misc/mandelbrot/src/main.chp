@@ -48,10 +48,7 @@ func CalculateMB(col, row, iter)
 		var zRealNew = (zReal ^ 2) - (zImag ^ 2) + cReal;
 		var zImagNew = 2 * zReal * zImag + cImag;
 
-		if (zRealNew ^ 2) + (zImagNew ^ 2) > 4
-		{
-			return x;
-		}
+		if (zRealNew ^ 2) + (zImagNew ^ 2) > 4 { return x; }
 
 		zReal = zRealNew;
 		zImag = zImagNew;

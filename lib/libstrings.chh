@@ -109,10 +109,7 @@ func TrimLeft(value)
 	{
 		var ch = charat(value, i);
 
-		if ch != " " and ch != "\t" and ch != "\n" and ch != "\r"
-		{
-			break;
-		}
+		if ch != " " and ch != "\t" and ch != "\n" and ch != "\r" { break; }
 
 		i = i + 1;
 	}
@@ -133,10 +130,7 @@ func TrimRight(value)
 	{
 		var ch = charat(value, i);
 
-		if ch != " " and ch != "\t" and ch != "\n" and ch != "\r"
-		{
-			break;
-		}
+		if ch != " " and ch != "\t" and ch != "\n" and ch != "\r" { break; }
 
 		i = i - 1;
 	}
@@ -174,10 +168,7 @@ func SplitCollapse(value, delimiter)
 	{
 		var part = parts[i];
 
-		if part != ""
-		{
-			append(result, part);
-		}
+		if part != "" { append(result, part); }
 	}
 
 	return result;

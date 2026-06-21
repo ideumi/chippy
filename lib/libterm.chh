@@ -406,9 +406,9 @@ func SetFGColor256(color)
 func SetBGColorRGB(red, green, blue)
 {
 	fwrite(CSI + b[52, 56, 59, 50, 59] +
-			pack(str(red)) + b[59] +
-			pack(str(green)) + b[59] +
-			pack(str(blue)) + b[109], STDOUT);
+		pack(str(red)) + b[59] +
+		pack(str(green)) + b[59] +
+		pack(str(blue)) + b[109], STDOUT);
 }
 
 #@ <SetFGColorRGB(red, green, blue)>
@@ -419,9 +419,9 @@ func SetBGColorRGB(red, green, blue)
 func SetFGColorRGB(red, green, blue)
 {
 	fwrite(CSI + b[51, 56, 59, 50, 59] +
-			pack(str(red)) + b[59] +
-			pack(str(green)) + b[59] +
-			pack(str(blue)) + b[109], STDOUT);
+		pack(str(red)) + b[59] +
+		pack(str(green)) + b[59] +
+		pack(str(blue)) + b[109], STDOUT);
 }
 
 #@ <ShowCursor()>

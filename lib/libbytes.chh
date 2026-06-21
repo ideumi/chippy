@@ -59,9 +59,9 @@ func SetShort(data, idx, value)
 func GetInt(data, idx)
 {
 	return data[idx]
-			bor (data[idx + 1] * 256)
-			bor (data[idx + 2] * 256 ^ 2)
-			bor (data[idx + 3] * 256 ^ 3);
+		bor (data[idx + 1] * 256)
+		bor (data[idx + 2] * 256 ^ 2)
+		bor (data[idx + 3] * 256 ^ 3);
 }
 
 #@ <SetInt(data, idx, value)>
@@ -110,9 +110,9 @@ func SetShortBE(data, idx, value)
 func GetIntBE(data, idx)
 {
 	return (data[idx] * 256 ^ 3)
-			bor (data[idx + 1] * 256 ^ 2)
-			bor (data[idx + 2] * 256)
-			bor data[idx + 3];
+		bor (data[idx + 1] * 256 ^ 2)
+		bor (data[idx + 2] * 256)
+		bor data[idx + 3];
 }
 
 #@ <SetIntBE(data, idx, value)>

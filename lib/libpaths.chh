@@ -180,10 +180,7 @@ func IsAbsolutePath(path)
 
 func AbsolutePath(path)
 {
-	if IsAbsolutePath(path)
-	{
-		return path;
-	}
+	if IsAbsolutePath(path) { return path; }
 
 	return JoinPath(getcwd(), path);
 }

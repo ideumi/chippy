@@ -197,10 +197,7 @@ func ChpDocToHtml(content, filename)
 		}
 	}
 
-	if inCodeBlock
-	{
-		append(out, RenderCodeBlock(codeLines));
-	}
+	if inCodeBlock { append(out, RenderCodeBlock(codeLines)); }
 
 	return join(out, "");
 }
@@ -218,10 +215,7 @@ func RenderCodeBlock(lines)
 	{
 		var numStr = str(lineIndex);
 
-		while len(numStr) < width
-		{
-			numStr = " " + numStr;
-		}
+		while len(numStr) < width { numStr = " " + numStr; }
 
 		append(codeLines, "<span class=\"ln\">" + numStr + "</span>    " + HtmlEscape(lines[lineIndex]));
 	}
@@ -231,10 +225,7 @@ func RenderCodeBlock(lines)
 
 func TryParseInlineCode(line, pos)
 {
-	if not (pos + 1 <= len(line))
-	{
-		return m["matched": err];
-	}
+	if not (pos + 1 <= len(line)) { return m["matched": err]; }
 
 	if charat(line, pos) != "'" or charat(line, pos + 1) != "'"
 	{
@@ -274,10 +265,7 @@ func TryParseInlineCode(line, pos)
 
 func TryParseBold(line, pos)
 {
-	if not (pos + 1 <= len(line))
-	{
-		return m["matched": err];
-	}
+	if not (pos + 1 <= len(line)) { return m["matched": err]; }
 
 	if charat(line, pos) != "*" or charat(line, pos + 1) == "*"
 	{
@@ -291,27 +279,18 @@ func TryParseBold(line, pos)
 		boldEnd = boldEnd + 1;
 	}
 
-	if boldEnd > len(line)
-	{
-		return m["matched": err];
-	}
+	if boldEnd > len(line) { return m["matched": err]; }
 
 	var boldContent = slice(line, pos + 1, boldEnd - 1);
 
-	if len(boldContent) == 0
-	{
-		return m["matched": err];
-	}
+	if len(boldContent) == 0 { return m["matched": err]; }
 
 	return m["matched": ok, "result": "<strong>" + HtmlEscape(boldContent) + "</strong>", "newPos": boldEnd + 1];
 }
 
 func TryParseTag(line, pos)
 {
-	if charat(line, pos) != "<"
-	{
-		return m["matched": err];
-	}
+	if charat(line, pos) != "<" { return m["matched": err]; }
 
 	var tagEnd = pos + 1;
 	var tagContent = "";
@@ -320,25 +299,16 @@ func TryParseTag(line, pos)
 	{
 		var tagChar = charat(line, tagEnd);
 
-		if tagChar == " "
-		{
-			return m["matched": err];
-		}
+		if tagChar == " " { return m["matched": err]; }
 
 		tagContent = tagContent + tagChar;
 		tagEnd = tagEnd + 1;
 	}
 
-	if tagEnd > len(line)
-	{
-		return m["matched": err];
-	}
+	if tagEnd > len(line) { return m["matched": err]; }
 
 	# Reject an empty <>
-	if len(tagContent) == 0
-	{
-		return m["matched": err];
-	}
+	if len(tagContent) == 0 { return m["matched": err]; }
 
 	return m["matched": ok, "result": "<code>&lt;" + HtmlEscape(tagContent) + "&gt;</code>", "newPos": tagEnd + 1];
 }
@@ -466,10 +436,7 @@ func Main()
 	var inputPath = mode;
 	var outputDir = getcwd();
 
-	if len(arguments) >= 2
-	{
-		outputDir = arguments[2];
-	}
+	if len(arguments) >= 2 { outputDir = arguments[2]; }
 
 	return ConvertFile(inputPath, outputDir);
 }

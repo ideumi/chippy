@@ -150,9 +150,9 @@ func Sqrt(n)
 
 func Cbrt(n)
 {
-	if n < 0 { return -(Abs(n) ^ (1/3)); }
+	if n < 0 { return -(Abs(n) ^ (1 / 3)); }
 
-	return n ^ (1/3);
+	return n ^ (1 / 3);
 }
 
 #@ <Pow(base, exp)>

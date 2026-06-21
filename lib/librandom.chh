@@ -37,10 +37,7 @@ func RandomInt(min, max)
 			place = place * 256;
 		}
 
-		if bigInt < maxFair
-		{
-			return min + (bigInt % range);
-		}
+		if bigInt < maxFair { return min + (bigInt % range); }
 	}
 }
 
@@ -119,10 +116,7 @@ func RandomString(length, chars)
 
 		finalString = finalString + char;
 
-		if len(finalString) == length
-		{
-			break;
-		}
+		if len(finalString) == length { break; }
 
 		if len(finalString) > length
 		{

@@ -62,7 +62,9 @@ var TYPEUNKNOWN = "unknown";
 func StatType(statResult)
 {
 	if type(statResult) == "map" and has(statResult, "type")
-	{ return statResult["type"]; }
+	{
+		return statResult["type"];
+	}
 
 	return TYPEUNKNOWN;
 }

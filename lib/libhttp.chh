@@ -118,10 +118,7 @@ func _HttpResolveLocation_(location, url)
 	# Absolute URL
 	var isAbsoluteUrl = not iserr(indexof(location, "://"));
 
-	if isAbsoluteUrl
-	{
-		return location;
-	}
+	if isAbsoluteUrl { return location; }
 
 	# Protocol-relative
 	if len(location) >= 2 and charat(location, 1) == "/" and charat(location, 2) == "/"
@@ -130,16 +127,10 @@ func _HttpResolveLocation_(location, url)
 	}
 
 	# Absolute path
-	if charat(location, 1) == "/"
-	{
-		return baseUrl + location;
-	}
+	if charat(location, 1) == "/" { return baseUrl + location; }
 
 	# Query-only
-	if charat(location, 1) == "?"
-	{
-		return baseUrl + origPath + location;
-	}
+	if charat(location, 1) == "?" { return baseUrl + origPath + location; }
 
 	# Fragment-only
 	if charat(location, 1) == "#"
@@ -160,16 +151,10 @@ func _HttpResolveLocation_(location, url)
 
 	for i = 1 to len(origPath)
 	{
-		if charat(origPath, i) == "/"
-		{
-			lastSlash = i;
-		}
+		if charat(origPath, i) == "/" { lastSlash = i; }
 	}
 
-	if lastSlash > 0
-	{
-		baseDir = slice(origPath, 1, lastSlash);
-	}
+	if lastSlash > 0 { baseDir = slice(origPath, 1, lastSlash); }
 
 	var locationPath = location;
 	var locationQuery = "";
@@ -244,8 +229,8 @@ func _HttpFilterRedirectHeaders_(headers, origUrl, targetUrl, statusCode)
 
 	# RFC 6454: origin = scheme + host + port
 	var isCrossOrigin = (lower(origHost) != lower(targetHost))
-						or (origScheme != targetScheme)
-						or (origPort != targetPort);
+		or (origScheme != targetScheme)
+		or (origPort != targetPort);
 
 	var cleanHeaders = [];
 
@@ -379,10 +364,7 @@ func _HttpReadHeaders_(conn, isTLS, bufSize)
 
 		buf = buf + chunk;
 
-		if not iserr(indexof(unpack(buf), "\r\n\r\n"))
-		{
-			return buf;
-		}
+		if not iserr(indexof(unpack(buf), "\r\n\r\n")) { return buf; }
 	}
 
 	return err;
@@ -424,10 +406,7 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 	{
 		var pair = headers[i];
 
-		if lower(pair[1]) == "host"
-		{
-			hasHost = true;
-		}
+		if lower(pair[1]) == "host" { hasHost = true; }
 	}
 
 	if not hasHost
@@ -514,10 +493,7 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 		var hPair = respHeaders[i];
 		var keyLower = lower(hPair[1]);
 
-		if keyLower == "content-length"
-		{
-			contentLength = int(num(hPair[2]));
-		}
+		if keyLower == "content-length" { contentLength = int(num(hPair[2])); }
 
 		if keyLower == "transfer-encoding"
 		{
@@ -643,10 +619,10 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 	var statusCode = response["statusCode"];
 
 	if statusCode == 301 or
-	   statusCode == 302 or
-	   statusCode == 303 or
-	   statusCode == 307 or
-	   statusCode == 308
+		statusCode == 302 or
+		statusCode == 303 or
+		statusCode == 307 or
+		statusCode == 308
 	{
 		if maxRedirects <= 0 { return response; }
 
@@ -908,10 +884,7 @@ func _HttpConnectionReaper_()
 	{
 		var msgs = receive(true);
 
-		for i = 1 to len(msgs)
-		{
-			wait(msgs[i]);
-		}
+		for i = 1 to len(msgs) { wait(msgs[i]); }
 	}
 }
 
@@ -979,10 +952,7 @@ func _HttpConnectionTLSWorker_(handler, state, certPath, keyPath)
 
 	var tlsClient = TlsUpgrade(client, certPath, keyPath);
 
-	if iserr(tlsClient)
-	{
-		return ok;
-	}
+	if iserr(tlsClient) { return ok; }
 
 	var info = TlsInfo(tlsClient);
 	var requestBytes = _HttpReadRequest_(tlsClient, true);
@@ -1039,7 +1009,10 @@ func _HttpConnectionTLSWorker_(handler, state, certPath, keyPath)
 func HttpServe(port, handler, state)
 {
 	# Yes Rico, kaboom
-	if getuid() == 0 { return error("Will NOT run HTTP server as root, are you insane?"); }
+	if getuid() == 0
+	{
+		return error("Will NOT run HTTP server as root, are you insane?");
+	}
 
 	var server = sopen("0.0.0.0", port, SOCKLISTEN);
 
@@ -1077,7 +1050,10 @@ func HttpServe(port, handler, state)
 func HttpServeTLS(port, certPath, keyPath, handler, state)
 {
 	# Yes Rico, kaboom
-	if getuid() == 0 { return error("Will NOT run HTTP server as root, are you insane?"); }
+	if getuid() == 0
+	{
+		return error("Will NOT run HTTP server as root, are you insane?");
+	}
 
 	var server = sopen("0.0.0.0", port, SOCKLISTEN);
 

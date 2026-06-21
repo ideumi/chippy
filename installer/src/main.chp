@@ -55,13 +55,11 @@ func InstallFiles(srcDir, destDir)
 {
 	var createResult = CreateDir(destDir);
 
-	if iserr(createResult) {
+	if iserr(createResult)
+	{
 		var creationResult = IsDir(destDir);
 
-		if creationResult == false
-		{
-			return err;
-		}
+		if creationResult == false { return err; }
 	}
 
 	var files = ListDir(srcDir);
@@ -77,13 +75,11 @@ func InstallFiles(srcDir, destDir)
 		var srcFile = JoinPath(srcDir, fileName);
 		var destFile = JoinPath(destDir, fileName);
 
-		if IsFile(srcFile) {
+		if IsFile(srcFile)
+		{
 			var copyResult = CopyFile(srcFile, destFile);
 
-			if iserr(copyResult)
-			{
-				return err;
-			}
+			if iserr(copyResult) { return err; }
 		}
 	}
 
@@ -103,10 +99,7 @@ func CopyFile(src, dest)
 
 func RemoveDirectory(dirPath)
 {
-	if IsDir(dirPath) == false
-	{
-		return true;
-	}
+	if IsDir(dirPath) == false { return true; }
 
 	var files = ListDir(dirPath);
 
@@ -117,19 +110,13 @@ func RemoveDirectory(dirPath)
 			var filePath = JoinPath(dirPath, files[i]);
 			var unlinkResult = unlink(filePath);
 
-			if iserr(unlinkResult)
-			{
-				return err;
-			}
+			if iserr(unlinkResult) { return err; }
 		}
 	}
 
 	var unlinkResult = unlink(dirPath);
 
-	if iserr(unlinkResult)
-	{
-		return err;
-	}
+	if iserr(unlinkResult) { return err; }
 
 	return true;
 }
@@ -140,10 +127,7 @@ func CleanLegacyInstallation()
 {
 	var legacyPaths = ["/usr/lib/chiplang", "/usr/share/doc/chiplang", "/data/data/com.termux/files/usr/lib/chiplang", "/data/data/com.termux/files/usr/share/doc/chiplang"];
 
-	for i = 1 to len(legacyPaths)
-	{
-		RemoveDirectory(legacyPaths[i]);
-	}
+	for i = 1 to len(legacyPaths) { RemoveDirectory(legacyPaths[i]); }
 }
 
 func CleanExistingInstallation()
@@ -159,25 +143,16 @@ func CleanExistingInstallation()
 	{
 		var unlinkResult = unlink(binaryPath);
 
-		if iserr(unlinkResult)
-		{
-			return err;
-		}
+		if iserr(unlinkResult) { return err; }
 	}
 
 	var removeLibResult = RemoveDirectory(libPath);
 
-	if iserr(removeLibResult)
-	{
-		return err;
-	}
+	if iserr(removeLibResult) { return err; }
 
 	var removeDocResult = RemoveDirectory(docPath);
 
-	if iserr(removeDocResult)
-	{
-		return err;
-	}
+	if iserr(removeDocResult) { return err; }
 
 	return true;
 }
@@ -189,17 +164,11 @@ func InstallBinary()
 
 	var result = CopyFile(CHIPPYBIN, binaryPath);
 
-	if iserr(result)
-	{
-		return err;
-	}
+	if iserr(result) { return err; }
 
 	var chmodResult = chmod(binaryPath, 0755);
 
-	if iserr(chmodResult)
-	{
-		return err;
-	}
+	if iserr(chmodResult) { return err; }
 
 	return true;
 }

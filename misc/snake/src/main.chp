@@ -45,26 +45,11 @@ func KeyHandler(spawner)
 	{
 		var key = getch();
 
-		if key == KEYUP
-		{
-			send(spawner, UP);
-		}
-		elseif key == KEYDOWN
-		{
-			send(spawner, DOWN);
-		}
-		elseif key == KEYLEFT
-		{
-			send(spawner, LEFT);
-		}
-		elseif key == KEYRIGHT
-		{
-			send(spawner, RIGHT);
-		}
-		elseif key == KEYESC
-		{
-			send(spawner, SESC);
-		}
+		if key == KEYUP { send(spawner, UP); }
+		elseif key == KEYDOWN { send(spawner, DOWN); }
+		elseif key == KEYLEFT { send(spawner, LEFT); }
+		elseif key == KEYRIGHT { send(spawner, RIGHT); }
+		elseif key == KEYESC { send(spawner, SESC); }
 	}
 
 	return ok;
@@ -99,7 +84,7 @@ func DrawApple(playerPosition, body)
 		for x = 1 to len(body)
 		{
 			if body[x]["col"] == applePosCol
-			and body[x]["row"] == applePosRow
+				and body[x]["row"] == applePosRow
 			{
 				collission = true;
 				break;
@@ -237,7 +222,9 @@ func Main()
 			or game["playerPosition"]["col"] == 0
 			or game["playerPosition"]["row"] == CANVASSIZE["rows"] + 1
 			or game["playerPosition"]["col"] == CANVASSIZE["columns"] + 1
-		{ break; }
+		{
+			break;
+		}
 
 		# nom
 		if game["playerPosition"]["row"] == game["applePosition"]["row"]
@@ -250,10 +237,7 @@ func Main()
 			# Redraw score
 			Draw("Score: " + str(game["applesEaten"]), 0, 0, COLORRESET);
 
-			if TICKRATE > 50
-			{
-				TICKRATE = TICKRATE - 1;
-			}
+			if TICKRATE > 50 { TICKRATE = TICKRATE - 1; }
 		}
 	}
 
