@@ -124,7 +124,8 @@ var map = m["key1": "value", "key2": 2, "key3": [1, 2, 3]];    # Map
 
 ### Functions
 ```chippy
-func Add(a, b) {
+func Add(a, b)
+{
     return a + b;
 }
 
@@ -133,27 +134,36 @@ var result = Add(10, 20);
 
 ### Control Structures
 ```chippy
-if condition {
+if condition
+{
     # code
 }
 
-if condition {
+if condition
+{
     # code
-} elseif otherCondition {
+}
+elseif otherCondition
+{
     # code
-} else {
+}
+else
+{
     # code
 }
 
-for i = 1 to 10 {
+for i = 1 to 10
+{
     # code
 }
 
-for i = 1 to 10 step 2 {
+for i = 1 to 10 step 2
+{
     # code
 }
 
-while condition {
+while condition
+{
     # code
 }
 ```
