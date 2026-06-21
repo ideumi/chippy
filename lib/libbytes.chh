@@ -8,13 +8,15 @@
 #@
 #@ Converts ''bytes'' to a lowercase hexadecimal string representation.
 
-func BytesToHex(bytes) {
+func BytesToHex(bytes)
+{
 	var hexDigits = "0123456789abcdef";
 	var result = "";
 	var i = 1;
 	var byteLen = len(bytes);
 
-	while i <= byteLen {
+	while i <= byteLen
+	{
 		var byteVal = bytes[i];
 		var high = int(byteVal / 16);
 		var low = byteVal % 16;
@@ -31,7 +33,8 @@ func BytesToHex(bytes) {
 #@
 #@ Reads a little-endian uint16 from ''data'' at byte offset ''idx''.
 
-func GetShort(data, idx) {
+func GetShort(data, idx)
+{
 	return data[idx] bor (data[idx + 1] * 256);
 }
 
@@ -40,7 +43,8 @@ func GetShort(data, idx) {
 #@
 #@ Writes ''value'' as a little-endian uint16 into ''data'' at byte offset ''idx''.
 
-func SetShort(data, idx, value) {
+func SetShort(data, idx, value)
+{
 	data[idx] = int(value) band 255;
 	data[idx + 1] = int(value / 256) band 255;
 
@@ -52,7 +56,8 @@ func SetShort(data, idx, value) {
 #@
 #@ Reads a little-endian uint32 from ''data'' at byte offset ''idx''.
 
-func GetInt(data, idx) {
+func GetInt(data, idx)
+{
 	return data[idx]
 		bor (data[idx + 1] * 256)
 		bor (data[idx + 2] * 256 ^ 2)
@@ -64,7 +69,8 @@ func GetInt(data, idx) {
 #@
 #@ Writes ''value'' as a little-endian uint32 into ''data'' at byte offset ''idx''.
 
-func SetInt(data, idx, value) {
+func SetInt(data, idx, value)
+{
 	data[idx] = int(value) band 255;
 	data[idx + 1] = int(value / 256) band 255;
 	data[idx + 2] = int(value / 256 ^ 2) band 255;
@@ -78,7 +84,8 @@ func SetInt(data, idx, value) {
 #@
 #@ Reads a big-endian uint16 from ''data'' at byte offset ''idx''.
 
-func GetShortBE(data, idx) {
+func GetShortBE(data, idx)
+{
 	return (data[idx] * 256) bor data[idx + 1];
 }
 
@@ -87,7 +94,8 @@ func GetShortBE(data, idx) {
 #@
 #@ Writes ''value'' as a big-endian uint16 into ''data'' at byte offset ''idx''.
 
-func SetShortBE(data, idx, value) {
+func SetShortBE(data, idx, value)
+{
 	data[idx] = int(value / 256) band 255;
 	data[idx + 1] = int(value) band 255;
 
@@ -99,7 +107,8 @@ func SetShortBE(data, idx, value) {
 #@
 #@ Reads a big-endian uint32 from ''data'' at byte offset ''idx''.
 
-func GetIntBE(data, idx) {
+func GetIntBE(data, idx)
+{
 	return (data[idx] * 256 ^ 3)
 		bor (data[idx + 1] * 256 ^ 2)
 		bor (data[idx + 2] * 256)
@@ -111,7 +120,8 @@ func GetIntBE(data, idx) {
 #@
 #@ Writes ''value'' as a big-endian uint32 into ''data'' at byte offset ''idx''.
 
-func SetIntBE(data, idx, value) {
+func SetIntBE(data, idx, value)
+{
 	data[idx] = int(value / 256 ^ 3) band 255;
 	data[idx + 1] = int(value / 256 ^ 2) band 255;
 	data[idx + 2] = int(value / 256) band 255;

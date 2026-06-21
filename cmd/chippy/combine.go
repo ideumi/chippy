@@ -115,7 +115,8 @@ Paths = Paths + ["src/lib"];
 
 var homePath = getenv("HOME");
 
-if not iserr(homePath) {
+if not iserr(homePath)
+{
 	Paths = Paths + [homePath + "/.local/share/chippy/lib"];
 }
 

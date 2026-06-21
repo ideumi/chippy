@@ -19,7 +19,8 @@ TIMEZONEOFFSET = CalculateTimezone();
 
 load("libhandles.chh");
 
-func Main() {
+func Main()
+{
 	var currentTime = time();
 	var gregorianDate = GregorianFormatTime(currentTime);
 

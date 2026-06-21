@@ -13,130 +13,125 @@ var LIBDIR = JoinPath(CWD, "content/lib");
 var CHIPPYBIN = JoinPath(CWD, "content/chippy");
 var DOCDIR = JoinPath(CWD, "content/doc");
 
-func IsTermux() {
+func IsTermux()
+{
 	var termuxVersion = getenv("TERMUX_VERSION");
 
-	if not iserr(termuxVersion) {
-		return true;
-	}
+	if not iserr(termuxVersion) { return true; }
 
 	return false;
 }
 
-func GetInstallPaths() {
-	if IsTermux() == true {
+func GetInstallPaths()
+{
+	if IsTermux() == true
+	{
 		return ["/data/data/com.termux/files/usr/bin/chippy", "/data/data/com.termux/files/usr/lib/chippy", "/data/data/com.termux/files/usr/share/doc/chippy"];
 	}
 
 	return ["/usr/bin/chippy", "/usr/lib/chippy", "/usr/share/doc/chippy"];
 }
 
-func CheckPermissions() {
-	if IsTermux() == true {
-		return true;
-	}
+func CheckPermissions()
+{
+	if IsTermux() == true { return true; }
 
-	if getuid() == 0 {
+	if getuid() == 0 { return true; }
+
+	return false;
+}
+
+func CheckInstallationBundle()
+{
+	if (IsDir(LIBDIR) == true) and (IsDir(DOCDIR) == true) and (IsFile(CHIPPYBIN) == true)
+	{
 		return true;
 	}
 
 	return false;
 }
 
-func CheckInstallationBundle() {
-	if (IsDir(LIBDIR) == true) and (IsDir(DOCDIR) == true) and (IsFile(CHIPPYBIN) == true) {
-		return true;
-	}
-
-	return false;
-}
-
-func InstallFiles(srcDir, destDir) {
+func InstallFiles(srcDir, destDir)
+{
 	var createResult = CreateDir(destDir);
 
-	if iserr(createResult) {
+	if iserr(createResult)
+	{
 		var creationResult = IsDir(destDir);
 
-		if creationResult == false {
-			return err;
-		}
+		if creationResult == false { return err; }
 	}
 
 	var files = ListDir(srcDir);
 
-	if iserr(files) {
+	if iserr(files)
+	{
 		return true; # No files to install
 	}
 
-	for i = 1 to len(files) {
+	for i = 1 to len(files)
+	{
 		var fileName = files[i];
 		var srcFile = JoinPath(srcDir, fileName);
 		var destFile = JoinPath(destDir, fileName);
 
-		if IsFile(srcFile) {
+		if IsFile(srcFile)
+		{
 			var copyResult = CopyFile(srcFile, destFile);
 
-			if iserr(copyResult) {
-				return err;
-			}
+			if iserr(copyResult) { return err; }
 		}
 	}
 
 	return true;
 }
 
-func CopyFile(src, dest) {
+func CopyFile(src, dest)
+{
 	var data = ReadFile(src, false);
-	if iserr(data) {
-		return err;
-	}
+	if iserr(data) { return err; }
 
 	var result = WriteFile(dest, data, false, true);
-	if iserr(result) {
-		return err;
-	}
+	if iserr(result) { return err; }
 
 	return true;
 }
 
-func RemoveDirectory(dirPath) {
-	if IsDir(dirPath) == false {
-		return true;
-	}
+func RemoveDirectory(dirPath)
+{
+	if IsDir(dirPath) == false { return true; }
 
 	var files = ListDir(dirPath);
 
-	if not iserr(files) {
-		for i = 1 to len(files) {
+	if not iserr(files)
+	{
+		for i = 1 to len(files)
+		{
 			var filePath = JoinPath(dirPath, files[i]);
 			var unlinkResult = unlink(filePath);
 
-			if iserr(unlinkResult) {
-				return err;
-			}
+			if iserr(unlinkResult) { return err; }
 		}
 	}
 
 	var unlinkResult = unlink(dirPath);
 
-	if iserr(unlinkResult) {
-		return err;
-	}
+	if iserr(unlinkResult) { return err; }
 
 	return true;
 }
 
 # TODO: Remove this after the naming change.
 
-func CleanLegacyInstallation() {
+func CleanLegacyInstallation()
+{
 	var legacyPaths = ["/usr/lib/chiplang", "/usr/share/doc/chiplang", "/data/data/com.termux/files/usr/lib/chiplang", "/data/data/com.termux/files/usr/share/doc/chiplang"];
 
-	for i = 1 to len(legacyPaths) {
-		RemoveDirectory(legacyPaths[i]);
-	}
+	for i = 1 to len(legacyPaths) { RemoveDirectory(legacyPaths[i]); }
 }
 
-func CleanExistingInstallation() {
+func CleanExistingInstallation()
+{
 	CleanLegacyInstallation();
 
 	var paths = GetInstallPaths();
@@ -144,49 +139,42 @@ func CleanExistingInstallation() {
 	var libPath = paths[2];
 	var docPath = paths[3];
 
-	if IsFile(binaryPath) {
+	if IsFile(binaryPath)
+	{
 		var unlinkResult = unlink(binaryPath);
 
-		if iserr(unlinkResult) {
-			return err;
-		}
+		if iserr(unlinkResult) { return err; }
 	}
 
 	var removeLibResult = RemoveDirectory(libPath);
 
-	if iserr(removeLibResult) {
-		return err;
-	}
+	if iserr(removeLibResult) { return err; }
 
 	var removeDocResult = RemoveDirectory(docPath);
 
-	if iserr(removeDocResult) {
-		return err;
-	}
+	if iserr(removeDocResult) { return err; }
 
 	return true;
 }
 
-func InstallBinary() {
+func InstallBinary()
+{
 	var paths = GetInstallPaths();
 	var binaryPath = paths[1];
 
 	var result = CopyFile(CHIPPYBIN, binaryPath);
 
-	if iserr(result) {
-		return err;
-	}
+	if iserr(result) { return err; }
 
 	var chmodResult = chmod(binaryPath, 0755);
 
-	if iserr(chmodResult) {
-		return err;
-	}
+	if iserr(chmodResult) { return err; }
 
 	return true;
 }
 
-func InstallLibraries() {
+func InstallLibraries()
+{
 	var paths = GetInstallPaths();
 	var libPath = paths[2];
 
@@ -195,7 +183,8 @@ func InstallLibraries() {
 	return result;
 }
 
-func InstallDocumentation() {
+func InstallDocumentation()
+{
 	var paths = GetInstallPaths();
 	var docPath = paths[3];
 
@@ -204,10 +193,12 @@ func InstallDocumentation() {
 	return result;
 }
 
-func Uninstall() {
+func Uninstall()
+{
 	Println("Chippy Uninstaller");
 
-	if CheckPermissions() == false {
+	if CheckPermissions() == false
+	{
 		Println("Insufficient privileges for uninstallation");
 		Println("Please run this installer as root");
 
@@ -218,7 +209,8 @@ func Uninstall() {
 
 	var cleanResult = CleanExistingInstallation();
 
-	if iserr(cleanResult) {
+	if iserr(cleanResult)
+	{
 		Println("Uninstall failed");
 
 		return;
@@ -227,17 +219,20 @@ func Uninstall() {
 	Println("Chippy has been uninstalled successfully.");
 }
 
-func Install() {
+func Install()
+{
 	Println("Chippy Installer");
 
-	if CheckPermissions() == false {
+	if CheckPermissions() == false
+	{
 		Println("Insufficient privileges for installation");
 		Println("Please run this installer as root");
 
 		return;
 	}
 
-	if CheckInstallationBundle() == false {
+	if CheckInstallationBundle() == false
+	{
 		Println("Missing chippy binary or library files");
 
 		return;
@@ -245,7 +240,8 @@ func Install() {
 
 	var cleanResult = CleanExistingInstallation();
 
-	if iserr(cleanResult) {
+	if iserr(cleanResult)
+	{
 		Println("Installation failed during cleanup");
 
 		return;
@@ -255,7 +251,8 @@ func Install() {
 
 	var binaryResult = InstallBinary();
 
-	if iserr(binaryResult) {
+	if iserr(binaryResult)
+	{
 		Println("Installation failed during binary installation");
 
 		return;
@@ -263,7 +260,8 @@ func Install() {
 
 	var libResult = InstallLibraries();
 
-	if iserr(libResult) {
+	if iserr(libResult)
+	{
 		Println("Installation failed during library installation");
 
 		return;
@@ -271,7 +269,8 @@ func Install() {
 
 	var docResult = InstallDocumentation();
 
-	if iserr(docResult) {
+	if iserr(docResult)
+	{
 		Println("Installation failed during documentation installation");
 
 		return;
@@ -280,13 +279,16 @@ func Install() {
 	Println("Chippy has been installed successfully!");
 }
 
-func Main() {
+func Main()
+{
 	var arguments = args();
 
-	if len(arguments) > 0 {
+	if len(arguments) > 0
+	{
 		var firstArg = arguments[1];
 
-		if firstArg == "-u" or firstArg == "--uninstall" {
+		if firstArg == "-u" or firstArg == "--uninstall"
+		{
 			Uninstall();
 
 			return;

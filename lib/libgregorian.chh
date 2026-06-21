@@ -65,7 +65,8 @@ var TIMEZONEOFFSET = 0;
 #@
 #@ If ''year'' is a leap year, ''true'' is returned, otherwise ''false''.
 
-func IsLeapYear(year) {
+func IsLeapYear(year)
+{
 	return (Mod(year, 4) == 0 and Mod(year, 100) != 0) or (Mod(year, 400) == 0);
 }
 
@@ -74,7 +75,8 @@ func IsLeapYear(year) {
 #@
 #@ Calculates year and remaining days from ''days''.
 
-func GregorianYear(days) {
+func GregorianYear(days)
+{
 	var year = UNIXEPOCHYEAR;
 	var remainingDays = days;
 
@@ -86,39 +88,39 @@ func GregorianYear(days) {
 	var leapDaysFromEpoch = 0;
 	var yearIter = UNIXEPOCHYEAR;
 
-	while yearIter < year {
-		if IsLeapYear(yearIter) {
-			leapDaysFromEpoch = leapDaysFromEpoch + 1;
-		}
+	while yearIter < year
+	{
+		if IsLeapYear(yearIter) { leapDaysFromEpoch = leapDaysFromEpoch + 1; }
 
 		yearIter = yearIter + 1;
 	}
 
 	remainingDays = remainingDays - leapDaysFromEpoch;
 
-	while remainingDays < 0 {
+	while remainingDays < 0
+	{
 		year = year - 1;
 
 		var daysInPrevYear = DAYSINYEAR;
 
-		if IsLeapYear(year) {
-			daysInPrevYear = DAYSINLEAPYEAR;
-		}
+		if IsLeapYear(year) { daysInPrevYear = DAYSINLEAPYEAR; }
 
 		remainingDays = remainingDays + daysInPrevYear;
 	}
 
-	while true {
+	while true
+	{
 		var daysInYear = DAYSINYEAR;
 
-		if IsLeapYear(year) {
-			daysInYear = DAYSINLEAPYEAR;
-		}
+		if IsLeapYear(year) { daysInYear = DAYSINLEAPYEAR; }
 
-		if remainingDays >= daysInYear {
+		if remainingDays >= daysInYear
+		{
 			remainingDays = remainingDays - daysInYear;
 			year = year + 1;
-		} else {
+		}
+		else
+		{
 			break;
 		}
 	}
@@ -131,22 +133,25 @@ func GregorianYear(days) {
 #@
 #@ Calculates month and day from ''remainingDays'' in ''year''.
 
-func GregorianMonthAndDay(year, remainingDays) {
+func GregorianMonthAndDay(year, remainingDays)
+{
 	var isLeap = IsLeapYear(year);
 	var month = 1;
 	var daysLeft = remainingDays;
 
-	while month <= MONTHSINYEAR {
+	while month <= MONTHSINYEAR
+	{
 		var daysInMonth = MONTHDAYS[month];
 
-		if month == 2 and isLeap {
-			daysInMonth = 29;
-		}
+		if month == 2 and isLeap { daysInMonth = 29; }
 
-		if daysLeft >= daysInMonth {
+		if daysLeft >= daysInMonth
+		{
 			daysLeft = daysLeft - daysInMonth;
 			month = month + 1;
-		} else {
+		}
+		else
+		{
 			break;
 		}
 	}
@@ -159,12 +164,11 @@ func GregorianMonthAndDay(year, remainingDays) {
 #@
 #@ UNIX ''timestamp'' to "YYYY-MM-DD HH:MM:SS" string.
 
-func GregorianFormatTime(timestamp) {
+func GregorianFormatTime(timestamp)
+{
 	var components = GregorianParseTime(timestamp);
 
-	if iserr(components) {
-		return err;
-	}
+	if iserr(components) { return err; }
 
 	var year = components[1];
 	var month = components[2];
@@ -173,10 +177,9 @@ func GregorianFormatTime(timestamp) {
 	var minutes = components[5];
 	var seconds = components[6];
 
-	var pad = func(val) {
-		if val < 10 {
-			return "0" + str(val);
-		}
+	var pad = func(val)
+	{
+		if val < 10 { return "0" + str(val); }
 
 		return str(val);
 	};
@@ -189,14 +192,11 @@ func GregorianFormatTime(timestamp) {
 #@
 #@ Returns the number of days in ''month'' and ''year''.
 
-func GregorianDaysInMonth(year, month) {
-	if month < 1 or month > MONTHSINYEAR {
-		return err;
-	}
+func GregorianDaysInMonth(year, month)
+{
+	if month < 1 or month > MONTHSINYEAR { return err; }
 
-	if month == 2 and IsLeapYear(year) {
-		return 29;
-	}
+	if month == 2 and IsLeapYear(year) { return 29; }
 
 	return MONTHDAYS[month];
 }
@@ -206,10 +206,9 @@ func GregorianDaysInMonth(year, month) {
 #@
 #@ Returns the day of year from ''timestamp''.
 
-func GregorianDayOfYear(timestamp) {
-	if timestamp < 0 {
-		return err;
-	}
+func GregorianDayOfYear(timestamp)
+{
+	if timestamp < 0 { return err; }
 
 	# Timezone
 	var localTimestamp = timestamp + TIMEZONEOFFSET;
@@ -226,10 +225,9 @@ func GregorianDayOfYear(timestamp) {
 #@
 #@ Parses ''timestamp'' to ''[year, month, day, hour, minute, second]''.
 
-func GregorianParseTime(timestamp) {
-	if timestamp < 0 {
-		return err;
-	}
+func GregorianParseTime(timestamp)
+{
+	if timestamp < 0 { return err; }
 
 	# Timezone
 	var localTimestamp = timestamp + TIMEZONEOFFSET;
@@ -258,10 +256,9 @@ func GregorianParseTime(timestamp) {
 #@
 #@ Returns the day of week from ''timestamp'' (0 = Monday, 6 = Sunday).
 
-func GregorianDayOfWeek(timestamp) {
-	if timestamp < 0 {
-		return err;
-	}
+func GregorianDayOfWeek(timestamp)
+{
+	if timestamp < 0 { return err; }
 
 	var localTimestamp = timestamp + TIMEZONEOFFSET;
 
@@ -275,35 +272,23 @@ func GregorianDayOfWeek(timestamp) {
 #@
 #@ Converts Gregorian date/time to UNIX timestamp.
 
-func GregorianDateToTimestamp(year, month, day, hour, minute, second) {
-	if year < UNIXEPOCHYEAR {
-		return err;
-	}
-	if month < 1 or month > MONTHSINYEAR {
-		return err;
-	}
-	if day < 1 or day > GregorianDaysInMonth(year, month) {
-		return err;
-	}
-	if hour < 0 or hour >= HOURSPERDAY {
-		return err;
-	}
-	if minute < 0 or minute >= MINUTESPERHOUR {
-		return err;
-	}
-	if second < 0 or second >= SECONDSPERMINUTE {
-		return err;
-	}
+func GregorianDateToTimestamp(year, month, day, hour, minute, second)
+{
+	if year < UNIXEPOCHYEAR { return err; }
+	if month < 1 or month > MONTHSINYEAR { return err; }
+	if day < 1 or day > GregorianDaysInMonth(year, month) { return err; }
+	if hour < 0 or hour >= HOURSPERDAY { return err; }
+	if minute < 0 or minute >= MINUTESPERHOUR { return err; }
+	if second < 0 or second >= SECONDSPERMINUTE { return err; }
 
 	var totalDays = 0;
 	var yearIter = UNIXEPOCHYEAR;
 
-	while yearIter < year {
+	while yearIter < year
+	{
 		var daysInYear = DAYSINYEAR;
 
-		if IsLeapYear(yearIter) {
-			daysInYear = DAYSINLEAPYEAR;
-		}
+		if IsLeapYear(yearIter) { daysInYear = DAYSINLEAPYEAR; }
 
 		totalDays = totalDays + daysInYear;
 		yearIter = yearIter + 1;
@@ -311,7 +296,8 @@ func GregorianDateToTimestamp(year, month, day, hour, minute, second) {
 
 	var monthIter = 1;
 
-	while monthIter < month {
+	while monthIter < month
+	{
 		totalDays = totalDays + GregorianDaysInMonth(year, monthIter);
 		monthIter = monthIter + 1;
 	}

@@ -22,7 +22,8 @@ load("libbytes.chh");
 #@
 #@ Returns the MD5 hash digest of ''bytes''.
 
-func Md5(bytes) {
+func Md5(bytes)
+{
 	return _hash_md5_(bytes);
 }
 
@@ -37,7 +38,8 @@ func Md5(bytes) {
 #@
 #@ Returns the MD5 hash digest of ''bytes'' as a hex string.
 
-func Md5Hex(bytes) {
+func Md5Hex(bytes)
+{
 	return BytesToHex(Md5(bytes));
 }
 
@@ -52,7 +54,8 @@ func Md5Hex(bytes) {
 #@
 #@ Returns the SHA-1 hash digest of ''bytes''.
 
-func Sha1(bytes) {
+func Sha1(bytes)
+{
 	return _hash_sha1_(bytes);
 }
 
@@ -67,7 +70,8 @@ func Sha1(bytes) {
 #@
 #@ Returns the SHA-1 hash digest of ''bytes'' as a hex string.
 
-func Sha1Hex(bytes) {
+func Sha1Hex(bytes)
+{
 	return BytesToHex(Sha1(bytes));
 }
 
@@ -76,7 +80,8 @@ func Sha1Hex(bytes) {
 #@
 #@ Returns the SHA-224 hash digest of ''bytes''.
 
-func Sha224(bytes) {
+func Sha224(bytes)
+{
 	return _hash_sha224_(bytes);
 }
 
@@ -85,7 +90,8 @@ func Sha224(bytes) {
 #@
 #@ Returns the SHA-224 hash digest of ''bytes'' as a hex string.
 
-func Sha224Hex(bytes) {
+func Sha224Hex(bytes)
+{
 	return BytesToHex(Sha224(bytes));
 }
 
@@ -94,7 +100,8 @@ func Sha224Hex(bytes) {
 #@
 #@ Returns the SHA-256 hash digest of ''bytes''.
 
-func Sha256(bytes) {
+func Sha256(bytes)
+{
 	return _hash_sha256_(bytes);
 }
 
@@ -103,7 +110,8 @@ func Sha256(bytes) {
 #@
 #@ Returns the SHA-256 hash digest of ''bytes'' as a hex string.
 
-func Sha256Hex(bytes) {
+func Sha256Hex(bytes)
+{
 	return BytesToHex(Sha256(bytes));
 }
 
@@ -112,7 +120,8 @@ func Sha256Hex(bytes) {
 #@
 #@ Returns the SHA-384 hash digest of ''bytes''.
 
-func Sha384(bytes) {
+func Sha384(bytes)
+{
 	return _hash_sha384_(bytes);
 }
 
@@ -121,7 +130,8 @@ func Sha384(bytes) {
 #@
 #@ Returns the SHA-384 hash digest of ''bytes'' as a hex string.
 
-func Sha384Hex(bytes) {
+func Sha384Hex(bytes)
+{
 	return BytesToHex(Sha384(bytes));
 }
 
@@ -130,7 +140,8 @@ func Sha384Hex(bytes) {
 #@
 #@ Returns the SHA-512 hash digest of ''bytes''.
 
-func Sha512(bytes) {
+func Sha512(bytes)
+{
 	return _hash_sha512_(bytes);
 }
 
@@ -139,7 +150,8 @@ func Sha512(bytes) {
 #@
 #@ Returns the SHA-512 hash digest of ''bytes'' as a hex string.
 
-func Sha512Hex(bytes) {
+func Sha512Hex(bytes)
+{
 	return BytesToHex(Sha512(bytes));
 }
 
@@ -148,7 +160,8 @@ func Sha512Hex(bytes) {
 #@
 #@ Returns the SHA-3-224 hash digest of ''bytes''.
 
-func Sha3224(bytes) {
+func Sha3224(bytes)
+{
 	return _hash_sha3224_(bytes);
 }
 
@@ -157,7 +170,8 @@ func Sha3224(bytes) {
 #@
 #@ Returns the SHA-3-224 hash digest of ''bytes'' as a hex string.
 
-func Sha3224Hex(bytes) {
+func Sha3224Hex(bytes)
+{
 	return BytesToHex(Sha3224(bytes));
 }
 
@@ -166,7 +180,8 @@ func Sha3224Hex(bytes) {
 #@
 #@ Returns the SHA-3-256 hash digest of ''bytes''.
 
-func Sha3256(bytes) {
+func Sha3256(bytes)
+{
 	return _hash_sha3256_(bytes);
 }
 
@@ -175,7 +190,8 @@ func Sha3256(bytes) {
 #@
 #@ Returns the SHA-3-256 hash digest of ''bytes'' as a hex string.
 
-func Sha3256Hex(bytes) {
+func Sha3256Hex(bytes)
+{
 	return BytesToHex(Sha3256(bytes));
 }
 
@@ -184,7 +200,8 @@ func Sha3256Hex(bytes) {
 #@
 #@ Returns the SHA-3-384 hash digest of ''bytes''.
 
-func Sha3384(bytes) {
+func Sha3384(bytes)
+{
 	return _hash_sha3384_(bytes);
 }
 
@@ -193,7 +210,8 @@ func Sha3384(bytes) {
 #@
 #@ Returns the SHA-3-384 hash digest of ''bytes'' as a hex string.
 
-func Sha3384Hex(bytes) {
+func Sha3384Hex(bytes)
+{
 	return BytesToHex(Sha3384(bytes));
 }
 
@@ -202,7 +220,8 @@ func Sha3384Hex(bytes) {
 #@
 #@ Returns the SHA-3-512 hash digest of ''bytes''.
 
-func Sha3512(bytes) {
+func Sha3512(bytes)
+{
 	return _hash_sha3512_(bytes);
 }
 
@@ -211,6 +230,7 @@ func Sha3512(bytes) {
 #@
 #@ Returns the SHA-3-512 hash digest of ''bytes'' as a hex string.
 
-func Sha3512Hex(bytes) {
+func Sha3512Hex(bytes)
+{
 	return BytesToHex(Sha3512(bytes));
 }

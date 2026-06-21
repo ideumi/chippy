@@ -12,24 +12,19 @@ load("libmath.chh");
 #@ and returns either bytes or UTF-8 text depending on if ''text == true''.
 #@ Returns ''err'' on failure.
 
-func ReadFile(filename, text) {
+func ReadFile(filename, text)
+{
 	var handle = fopen(filename, "r");
 
-	if iserr(handle) {
-		return err;
-	}
+	if iserr(handle) { return err; }
 
 	var allBytes = fread(handle, 0); # Entire file
 
 	fclose(handle);
 
-	if iserr(allBytes) {
-		return err;
-	}
+	if iserr(allBytes) { return err; }
 
-	if text == true {
-		return unpack(allBytes);
-	}
+	if text == true { return unpack(allBytes); }
 
 	return allBytes;
 }
@@ -40,12 +35,11 @@ func ReadFile(filename, text) {
 #@ Reads all lines from the file and returns them as a list of strings.
 #@ Returns ''err'' on failure.
 
-func ReadLines(filename) {
+func ReadLines(filename)
+{
 	var content = ReadFile(filename, true);
 
-	if iserr(content) {
-		return err;
-	}
+	if iserr(content) { return err; }
 
 	return split(content, "\n");
 }
@@ -58,37 +52,25 @@ func ReadLines(filename) {
 #@ ''bytesOrText'' must be bytes. If ''overwrite'' is ''true'', content will be overwritten
 #@ not appended. Returns ''err'' on failure.
 
-func WriteFile(filename, bytesOrText, text, overwrite) {
-	if text and type(bytesOrText) != "string" {
-		return err;
-	}
+func WriteFile(filename, bytesOrText, text, overwrite)
+{
+	if text and type(bytesOrText) != "string" { return err; }
 
-	if not text and type(bytesOrText) != "bytes" {
-		return err;
-	}
+	if not text and type(bytesOrText) != "bytes" { return err; }
 
 	var result = "";
 	var mode = "a";
 
-	if overwrite == true {
-		mode = "w";
-	}
+	if overwrite == true { mode = "w"; }
 
 	var handle = fopen(filename, mode);
 
-	if iserr(handle) {
-		return err;
-	}
+	if iserr(handle) { return err; }
 
-	if text == true {
-		result = fwrite(pack(bytesOrText), handle);
-	} else {
-		result = fwrite(bytesOrText, handle);
-	}
+	if text == true { result = fwrite(pack(bytesOrText), handle); }
+	else { result = fwrite(bytesOrText, handle); }
 
-	if iserr(result) {
-		return err;
-	}
+	if iserr(result) { return err; }
 
 	return fclose(handle);
 }
@@ -100,10 +82,9 @@ func WriteFile(filename, bytesOrText, text, overwrite) {
 #@ be overwritten not appended. Returns ''err'' on failure or if ''lines'' is
 #@ not a list.
 
-func WriteLines(filename, lines, overwrite) {
-	if type(lines) != "list" {
-		return err;
-	}
+func WriteLines(filename, lines, overwrite)
+{
+	if type(lines) != "list" { return err; }
 
 	var content = join(lines, "\n");
 
@@ -116,12 +97,11 @@ func WriteLines(filename, lines, overwrite) {
 #@ Creates a new directory with permission 755 (rwxr-xr-x), returns ''err'' on
 #@ failure.
 
-func CreateDir(path) {
+func CreateDir(path)
+{
 	var result = mkdir(path, 755);
 
-	if iserr(result) {
-		return err;
-	}
+	if iserr(result) { return err; }
 
 	return ok;
 }
@@ -132,24 +112,20 @@ func CreateDir(path) {
 #@ Opens and reads contents of a directory non-recursively and returns a list
 #@ of file and directory names as strings. Returns ''err'' on failure.
 
-func ListDir(path) {
+func ListDir(path)
+{
 	var dir = dopen(path);
 
-	if iserr(dir) {
-		return err;
-	}
+	if iserr(dir) { return err; }
 
 	var entries = [];
 	var entry = dread(dir);
 
-	while type(entry) == "string" {
-		if isok(entry) {
-			break;
-		} # EOF
+	while type(entry) == "string"
+	{
+		if isok(entry) { break; } # EOF
 
-		if entry != "." and entry != ".." {
-			append(entries, entry);
-		}
+		if entry != "." and entry != ".." { append(entries, entry); }
 
 		entry = dread(dir);
 	}
@@ -163,16 +139,26 @@ func ListDir(path) {
 #@
 #@ Formats bytes count as human-readable string with appropriate unit suffix.
 
-func SizeToString(bytesCount) {
-	if bytesCount < 1024 {
+func SizeToString(bytesCount)
+{
+	if bytesCount < 1024
+	{
 		return str(bytesCount) + " B";
-	} elseif bytesCount < 1024 ^ 2 {
+	}
+	elseif bytesCount < 1024 ^ 2
+	{
 		return str(Round(bytesCount / 1024, 2)) + " KB";
-	} elseif bytesCount < 1024 ^ 3 {
+	}
+	elseif bytesCount < 1024 ^ 3
+	{
 		return str(Round(bytesCount / (1024 ^ 2), 2)) + " MB";
-	} elseif bytesCount < 1024 ^ 4 {
+	}
+	elseif bytesCount < 1024 ^ 4
+	{
 		return str(Round(bytesCount / (1024 ^ 3), 2)) + " GB";
-	} else {
+	}
+	else
+	{
 		return str(Round(bytesCount / (1024 ^ 4), 2)) + " TB";
 	}
 }

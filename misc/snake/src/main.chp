@@ -29,38 +29,34 @@ var TICKRATE = 125;
 var APPLE = "█";
 var PLAYER = "█";
 
-func GetDirection(keyHandler, movingDirection) {
+func GetDirection(keyHandler, movingDirection)
+{
 	var inbox = receive(false);
 
-	if len(inbox) == 0 {
-		return movingDirection;
-	}
+	if len(inbox) == 0 { return movingDirection; }
 
 	# Most recent keypress
 	return inbox[len(inbox)];
 }
 
-func KeyHandler(spawner) {
-	while true {
+func KeyHandler(spawner)
+{
+	while true
+	{
 		var key = getch();
 
-		if key == KEYUP {
-			send(spawner, UP);
-		} elseif key == KEYDOWN {
-			send(spawner, DOWN);
-		} elseif key == KEYLEFT {
-			send(spawner, LEFT);
-		} elseif key == KEYRIGHT {
-			send(spawner, RIGHT);
-		} elseif key == KEYESC {
-			send(spawner, SESC);
-		}
+		if key == KEYUP { send(spawner, UP); }
+		elseif key == KEYDOWN { send(spawner, DOWN); }
+		elseif key == KEYLEFT { send(spawner, LEFT); }
+		elseif key == KEYRIGHT { send(spawner, RIGHT); }
+		elseif key == KEYESC { send(spawner, SESC); }
 	}
 
 	return ok;
 }
 
-func Draw(chara, row, col, attr) {
+func Draw(chara, row, col, attr)
+{
 	CursorTo(row, col);
 
 	SetAttribute(attr);
@@ -68,31 +64,34 @@ func Draw(chara, row, col, attr) {
 	SetAttribute(COLORRESET);
 }
 
-func DrawApple(playerPosition, body) {
+func DrawApple(playerPosition, body)
+{
 	var applePosRow = 0;
 	var applePosCol = 0;
 
-	while true {
+	while true
+	{
 		applePosRow = RandomInt(2, CANVASSIZE["rows"]);
 		applePosCol = RandomInt(1, CANVASSIZE["columns"]);
 
-		if playerPosition["row"] == applePosRow and playerPosition["col"] == applePosCol {
+		if playerPosition["row"] == applePosRow and playerPosition["col"] == applePosCol
+		{
 			continue;
 		}
 
 		var collission = false;
 
-		for x = 1 to len(body) {
+		for x = 1 to len(body)
+		{
 			if body[x]["col"] == applePosCol
-				and body[x]["row"] == applePosRow {
+				and body[x]["row"] == applePosRow
+			{
 				collission = true;
 				break;
 			}
 		}
 
-		if collission {
-			continue;
-		}
+		if collission { continue; }
 
 		break;
 	}
@@ -105,26 +104,34 @@ func DrawApple(playerPosition, body) {
 	];
 }
 
-func MoveAndDrawPlayer(direction, playerPosition) {
-	if direction == UP {
+func MoveAndDrawPlayer(direction, playerPosition)
+{
+	if direction == UP
+	{
 		var newPos = playerPosition["row"] - 1;
 
 		Draw(PLAYER, newPos, playerPosition["col"], COLORGREEN);
 
 		return playerPosition + m["row": newPos];
-	} elseif direction == DOWN {
+	}
+	elseif direction == DOWN
+	{
 		var newPos = playerPosition["row"] + 1;
 
 		Draw(PLAYER, newPos, playerPosition["col"], COLORGREEN);
 
 		return playerPosition + m["row": newPos];
-	} elseif direction == LEFT {
+	}
+	elseif direction == LEFT
+	{
 		var newPos = playerPosition["col"] - 1;
 
 		Draw(PLAYER, playerPosition["row"], newPos, COLORGREEN);
 
 		return playerPosition + m["col": newPos];
-	} elseif direction == RIGHT {
+	}
+	elseif direction == RIGHT
+	{
 		var newPos = playerPosition["col"] + 1;
 
 		Draw(PLAYER, playerPosition["row"], newPos, COLORGREEN);
@@ -133,7 +140,8 @@ func MoveAndDrawPlayer(direction, playerPosition) {
 	}
 }
 
-func Main() {
+func Main()
+{
 	var initialPlayerPos = m[
 		"row": int(CANVASSIZE["rows"] / 2),
 		"col": int(CANVASSIZE["columns"] / 2),
@@ -156,31 +164,37 @@ func Main() {
 	# Initial score draw
 	Draw("Score: " + str(game["applesEaten"]), 0, 0, COLORRESET);
 
-	while true {
+	while true
+	{
 		sleep(TICKRATE);
 
 		var direction = GetDirection(keyHandler, game["moving"]);
-		if direction == SESC {
-			break;
-		}
+		if direction == SESC { break; }
 
-		if game["applesEaten"] > 0 {
+		if game["applesEaten"] > 0
+		{
 			if not (game["moving"] == UP and direction == DOWN)
 				and not (game["moving"] == DOWN and direction == UP)
 				and not (game["moving"] == LEFT and direction == RIGHT)
-				and not (game["moving"] == RIGHT and direction == LEFT) {
+				and not (game["moving"] == RIGHT and direction == LEFT)
+			{
 				game["moving"] = direction;
-			} else {
+			}
+			else
+			{
 				direction = game["moving"];
 			}
-		} else {
+		}
+		else
+		{
 			game["moving"] = direction;
 		}
 
 		# Append last position
 		append(game["body"], game["playerPosition"]);
 
-		if len(game["body"]) > game["applesEaten"] {
+		if len(game["body"]) > game["applesEaten"]
+		{
 			Draw(" ", game["body"][1]["row"], game["body"][1]["col"], COLORRESET);
 
 			game["body"] = game["body"] - 1;
@@ -191,29 +205,31 @@ func Main() {
 		var selfCol = false;
 
 		# Self collission
-		for x = 1 to len(game["body"]) {
+		for x = 1 to len(game["body"])
+		{
 			if game["body"][x]["col"] == game["playerPosition"]["col"]
-				and game["body"][x]["row"] == game["playerPosition"]["row"] {
+				and game["body"][x]["row"] == game["playerPosition"]["row"]
+			{
 				selfCol = true;
 				break;
 			}
 		}
 
-		if selfCol {
-			break;
-		}
+		if selfCol { break; }
 
 		# Wall
 		if game["playerPosition"]["row"] == 1
 			or game["playerPosition"]["col"] == 0
 			or game["playerPosition"]["row"] == CANVASSIZE["rows"] + 1
-			or game["playerPosition"]["col"] == CANVASSIZE["columns"] + 1 {
+			or game["playerPosition"]["col"] == CANVASSIZE["columns"] + 1
+		{
 			break;
 		}
 
 		# nom
 		if game["playerPosition"]["row"] == game["applePosition"]["row"]
-			and game["playerPosition"]["col"] == game["applePosition"]["col"] {
+			and game["playerPosition"]["col"] == game["applePosition"]["col"]
+		{
 			game["applePosition"] = DrawApple(game["playerPosition"], game["body"]);
 
 			game["applesEaten"] = game["applesEaten"] + 5;
@@ -221,9 +237,7 @@ func Main() {
 			# Redraw score
 			Draw("Score: " + str(game["applesEaten"]), 0, 0, COLORRESET);
 
-			if TICKRATE > 50 {
-				TICKRATE = TICKRATE - 1;
-			}
+			if TICKRATE > 50 { TICKRATE = TICKRATE - 1; }
 		}
 	}
 

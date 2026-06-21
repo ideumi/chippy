@@ -8,7 +8,8 @@ load("libprint.chh");
 
 var PORT = 8080;
 
-func Handler(state, request) {
+func Handler(state, request)
+{
 	var method = request["method"];
 	var path = request["path"];
 	var peer = request["remoteIp"] + ":" + str(request["remotePort"]);
