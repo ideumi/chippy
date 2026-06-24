@@ -24,7 +24,7 @@ Chippy interpreter and toolchain
   ''chippy doc <file.chpdoc>''        Render chpdoc to terminal
 
   ''chippy doc <file>''               List symbols in source file
-  ''chippy doc <file> <signature>''   Show symbol documentation
+  ''chippy doc <file> <symbol>''      Show symbol documentation
   ''chippy doc <file> all''           Show all symbol documentation
 
   ''chippy combine [config]''         Bundle a project
