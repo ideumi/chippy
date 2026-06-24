@@ -246,6 +246,14 @@ func (l *Lexer) makeIdentifier() *Token {
 		l.advance()
 	}
 
+	if idStr == "b" {
+		return NewToken(constants.TT_BYTES, idStr, posStart, l.pos.Copy())
+	}
+
+	if idStr == "m" {
+		return NewToken(constants.TT_MAP, idStr, posStart, l.pos.Copy())
+	}
+
 	if constants.IsKeyword(idStr) {
 		return NewToken(constants.TT_KEYWORD, idStr, posStart, l.pos.Copy())
 	} else {

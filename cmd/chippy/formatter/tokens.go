@@ -79,15 +79,17 @@ func wantSpace(prev, cur *lexer.Token, prevUnaryMinus bool) bool {
 		return false
 	}
 
-	// '(' / '[' cuddle as a call/index after a value, an m/b literal keyword,
-	// or a 'func' parameter list. After any other keyword or operator, space.
+	// '(' / '[' cuddle as a call/index after a value (b[...] and m[...] literals
+	// included) or a 'func' parameter list. After any other keyword or operator,
+	// space.
 	if cur.Type == constants.TT_LPAREN || cur.Type == constants.TT_LSQUARE {
 		switch prev.Type {
 		case constants.TT_IDENTIFIER, constants.TT_RPAREN, constants.TT_RSQUARE,
-			constants.TT_RBRACE, constants.TT_INT, constants.TT_FLOAT, constants.TT_STRING:
+			constants.TT_RBRACE, constants.TT_INT, constants.TT_FLOAT, constants.TT_STRING,
+			constants.TT_BYTES, constants.TT_MAP:
 			return false
 		case constants.TT_KEYWORD:
-			if prev.Value == "m" || prev.Value == "b" || prev.Value == "func" {
+			if prev.Value == "func" {
 				return false
 			}
 		}

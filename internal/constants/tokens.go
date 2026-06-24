@@ -14,6 +14,8 @@ const (
 	TT_FLOAT      = "__~flt~__"
 	TT_STRING     = "__~str~__"
 	TT_IDENTIFIER = "__~idf~__"
+	TT_BYTES      = "__~byt~__" // b[...]
+	TT_MAP        = "__~map~__" // m[...]
 
 	// Keywords
 
@@ -69,7 +71,6 @@ var Keywords = []string{
 	"while",
 	"func",
 	"return", "continue", "break",
-	"b", "m",
 }
 
 func IsKeyword(word string) bool {
