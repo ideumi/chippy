@@ -3,7 +3,7 @@ set -e
 
 # Configuration
 RELEASE_NAME="chippy"
-VERSION="1.0.21"
+VERSION="1.0.22"
 ARCH=${TARGET_ARCH:-$(uname -m)}
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 RELEASE_DIR="${RELEASE_NAME}-${VERSION}-${OS}-${ARCH}"
