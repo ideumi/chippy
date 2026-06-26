@@ -51,13 +51,13 @@ var AVANTMONTHSSHORT = [
 ];
 
 #@ <AVANTCYCLESTART>
-#@ (2025-08-16)
+#@ (2026-06-26)
 #@ Hour when day cycle starts
 
 var AVANTCYCLESTART = 6;
 
 #@ <AVANTCYCLEEND>
-#@ (2025-08-16)
+#@ (2026-06-26)
 #@ Hour when day cycle ends
 
 var AVANTCYCLEEND = 18;
@@ -106,7 +106,7 @@ func AvantjienMinute(timestamp)
 }
 
 #@ <DaysSinceAvantjienEpoch(timestamp)>
-#@ V-1.0.0 (2025-08-16)
+#@ V-1.0.1 (2026-06-26)
 #@
 #@ Calculates days since epoch from ''timestamp''.
 
@@ -121,7 +121,7 @@ func DaysSinceAvantjienEpoch(timestamp)
 }
 
 #@ <AvantjienDate(timestamp)>
-#@ V-1.0.0 (2025-08-16)
+#@ V-1.0.1 (2026-06-26)
 #@
 #@ Calculates date ''[day, month, year]'' from ''timestamp''.
 
@@ -144,7 +144,7 @@ func AvantjienDate(timestamp)
 }
 
 #@ <AvantjienDay(timestamp)>
-#@ V-1.0.0 (2025-08-16)
+#@ V-1.0.1 (2026-06-26)
 #@
 #@ Returns the current day from ''timestamp''.
 
@@ -154,7 +154,7 @@ func AvantjienDay(timestamp)
 }
 
 #@ <AvantjienMonth(timestamp)>
-#@ V-1.0.0 (2025-08-16)
+#@ V-1.0.1 (2026-06-26)
 #@
 #@ Returns the current month from ''timestamp''.
 
@@ -164,7 +164,7 @@ func AvantjienMonth(timestamp)
 }
 
 #@ <AvantjienYear(timestamp)>
-#@ V-1.0.0 (2025-08-16)
+#@ V-1.0.1 (2026-06-26)
 #@
 #@ Returns the current year from ''timestamp''.
 
@@ -198,7 +198,7 @@ func AvantjienMonthShort(month)
 }
 
 #@ <AvantjienCycle(timestamp)>
-#@ V-1.0.0 (2025-08-16)
+#@ V-1.0.1 (2026-06-26)
 #@
 #@ Returns current cycle at ''timestamp'' (1 = day, 0 = night).
 
@@ -214,7 +214,7 @@ func AvantjienCycle(timestamp)
 }
 
 #@ <AvantjienTime(timestamp)>
-#@ V-1.0.0 (2025-08-16)
+#@ V-1.0.1 (2026-06-26)
 #@
 #@ Returns time period at ''timestamp''.
 
@@ -240,7 +240,7 @@ func AvantjienTime(timestamp)
 }
 
 #@ <AvantjienDateToTimestamp(aYear, aMonth, aDay, cycle, timePeriod)>
-#@ V-1.0.0 (2025-08-16)
+#@ V-1.0.1 (2026-06-26)
 #@
 #@ Converts Avantjien date and cycle to UNIX timestamp. Normal time is returned
 #@ as the start time of the relevant cycle according to 60.2.5.
@@ -325,7 +325,7 @@ func IsAvantjienNewYear(day, month)
 }
 
 #@ <FormatAvantjienDate(timestamp)>
-#@ V-1.0.0 (2025-08-16)
+#@ V-1.0.1 (2026-06-26)
 #@
 #@ Returns ''timestamp'' as date string "D.M.Y".
 
