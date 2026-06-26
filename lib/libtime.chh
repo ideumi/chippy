@@ -3,6 +3,8 @@
 # corelib - libtime.chh
 #
 
+load("libmath.chh");
+
 #@ <SECONDSPERMINUTE>
 #@ (2025-08-16)
 #@ Number of seconds in one minute
@@ -131,4 +133,35 @@ func StartOfDay(timestamp)
 func EndOfDay(timestamp)
 {
 	return StartOfDay(timestamp) + SECONDSPERDAY - 1;
+}
+
+#@ <EquationOfTime(timestamp)>
+#@ V-1.0.0 (2026-06-26)
+#@
+#@ Returns the equation of time at ''timestamp'' in seconds.
+
+func EquationOfTime(timestamp)
+{
+	var totalDays = int(timestamp / SECONDSPERDAY);
+
+	var years = int(totalDays / 365.2425);
+
+	var dayOfYear = totalDays - int(years * 365.2425) + 1;
+
+	var g = 2 * PI * (dayOfYear - 1) / 365;
+
+	var minutes = 229.18 * (0.000075 + 0.001868 * cos(g) - 0.032077 * sin(g) - 0.014615 * cos(2 * g) - 0.040849 * sin(2 * g));
+
+	return int(minutes * SECONDSPERMINUTE);
+}
+
+#@ <SolarOffset(longitude, timestamp)>
+#@ V-1.0.0 (2026-06-26)
+#@
+#@ Returns the apparent solar time offset in seconds at ''timestamp'' for
+#@ ''longitude'' in degrees east.
+
+func SolarOffset(longitude, timestamp)
+{
+	return int(longitude * 240) + EquationOfTime(timestamp);
 }
