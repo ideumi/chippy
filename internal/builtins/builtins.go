@@ -117,11 +117,12 @@ func GetBuiltins() map[string]*values.BuiltInFunction {
 		"tan": values.NewBuiltInFunction("tan", tanFunction),
 
 		// Misc
-		"getpid": values.NewBuiltInFunction("getpid", getpidFunction),
-		"getuid": values.NewBuiltInFunction("getuid", getuidFunction),
-		"time":   values.NewBuiltInFunction("time", timeFunction),
-		"sleep":  values.NewBuiltInFunction("sleep", sleepFunction),
-		"getch":  values.NewBuiltInFunction("getch", getchFunction),
+		"getpid":   values.NewBuiltInFunction("getpid", getpidFunction),
+		"getuid":   values.NewBuiltInFunction("getuid", getuidFunction),
+		"time":     values.NewBuiltInFunction("time", timeFunction),
+		"timezone": values.NewBuiltInFunction("timezone", timezoneFunction),
+		"sleep":    values.NewBuiltInFunction("sleep", sleepFunction),
+		"getch":    values.NewBuiltInFunction("getch", getchFunction),
 
 		// Terminal state
 		"getterm": values.NewBuiltInFunction("getterm", gettermFunction),

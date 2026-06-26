@@ -1,0 +1,21 @@
+*timezone* | V-$CHIPVR ($CHIPCN)
+
+''timezone(timestamp)''
+
+Returns timezone information for the operating system's local timezone at the time of ''timestamp''.
+
+If the current timezone cannot be determined, data for UTC is returned.
+
+*Parameters:*
+- ''timestamp'': Number Unix timestamp in seconds (see ''time()'')
+
+*Returns:*
+- Map: timezone information
+
+*Map fields:*
+- ''"offsetSeconds"'' (Number): seconds east of UTC
+- ''"abbreviation"'' (String): zone abbreviation in effect
+- ''"isDaylightSaving"'' (Number): ''true'' if daylight-saving time is in effect, ''false'' otherwise
+
+*Errors:*
+- Runtime error if timestamp is not a number
