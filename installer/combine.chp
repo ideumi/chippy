@@ -6,7 +6,7 @@
 # Metadata
 
 var Project = "Chippy Installer";
-var Version = "1.0.2";
+var Version = "1.0.3";
 var Licence = "../LICENCE.txt";
 var Output = "out/installer";
 
