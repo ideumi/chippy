@@ -121,19 +121,8 @@ func RemoveDirectory(dirPath)
 	return true;
 }
 
-# TODO: Remove this after the naming change.
-
-func CleanLegacyInstallation()
-{
-	var legacyPaths = ["/usr/lib/chiplang", "/usr/share/doc/chiplang", "/data/data/com.termux/files/usr/lib/chiplang", "/data/data/com.termux/files/usr/share/doc/chiplang"];
-
-	for i = 1 to len(legacyPaths) { RemoveDirectory(legacyPaths[i]); }
-}
-
 func CleanExistingInstallation()
 {
-	CleanLegacyInstallation();
-
 	var paths = GetInstallPaths();
 	var binaryPath = paths[1];
 	var libPath = paths[2];

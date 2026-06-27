@@ -34,13 +34,34 @@ var MONTHSINYEAR = 12;
 #@ (2025-08-13)
 #@ Weekday names in English
 
-var WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+var WEEKDAYS = [
+	"Monday",
+	"Tuesday",
+	"Wednesday",
+	"Thursday",
+	"Friday",
+	"Saturday",
+	"Sunday"
+];
 
 #@ <MONTHS>
 #@ (2025-08-13)
 #@ Month names in English
 
-var MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+var MONTHS = [
+	"January",
+	"February",
+	"March",
+	"April",
+	"May",
+	"June",
+	"July",
+	"August",
+	"September",
+	"October",
+	"November",
+	"December"
+];
 
 #@ <MONTHDAYS>
 #@ (2025-08-13)
@@ -59,6 +80,16 @@ var UNIXEPOCHWEEKDAY = 3;
 #@ Timezone offset in seconds from UTC
 
 var TIMEZONEOFFSET = 0;
+
+#@ <SetLocalTimezoneOffset()>
+#@ V-1.0.0 (2026-06-25)
+#@
+#@ Sets ''TIMEZONEOFFSET'' to the operating system's current local UTC offset.
+
+func SetLocalTimezoneOffset()
+{
+	TIMEZONEOFFSET = timezone(time())["offsetSeconds"];
+}
 
 #@ <IsLeapYear(year)>
 #@ V-1.0.0 (2025-08-13)

@@ -18,7 +18,7 @@ chippy doc <document>             # Show specific document
 chippy doc list                   # List all available documents
 chippy doc <file.chpdoc>          # Render .chpdoc file directly
 chippy doc <file>                 # List symbols in source file
-chippy doc <file> <signature>     # Show specific symbol documentation
+chippy doc <file> <symbol>        # Show symbol documentation
 chippy doc <file> all             # Show all symbol documentation
 '''
 

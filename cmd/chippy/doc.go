@@ -399,6 +399,7 @@ func showFileDocumentation(filepath, symbolSignature string) {
 		return
 	}
 
+	// "all" keyword overrides search
 	if symbolSignature == constants.SYMBOL_FILTER_ALL {
 		if len(symbols) == 0 {
 			fmt.Printf("Error: No documentation found in %s\n", filepath)
@@ -417,6 +418,7 @@ func showFileDocumentation(filepath, symbolSignature string) {
 		return
 	}
 
+	// Exact signature match
 	for _, sym := range symbols {
 		if sym.Signature == symbolSignature {
 			renderSymbolDoc(sym)
@@ -425,6 +427,56 @@ func showFileDocumentation(filepath, symbolSignature string) {
 		}
 	}
 
-	fmt.Printf("Error: No documentation found for symbol '%s' in %s\n", symbolSignature, filepath)
-	os.Exit(1)
+	query := strings.ToLower(symbolName(symbolSignature))
+
+	var best []SymbolDoc
+	bestTier := 0
+
+	for _, sym := range symbols {
+		name := strings.ToLower(symbolName(sym.Signature))
+
+		tier := 0
+
+		switch {
+		case name == query:
+			tier = 3
+		case strings.HasPrefix(name, query):
+			tier = 2
+		case strings.Contains(name, query):
+			tier = 1
+		}
+
+		if query == "" || tier == 0 {
+			continue
+		}
+
+		if tier > bestTier {
+			bestTier = tier
+			best = best[:0]
+		}
+
+		if tier == bestTier {
+			best = append(best, sym)
+		}
+	}
+
+	switch len(best) {
+	case 0:
+		fmt.Printf("Error: No documentation found for symbol '%s' in %s\n", symbolSignature, filepath)
+		os.Exit(1)
+	case 1:
+		renderSymbolDoc(best[0])
+	default:
+		listFileSymbols(best)
+	}
+}
+
+// symbolName returns the signature up to the first '(', trimmed. Constants and
+// vars have no '(', so the whole signature is the name.
+func symbolName(sig string) string {
+	if i := strings.IndexByte(sig, '('); i >= 0 {
+		sig = sig[:i]
+	}
+
+	return strings.TrimSpace(sig)
 }

@@ -4,7 +4,6 @@
 #
 
 load("libmath.chh");
-load("libgregorian.chh");
 load("libtime.chh");
 
 #@ <DAYSINAVANTMONTH>
@@ -29,25 +28,39 @@ var DAYSINAVANTYEAR = 540;
 #@ (2025-08-16)
 #@ Month names
 
-var AVANTMONTHS = ["Caljistjien", "Catjia", "Laureljia", "Clastobjia", "Ljiterjian", "Rnifersale"];
+var AVANTMONTHS = [
+	"Caljistjien",
+	"Catjia",
+	"Laureljia",
+	"Clastobjia",
+	"Ljiterjian",
+	"Rnifersale"
+];
 
 #@ <AVANTMONTHSSHORT>
 #@ (2025-08-16)
 #@ Short month names
 
-var AVANTMONTHSSHORT = ["Cal", "Cat", "Lau", "Cla", "Ljit", "Rni"];
+var AVANTMONTHSSHORT = [
+	"Cal",
+	"Cat",
+	"Lau",
+	"Cla",
+	"Ljit",
+	"Rni"
+];
 
 #@ <AVANTCYCLESTART>
-#@ (2025-08-16)
+#@ (2026-06-26)
 #@ Hour when day cycle starts
 
-var AVANTCYCLESTART = 8;
+var AVANTCYCLESTART = 6;
 
 #@ <AVANTCYCLEEND>
-#@ (2025-08-16)
+#@ (2026-06-26)
 #@ Hour when day cycle ends
 
-var AVANTCYCLEEND = 20;
+var AVANTCYCLEEND = 18;
 
 #@ <AVANTJIENPOCHTIMESTAMP>
 #@ (2025-08-16)
@@ -55,8 +68,45 @@ var AVANTCYCLEEND = 20;
 
 var AVANTJIENPOCHTIMESTAMP = 1545350400;
 
+#@ <AVANTLONGITUDE>
+#@ (2026-06-26)
+#@ Observer longitude in degrees east for local solar time
+
+var AVANTLONGITUDE = 0;
+
+#@ <AvantjienSolarOffset(timestamp)>
+#@ V-1.0.0 (2026-06-26)
+#@
+#@ Returns the local apparent solar time offset in seconds at ''timestamp'' for
+#@ the observer's ''AVANTLONGITUDE''.
+
+func AvantjienSolarOffset(timestamp)
+{
+	return SolarOffset(AVANTLONGITUDE, timestamp);
+}
+
+#@ <AvantjienHour(timestamp)>
+#@ V-1.0.0 (2026-06-26)
+#@
+#@ Returns the local apparent solar hour at ''timestamp''.
+
+func AvantjienHour(timestamp)
+{
+	return int(Mod(timestamp + AvantjienSolarOffset(timestamp), SECONDSPERDAY) / SECONDSPERHOUR);
+}
+
+#@ <AvantjienMinute(timestamp)>
+#@ V-1.0.0 (2026-06-26)
+#@
+#@ Returns the local apparent solar minute at ''timestamp''.
+
+func AvantjienMinute(timestamp)
+{
+	return int(Mod(timestamp + AvantjienSolarOffset(timestamp), SECONDSPERHOUR) / SECONDSPERMINUTE);
+}
+
 #@ <DaysSinceAvantjienEpoch(timestamp)>
-#@ V-1.0.0 (2025-08-16)
+#@ V-1.0.1 (2026-06-26)
 #@
 #@ Calculates days since epoch from ''timestamp''.
 
@@ -65,13 +115,13 @@ func DaysSinceAvantjienEpoch(timestamp)
 	if timestamp < 0 { return err; }
 	if timestamp < AVANTJIENPOCHTIMESTAMP { return err; }
 
-	var secondsDelta = timestamp - AVANTJIENPOCHTIMESTAMP;
+	var secondsDelta = (timestamp + AvantjienSolarOffset(timestamp)) - AVANTJIENPOCHTIMESTAMP;
 
 	return int(secondsDelta / SECONDSPERDAY);
 }
 
 #@ <AvantjienDate(timestamp)>
-#@ V-1.0.0 (2025-08-16)
+#@ V-1.0.1 (2026-06-26)
 #@
 #@ Calculates date ''[day, month, year]'' from ''timestamp''.
 
@@ -94,7 +144,7 @@ func AvantjienDate(timestamp)
 }
 
 #@ <AvantjienDay(timestamp)>
-#@ V-1.0.0 (2025-08-16)
+#@ V-1.0.1 (2026-06-26)
 #@
 #@ Returns the current day from ''timestamp''.
 
@@ -104,7 +154,7 @@ func AvantjienDay(timestamp)
 }
 
 #@ <AvantjienMonth(timestamp)>
-#@ V-1.0.0 (2025-08-16)
+#@ V-1.0.1 (2026-06-26)
 #@
 #@ Returns the current month from ''timestamp''.
 
@@ -114,7 +164,7 @@ func AvantjienMonth(timestamp)
 }
 
 #@ <AvantjienYear(timestamp)>
-#@ V-1.0.0 (2025-08-16)
+#@ V-1.0.1 (2026-06-26)
 #@
 #@ Returns the current year from ''timestamp''.
 
@@ -148,7 +198,7 @@ func AvantjienMonthShort(month)
 }
 
 #@ <AvantjienCycle(timestamp)>
-#@ V-1.0.0 (2025-08-16)
+#@ V-1.0.1 (2026-06-26)
 #@
 #@ Returns current cycle at ''timestamp'' (1 = day, 0 = night).
 
@@ -156,11 +206,7 @@ func AvantjienCycle(timestamp)
 {
 	if timestamp < 0 { return err; }
 
-	var timeComponents = GregorianParseTime(timestamp);
-
-	if iserr(timeComponents) { return err; }
-
-	var hour = timeComponents[4];
+	var hour = AvantjienHour(timestamp);
 
 	if hour >= AVANTCYCLESTART and hour < AVANTCYCLEEND { return 1; }
 
@@ -168,40 +214,36 @@ func AvantjienCycle(timestamp)
 }
 
 #@ <AvantjienTime(timestamp)>
-#@ V-1.0.0 (2025-08-16)
+#@ V-1.0.1 (2026-06-26)
 #@
-#@ Returns time period at ''timestamp''. See HERA's 60.2.5, Page 3.
+#@ Returns time period at ''timestamp''.
 
 func AvantjienTime(timestamp)
 {
 	if timestamp < 0 { return err; }
 
-	var timeComponents = GregorianParseTime(timestamp);
+	var hour = AvantjienHour(timestamp);
 
-	if iserr(timeComponents) { return err; }
+	# Day periods (cycle 1): 6AM-6PM
+	if hour >= 6 and hour < 9 { return 1; } # 6AM-9AM
+	if hour >= 9 and hour < 12 { return 2; } # 9AM-12PM
+	if hour >= 12 and hour < 15 { return 3; } # 12PM-3PM
+	if hour >= 15 and hour < 18 { return 4; } # 3PM-6PM
 
-	var hour = timeComponents[4];
-
-	# Day periods (cycle 1): 8AM-8PM
-	if hour >= 8 and hour < 11 { return 1; } # 8AM-11AM
-	if hour >= 11 and hour < 14 { return 2; } # 11AM-2PM
-	if hour >= 14 and hour < 17 { return 3; } # 2PM-5PM
-	if hour >= 17 and hour < 20 { return 4; } # 5PM-8PM
-
-	# Night periods (cycle 0): 8PM-8AM
-	if hour >= 20 and hour < 23 { return 1; } # 8PM-11PM
-	if hour >= 23 or hour < 2 { return 2; } # 11PM-2AM
-	if hour >= 2 and hour < 5 { return 3; } # 2AM-5AM
-	if hour >= 5 and hour < 8 { return 4; } # 5AM-8AM
+	# Night periods (cycle 0): 6PM-6AM
+	if hour >= 18 and hour < 21 { return 1; } # 6PM-9PM
+	if hour >= 21 { return 2; } # 9PM-12AM
+	if hour < 3 { return 3; } # 12AM-3AM
+	if hour >= 3 and hour < 6 { return 4; } # 3AM-6AM
 
 	return err;
 }
 
 #@ <AvantjienDateToTimestamp(aYear, aMonth, aDay, cycle, timePeriod)>
-#@ V-1.0.0 (2025-08-16)
+#@ V-1.0.1 (2026-06-26)
 #@
-#@ Converts Avantjien date and cycle to UNIX timestamp. Normal time is
-#@ returned as the start time of the relevant cycle according to 60.2.5.
+#@ Converts Avantjien date and cycle to UNIX timestamp. Normal time is returned
+#@ as the start time of the relevant cycle according to 60.2.5.
 
 func AvantjienDateToTimestamp(aYear, aMonth, aDay, cycle, timePeriod)
 {
@@ -222,22 +264,22 @@ func AvantjienDateToTimestamp(aYear, aMonth, aDay, cycle, timePeriod)
 
 	if cycle == 1
 	{
-		if timePeriod == 1 { hour = 8; }
-		elseif timePeriod == 2 { hour = 11; }
-		elseif timePeriod == 3 { hour = 14; }
-		elseif timePeriod == 4 { hour = 17; }
+		if timePeriod == 1 { hour = 6; }
+		elseif timePeriod == 2 { hour = 9; }
+		elseif timePeriod == 3 { hour = 12; }
+		elseif timePeriod == 4 { hour = 15; }
 		else { return err; }
 	}
 	else
 	{
-		if timePeriod == 1 { hour = 20; }
-		elseif timePeriod == 2 { hour = 23; }
-		elseif timePeriod == 3 { hour = 2; }
-		elseif timePeriod == 4 { hour = 5; }
+		if timePeriod == 1 { hour = 18; }
+		elseif timePeriod == 2 { hour = 21; }
+		elseif timePeriod == 3 { hour = 0; }
+		elseif timePeriod == 4 { hour = 3; }
 		else { return err; }
 	}
 
-	return baseTimestamp + (hour * SECONDSPERHOUR);
+	return baseTimestamp + (hour * SECONDSPERHOUR) - AvantjienSolarOffset(baseTimestamp);
 }
 
 #@ <IsAvantjienPrime(day, month)>
@@ -283,7 +325,7 @@ func IsAvantjienNewYear(day, month)
 }
 
 #@ <FormatAvantjienDate(timestamp)>
-#@ V-1.0.0 (2025-08-16)
+#@ V-1.0.1 (2026-06-26)
 #@
 #@ Returns ''timestamp'' as date string "D.M.Y".
 
@@ -298,4 +340,42 @@ func FormatAvantjienDate(timestamp)
 	var aYear = avantDate[3];
 
 	return str(aDay) + "." + str(aMonth) + "." + str(aYear);
+}
+
+#@ <FormatAvantjienClock(timestamp)>
+#@ V-1.0.0 (2026-06-26)
+#@
+#@ Returns the local apparent solar time at ''timestamp'' as a "HH:MM" string.
+
+func FormatAvantjienClock(timestamp)
+{
+	var hour = AvantjienHour(timestamp);
+	var minute = AvantjienMinute(timestamp);
+
+	var hh = str(hour);
+	var mm = str(minute);
+
+	if hour < 10 { hh = "0" + hh; }
+	if minute < 10 { mm = "0" + mm; }
+
+	return hh + ":" + mm;
+}
+
+#@ <FormatAvantjienTimePeriod(timestamp)>
+#@ V-1.0.0 (2026-06-26)
+#@
+#@ Returns the cycle and period at ''timestamp'' as a string, for example "D2"
+#@ (day period 2) or "N3" (night period 3).
+
+func FormatAvantjienTimePeriod(timestamp)
+{
+	var period = AvantjienTime(timestamp);
+
+	if iserr(period) { return err; }
+
+	var letter = "N";
+
+	if AvantjienCycle(timestamp) == 1 { letter = "D"; }
+
+	return letter + str(period);
 }

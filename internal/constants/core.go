@@ -9,7 +9,7 @@ package constants
 import "runtime"
 
 const (
-	VERSION_DATE = "2026-06-21"
+	VERSION_DATE = "2026-06-26"
 	HIST_FILE    = ".ChippyHistory"
 
 	RR_CONTEXT_DISPLAY_NAME     = "<ChippyProgram>"
@@ -23,7 +23,7 @@ const (
 	FILE_EXT_PROG   = ".chp"
 	FILE_EXT_HEADER = ".chh"
 
-	STR_LPLVR = "1.0.21"
+	STR_LPLVR = "1.0.22"
 	STR_LPLCN = "pardalote"
 	STR_LPLOS = runtime.GOOS
 	STR_LPLAR = runtime.GOARCH

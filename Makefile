@@ -1,6 +1,8 @@
 export GO_BUILD = CGO_ENABLED=0 go build -trimpath
+export GOTOOLCHAIN = local
 
 build:
+	@go version
 	$(GO_BUILD) -o chippy cmd/chippy/*.go
 
 	./chippy check all installer/

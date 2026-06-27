@@ -3,21 +3,19 @@
 # avant - main.chp
 #
 
-# This is a almost 1:1 port of HERA's avant.py
-# to Chip, it shows a basic evaluation of the
-# current day.
-
 load("display.chh");
-load("timezone.chh");
 
 load("libavantjien.chh");
 load("libgregorian.chh");
-
-# Set libgregorian's TIMEZONEOFFSET to the current
-# system time offset
-TIMEZONEOFFSET = CalculateTimezone();
+load("longitude.chh");
 
 load("libhandles.chh");
+
+# Set libgregorian's TIMEZONEOFFSET to the current system time offset
+SetLocalTimezoneOffset();
+
+# Read longitude.config and configure AVANTLONGITUDE
+LoadLongitudeConfig();
 
 func Main()
 {
@@ -34,13 +32,21 @@ func Main()
 
 	var cycle = AvantjienCycle(currentTime);
 	var timePeriod = AvantjienTime(currentTime);
+	var clock = FormatAvantjienClock(currentTime);
 
 	var isPrime = IsAvantjienPrime(aDay, aMonth);
 	var isNewMonth = IsAvantjienNewMonth(aDay, aMonth);
 	var isNewYear = IsAvantjienNewYear(aDay, aMonth);
 
-	PrintDetail(aDay, aMonth, aYear, cycle, timePeriod, isPrime, isNewMonth, isNewYear);
-	Println("");
+	PrintDetail(aDay,
+		aMonth,
+		aYear,
+		cycle,
+		timePeriod,
+		clock,
+		isPrime,
+		isNewMonth,
+		isNewYear);
 }
 
 Main();

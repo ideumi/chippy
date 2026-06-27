@@ -1,0 +1,34 @@
+#!/usr/bin/chippy
+#
+# avant - longitude.chh
+#
+
+load("libfsio.chh");
+load("libstrings.chh");
+load("libprint.chh");
+load("libavantjien.chh");
+
+var LONGITUDEFILE = "longitude.conf";
+
+func LoadLongitudeConfig()
+{
+	var content = ReadFile(LONGITUDEFILE, true);
+
+	if iserr(content)
+	{
+		WriteFile(LONGITUDEFILE, "", true, true);
+
+		content = "";
+	}
+
+	content = Trim(content);
+
+	if content == ""
+	{
+		Printeln("Warning: " + LONGITUDEFILE + " is empty, using longitude 0.");
+	}
+	else
+	{
+		AVANTLONGITUDE = num(content);
+	}
+}

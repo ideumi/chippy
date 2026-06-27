@@ -537,7 +537,7 @@ func (p *Parser) atom() *ParseResult {
 		return res.Success(listExpr)
 	}
 
-	if tok.Matches(constants.TT_KEYWORD, "b") {
+	if tok.Type == constants.TT_BYTES {
 		res.RegisterAdvancement()
 		p.advance()
 		byteArrayExpr := res.Register(p.byteArrayExpr())
@@ -549,7 +549,7 @@ func (p *Parser) atom() *ParseResult {
 		return res.Success(byteArrayExpr)
 	}
 
-	if tok.Matches(constants.TT_KEYWORD, "m") {
+	if tok.Type == constants.TT_MAP {
 		res.RegisterAdvancement()
 		p.advance()
 		mapExpr := res.Register(p.mapExpr())

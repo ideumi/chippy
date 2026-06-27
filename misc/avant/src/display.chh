@@ -21,7 +21,7 @@ func PrintTrueFalse(value)
 	return "No";
 }
 
-func PrintDetail(aDay, aMonth, aYear, cycle, timePeriod, isPrime, isNewMonth, isNewYear)
+func PrintDetail(aDay, aMonth, aYear, cycle, timePeriod, clock, isPrime, isNewMonth, isNewYear)
 {
 	var monthName = AvantjienMonthName(aMonth);
 	var monthShort = AvantjienMonthShort(aMonth);
@@ -36,7 +36,7 @@ func PrintDetail(aDay, aMonth, aYear, cycle, timePeriod, isPrime, isNewMonth, is
 	}
 
 	Println(str(aDay) + ". " + monthName + " of year " + str(aYear));
-	Println("Current Time: " + str(timePeriod) + " at " + daySymbolVerbose);
+	Println("Current Time: " + clock + " (" + daySymbol + str(timePeriod) + ") at " + daySymbolVerbose);
 	Println("");
 	Println("New week (falame):\t" + PrintTrueFalse(isPrime));
 	Println("");
@@ -76,4 +76,5 @@ func PrintDetail(aDay, aMonth, aYear, cycle, timePeriod, isPrime, isNewMonth, is
 
 	Println("");
 	Println(str(aDay) + "." + str(aMonth) + "." + str(aYear) + " " + monthShort + " ‒ " + daySymbol + str(timePeriod) + specialSuffix);
+	Println("");
 }
