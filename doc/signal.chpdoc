@@ -8,7 +8,6 @@ Blocks until a registered operating system signal (see: ''sigcatch(signums)'', '
 - Number: Signal number received
 
 *Errors:*
-- Runtime error if any arguments are passed
 - Runtime error if ''signal()'' is cancelled by the deadlock detector (e.g. no signals are being caught)
 
 *Important:*

@@ -15,6 +15,3 @@ Converts a value to its string representation.
   - Map: Formatted as ''m["key": value, ...]''
   - Bytes: Formatted byte representation
   - Other: Default string representation
-
-*Errors:*
-- Runtime error if wrong number of arguments
