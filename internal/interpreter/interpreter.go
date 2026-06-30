@@ -233,7 +233,7 @@ func (i *Interpreter) visitVarAccessNode(node *ast.VarAccessNode, ctx values.Ctx
 	}
 
 	// Do NOT call SetContext here. Function values capture their defining
-	// scope via f.context; overwriting it with the call site's ctx would
+	// scope via f.context. Overwriting it with the call site's ctx would
 	// break closures and re-entrant calls.
 	value.SetPos(node.PosStart, node.PosEnd)
 

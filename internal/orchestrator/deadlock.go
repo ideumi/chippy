@@ -97,7 +97,7 @@ func (o *Orchestrator) CheckDeadlock() {
 
 			stuck = append(stuck, inst)
 		case StateBlockedReceive:
-			// Pending items mean the actor is about to wake; treat
+			// Pending items mean the actor is about to wake. Treat
 			// as runnable so a wait(handle)er racing the drain isnt
 			// falsely cancelled.
 			if inst.Inbox != nil && inst.Inbox.HasItems() {

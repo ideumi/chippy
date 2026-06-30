@@ -65,7 +65,7 @@ func isolateTransferFunction(fn *values.Function, cycles map[values.Ctx]values.C
 				return
 			}
 
-			// Builtins are stateless; the receiver reaches its own copies
+			// Builtins are stateless. The receiver reaches its own copies
 			// through its globals once the detached context is parented.
 			if _, isBuiltin := val.(*values.BuiltInFunction); isBuiltin {
 				return

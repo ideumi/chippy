@@ -358,7 +358,7 @@ func (n *Number) DivedBy(other Value) (Value, error) {
 
 		}
 
-		// MinInt64 / -1 overflows int64; fall through to float.
+		// MinInt64 / -1 overflows int64. Fall through to float.
 		if !(n.iVal == math.MinInt64 && otherNum.iVal == -1) {
 			if n.iVal%otherNum.iVal == 0 {
 				return NewNumber(n.iVal / otherNum.iVal).SetContext(n.context), nil
@@ -396,7 +396,7 @@ func (n *Number) PowedBy(other Value) (Value, error) {
 	base := n.AsFloat()
 	exp := otherNum.AsFloat()
 
-	// math.Pow(neg, fractional) is NaN; reject early for a precise message.
+	// math.Pow(neg, fractional) is NaN. Reject early for a precise message.
 	if base < 0 && exp != math.Trunc(exp) {
 		return nil, errors.NewRTError(
 			n.posStart, otherNum.posEnd,
@@ -404,7 +404,7 @@ func (n *Number) PowedBy(other Value) (Value, error) {
 
 	}
 
-	// math.Pow(0, negative) is +Inf; same reason.
+	// math.Pow(0, negative) is +Inf. Same reason.
 	if base == 0 && exp < 0 {
 		return nil, errors.NewRTError(
 			n.posStart, otherNum.posEnd,
