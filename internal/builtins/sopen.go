@@ -13,8 +13,8 @@ import (
 	"chip-go/internal/handles"
 	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
-	"fmt"
 	"net"
+	"strconv"
 )
 
 func sopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
@@ -100,7 +100,7 @@ func sopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	case "tcp":
 		// TCP client connection
-		conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", address, port))
+		conn, err := net.Dial("tcp", net.JoinHostPort(address, strconv.Itoa(port)))
 
 		if err != nil {
 			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
@@ -110,7 +110,7 @@ func sopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	case "udp":
 		// UDP connection
-		raddr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", address, port))
+		raddr, err := net.ResolveUDPAddr("udp", net.JoinHostPort(address, strconv.Itoa(port)))
 
 		if err != nil {
 			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx)) // Address resolution failed
@@ -123,11 +123,11 @@ func sopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		}
 
 		socket.UdpConn = conn
-		socket.Address = fmt.Sprintf("%s:%d", address, port)
+		socket.Address = net.JoinHostPort(address, strconv.Itoa(port))
 
 	case "listen":
 		// TCP server (bind & listen)
-		listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", address, port))
+		listener, err := net.Listen("tcp", net.JoinHostPort(address, strconv.Itoa(port)))
 
 		if err != nil {
 			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))

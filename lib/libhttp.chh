@@ -82,6 +82,22 @@ func HttpRequest(method, url, headers, body)
 	return HttpRequestFollow(method, url, headers, body, 10);
 }
 
+# <_HttpBracketHost_(host)>
+# V-1.0.0 (2026-06-30)
+#
+# Wraps an IPv6 ''host'' in square brackets, so ''::1'' becomes ''[::1]''. URLs
+# and Host headers require this. Names, IPv4 and already wrapped ''host''s are
+# returned unchanged.
+
+func _HttpBracketHost_(host)
+{
+	if not iserr(indexof(host, "[")) { return host; }
+
+	if not iserr(indexof(host, ":")) { return "[" + host + "]"; }
+
+	return host;
+}
+
 # <_HttpResolveLocation_(location, url)>
 # V-1.0.1 (2026-03-13)
 #
@@ -108,11 +124,11 @@ func _HttpResolveLocation_(location, url)
 
 	if (origScheme == "http" and origPort == 80) or (origScheme == "https" and origPort == 443)
 	{
-		baseUrl = origScheme + "://" + origHost;
+		baseUrl = origScheme + "://" + _HttpBracketHost_(origHost);
 	}
 	else
 	{
-		baseUrl = origScheme + "://" + origHost + ":" + str(int(origPort));
+		baseUrl = origScheme + "://" + _HttpBracketHost_(origHost) + ":" + str(int(origPort));
 	}
 
 	# Absolute URL
@@ -413,11 +429,11 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 	{
 		if (scheme == "http" and port == 80) or (scheme == "https" and port == 443)
 		{
-			headers = headers + [["Host", host]];
+			headers = headers + [["Host", _HttpBracketHost_(host)]];
 		}
 		else
 		{
-			headers = headers + [["Host", host + ":" + str(int(port))]];
+			headers = headers + [["Host", _HttpBracketHost_(host) + ":" + str(int(port))]];
 		}
 	}
 
