@@ -8,6 +8,7 @@ package builtins
 
 import (
 	"chip-go/internal/builtins/shared"
+	"chip-go/internal/constants"
 	"chip-go/internal/errors"
 	"chip-go/internal/values"
 )
@@ -39,7 +40,7 @@ func intFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	intVal, err := num.AsInt()
 
 	if err != nil {
-		return res.Failure(err)
+		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 	}
 
 	return res.Success(values.NewNumber(intVal).SetContext(ctx))
