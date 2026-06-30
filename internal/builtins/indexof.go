@@ -89,11 +89,7 @@ func indexofFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 			byteValue := int(byte64)
 
 			if byteValue < 0 || byteValue > 255 {
-				posStart, posEnd := args[1].GetPos()
-
-				return res.Failure(errors.NewRTError(
-					posStart, posEnd,
-					"Byte values must be between 0 and 255"))
+				return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 			}
 
 			target := byte(byteValue)
