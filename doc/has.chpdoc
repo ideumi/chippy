@@ -5,7 +5,7 @@
 Checks if ''container'' contains ''needle''.
 
 *Parameters:*
-- ''container'': Map, list, string, or bytes to search
+- ''container'': String, list, bytes, or map to search
 - ''needle'': Key (map), element (list), substring (string), or byte value (bytes)
 
 *Returns:*
@@ -14,5 +14,5 @@ Checks if ''container'' contains ''needle''.
 - ''err'' if ''needle'' is an empty string
 
 *Errors:*
-- Runtime error if ''container'' is not a map, list, string, or bytes
+- Runtime error if ''container'' is not a string, list, bytes, or map
 - Runtime error if ''needle'' type does not match the type of the ''container''

@@ -2,10 +2,10 @@
 
 ''slice(container, start, end)''
 
-Extracts a sub-range from a string, bytes, or list. The range is inclusive on both ends. ''end'' is clamped to the container length; returns an empty value of the same type if ''start'' > length or ''end'' < ''start''.
+Extracts a sub-range from a string, list, or bytes. The range is inclusive on both ends. ''end'' is clamped to the container length. Returns an empty value of the same type if ''start'' > length or ''end'' < ''start''.
 
 *Parameters:*
-- ''container'': String, bytes, or list to slice
+- ''container'': String, list, or bytes to slice
 - ''start'': Start position (inclusive)
 - ''end'': End position (inclusive)
 
@@ -13,6 +13,6 @@ Extracts a sub-range from a string, bytes, or list. The range is inclusive on bo
 - Same type as ''container'': Sub-range from ''start'' to ''end''
 
 *Errors:*
-- Runtime error if ''container'' is not a string, bytes, or list
+- Runtime error if ''container'' is not a string, list, or bytes
 - Runtime error if ''start'' or ''end'' is not a number
 - Runtime error if ''start'' is less than 1
