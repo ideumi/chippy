@@ -9,7 +9,7 @@ package constants
 import "runtime"
 
 const (
-	VERSION_DATE = "2026-06-30"
+	VERSION_DATE = "2026-07-02"
 	HIST_FILE    = ".ChippyHistory"
 
 	RR_CONTEXT_DISPLAY_NAME     = "<ChippyProgram>"
@@ -37,11 +37,11 @@ const (
 
 	MAX_VALUE_DEPTH = 100000
 
-	RT_ERROR_TITLE           = "Runtime Error"
-	RT_ERROR_DEBUGGER_PREFIX = "Chippy Debugger (Trace):"
-	E_INVALID_SYNTAX         = "Syntax Error"
-	E_ILLEGAL_CHAR           = "Illegal Character"
-	E_EXPECTED_CHAR          = "Expected Character"
-	E_CYCLIC_VALUE           = "A value cannot contain itself"
-	E_VALUE_TOO_DEEP         = "Value is nested too deeply to process"
+	RT_ERROR_TITLE    = "Runtime Error"
+	PANIC_ERROR_TITLE = "Panic"
+	E_INVALID_SYNTAX  = "Syntax Error"
+	E_ILLEGAL_CHAR    = "Illegal Character"
+	E_EXPECTED_CHAR   = "Expected Character"
+	E_CYCLIC_VALUE    = "A value cannot contain itself"
+	E_VALUE_TOO_DEEP  = "Value is nested too deeply to process"
 )

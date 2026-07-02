@@ -22,6 +22,10 @@ func NewInterpreter() *Interpreter {
 }
 
 func (i *Interpreter) Visit(node ast.Node, ctx values.Ctx) *values.RuntimeResult {
+	if ctx.Trace != nil {
+		ctx.Trace.Pos = node.GetPosStart()
+	}
+
 	switch n := node.(type) {
 	case *ast.NumberNode:
 		return i.visitNumberNode(n, ctx)

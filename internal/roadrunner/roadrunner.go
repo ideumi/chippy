@@ -22,12 +22,14 @@ import (
 	"chip-go/internal/builtins"
 	"chip-go/internal/constants"
 	"chip-go/internal/context"
+	"chip-go/internal/errors"
 	"chip-go/internal/interpreter"
 	"chip-go/internal/lexer"
 	"chip-go/internal/orchestrator"
 	"chip-go/internal/parser"
 	"chip-go/internal/values"
 	"fmt"
+	"runtime/debug"
 )
 
 type RoadRunner2 struct {
@@ -48,6 +50,7 @@ func NewRoadRunner2() *RoadRunner2 {
 
 	orch := orchestrator.New()
 	orch.CreateMain(rr)
+
 	orch.SetFactory(func(instanceID int) orchestrator.RR2Interface {
 		return newRR2(instanceID, fmt.Sprintf("<Actor %d>", instanceID))
 	})
@@ -55,8 +58,27 @@ func NewRoadRunner2() *RoadRunner2 {
 	return rr
 }
 
+func recoverPanic(ctx values.Ctx, err *error) {
+	if r := recover(); r != nil {
+		if rtErr, ok := r.(*errors.RTError); ok {
+			*err = rtErr
+			return
+		}
+
+		var rrErr error
+
+		if ctx.Trace != nil && ctx.Trace.Pos != nil {
+			rrErr = errors.NewBaseError(ctx.Trace.Pos, nil, constants.PANIC_ERROR_TITLE, fmt.Sprintf("%v", r))
+		} else {
+			rrErr = fmt.Errorf("%s: %v", constants.PANIC_ERROR_TITLE, r)
+		}
+
+		*err = fmt.Errorf("%s\n\n%s", rrErr.Error(), debug.Stack())
+	}
+}
+
 func (rr *RoadRunner2) Run(filename, text string) (retVal values.Value, retErr error) {
-	defer values.RecoverCyclic(&retErr)
+	defer recoverPanic(rr.globalContext, &retErr)
 
 	lexer := lexer.NewLexer(filename, text)
 	tokens, err := lexer.MakeTokens()
