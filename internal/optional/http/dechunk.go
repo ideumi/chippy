@@ -67,7 +67,7 @@ func dechunkFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 
 		chunkSize, err := strconv.ParseInt(sizeLine, 16, 64)
 
-		if err != nil {
+		if err != nil || chunkSize < 0 {
 			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 		}
 
@@ -78,8 +78,8 @@ func dechunkFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 			break
 		}
 
-		// Read chunk data
-		if pos+int(chunkSize) > len(data) {
+		// Read chunk data and compare against remaining length to avoid overflow
+		if chunkSize > int64(len(data)-pos) {
 			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 		}
 

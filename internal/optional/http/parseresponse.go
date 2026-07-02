@@ -117,7 +117,11 @@ func parseresponseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeR
 		keyLower := strings.ToLower(key)
 
 		if keyLower == "content-length" {
-			contentLength, _ = strconv.Atoi(value)
+			// Leave contentLength at -1 on garbage so the body defaults to
+			// the remaining data rather than being truncated to empty
+			if n, err := strconv.Atoi(value); err == nil {
+				contentLength = n
+			}
 		}
 
 		if keyLower == "transfer-encoding" && strings.Contains(strings.ToLower(value), "chunked") {
@@ -136,10 +140,12 @@ func parseresponseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeR
 			   and a Content-Length header field, the Transfer-Encoding
 			   overrides the Content-Length."
 			*/
-			end := bodyStart + contentLength
 
-			if end > len(data) {
-				end = len(data)
+			// Clamp to remaining length to avoid overflow on a huge Content-Length
+			end := len(data)
+
+			if contentLength < len(data)-bodyStart {
+				end = bodyStart + contentLength
 			}
 
 			body = data[bodyStart:end]
