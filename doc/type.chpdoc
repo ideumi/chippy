@@ -17,6 +17,3 @@ Returns the type name of a value.
   - "function": User-defined functions
   - "builtin": Built-in functions
   - "unknown": Radiation damage
-
-*Errors:*
-- Runtime error if wrong number of arguments

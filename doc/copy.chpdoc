@@ -11,5 +11,4 @@ Returns an independent (deep) copy of ''value''. Numbers and strings are immutab
 - An independent copy of ''value''
 
 *Errors:*
-- Runtime error if wrong number of arguments
 - Runtime error if ''value'' contains itself

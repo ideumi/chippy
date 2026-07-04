@@ -30,7 +30,7 @@ func indexofFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 			shared.Errors.InvalidArgCountWithHint("indexof", 2, "haystack, needle")))
 	}
 
-	switch haystack := args[0].(type) {
+	switch container := args[0].(type) {
 	case *values.String:
 		needleArg, ok := args[1].(*values.String)
 
@@ -48,20 +48,20 @@ func indexofFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 		}
 
-		byteIndex := strings.Index(haystack.Value, needle)
+		byteIndex := strings.Index(container.Value, needle)
 
 		if byteIndex == -1 {
 			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 		}
 
-		runeIndex := len([]rune(haystack.Value[:byteIndex]))
+		runeIndex := len([]rune(container.Value[:byteIndex]))
 
 		return res.Success(values.NewNumber(runeIndex + 1).SetContext(ctx))
 
 	case *values.List:
 		needle := args[1]
 
-		for i, element := range haystack.Elements {
+		for i, element := range container.Elements {
 			comparison, err := element.GetComparisonEe(needle)
 
 			if err != nil {
@@ -89,16 +89,12 @@ func indexofFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 			byteValue := int(byte64)
 
 			if byteValue < 0 || byteValue > 255 {
-				posStart, posEnd := args[1].GetPos()
-
-				return res.Failure(errors.NewRTError(
-					posStart, posEnd,
-					"Byte values must be between 0 and 255"))
+				return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 			}
 
 			target := byte(byteValue)
 
-			for i, b := range haystack.Data {
+			for i, b := range container.Data {
 				if b == target {
 					return res.Success(values.NewNumber(i + 1).SetContext(ctx))
 				}
@@ -111,7 +107,7 @@ func indexofFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 				return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 			}
 
-			idx := bytes.Index(haystack.Data, needle.Data)
+			idx := bytes.Index(container.Data, needle.Data)
 
 			if idx == -1 {
 				return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))

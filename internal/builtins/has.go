@@ -30,18 +30,22 @@ func hasFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	}
 
 	switch container := args[0].(type) {
-	case *values.Map:
-		keyStr, ok := args[1].(*values.String)
+	case *values.String:
+		needleStr, ok := args[1].(*values.String)
 
 		if !ok {
 			posStart, posEnd := args[1].GetPos()
 
 			return res.Failure(errors.NewRTError(
 				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("has", shared.PositionSecond, shared.TypeString, "key")))
+				shared.Errors.InvalidArgTypePositionalWithHint("has", shared.PositionSecond, shared.TypeString, "needle")))
 		}
 
-		if _, exists := container.Entries[keyStr.Value]; exists {
+		if needleStr.Value == "" {
+			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		}
+
+		if strings.Contains(container.Value, needleStr.Value) {
 			return res.Success(values.NewNumber(constants.NUM_TRU).SetContext(ctx))
 		}
 
@@ -70,27 +74,6 @@ func hasFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 		return res.Success(values.NewNumber(constants.NUM_FAL).SetContext(ctx))
 
-	case *values.String:
-		needleStr, ok := args[1].(*values.String)
-
-		if !ok {
-			posStart, posEnd := args[1].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("has", shared.PositionSecond, shared.TypeString, "needle")))
-		}
-
-		if needleStr.Value == "" {
-			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
-		}
-
-		if strings.Contains(container.Value, needleStr.Value) {
-			return res.Success(values.NewNumber(constants.NUM_TRU).SetContext(ctx))
-		}
-
-		return res.Success(values.NewNumber(constants.NUM_FAL).SetContext(ctx))
-
 	case *values.Bytes:
 		needleNum, ok := args[1].(*values.Number)
 
@@ -111,11 +94,7 @@ func hasFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		byteValue := int(byte64)
 
 		if byteValue < 0 || byteValue > 255 {
-			posStart, posEnd := args[1].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				"Byte values must be between 0 and 255"))
+			return res.Success(values.NewNumber(constants.NUM_FAL).SetContext(ctx))
 		}
 
 		target := byte(byteValue)
@@ -128,11 +107,28 @@ func hasFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 		return res.Success(values.NewNumber(constants.NUM_FAL).SetContext(ctx))
 
+	case *values.Map:
+		keyStr, ok := args[1].(*values.String)
+
+		if !ok {
+			posStart, posEnd := args[1].GetPos()
+
+			return res.Failure(errors.NewRTError(
+				posStart, posEnd,
+				shared.Errors.InvalidArgTypePositionalWithHint("has", shared.PositionSecond, shared.TypeString, "key")))
+		}
+
+		if _, exists := container.Entries[keyStr.Value]; exists {
+			return res.Success(values.NewNumber(constants.NUM_TRU).SetContext(ctx))
+		}
+
+		return res.Success(values.NewNumber(constants.NUM_FAL).SetContext(ctx))
+
 	default:
 		posStart, posEnd := args[0].GetPos()
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("has", shared.PositionFirst, "a map, list, string, or bytes", "container")))
+			shared.Errors.InvalidArgTypePositionalWithHint("has", shared.PositionFirst, "a string, list, bytes, or map", "container")))
 	}
 }

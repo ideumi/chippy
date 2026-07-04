@@ -9,6 +9,3 @@ Checks if a value is the ''ok'' constant.
 
 *Returns:*
 - Number: ''true'' if value is ''ok'', ''false'' otherwise
-
-*Errors:*
-- Runtime error if wrong number of arguments

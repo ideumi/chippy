@@ -110,7 +110,7 @@ func waitFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	orch.RemoveInstance(instanceID)
 
 	if result.Err != nil {
-		// Actor-body RTErrors carry their own internal position; pass through.
+		// Actor-body RTErrors carry their own internal position. Pass through.
 		// Panics surface as plain errors (see actor.go) and have none, so wrap
 		// them with the wait call site so reporting isn't blind.
 		if _, ok := result.Err.(*errors.RTError); ok {

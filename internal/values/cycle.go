@@ -15,25 +15,12 @@ import (
 // maps can contain themselves, so each walk tracks the lists and maps it is
 // currently inside of and stops if it reaches one again.
 
-// PanicCyclic aborts a walk with a runtime error that RecoverCyclic turns back
-// into a returned error.
+// PanicCyclic aborts a walk with a runtime error that is recovered into a
+// returned error at the run boundary
 func PanicCyclic(v Value, msg string) {
 	posStart, posEnd := v.GetPos()
 
 	panic(errors.NewRTError(posStart, posEnd, msg))
-}
-
-// RecoverCyclic turns a PanicCyclic into a returned error. RoadRunner2.Run defers
-// it once, around the whole execution. Any other panic gets passed through because
-// that would be a real bug.
-func RecoverCyclic(err *error) {
-	if r := recover(); r != nil {
-		if rtErr, ok := r.(*errors.RTError); ok {
-			*err = rtErr
-		} else {
-			panic(r)
-		}
-	}
 }
 
 // EnterWalk guards a walk against cycles and over-deep nesting. Defer the

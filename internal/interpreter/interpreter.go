@@ -22,6 +22,10 @@ func NewInterpreter() *Interpreter {
 }
 
 func (i *Interpreter) Visit(node ast.Node, ctx values.Ctx) *values.RuntimeResult {
+	if ctx.Trace != nil {
+		ctx.Trace.Pos = node.GetPosStart()
+	}
+
 	switch n := node.(type) {
 	case *ast.NumberNode:
 		return i.visitNumberNode(n, ctx)
@@ -233,7 +237,7 @@ func (i *Interpreter) visitVarAccessNode(node *ast.VarAccessNode, ctx values.Ctx
 	}
 
 	// Do NOT call SetContext here. Function values capture their defining
-	// scope via f.context; overwriting it with the call site's ctx would
+	// scope via f.context. Overwriting it with the call site's ctx would
 	// break closures and re-entrant calls.
 	value.SetPos(node.PosStart, node.PosEnd)
 

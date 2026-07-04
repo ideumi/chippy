@@ -8,6 +8,7 @@ package main
 
 import (
 	"bufio"
+	"chip-go/cmd/chippy/formatter"
 	"chip-go/cmd/chippy/safety"
 	"chip-go/internal/constants"
 	"chip-go/internal/roadrunner"
@@ -502,8 +503,18 @@ func generateCombinedFile(config CombineConfig, files []string) error {
 		}
 	}
 
+	// Normalize the tail to a single newline.
+	output := strings.TrimRight(combined.String(), " \t\r\n") + "\n"
+
+	// Run the formatter on readable output
+	if !config.StripWhitespace {
+		if formatted, err := formatter.Format(config.Output, output); err == nil {
+			output = formatted
+		}
+	}
+
 	// Write output file
-	err := os.WriteFile(config.Output, []byte(combined.String()), constants.FILE_PERM_EXECUTABLE)
+	err := os.WriteFile(config.Output, []byte(output), constants.FILE_PERM_EXECUTABLE)
 
 	if err != nil {
 		return fmt.Errorf("writing output file '%s': %w", config.Output, err)

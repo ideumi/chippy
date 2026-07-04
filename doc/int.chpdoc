@@ -9,6 +9,7 @@ Converts a number to an integer by truncating the decimal part.
 
 *Returns:*
 - Number: Integer value
+- ''err'' if the value cannot be converted to an integer
 
 *Errors:*
 - Runtime error if value is not a number

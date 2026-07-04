@@ -79,10 +79,6 @@ func (b *Bytes) GetElement(index int) *Number {
 }
 
 func (b *Bytes) AppendByte(value int) *Bytes {
-	if value < 0 || value > 255 {
-		return b
-	}
-
 	b.Data = append(b.Data, byte(value))
 
 	return b

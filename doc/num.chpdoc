@@ -13,6 +13,3 @@ Converts a value to number.
   - String: Parses as floating point number
   - List: Returns 0 for empty list, single number element if list has one number
 - ''err'' if the value cannot be converted to a number
-
-*Errors:*
-- Runtime error if wrong number of arguments

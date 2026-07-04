@@ -22,4 +22,3 @@ Finds the first occurrence of ''needle'' in ''haystack''.
 - Runtime error if ''haystack'' is not a string, list, or bytes
 - Runtime error if ''haystack'' is a string and ''needle'' is not a string
 - Runtime error if ''haystack'' is bytes and ''needle'' is not a number or bytes
-- Runtime error if ''haystack'' is bytes and ''needle'' is a number not between 0 and 255

@@ -13,7 +13,8 @@ import (
 	"chip-go/internal/optional"
 	"chip-go/internal/values"
 	"crypto/tls"
-	"fmt"
+	"net"
+	"strconv"
 )
 
 func tlsopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
@@ -87,7 +88,7 @@ func tlsopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 		ServerName:         hostStr.Value,
 	}
 
-	address := fmt.Sprintf("%s:%d", hostStr.Value, port)
+	address := net.JoinHostPort(hostStr.Value, strconv.Itoa(port))
 	conn, err := tls.Dial("tcp", address, tlsConfig)
 
 	if err != nil {
