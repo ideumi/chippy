@@ -18,8 +18,8 @@ Chippy interpreter and toolchain
 
 *Commands:*
 
-  ''chippy doc [topic]''              View documentation
-  ''chippy doc list''                 List all documentation topics
+  ''chippy doc''                      List all documentation topics
+  ''chippy doc <topic>''              View documentation for a topic
 
   ''chippy doc <file.chpdoc>''        Render chpdoc to terminal
 

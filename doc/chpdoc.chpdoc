@@ -13,9 +13,8 @@ The documentation system searches paths in the following priority order:
 *Usage*
 
 '''
-chippy doc                        # Show index page
+chippy doc                        # List all available documents
 chippy doc <document>             # Show specific document
-chippy doc list                   # List all available documents
 chippy doc <file.chpdoc>          # Render .chpdoc file directly
 chippy doc <file>                 # List symbols in source file
 chippy doc <file> <symbol>        # Show symbol documentation

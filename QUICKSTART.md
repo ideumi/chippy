@@ -191,7 +191,7 @@ Chippy has wide reaching documentation in appropriate places:
 
 ```bash
 # List all documentation topics
-chippy doc list
+chippy doc
 
 # View documentation for topic
 chippy doc [topic]
