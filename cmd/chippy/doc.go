@@ -196,20 +196,6 @@ func showHelp(document, symbol string) {
 	docPaths := getDocPaths()
 
 	if document == "" {
-		// Index file - try each path until found
-		for _, docPath := range docPaths {
-			indexPath := filepath.Join(docPath, constants.DOC_INDEX_FILE)
-
-			if err := displayChpDocFile(indexPath); err == nil {
-				return
-			}
-		}
-
-		fmt.Printf("Error: Index document not found in any documentation directory\n")
-		os.Exit(1)
-	}
-
-	if document == "list" {
 		listFunctions(docPaths)
 
 		return
@@ -245,7 +231,7 @@ func listFunctions(docPaths []string) {
 		}
 
 		for _, file := range files {
-			if strings.HasSuffix(file.Name(), constants.DOC_FILE_EXTENSION) && file.Name() != constants.DOC_INDEX_FILE {
+			if strings.HasSuffix(file.Name(), constants.DOC_FILE_EXTENSION) {
 				name := strings.TrimSuffix(file.Name(), constants.DOC_FILE_EXTENSION)
 
 				if !topicsSet[name] {
