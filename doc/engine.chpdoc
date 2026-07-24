@@ -1,0 +1,83 @@
+*Modena Engine* | V-$CHIPVR ($CHIPCN)
+
+*The Model*
+
+Chippy does not run your program by walking the syntax tree, which is slow. It compiles the program to bytecode first, and a virtual machine then executes that bytecode. The engine behind this is called "Modena", it contains a bytecode compiler, serializer, virtual machine and disassembler.
+
+*Architecture*
+
+The lexer turns the text into tokens, the parser turns the tokens into a syntax tree, the compiler turns that tree into a chunk of bytecode, and the virtual machine runs the chunk. All of this happens automatically in memory when you run a program.
+
+'''
+                 chippy <program>
+                        |
+          +-------------+-------------+
+          |                           |
+        source                     bytecode
+          |                           |
++---------+---------+                 |
+|      Lexer        |                 |
+|      Parser       |                 |
+|      Compiler     |                 |
++---------+---------+                 |
+          |                           |
+          +-------------+-------------+
+                        |
+          +-------------+-------------+
+          |           Chunk           |
+          |                           |
+          |  code                     |
+          |  constants                |
+          |  names                    |
+          |  functions                |
+          |  line table               |
+          +-------------+-------------+
+                        |
+          +-------------+-------------+
+          |         Modena VM         |
+          |                           |
+          |  value stack              |
+          |  call frames              |
+          |  globals                  |
+          +-------------+-------------+
+                        |
+          +-------------+-------------+
+          |Values, Builtins, Optionals|
+          +---------------------------+
+'''
+
+*Source or Bytecode*
+
+A program can be given to the engine as source code or as compiled bytecode. The engine can tell them apart automatically, so ''chippy <program>'' and e.g. ''load(filename)'' can accept either form and there is nothing extra to do.
+
+*Disassembling*
+
+''chippy disasm <file>'' outputs the instructions the compiler produced, with the constants and the source line each instruction came from. It accepts source files and compiled files, and prints the same thing for both.
+
+For example, see this simple ''"Hello World!"'' program:
+
+'''
+#!/usr/bin/chippy
+
+fwrite(pack("Hello World!"), 1);
+'''
+
+which compiles to:
+
+'''
+== helloworld.chp ==
+0000  OpGetGlobal      0 (fwrite) ; line 3
+0005  OpGetGlobal      1 (pack)
+0010  OpConstant       0 ("Hello World!")
+0015  OpCall           1
+0020  OpConstant       1 (1)
+0025  OpCall           2
+'''
+
+This is practical for example when you do not know what a specific program is doing and want to audit it, or something in your program is going wrong and the compiler is suspected of producing bad instructions.
+
+*Recommended Reading*
+
+''chippy doc scoping''
+''chippy doc concurrency''
+''chippy doc combine''

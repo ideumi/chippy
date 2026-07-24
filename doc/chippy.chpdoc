@@ -37,3 +37,8 @@ Chippy interpreter and toolchain
   ''chippy format all [dir]''         Format ''.chp'' and ''.chh'' files recursively
   ''chippy format check <files...>''  Report which files need formatting
   ''chippy format check all [dir]''   Report recursively which files need formatting
+
+  ''chippy compile <source>''         Compile a program to a bytecode file
+  ''chippy compile <source> <out>''   Compile a program to a bytecode file named ''out''
+
+  ''chippy disasm <file>''            Disassemble and output a program's bytecode

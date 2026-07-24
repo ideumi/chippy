@@ -1,0 +1,43 @@
+*Bytecode* | V-$CHIPVR ($CHIPCN)
+
+Bytecode holds the instructions the compiler produced, together with everything those instructions refer to. It carries no source text, so it is a finished program akin to a binary that a systems language like C may produce, the difference is that the instructions that the Modena compiler produces are specific to the Modena virtual machine and not the underlying processor architecture instruction set or operating system. This allows the bytecode to be processor architecture and operating system independent at least in theory.
+
+You can compile source code to a bytecode file by using ''chippy compile <source>'', or by setting ''Compile'' in a ''combine.chp'' file (see ''chippy doc combine'').
+
+You can see the instructions the compiler produces by disassembling the bytecode file by using ''chippy disasm <file>''.
+
+*The File format*
+
+The Chippy bytecode file format is custom and encodes Chippy / Modena bytecode alongside some identifying and supporting data. It is intentionally kept minimal and 1:1 hash reproducible, this means that the same code, on the same version of Chippy, will give you a binary that is byte identical each time. The file format is handled by the Modena serializer.
+
+'''
++-----------------------------------------------+
+|  #!/usr/bin/chippy                            | shebang (optional)
++-----------------------------------------------+
+|  F8 43 48 49 50 50 59 FF                      | signature magic, 8 bytes
++-----------------------------------------------+
+|  format version                               | u32
++-----------------------------------------------+
+|                                               |
+|  chunk                                        |
+|    code             the instructions          |
+|    constants        numbers and strings       |
+|    names            globals referred to       |
+|    slot count       locals per call frame     |
+|    local names      for diagnostics           |
+|    functions        a nested chunk each       |
+|    line table       offset to file and line   |
+|                                               |
++-----------------------------------------------+
+
+shebang        -->  part of the format, this is written unless the ''AddShebang = false;'' option is set in combine.
+magic          -->  ''0xF8 CHIPPY 0xFF''
+format version -->  in case the format the bytecode serializer produces ever needs to change, this indicates the file format version
+chunk          -->  the code, and everything the code refers to
+'''
+
+*Recommended Reading*
+
+''chippy doc engine''
+''chippy doc combine''
+''chippy doc scoping''

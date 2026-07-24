@@ -20,16 +20,29 @@ Programs, properly built using combine have no dependencies outside of the ''chi
 - ''External'': List of dependencies combine shouldn't bundle and just keep as loads
 - ''StripComments'': Remove comments from bundled output
 - ''StripWhitespace'': Remove excess whitespace from bundled output
-- ''AddShebang'': Add ''#!/usr/bin/chippy'' shebang to output
+- ''Compile'': Write the bundle as bytecode instead of source
+- ''AddShebang'': Add ''#!/usr/bin/chippy'' shebang to output, source or bytecode
 
 *What it does:*
-- Automatic dependency resolution via ''load()'' statements
+- Automatic dependency resolution via ''load(filename)'' statements
 - Circular dependency prevention
 - Licence header insertion (when configured)
 - Comment/whitespace stripping (when configured)
 - Safety checks:
 	- Symbol collision detection in file scope (see ''chippy doc scoping'')
 	- Syntax error detection
+
+*Source bundles and compiled bundles:*
+
+With ''Compile'' set to ''false'', combine writes one Chippy source file. You can read it, run it, see documentation it with ''chippy doc'', and bundle it again as part of a larger program.
+
+With ''Compile'' set to ''true'', combine bundles the sources exactly the same way and then compiles the result to bytecode. The program starts up faster since it does not need to be compiled from source at runtime, but in this state it is a finished program, so its documentation is stripped, and it cannot be bundled again.
+
+''StripComments'' and ''StripWhitespace'' only affect source bundles. Comments and spacing are not part of the bytecode.
+
+''AddShebang'' applies to both source bundles as well as compiled bytecode bundles.
+
+Dependencies listed in ''External'' stay as ''load(filename)'' calls in both cases, and are resolved when the program runs.
 
 *Returns:*
 - Creates bundled executable file
