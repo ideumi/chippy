@@ -462,6 +462,10 @@ func (n *Number) Negate() *Number {
 	return numberFromFloat64(-n.fVal).SetContext(n.context).(*Number)
 }
 
+func (n *Number) Negated() (Value, error) {
+	return n.Negate(), nil
+}
+
 func compareEqual(a, b *Number) bool {
 	if a.isInt && b.isInt {
 		return a.iVal == b.iVal

@@ -26,7 +26,7 @@ func PanicCyclic(v Value, msg string) {
 // EnterWalk guards a walk against cycles and over-deep nesting. Defer the
 // returned func to leave: defer EnterWalk(v, seen, depth)().
 func EnterWalk(v Value, seen map[Value]bool, depth int) func() {
-	if depth > constants.MAX_VALUE_DEPTH {
+	if depth > constants.LIMIT_VALUE_NESTING_DEPTH {
 		PanicCyclic(v, constants.E_VALUE_TOO_DEEP)
 	}
 

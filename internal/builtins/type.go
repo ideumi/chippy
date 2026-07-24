@@ -46,11 +46,11 @@ func typeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	case *values.Map:
 		typeName = "map"
 
-	case *values.Function:
-		typeName = "function"
-
 	case *values.BuiltInFunction:
 		typeName = "builtin"
+
+	case values.Callable:
+		typeName = "function"
 
 	default:
 		typeName = "unknown"

@@ -105,6 +105,7 @@ type Value interface {
 	GetComparisonGte(other Value) (Value, error)
 
 	Notted() (Value, error)
+	Negated() (Value, error)
 	XoredBy(other Value) (Value, error)
 
 	BAndedBy(other Value) (Value, error)
@@ -214,6 +215,10 @@ func (bv *BaseValue) GetComparisonGte(other Value) (Value, error) {
 }
 
 func (bv *BaseValue) Notted() (Value, error) {
+	return nil, IllegalOperation(bv, nil)
+}
+
+func (bv *BaseValue) Negated() (Value, error) {
 	return nil, IllegalOperation(bv, nil)
 }
 

@@ -39,7 +39,7 @@ func (o *Orchestrator) GetRegistry(instanceID int) *handles.HandleRegistry {
 	return nil
 }
 
-func (o *Orchestrator) GetRR2ForContext(instanceID int) RR2Interface {
+func (o *Orchestrator) GetModenaForContext(instanceID int) Modena {
 	o.mu.RLock()
 
 	inst := o.instances[instanceID]
@@ -47,7 +47,7 @@ func (o *Orchestrator) GetRR2ForContext(instanceID int) RR2Interface {
 	o.mu.RUnlock()
 
 	if inst != nil {
-		return inst.RR
+		return inst.Modena
 	}
 
 	return nil

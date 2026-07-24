@@ -200,7 +200,7 @@ func walkAST(node ast.Node, filename string, symbols *[]SymbolInfo) {
 			*symbols = append(*symbols, SymbolInfo{
 				Name:    name,
 				File:    filename,
-				Line:    n.VarNameToken.PosStart.Line,
+				Line:    n.VarNameToken.PosStart.DisplayLine(),
 				SymType: "function",
 			})
 		}
@@ -217,7 +217,7 @@ func walkAST(node ast.Node, filename string, symbols *[]SymbolInfo) {
 		*symbols = append(*symbols, SymbolInfo{
 			Name:    name,
 			File:    filename,
-			Line:    n.VarNameToken.PosStart.Line,
+			Line:    n.VarNameToken.PosStart.DisplayLine(),
 			SymType: "variable",
 		})
 

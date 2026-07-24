@@ -39,7 +39,7 @@ func (m *Map) String() string {
 }
 
 func (m *Map) stringWalk(seen map[Value]bool, depth int) string {
-	if depth > constants.MAX_VALUE_DEPTH || seen[m] {
+	if depth > constants.LIMIT_VALUE_NESTING_DEPTH || seen[m] {
 		return "m[...]"
 	}
 

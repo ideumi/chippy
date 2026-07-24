@@ -11,12 +11,12 @@ import (
 	"chip-go/internal/values"
 )
 
-type RR2Interface interface {
+type Modena interface {
 	Run(filename, text string) (values.Value, error)
 	GetGlobalContext() values.Ctx
 }
 
-type RR2Factory func(instanceID int) RR2Interface
+type ModenaFactory func(instanceID int) Modena
 
 type ActorResult struct {
 	Value values.Value
@@ -27,7 +27,7 @@ type ActorResult struct {
 // Orchestrator.mu.
 type Instance struct {
 	ID       int
-	RR       RR2Interface
+	Modena   Modena
 	Registry *handles.HandleRegistry
 	Inbox    *Inbox
 	ResultCh chan ActorResult

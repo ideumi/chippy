@@ -133,7 +133,7 @@ func waitFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		// just relied on.
 		orchestrator.BindValuesToGlobals(
 			[]values.Value{result.Value},
-			selfInst.RR.GetGlobalContext(),
+			selfInst.Modena.GetGlobalContext(),
 		)
 
 		return res.Success(result.Value)

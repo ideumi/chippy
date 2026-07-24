@@ -78,17 +78,17 @@ func loadoptFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 			"Optional \""+optionalName.Value+"\" does not exist"))
 	}
 
-	roadRunner := orchestrator.Get().GetRR2ForContext(ctx.InstanceID)
+	mod := orchestrator.Get().GetModenaForContext(ctx.InstanceID)
 
-	if roadRunner == nil {
+	if mod == nil {
 		posStart, posEnd := args[0].GetPos()
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			"RoadRunner2 not available"))
+			"Modena not available"))
 	}
 
-	globalCtx := roadRunner.GetGlobalContext()
+	globalCtx := mod.GetGlobalContext()
 
 	InstallOpt(opt, globalCtx)
 

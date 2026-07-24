@@ -50,17 +50,17 @@ func loadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			"Failed to load file \""+filename.Value+"\": "+err.Error()))
 	}
 
-	roadRunner := orchestrator.Get().GetRR2ForContext(ctx.InstanceID)
+	mod := orchestrator.Get().GetModenaForContext(ctx.InstanceID)
 
-	if roadRunner == nil {
+	if mod == nil {
 		posStart, posEnd := args[0].GetPos()
 
 		return res.Failure(errors.NewRTError(
 			posStart, posEnd,
-			"RoadRunner2 not available"))
+			"Modena not available"))
 	}
 
-	_, err = roadRunner.Run(filename.Value, string(content))
+	_, err = mod.Run(filename.Value, string(content))
 
 	if err != nil {
 		posStart, posEnd := args[0].GetPos()

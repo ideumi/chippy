@@ -29,7 +29,7 @@ func (l *List) String() string {
 }
 
 func (l *List) stringWalk(seen map[Value]bool, depth int) string {
-	if depth > constants.MAX_VALUE_DEPTH || seen[l] {
+	if depth > constants.LIMIT_VALUE_NESTING_DEPTH || seen[l] {
 		return "[...]"
 	}
 

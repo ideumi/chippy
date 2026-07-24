@@ -150,7 +150,7 @@ func GetConstants() map[string]values.Value {
 		"CHIPCN": values.NewString(constants.STR_LPLCN),
 		"CHIPOS": values.NewString(constants.STR_LPLOS),
 		"CHIPAR": values.NewString(constants.STR_LPLAR),
-		// CHIPRT is bound per actor in roadrunner.go and not here
+		// CHIPRT is bound per actor by the engine and not here
 
 		"null":  values.NewNumber(constants.NUM_NUL),
 		"false": values.NewNumber(constants.NUM_FAL),

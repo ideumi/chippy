@@ -386,10 +386,12 @@ func (p *Parser) call() *ParseResult {
 			res.RegisterAdvancement()
 			p.advance()
 			argNodes := []ast.Node{}
+			var posEnd *errors.Position
 
 			p.skipWhitespace(res)
 
 			if p.currentTok.Type == constants.TT_RPAREN {
+				posEnd = p.currentTok.PosEnd
 				res.RegisterAdvancement()
 				p.advance()
 			} else {
@@ -428,11 +430,12 @@ func (p *Parser) call() *ParseResult {
 					))
 				}
 
+				posEnd = p.currentTok.PosEnd
 				res.RegisterAdvancement()
 				p.advance()
 			}
 
-			atom = ast.NewCallNode(atom, argNodes)
+			atom = ast.NewCallNode(atom, argNodes, posEnd)
 
 			continue
 		}

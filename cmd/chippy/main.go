@@ -9,7 +9,7 @@ package main
 import (
 	"chip-go/internal/builtins"
 	"chip-go/internal/constants"
-	"chip-go/internal/roadrunner"
+	"chip-go/internal/modena"
 	"chip-go/thirdparty/readline"
 	"fmt"
 	"os"
@@ -62,20 +62,32 @@ func main() {
 		return
 	}
 
-	rr := roadrunner.NewRoadRunner2()
+	// Handle compile command
+	if len(args) > 0 && args[0] == "compile" {
+		handleCompileCommand(args[1:])
+		return
+	}
+
+	// Handle disasm command
+	if len(args) > 0 && args[0] == "disasm" {
+		handleDisasmCommand(args[1:])
+		return
+	}
+
+	mod := modena.New()
 
 	// Start REPL
 	if len(args) == 0 {
 		builtins.SetGlobalArgs([]string{})
 
-		runREPL(rr)
+		runREPL(mod)
 	} else if len(args) >= 1 && (args[0] == "-v" || args[0] == "--version") {
 		fmt.Printf("%s %s %s\n",
 			constants.STR_LPLVR, constants.VERSION_DATE, constants.STR_LPLCN)
 	} else if len(args) >= 2 && (args[0] == "-r" || args[0] == "--run") {
 		builtins.SetGlobalArgs([]string{}) // No args for -r / --run mode
 
-		runCommand(rr, args[1])
+		runCommand(mod, args[1])
 	} else {
 		scriptArgs := []string{}
 
@@ -84,11 +96,11 @@ func main() {
 		}
 
 		builtins.SetGlobalArgs(scriptArgs)
-		runScript(rr, args[0])
+		runScript(mod, args[0])
 	}
 }
 
-func runREPL(rr *roadrunner.RoadRunner2) {
+func runREPL(mod *modena.Modena) {
 	fmt.Printf("chippy V-%s '%s' from %s on %s-%s.\n",
 		constants.STR_LPLVR, constants.STR_LPLCN, constants.VERSION_DATE, runtime.GOOS, runtime.GOARCH)
 
@@ -151,7 +163,7 @@ func runREPL(rr *roadrunner.RoadRunner2) {
 			continue
 		}
 
-		result, err := rr.Run(constants.CLI_CONTEXT_DISPLAY_NAME_FN, text)
+		result, err := mod.Run(constants.CLI_CONTEXT_DISPLAY_NAME_FN, text)
 
 		if err != nil {
 			fmt.Println(err.Error())
@@ -187,8 +199,8 @@ func showHistory(historyFile string) {
 	}
 }
 
-func runCommand(rr *roadrunner.RoadRunner2, command string) {
-	result, err := rr.Run("<command>", command)
+func runCommand(mod *modena.Modena, command string) {
+	result, err := mod.Run("<command>", command)
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -204,12 +216,15 @@ func runCommand(rr *roadrunner.RoadRunner2, command string) {
 	}
 }
 
-func runScript(rr *roadrunner.RoadRunner2, filename string) {
-	chpCode := fmt.Sprintf("load(\"%s\");", filename)
-
-	_, err := rr.Run("<"+filename+">", chpCode)
+func runScript(mod *modena.Modena, filename string) {
+	data, err := os.ReadFile(filename)
 
 	if err != nil {
+		fmt.Printf("Error: could not read '%s': %v\n", filename, err)
+		os.Exit(1)
+	}
+
+	if _, err := mod.Run(filename, string(data)); err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}

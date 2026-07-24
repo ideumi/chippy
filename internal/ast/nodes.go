@@ -343,14 +343,7 @@ type CallNode struct {
 	ArgNodes   []Node
 }
 
-func NewCallNode(nodeToCall Node, argNodes []Node) *CallNode {
-	var posEnd *errors.Position
-	if len(argNodes) > 0 {
-		posEnd = argNodes[len(argNodes)-1].GetPosEnd()
-	} else {
-		posEnd = nodeToCall.GetPosEnd()
-	}
-
+func NewCallNode(nodeToCall Node, argNodes []Node, posEnd *errors.Position) *CallNode {
 	return &CallNode{
 		BaseNode:   NewBaseNode(nodeToCall.GetPosStart(), posEnd),
 		NodeToCall: nodeToCall,

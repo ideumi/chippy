@@ -123,7 +123,7 @@ func getTypePrecedence(v values.Value) int {
 		return 2
 	case *values.Bytes:
 		return 3
-	case *values.BuiltInFunction, *values.Function:
+	case *values.BuiltInFunction, values.Callable:
 		return 4
 	case *values.Map:
 		return 5

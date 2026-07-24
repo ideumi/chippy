@@ -10,8 +10,9 @@ import (
 	"bufio"
 	"chip-go/cmd/chippy/formatter"
 	"chip-go/cmd/chippy/safety"
+	"chip-go/internal/compiler"
 	"chip-go/internal/constants"
-	"chip-go/internal/roadrunner"
+	"chip-go/internal/modena"
 	"chip-go/internal/values"
 	"fmt"
 	"os"
@@ -37,19 +38,19 @@ func reportCollisions(collisions []safety.SymbolCollision) {
 			fmt.Printf("\n  %s '%s' collides with %s:\n", collision.Locations[0].SymType, collision.Name, collision.SymType)
 
 			for _, loc := range collision.Locations {
-				fmt.Printf("    - %s:%d\n", loc.File, loc.Line+1)
+				fmt.Printf("    - %s:%d\n", loc.File, loc.Line)
 			}
 		} else if collision.IsSameFile() {
 			fmt.Printf("\n  %s '%s' defined multiple times in %s:\n", collision.SymType, collision.Name, collision.GetFirstFile())
 
 			for _, loc := range collision.Locations {
-				fmt.Printf("    - %s:%d\n", loc.File, loc.Line+1)
+				fmt.Printf("    - %s:%d\n", loc.File, loc.Line)
 			}
 		} else {
 			fmt.Printf("\n  %s '%s' defined in multiple files:\n", collision.SymType, collision.Name)
 
 			for _, loc := range collision.Locations {
-				fmt.Printf("    - %s:%d\n", loc.File, loc.Line+1)
+				fmt.Printf("    - %s:%d\n", loc.File, loc.Line)
 			}
 		}
 	}
@@ -91,7 +92,7 @@ func generateTemplateCombineFile() error {
 		return fmt.Errorf("file '%s' already exists, rejected", constants.COMBINE_DEFAULT_FILENAME)
 	}
 
-	template := constants.COMBINE_SHEBANG + `
+	template := constants.CHIPPY_SHEBANG + `
 #
 # Combine configuration file
 #
@@ -129,9 +130,11 @@ var External = [];
 
 # Options
 
+var Compile = true;
+var AddShebang = true;
+
 var StripComments = true;
 var StripWhitespace = true;
-var AddShebang = true;
 `
 
 	err := os.WriteFile(constants.COMBINE_DEFAULT_FILENAME, []byte(template), constants.FILE_PERM_READABLE)
@@ -153,17 +156,17 @@ func executeCombine(combineFile string) error {
 		return fmt.Errorf("reading combine file '%s': %w", combineFile, err)
 	}
 
-	rr := roadrunner.NewRoadRunner2()
+	mod := modena.New()
 
 	// Run combine.chp
-	_, err = rr.Run(combineFile, string(content))
+	_, err = mod.Run(combineFile, string(content))
 
 	if err != nil {
 		return fmt.Errorf("executing combine file '%s': %w", combineFile, err)
 	}
 
 	// Extract configuration from context
-	config := extractCombineConfig(rr.GetGlobalContext())
+	config := extractCombineConfig(mod.GetGlobalContext())
 
 	if config.Project == "" {
 		return fmt.Errorf("project name not specified in '%s'", combineFile)
@@ -263,6 +266,7 @@ type CombineConfig struct {
 	StripComments   bool
 	StripWhitespace bool
 	AddShebang      bool
+	Compile         bool
 }
 
 func extractCombineConfig(ctx values.Ctx) CombineConfig {
@@ -338,6 +342,12 @@ func extractCombineConfig(ctx values.Ctx) CombineConfig {
 	if val := ctx.SymbolTable.Get(constants.CONFIG_ADD_SHEBANG); val != nil {
 		if num, ok := val.(*values.Number); ok {
 			config.AddShebang = num.IsTrue()
+		}
+	}
+
+	if val := ctx.SymbolTable.Get(constants.CONFIG_COMPILE); val != nil {
+		if num, ok := val.(*values.Number); ok {
+			config.Compile = num.IsTrue()
 		}
 	}
 
@@ -455,7 +465,7 @@ func generateCombinedFile(config CombineConfig, files []string) error {
 
 	// Add shebang if requested
 	if config.AddShebang {
-		combined.WriteString(constants.COMBINE_SHEBANG + "\n")
+		combined.WriteString(constants.CHIPPY_SHEBANG + "\n")
 	}
 
 	// Add project header
@@ -513,11 +523,26 @@ func generateCombinedFile(config CombineConfig, files []string) error {
 		}
 	}
 
-	// Write output file
-	err := os.WriteFile(config.Output, []byte(output), constants.FILE_PERM_EXECUTABLE)
+	if config.Compile {
+		return writeCompiledBundle(config.Output, output, config.AddShebang)
+	}
+
+	if err := os.WriteFile(config.Output, []byte(output), constants.FILE_PERM_EXECUTABLE); err != nil {
+		return fmt.Errorf("writing output file '%s': %w", config.Output, err)
+	}
+
+	return nil
+}
+
+func writeCompiledBundle(outputPath, source string, addShebang bool) error {
+	compiled, err := compiler.CompileToBytecode(outputPath, source, addShebang)
 
 	if err != nil {
-		return fmt.Errorf("writing output file '%s': %w", config.Output, err)
+		return fmt.Errorf("compiling bundle: %w", err)
+	}
+
+	if err := os.WriteFile(outputPath, compiled, constants.FILE_PERM_EXECUTABLE); err != nil {
+		return fmt.Errorf("writing output file '%s': %w", outputPath, err)
 	}
 
 	return nil

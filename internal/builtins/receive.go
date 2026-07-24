@@ -50,7 +50,7 @@ func receiveFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 			shared.Errors.InvalidValue("Invalid actor handle")))
 	}
 
-	globals := inst.RR.GetGlobalContext()
+	globals := inst.Modena.GetGlobalContext()
 
 	var items []values.Value
 
