@@ -25,8 +25,8 @@ const (
 
 	CHIPPY_SHEBANG = "#!/usr/bin/chippy"
 
-	STR_LPLVR = "1.0.25"
-	STR_LPLCN = "pardalote"
+	STR_LPLVR = "1.1.0"
+	STR_LPLCN = "rixosa"
 	STR_LPLOS = runtime.GOOS
 	STR_LPLAR = runtime.GOARCH
 
