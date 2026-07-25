@@ -8,7 +8,6 @@ package vm
 
 import (
 	"chip-go/internal/bytecode"
-	"chip-go/internal/constants"
 	"chip-go/internal/errors"
 	"chip-go/internal/values"
 )
@@ -84,7 +83,7 @@ func indexGet(collection, index values.Value, ctx values.Ctx, collSpan, idxSpan 
 			return value, nil
 		}
 
-		return values.NewString(constants.STR_ERR).SetContext(ctx), nil
+		return nil, errors.NewRTError(idxSpan.Start, idxSpan.End, "Map key not found")
 	}
 
 	idx, err := intIndex(index, idxSpan)
