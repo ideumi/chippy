@@ -9,7 +9,6 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/values"
 	"os"
 	"syscall"
@@ -19,25 +18,13 @@ func spawnFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("spawn", 1, "args")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("spawn", 1, "args"))
 	}
 
 	argsList, ok := args[0].(*values.List)
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("spawn", shared.TypeList, "args")))
+		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("spawn", shared.TypeList, "args"))
 	}
 
 	var spawnArgs []string
@@ -46,22 +33,14 @@ func spawnFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		str, ok := elem.(*values.String)
 
 		if !ok {
-			posStart, posEnd := args[0].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.InvalidValue("All arguments must be strings")))
+			return res.FailAt(1, shared.Errors.InvalidValue("All arguments must be strings"))
 		}
 
 		spawnArgs = append(spawnArgs, str.Value)
 	}
 
 	if len(spawnArgs) == 0 {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidValue("Arguments list cannot be empty")))
+		return res.FailAt(1, shared.Errors.InvalidValue("Arguments list cannot be empty"))
 	}
 
 	attr := &os.ProcAttr{

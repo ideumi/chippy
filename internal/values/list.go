@@ -100,14 +100,13 @@ func (l *List) AddedTo(other Value) (Value, error) {
 		return newList, nil
 	}
 
-	return nil, IllegalOperation(l, other)
+	return nil, IllegalOperation()
 }
 
 func (l *List) SubbedBy(other Value) (Value, error) {
 	if otherNum, ok := other.(*Number); ok {
 		if !otherNum.IsInt() {
-			return nil, errors.NewRTError(
-				otherNum.posStart, otherNum.posEnd,
+			return nil, errors.NewCallError(
 				"Index must be an integer")
 
 		}
@@ -116,8 +115,7 @@ func (l *List) SubbedBy(other Value) (Value, error) {
 		index := int(otherNum.iVal)
 
 		if index < 1 || index > len(newList.Elements) {
-			return nil, errors.NewRTError(
-				otherNum.posStart, otherNum.posEnd,
+			return nil, errors.NewCallError(
 				"Element at this index could not be removed from list because index is out of bounds")
 
 		}
@@ -127,21 +125,19 @@ func (l *List) SubbedBy(other Value) (Value, error) {
 		return newList, nil
 	}
 
-	return nil, IllegalOperation(l, other)
+	return nil, IllegalOperation()
 }
 
 func (l *List) MultedBy(other Value) (Value, error) {
 	if otherNum, ok := other.(*Number); ok {
 		if !otherNum.IsInt() {
-			return nil, errors.NewRTError(
-				otherNum.posStart, otherNum.posEnd,
+			return nil, errors.NewCallError(
 				"Repeat count must be an integer")
 
 		}
 
 		if otherNum.iVal < 0 {
-			return nil, errors.NewRTError(
-				otherNum.posStart, otherNum.posEnd,
+			return nil, errors.NewCallError(
 				"Cannot repeat list negative times")
 
 		}
@@ -157,7 +153,7 @@ func (l *List) MultedBy(other Value) (Value, error) {
 		return result, nil
 	}
 
-	return nil, IllegalOperation(l, other)
+	return nil, IllegalOperation()
 }
 
 func (l *List) GetComparisonEe(other Value) (Value, error) {
@@ -202,7 +198,7 @@ func (l *List) eqWalk(other Value, seen map[Value]bool, depth int) (Value, error
 		return NewNumber(result).SetContext(l.context), nil
 	}
 
-	return nil, IllegalOperation(l, other)
+	return nil, IllegalOperation()
 }
 
 func (l *List) GetComparisonNe(other Value) (Value, error) {
@@ -222,7 +218,7 @@ func (l *List) GetComparisonNe(other Value) (Value, error) {
 		return NewNumber(result).SetContext(l.context), nil
 	}
 
-	return nil, IllegalOperation(l, other)
+	return nil, IllegalOperation()
 }
 
 func (l *List) Notted() (Value, error) {

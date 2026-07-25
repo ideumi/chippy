@@ -55,9 +55,7 @@ func (bf *BuiltInFunction) Execute(args []Value) *RuntimeResult {
 	res := NewRuntimeResult()
 
 	if bf.context == nil {
-		return res.Failure(errors.NewRTError(
-			bf.posStart, bf.posEnd,
-			"Built-in function context is nil"))
+		return res.Fail("Built-in function context is nil")
 	}
 
 	return bf.Fn(args, bf.context)

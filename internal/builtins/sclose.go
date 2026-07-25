@@ -9,7 +9,6 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 )
@@ -18,26 +17,14 @@ func scloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("sclose", 1, "handle")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("sclose", 1, "handle"))
 	}
 
 	// Get handle argument
 	handleNum, ok := args[0].(*values.Number)
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("sclose", shared.TypeNumber, "handle")))
+		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("sclose", shared.TypeNumber, "handle"))
 	}
 
 	handle64, err := handleNum.AsInt()
@@ -52,11 +39,7 @@ func scloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	socket, exists := registry.Sockets.Extract(handle)
 
 	if !exists {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid socket handle")))
+		return res.FailAt(1, shared.Errors.InvalidValue("Invalid socket handle"))
 	}
 
 	registry.Alloc.Free(handle)
@@ -81,11 +64,7 @@ func scloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		}
 
 	default:
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid socket mode")))
+		return res.FailAt(1, shared.Errors.InvalidValue("Invalid socket mode"))
 	}
 
 	if err != nil {

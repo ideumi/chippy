@@ -9,7 +9,6 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/handles"
 	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
@@ -21,48 +20,31 @@ func sopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 3 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("sopen", 3, "address, port, mode")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("sopen", 3, "address, port, mode"))
 	}
 
 	// Get address argument
 	addressStr, ok := args[0].(*values.String)
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("sopen", shared.PositionFirst, shared.TypeString, "address")))
+		return res.FailAt(1,
+			shared.Errors.InvalidArgTypePositionalWithHint("sopen", shared.PositionFirst, shared.TypeString, "address"))
 	}
 
 	// Get port argument
 	portNum, ok := args[1].(*values.Number)
 
 	if !ok {
-		posStart, posEnd := args[1].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("sopen", shared.PositionSecond, shared.TypeNumber, "port")))
+		return res.FailAt(2,
+			shared.Errors.InvalidArgTypePositionalWithHint("sopen", shared.PositionSecond, shared.TypeNumber, "port"))
 	}
 
 	// Get mode argument
 	modeStr, ok := args[2].(*values.String)
 
 	if !ok {
-		posStart, posEnd := args[2].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("sopen", shared.PositionThird, shared.TypeString, "mode")))
+		return res.FailAt(3,
+			shared.Errors.InvalidArgTypePositionalWithHint("sopen", shared.PositionThird, shared.TypeString, "mode"))
 	}
 
 	port64, err := portNum.AsInt()
@@ -77,20 +59,12 @@ func sopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	// Validate mode
 	if mode != "tcp" && mode != "udp" && mode != "listen" {
-		posStart, posEnd := args[2].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid mode. Use 'tcp', 'udp', or 'listen'")))
+		return res.FailAt(3, shared.Errors.InvalidValue("Invalid mode. Use 'tcp', 'udp', or 'listen'"))
 	}
 
 	// Validate port range
 	if port < 1 || port > 65535 {
-		posStart, posEnd := args[1].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidValue("Port must be between 1 and 65535")))
+		return res.FailAt(2, shared.Errors.InvalidValue("Port must be between 1 and 65535"))
 	}
 
 	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)

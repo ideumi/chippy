@@ -9,7 +9,6 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/values"
 	"strings"
 )
@@ -18,15 +17,7 @@ func hasFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("has", 2, "container, needle")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("has", 2, "container, needle"))
 	}
 
 	switch container := args[0].(type) {
@@ -34,11 +25,8 @@ func hasFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		needleStr, ok := args[1].(*values.String)
 
 		if !ok {
-			posStart, posEnd := args[1].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("has", shared.PositionSecond, shared.TypeString, "needle")))
+			return res.FailAt(2,
+				shared.Errors.InvalidArgTypePositionalWithHint("has", shared.PositionSecond, shared.TypeString, "needle"))
 		}
 
 		if needleStr.Value == "" {
@@ -78,11 +66,8 @@ func hasFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		needleNum, ok := args[1].(*values.Number)
 
 		if !ok {
-			posStart, posEnd := args[1].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("has", shared.PositionSecond, shared.TypeNumber, "bytes")))
+			return res.FailAt(2,
+				shared.Errors.InvalidArgTypePositionalWithHint("has", shared.PositionSecond, shared.TypeNumber, "bytes"))
 		}
 
 		byte64, err := needleNum.AsInt()
@@ -111,11 +96,8 @@ func hasFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		keyStr, ok := args[1].(*values.String)
 
 		if !ok {
-			posStart, posEnd := args[1].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("has", shared.PositionSecond, shared.TypeString, "key")))
+			return res.FailAt(2,
+				shared.Errors.InvalidArgTypePositionalWithHint("has", shared.PositionSecond, shared.TypeString, "key"))
 		}
 
 		if _, exists := container.Entries[keyStr.Value]; exists {
@@ -125,10 +107,7 @@ func hasFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		return res.Success(values.NewNumber(constants.NUM_FAL).SetContext(ctx))
 
 	default:
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("has", shared.PositionFirst, "a string, list, bytes, or map", "container")))
+		return res.FailAt(1,
+			shared.Errors.InvalidArgTypePositionalWithHint("has", shared.PositionFirst, "a string, list, bytes, or map", "container"))
 	}
 }

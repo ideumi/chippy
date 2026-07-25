@@ -8,7 +8,6 @@ package builtins
 
 import (
 	"chip-go/internal/builtins/shared"
-	"chip-go/internal/errors"
 	"chip-go/internal/values"
 )
 
@@ -16,15 +15,7 @@ func appendFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("append", 2, "list, value")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("append", 2, "list, value"))
 	}
 
 	value := args[0]
@@ -34,11 +25,8 @@ func appendFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		valueNum, ok := args[1].(*values.Number)
 
 		if !ok {
-			posStart, posEnd := args[1].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("append", shared.PositionSecond, shared.TypeNumber, "value")))
+			return res.FailAt(2,
+				shared.Errors.InvalidArgTypePositionalWithHint("append", shared.PositionSecond, shared.TypeNumber, "value"))
 		}
 
 		byte64, err := valueNum.AsInt()
@@ -50,11 +38,7 @@ func appendFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		byteValue := int(byte64)
 
 		if byteValue < 0 || byteValue > 255 {
-			posStart, posEnd := args[1].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				"Byte values must be between 0 and 255"))
+			return res.FailAt(2, "Byte values must be between 0 and 255")
 		}
 
 		newBytes := v.AppendByte(byteValue)
@@ -67,10 +51,7 @@ func appendFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		return res.Success(v)
 
 	default:
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("append", shared.PositionFirst, shared.TypeListOrBytes, shared.TypeListOrBytes)))
+		return res.FailAt(1,
+			shared.Errors.InvalidArgTypePositionalWithHint("append", shared.PositionFirst, shared.TypeListOrBytes, shared.TypeListOrBytes))
 	}
 }

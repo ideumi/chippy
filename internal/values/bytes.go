@@ -116,7 +116,7 @@ func (b *Bytes) GetComparisonEe(other Value) (Value, error) {
 		return NewNumber(result).SetContext(b.context), nil
 	}
 
-	return nil, IllegalOperation(b, other)
+	return nil, IllegalOperation()
 }
 
 func (b *Bytes) GetComparisonNe(other Value) (Value, error) {
@@ -141,7 +141,7 @@ func (b *Bytes) GetComparisonNe(other Value) (Value, error) {
 		return NewNumber(result).SetContext(b.context), nil
 	}
 
-	return nil, IllegalOperation(b, other)
+	return nil, IllegalOperation()
 }
 
 func (b *Bytes) Notted() (Value, error) {
@@ -168,15 +168,13 @@ func (b *Bytes) MultedBy(other Value) (Value, error) {
 	if otherNum, ok := other.(*Number); ok {
 
 		if !otherNum.IsInt() {
-			return nil, errors.NewRTError(
-				otherNum.posStart, otherNum.posEnd,
+			return nil, errors.NewCallError(
 				"Repeat count must be an integer")
 
 		}
 
 		if otherNum.iVal < 0 {
-			return nil, errors.NewRTError(
-				otherNum.posStart, otherNum.posEnd,
+			return nil, errors.NewCallError(
 				"Cannot repeat bytes negative times")
 
 		}
@@ -191,15 +189,14 @@ func (b *Bytes) MultedBy(other Value) (Value, error) {
 		return NewBytes(newData).SetContext(b.context), nil
 	}
 
-	return nil, IllegalOperation(b, other)
+	return nil, IllegalOperation()
 }
 
 func (b *Bytes) SubbedBy(other Value) (Value, error) {
 	if otherNum, ok := other.(*Number); ok {
 
 		if !otherNum.IsInt() {
-			return nil, errors.NewRTError(
-				otherNum.posStart, otherNum.posEnd,
+			return nil, errors.NewCallError(
 				"Index must be an integer")
 
 		}
@@ -207,8 +204,7 @@ func (b *Bytes) SubbedBy(other Value) (Value, error) {
 		index := int(otherNum.iVal)
 
 		if index < 1 || index > len(b.Data) {
-			return nil, errors.NewRTError(
-				otherNum.posStart, otherNum.posEnd,
+			return nil, errors.NewCallError(
 				"Byte at this index could not be removed from bytes because index is out of bounds")
 
 		}
@@ -221,7 +217,7 @@ func (b *Bytes) SubbedBy(other Value) (Value, error) {
 		return NewBytes(newData).SetContext(b.context), nil
 	}
 
-	return nil, IllegalOperation(b, other)
+	return nil, IllegalOperation()
 }
 
 func (b *Bytes) AddedTo(other Value) (Value, error) {
@@ -235,5 +231,5 @@ func (b *Bytes) AddedTo(other Value) (Value, error) {
 		return NewBytes(newData).SetContext(b.context), nil
 	}
 
-	return nil, IllegalOperation(b, other)
+	return nil, IllegalOperation()
 }

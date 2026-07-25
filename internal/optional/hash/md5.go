@@ -8,7 +8,6 @@ package hash
 
 import (
 	"chip-go/internal/builtins/shared"
-	"chip-go/internal/errors"
 	"chip-go/internal/optional"
 	"chip-go/internal/values"
 
@@ -19,25 +18,15 @@ func md5Function(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "md5"), 1, "bytes")))
+		return res.Fail(
+			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "md5"), 1, "bytes"))
 	}
 
 	bytesVal, ok := args[0].(*values.Bytes)
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint(optional.Prefixed(OptionalName, "md5"), shared.TypeBytes, "bytes")))
+		return res.FailAt(1,
+			shared.Errors.InvalidArgTypeWithHint(optional.Prefixed(OptionalName, "md5"), shared.TypeBytes, "bytes"))
 	}
 
 	hash := md5.Sum(bytesVal.Data)

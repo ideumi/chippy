@@ -8,7 +8,6 @@ package builtins
 
 import (
 	"chip-go/internal/builtins/shared"
-	"chip-go/internal/errors"
 	"chip-go/internal/optional"
 	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
@@ -20,30 +19,22 @@ func actorFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) < 1 {
-		return res.Failure(errors.NewRTError(
-			nil, nil,
-			shared.Errors.InvalidArgCountWithHint("actor", 1, "function, ...args")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("actor", 1, "function, ...args"))
 	}
 
 	fn, ok := args[0].(values.Callable)
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("actor", shared.TypeFunction, "handler")))
+		return res.FailAt(1,
+			shared.Errors.InvalidArgTypeWithHint("actor", shared.TypeFunction, "handler"))
 	}
 
 	fnArgs := args[1:]
 
 	if len(fnArgs) != fn.ArgCount() {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
+		return res.FailAt(1,
 			shared.Errors.InvalidValue(fmt.Sprintf("handler '%s' expects %d argument(s), got %d",
-				fn.CallableName(), fn.ArgCount(), len(fnArgs)))))
+				fn.CallableName(), fn.ArgCount(), len(fnArgs))))
 	}
 
 	orch := orchestrator.Get()

@@ -8,7 +8,6 @@ package builtins
 
 import (
 	"chip-go/internal/builtins/shared"
-	"chip-go/internal/errors"
 	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 	"os"
@@ -113,11 +112,7 @@ func signalFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 0 {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCount("signal", 0)))
+		return res.Fail(shared.Errors.InvalidArgCount("signal", 0))
 	}
 
 	signalMu.Lock()
@@ -129,9 +124,7 @@ func signalFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	inst := orch.GetInstance(instanceID)
 
 	if inst == nil {
-		return res.Failure(errors.NewRTError(
-			nil, nil,
-			shared.Errors.InvalidValue("Invalid actor handle")))
+		return res.Fail(shared.Errors.InvalidValue("Invalid actor handle"))
 	}
 
 	// Fast path: signal already queued.
@@ -176,9 +169,8 @@ func signalFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 			orch.EndBlocking(inst)
 
-			return res.Failure(errors.NewRTError(
-				nil, nil,
-				shared.Errors.InvalidValue("Deadlock: signal() blocked with no signals being caught")))
+			return res.Fail(
+				shared.Errors.InvalidValue("Deadlock: signal() blocked with no signals being caught"))
 		}
 	}
 }

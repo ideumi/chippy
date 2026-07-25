@@ -9,7 +9,6 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 )
@@ -18,24 +17,12 @@ func dcloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("dclose", 1, "handle")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("dclose", 1, "handle"))
 	}
 
 	handleNum, ok := args[0].(*values.Number)
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("dclose", shared.TypeNumber, "handle")))
+		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("dclose", shared.TypeNumber, "handle"))
 	}
 
 	handle64, err := handleNum.AsInt()
@@ -49,11 +36,7 @@ func dcloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	handle, exists := registry.Dirs.Extract(handleID)
 
 	if !exists {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid directory handle")))
+		return res.FailAt(1, shared.Errors.InvalidValue("Invalid directory handle"))
 	}
 
 	registry.Alloc.Free(handleID)

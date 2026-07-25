@@ -10,7 +10,6 @@ import (
 	"bytes"
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/values"
 	"strings"
 )
@@ -19,15 +18,7 @@ func indexofFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("indexof", 2, "haystack, needle")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("indexof", 2, "haystack, needle"))
 	}
 
 	switch container := args[0].(type) {
@@ -35,11 +26,8 @@ func indexofFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 		needleArg, ok := args[1].(*values.String)
 
 		if !ok {
-			posStart, posEnd := args[1].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("indexof", shared.PositionSecond, shared.TypeString, "needle")))
+			return res.FailAt(2,
+				shared.Errors.InvalidArgTypePositionalWithHint("indexof", shared.PositionSecond, shared.TypeString, "needle"))
 		}
 
 		needle := needleArg.Value
@@ -116,18 +104,12 @@ func indexofFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 			return res.Success(values.NewNumber(idx + 1).SetContext(ctx))
 
 		default:
-			posStart, posEnd := args[1].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("indexof", shared.PositionSecond, "a number or bytes", "needle")))
+			return res.FailAt(2,
+				shared.Errors.InvalidArgTypePositionalWithHint("indexof", shared.PositionSecond, "a number or bytes", "needle"))
 		}
 
 	default:
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("indexof", shared.PositionFirst, "a string, list, or bytes", "haystack")))
+		return res.FailAt(1,
+			shared.Errors.InvalidArgTypePositionalWithHint("indexof", shared.PositionFirst, "a string, list, or bytes", "haystack"))
 	}
 }

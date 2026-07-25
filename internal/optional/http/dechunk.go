@@ -10,7 +10,6 @@ import (
 	"bytes"
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/optional"
 	"chip-go/internal/values"
 	"strconv"
@@ -21,26 +20,16 @@ func dechunkFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "dechunk"), 1, "chunkedBytes")))
+		return res.Fail(
+			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "dechunk"), 1, "chunkedBytes"))
 	}
 
 	chunkedBytes, ok := args[0].(*values.Bytes)
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
+		return res.FailAt(1,
 			shared.Errors.InvalidArgTypeWithHint(
-				optional.Prefixed(OptionalName, "dechunk"), shared.TypeBytes, "chunkedBytes")))
+				optional.Prefixed(OptionalName, "dechunk"), shared.TypeBytes, "chunkedBytes"))
 	}
 
 	data := chunkedBytes.Data

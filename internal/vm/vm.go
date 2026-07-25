@@ -228,7 +228,7 @@ func (vm *VM) Run() (values.Value, error) {
 			}
 
 			if err := fn.checkArity(argCount); err != nil {
-				return nil, err
+				return nil, locate(err, span.Start, span.End)
 			}
 
 			frame.ip = ip
@@ -265,7 +265,7 @@ func (vm *VM) Run() (values.Value, error) {
 			state, err := newForState(start, end, step)
 
 			if err != nil {
-				return nil, err
+				return nil, locate(err, span.Start, span.End)
 			}
 
 			vm.forStack = append(vm.forStack, state)
@@ -442,7 +442,13 @@ func (vm *VM) callBuiltin(calleeIdx, argCount int, span bytecode.Span) error {
 	result := vm.stack[calleeIdx].Execute(args)
 
 	if result.Error != nil {
-		return result.Error
+		if n := result.FailArg; n > 0 && n <= len(args) {
+			if start, end := args[n-1].GetPos(); start != nil {
+				return locate(result.Error, start, end)
+			}
+		}
+
+		return locate(result.Error, span.Start, span.End)
 	}
 
 	vm.stack = vm.stack[:calleeIdx]
@@ -527,6 +533,15 @@ func forBound(value values.Value, which string) (*values.Number, error) {
 	return num, nil
 }
 
+func locate(err error, start, end *errors.Position) error {
+	if rtErr, ok := err.(*errors.RTError); ok && rtErr.PosStart == nil {
+		rtErr.PosStart = start
+		rtErr.PosEnd = end
+	}
+
+	return err
+}
+
 // binaryOp takes the right operand off the stack first and the left one second,
 // because that is the order they were put there.
 func (vm *VM) binaryOp(span bytecode.Span, op func(values.Value, values.Value) (values.Value, error)) error {
@@ -536,7 +551,7 @@ func (vm *VM) binaryOp(span bytecode.Span, op func(values.Value, values.Value) (
 	result, err := op(left, right)
 
 	if err != nil {
-		return err
+		return locate(err, span.Start, span.End)
 	}
 
 	vm.push(result.SetPos(span.Start, span.End))
@@ -548,7 +563,7 @@ func (vm *VM) unaryOp(span bytecode.Span, op func(values.Value) (values.Value, e
 	result, err := op(vm.discard())
 
 	if err != nil {
-		return err
+		return locate(err, span.Start, span.End)
 	}
 
 	vm.push(result.SetPos(span.Start, span.End))

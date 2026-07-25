@@ -9,7 +9,6 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/optional"
 	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
@@ -47,45 +46,26 @@ func loadoptFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("loadopt", 1, "optional")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("loadopt", 1, "optional"))
 	}
 
 	optionalName, ok := args[0].(*values.String)
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("loadopt", shared.TypeString, "optional")))
+		return res.FailAt(1,
+			shared.Errors.InvalidArgTypeWithHint("loadopt", shared.TypeString, "optional"))
 	}
 
 	opt, exists := optional.GetOptional(optionalName.Value)
 
 	if !exists {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			"Optional \""+optionalName.Value+"\" does not exist"))
+		return res.FailAt(1, "Optional \""+optionalName.Value+"\" does not exist")
 	}
 
 	mod := orchestrator.Get().GetModenaForContext(ctx.InstanceID)
 
 	if mod == nil {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			"Modena not available"))
+		return res.FailAt(1, "Modena not available")
 	}
 
 	globalCtx := mod.GetGlobalContext()

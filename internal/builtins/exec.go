@@ -9,7 +9,6 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/values"
 	"os"
 	"syscall"
@@ -19,25 +18,13 @@ func execFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("exec", 1, "args")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("exec", 1, "args"))
 	}
 
 	argsList, ok := args[0].(*values.List)
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("exec", shared.TypeList, "args")))
+		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("exec", shared.TypeList, "args"))
 	}
 
 	var execArgs []string
@@ -45,21 +32,13 @@ func execFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	for _, elem := range argsList.Elements {
 		str, ok := elem.(*values.String)
 		if !ok {
-			posStart, posEnd := args[0].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.InvalidValue("All arguments must be strings")))
+			return res.FailAt(1, shared.Errors.InvalidValue("All arguments must be strings"))
 		}
 		execArgs = append(execArgs, str.Value)
 	}
 
 	if len(execArgs) == 0 {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidValue("Arguments list cannot be empty")))
+		return res.FailAt(1, shared.Errors.InvalidValue("Arguments list cannot be empty"))
 	}
 
 	program := execArgs[0]

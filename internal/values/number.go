@@ -140,8 +140,7 @@ func (n *Number) AsInt() (int64, error) {
 	}
 
 	if n.fVal >= float64(math.MaxInt64) || n.fVal < math.MinInt64 {
-		return 0, errors.NewRTError(
-			n.posStart, n.posEnd,
+		return 0, errors.NewCallError(
 			"Value out of integer range")
 
 	}
@@ -277,11 +276,11 @@ func powInt64(base, exp int64) (int64, bool) {
 	return result, false
 }
 
-func wrapFloatResult(v float64, ctx Ctx, posStart, posEnd *errors.Position) (Value, error) {
+func wrapFloatResult(v float64, ctx Ctx) (Value, error) {
 	n, err := NewNumberFromFloat(v)
 
 	if err != nil {
-		return nil, errors.NewRTError(posStart, posEnd, err.Error())
+		return nil, errors.NewCallError(err.Error())
 	}
 
 	return n.SetContext(ctx), nil
@@ -291,7 +290,7 @@ func (n *Number) AddedTo(other Value) (Value, error) {
 	otherNum, ok := other.(*Number)
 
 	if !ok {
-		return nil, IllegalOperation(n, other)
+		return nil, IllegalOperation()
 	}
 
 	if n.isInt && otherNum.isInt {
@@ -302,14 +301,14 @@ func (n *Number) AddedTo(other Value) (Value, error) {
 		}
 	}
 
-	return wrapFloatResult(n.AsFloat()+otherNum.AsFloat(), n.context, n.posStart, otherNum.posEnd)
+	return wrapFloatResult(n.AsFloat()+otherNum.AsFloat(), n.context)
 }
 
 func (n *Number) SubbedBy(other Value) (Value, error) {
 	otherNum, ok := other.(*Number)
 
 	if !ok {
-		return nil, IllegalOperation(n, other)
+		return nil, IllegalOperation()
 	}
 
 	if n.isInt && otherNum.isInt {
@@ -320,14 +319,14 @@ func (n *Number) SubbedBy(other Value) (Value, error) {
 		}
 	}
 
-	return wrapFloatResult(n.AsFloat()-otherNum.AsFloat(), n.context, n.posStart, otherNum.posEnd)
+	return wrapFloatResult(n.AsFloat()-otherNum.AsFloat(), n.context)
 }
 
 func (n *Number) MultedBy(other Value) (Value, error) {
 	otherNum, ok := other.(*Number)
 
 	if !ok {
-		return nil, IllegalOperation(n, other)
+		return nil, IllegalOperation()
 	}
 
 	if n.isInt && otherNum.isInt {
@@ -338,7 +337,7 @@ func (n *Number) MultedBy(other Value) (Value, error) {
 		}
 	}
 
-	return wrapFloatResult(n.AsFloat()*otherNum.AsFloat(), n.context, n.posStart, otherNum.posEnd)
+	return wrapFloatResult(n.AsFloat()*otherNum.AsFloat(), n.context)
 }
 
 // Exact integer divides stay in int64 so precision above 2^53 survives; inexact
@@ -347,13 +346,12 @@ func (n *Number) DivedBy(other Value) (Value, error) {
 	otherNum, ok := other.(*Number)
 
 	if !ok {
-		return nil, IllegalOperation(n, other)
+		return nil, IllegalOperation()
 	}
 
 	if n.isInt && otherNum.isInt {
 		if otherNum.iVal == 0 {
-			return nil, errors.NewRTError(
-				otherNum.posStart, otherNum.posEnd,
+			return nil, errors.NewCallError(
 				"Division by zero")
 
 		}
@@ -369,20 +367,19 @@ func (n *Number) DivedBy(other Value) (Value, error) {
 	rhs := otherNum.AsFloat()
 
 	if rhs == 0 {
-		return nil, errors.NewRTError(
-			otherNum.posStart, otherNum.posEnd,
+		return nil, errors.NewCallError(
 			"Division by zero")
 
 	}
 
-	return wrapFloatResult(n.AsFloat()/rhs, n.context, n.posStart, otherNum.posEnd)
+	return wrapFloatResult(n.AsFloat()/rhs, n.context)
 }
 
 func (n *Number) PowedBy(other Value) (Value, error) {
 	otherNum, ok := other.(*Number)
 
 	if !ok {
-		return nil, IllegalOperation(n, other)
+		return nil, IllegalOperation()
 	}
 
 	if n.isInt && otherNum.isInt && otherNum.iVal >= 0 {
@@ -398,34 +395,31 @@ func (n *Number) PowedBy(other Value) (Value, error) {
 
 	// math.Pow(neg, fractional) is NaN. Reject early for a precise message.
 	if base < 0 && exp != math.Trunc(exp) {
-		return nil, errors.NewRTError(
-			n.posStart, otherNum.posEnd,
+		return nil, errors.NewCallError(
 			"Negative base raised to a non-integer power")
 
 	}
 
 	// math.Pow(0, negative) is +Inf. Same reason.
 	if base == 0 && exp < 0 {
-		return nil, errors.NewRTError(
-			n.posStart, otherNum.posEnd,
+		return nil, errors.NewCallError(
 			"Zero raised to a negative power")
 
 	}
 
-	return wrapFloatResult(math.Pow(base, exp), n.context, n.posStart, otherNum.posEnd)
+	return wrapFloatResult(math.Pow(base, exp), n.context)
 }
 
 func (n *Number) ModdedBy(other Value) (Value, error) {
 	otherNum, ok := other.(*Number)
 
 	if !ok {
-		return nil, IllegalOperation(n, other)
+		return nil, IllegalOperation()
 	}
 
 	if n.isInt && otherNum.isInt {
 		if otherNum.iVal == 0 {
-			return nil, errors.NewRTError(
-				otherNum.posStart, otherNum.posEnd,
+			return nil, errors.NewCallError(
 				"Division by zero")
 
 		}
@@ -440,13 +434,12 @@ func (n *Number) ModdedBy(other Value) (Value, error) {
 	rhs := otherNum.AsFloat()
 
 	if rhs == 0 {
-		return nil, errors.NewRTError(
-			otherNum.posStart, otherNum.posEnd,
+		return nil, errors.NewCallError(
 			"Division by zero")
 
 	}
 
-	return wrapFloatResult(math.Mod(n.AsFloat(), rhs), n.context, n.posStart, otherNum.posEnd)
+	return wrapFloatResult(math.Mod(n.AsFloat(), rhs), n.context)
 }
 
 // MinInt64 promotes to float because -MinInt64 doesn't fit in int64.
@@ -548,7 +541,7 @@ func (n *Number) GetComparisonEe(other Value) (Value, error) {
 	otherNum, ok := other.(*Number)
 
 	if !ok {
-		return nil, IllegalOperation(n, other)
+		return nil, IllegalOperation()
 	}
 
 	return newBoolNumber(compareEqual(n, otherNum)).SetContext(n.context), nil
@@ -558,7 +551,7 @@ func (n *Number) GetComparisonNe(other Value) (Value, error) {
 	otherNum, ok := other.(*Number)
 
 	if !ok {
-		return nil, IllegalOperation(n, other)
+		return nil, IllegalOperation()
 	}
 
 	return newBoolNumber(!compareEqual(n, otherNum)).SetContext(n.context), nil
@@ -568,7 +561,7 @@ func (n *Number) GetComparisonLt(other Value) (Value, error) {
 	otherNum, ok := other.(*Number)
 
 	if !ok {
-		return nil, IllegalOperation(n, other)
+		return nil, IllegalOperation()
 	}
 
 	return newBoolNumber(compareLess(n, otherNum)).SetContext(n.context), nil
@@ -578,7 +571,7 @@ func (n *Number) GetComparisonGt(other Value) (Value, error) {
 	otherNum, ok := other.(*Number)
 
 	if !ok {
-		return nil, IllegalOperation(n, other)
+		return nil, IllegalOperation()
 	}
 
 	return newBoolNumber(compareLess(otherNum, n)).SetContext(n.context), nil
@@ -588,7 +581,7 @@ func (n *Number) GetComparisonLte(other Value) (Value, error) {
 	otherNum, ok := other.(*Number)
 
 	if !ok {
-		return nil, IllegalOperation(n, other)
+		return nil, IllegalOperation()
 	}
 
 	return newBoolNumber(!compareLess(otherNum, n)).SetContext(n.context), nil
@@ -598,7 +591,7 @@ func (n *Number) GetComparisonGte(other Value) (Value, error) {
 	otherNum, ok := other.(*Number)
 
 	if !ok {
-		return nil, IllegalOperation(n, other)
+		return nil, IllegalOperation()
 	}
 
 	return newBoolNumber(!compareLess(n, otherNum)).SetContext(n.context), nil
@@ -619,15 +612,13 @@ func bitwiseInt(n *Number) (int64, error) {
 	}
 
 	if n.fVal != math.Trunc(n.fVal) {
-		return 0, errors.NewRTError(
-			n.posStart, n.posEnd,
+		return 0, errors.NewCallError(
 			"Bitwise operation on decimal value")
 
 	}
 
 	if n.fVal < math.MinInt64 || n.fVal >= float64(math.MaxInt64) {
-		return 0, errors.NewRTError(
-			n.posStart, n.posEnd,
+		return 0, errors.NewCallError(
 			"Bitwise operation on value out of integer range")
 
 	}
@@ -639,7 +630,7 @@ func (n *Number) BAndedBy(other Value) (Value, error) {
 	otherNum, ok := other.(*Number)
 
 	if !ok {
-		return nil, IllegalOperation(n, other)
+		return nil, IllegalOperation()
 	}
 
 	a, err := bitwiseInt(n)
@@ -661,7 +652,7 @@ func (n *Number) BOredBy(other Value) (Value, error) {
 	otherNum, ok := other.(*Number)
 
 	if !ok {
-		return nil, IllegalOperation(n, other)
+		return nil, IllegalOperation()
 	}
 
 	a, err := bitwiseInt(n)
@@ -693,7 +684,7 @@ func (n *Number) BXoredBy(other Value) (Value, error) {
 	otherNum, ok := other.(*Number)
 
 	if !ok {
-		return nil, IllegalOperation(n, other)
+		return nil, IllegalOperation()
 	}
 
 	a, err := bitwiseInt(n)
@@ -715,7 +706,7 @@ func (n *Number) LShiftedBy(other Value) (Value, error) {
 	otherNum, ok := other.(*Number)
 
 	if !ok {
-		return nil, IllegalOperation(n, other)
+		return nil, IllegalOperation()
 	}
 
 	a, err := bitwiseInt(n)
@@ -731,8 +722,7 @@ func (n *Number) LShiftedBy(other Value) (Value, error) {
 	}
 
 	if b < 0 {
-		return nil, errors.NewRTError(
-			otherNum.posStart, otherNum.posEnd,
+		return nil, errors.NewCallError(
 			"Negative shift amount")
 
 	}
@@ -744,7 +734,7 @@ func (n *Number) RShiftedBy(other Value) (Value, error) {
 	otherNum, ok := other.(*Number)
 
 	if !ok {
-		return nil, IllegalOperation(n, other)
+		return nil, IllegalOperation()
 	}
 
 	a, err := bitwiseInt(n)
@@ -760,8 +750,7 @@ func (n *Number) RShiftedBy(other Value) (Value, error) {
 	}
 
 	if b < 0 {
-		return nil, errors.NewRTError(
-			otherNum.posStart, otherNum.posEnd,
+		return nil, errors.NewCallError(
 			"Negative shift amount")
 
 	}

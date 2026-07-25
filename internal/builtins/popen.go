@@ -8,7 +8,6 @@ package builtins
 
 import (
 	"chip-go/internal/builtins/shared"
-	"chip-go/internal/errors"
 	"chip-go/internal/handles"
 	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
@@ -20,35 +19,21 @@ func popenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("popen", 2, "command, mode")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("popen", 2, "command, mode"))
 	}
 
 	commandStr, ok := args[0].(*values.String)
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("popen", shared.PositionFirst, shared.TypeString, "command")))
+		return res.FailAt(1,
+			shared.Errors.InvalidArgTypePositionalWithHint("popen", shared.PositionFirst, shared.TypeString, "command"))
 	}
 
 	modeStr, ok := args[1].(*values.String)
 
 	if !ok {
-		posStart, posEnd := args[1].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("popen", shared.PositionSecond, shared.TypeString, "mode")))
+		return res.FailAt(2,
+			shared.Errors.InvalidArgTypePositionalWithHint("popen", shared.PositionSecond, shared.TypeString, "mode"))
 	}
 
 	command := commandStr.Value
@@ -68,11 +53,7 @@ func popenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		procHandle.Stdin, err = cmd.StdinPipe()
 
 		if err != nil {
-			posStart, posEnd := args[0].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				"Failed to create stdin pipe: "+err.Error()))
+			return res.FailAt(1, "Failed to create stdin pipe: "+err.Error())
 		}
 	}
 
@@ -80,11 +61,7 @@ func popenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		procHandle.Stdout, err = cmd.StdoutPipe()
 
 		if err != nil {
-			posStart, posEnd := args[0].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				"Failed to create stdout pipe: "+err.Error()))
+			return res.FailAt(1, "Failed to create stdout pipe: "+err.Error())
 		}
 	}
 
@@ -92,11 +69,7 @@ func popenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	err = cmd.Start()
 
 	if err != nil {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			"Failed to start process: "+err.Error()))
+		return res.FailAt(1, "Failed to start process: "+err.Error())
 	}
 
 	// Allocate handle using recycling system

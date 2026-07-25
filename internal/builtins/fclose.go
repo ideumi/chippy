@@ -9,7 +9,6 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 )
@@ -18,24 +17,12 @@ func fcloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("fclose", 1, "handle")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("fclose", 1, "handle"))
 	}
 
 	handleNum, ok := args[0].(*values.Number)
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("fclose", shared.TypeNumber, "handle")))
+		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("fclose", shared.TypeNumber, "handle"))
 	}
 
 	handle64, err := handleNum.AsInt()
@@ -47,22 +34,14 @@ func fcloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	handle := int(handle64)
 
 	if handle >= 0 && handle <= 2 {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidValue("Cannot close standard handles (0, 1, 2)")))
+		return res.FailAt(1, shared.Errors.InvalidValue("Cannot close standard handles (0, 1, 2)"))
 	}
 
 	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
 	file, exists := registry.Files.Extract(handle)
 
 	if !exists {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid handle")))
+		return res.FailAt(1, shared.Errors.InvalidValue("Invalid handle"))
 	}
 
 	registry.Alloc.Free(handle)

@@ -9,7 +9,6 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 )
@@ -18,25 +17,13 @@ func fsyncFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("fsync", 1, "handle")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("fsync", 1, "handle"))
 	}
 
 	handleNum, ok := args[0].(*values.Number)
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("fsync", shared.TypeNumber, "handle")))
+		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("fsync", shared.TypeNumber, "handle"))
 	}
 
 	handle64, err := handleNum.AsInt()
@@ -50,11 +37,7 @@ func fsyncFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	file, exists := registry.Files.Get(handle)
 
 	if !exists {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid handle")))
+		return res.FailAt(1, shared.Errors.InvalidValue("Invalid handle"))
 	}
 
 	err = file.Sync()

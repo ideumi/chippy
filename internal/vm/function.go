@@ -104,14 +104,12 @@ func (f *Function) checkArity(got int) error {
 		return nil
 	}
 
-	start, end := f.GetPos()
 	which := "Too few"
 
 	if got > f.template.Arity {
 		which = "Too many"
 	}
 
-	return errors.NewRTError(
-		start, end,
+	return errors.NewCallError(
 		fmt.Sprintf("%s args passed into '%s'. Expected %d, got %d", which, f.template.Name, f.template.Arity, got))
 }

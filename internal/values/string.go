@@ -59,21 +59,19 @@ func (s *String) AddedTo(other Value) (Value, error) {
 		return result, nil
 	}
 
-	return nil, IllegalOperation(s, other)
+	return nil, IllegalOperation()
 }
 
 func (s *String) MultedBy(other Value) (Value, error) {
 	if otherNum, ok := other.(*Number); ok {
 		if !otherNum.IsInt() {
-			return nil, errors.NewRTError(
-				otherNum.posStart, otherNum.posEnd,
+			return nil, errors.NewCallError(
 				"Repeat count must be an integer")
 
 		}
 
 		if otherNum.iVal < 0 {
-			return nil, errors.NewRTError(
-				otherNum.posStart, otherNum.posEnd,
+			return nil, errors.NewCallError(
 				"Cannot repeat string negative times")
 
 		}
@@ -84,7 +82,7 @@ func (s *String) MultedBy(other Value) (Value, error) {
 		return result, nil
 	}
 
-	return nil, IllegalOperation(s, other)
+	return nil, IllegalOperation()
 }
 
 func (s *String) GetComparisonEe(other Value) (Value, error) {
@@ -98,7 +96,7 @@ func (s *String) GetComparisonEe(other Value) (Value, error) {
 		return NewNumber(result).SetContext(s.context), nil
 	}
 
-	return nil, IllegalOperation(s, other)
+	return nil, IllegalOperation()
 }
 
 func (s *String) GetComparisonNe(other Value) (Value, error) {
@@ -112,7 +110,7 @@ func (s *String) GetComparisonNe(other Value) (Value, error) {
 		return NewNumber(result).SetContext(s.context), nil
 	}
 
-	return nil, IllegalOperation(s, other)
+	return nil, IllegalOperation()
 }
 
 func (s *String) Notted() (Value, error) {

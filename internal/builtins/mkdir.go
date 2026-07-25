@@ -9,7 +9,6 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/values"
 	"strconv"
 	"syscall"
@@ -19,35 +18,21 @@ func mkdirFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("mkdir", 2, "path, mode")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("mkdir", 2, "path, mode"))
 	}
 
 	pathStr, ok := args[0].(*values.String)
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("mkdir", shared.PositionFirst, shared.TypeString, "path")))
+		return res.FailAt(1,
+			shared.Errors.InvalidArgTypePositionalWithHint("mkdir", shared.PositionFirst, shared.TypeString, "path"))
 	}
 
 	modeNum, ok := args[1].(*values.Number)
 
 	if !ok {
-		posStart, posEnd := args[1].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("mkdir", shared.PositionSecond, shared.TypeNumber, "mode")))
+		return res.FailAt(2,
+			shared.Errors.InvalidArgTypePositionalWithHint("mkdir", shared.PositionSecond, shared.TypeNumber, "mode"))
 	}
 
 	mode64, err := modeNum.AsInt()
@@ -61,11 +46,7 @@ func mkdirFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	octalMode, err := strconv.ParseInt(modeStr, 8, 32)
 
 	if err != nil {
-		posStart, posEnd := args[1].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			"Invalid octal mode: "+modeStr))
+		return res.FailAt(2, "Invalid octal mode: "+modeStr)
 	}
 
 	err = syscall.Mkdir(pathStr.Value, uint32(octalMode))

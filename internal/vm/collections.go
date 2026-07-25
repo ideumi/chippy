@@ -58,6 +58,7 @@ func mapFromStack(pairs []values.Value, ctx values.Ctx) (values.Value, error) {
 
 		if !ok {
 			posStart, posEnd := pairs[i].GetPos()
+
 			return nil, errors.NewRTError(posStart, posEnd, "Map keys must be strings")
 		}
 

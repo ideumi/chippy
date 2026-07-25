@@ -19,6 +19,7 @@ type RuntimeResult struct {
 	FuncReturnValue    Value
 	LoopShouldContinue bool
 	LoopShouldBreak    bool
+	FailArg            int
 }
 
 func NewRuntimeResult() *RuntimeResult {
@@ -31,6 +32,7 @@ func (rr *RuntimeResult) reset() {
 	rr.FuncReturnValue = nil
 	rr.LoopShouldContinue = false
 	rr.LoopShouldBreak = false
+	rr.FailArg = 0
 }
 
 func (rr *RuntimeResult) Register(res *RuntimeResult) Value {
@@ -75,6 +77,18 @@ func (rr *RuntimeResult) SuccessBreak() *RuntimeResult {
 func (rr *RuntimeResult) Failure(err error) *RuntimeResult {
 	rr.reset()
 	rr.Error = err
+
+	return rr
+}
+
+func (rr *RuntimeResult) Fail(details string) *RuntimeResult {
+	return rr.Failure(errors.NewCallError(details))
+}
+
+func (rr *RuntimeResult) FailAt(arg int, details string) *RuntimeResult {
+	rr.Failure(errors.NewCallError(details))
+	// FailArg is set after Failure because Failure calls reset which clears it
+	rr.FailArg = arg
 
 	return rr
 }
@@ -149,109 +163,96 @@ func (bv *BaseValue) GetContext() Ctx {
 	return bv.context
 }
 
-func IllegalOperation(left, right Value) error {
-	if right == nil {
-		leftPos, leftEnd := left.GetPos()
-		return errors.NewRTError(
-			leftPos, leftEnd,
-			"Illegal operation")
-
-	}
-
-	leftPos, _ := left.GetPos()
-	_, rightPos := right.GetPos()
-	return errors.NewRTError(
-		leftPos, rightPos,
-		"Illegal operation")
-
+func IllegalOperation() error {
+	return errors.NewCallError("Illegal operation")
 }
 
 func (bv *BaseValue) AddedTo(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+	return nil, IllegalOperation()
 }
 
 func (bv *BaseValue) SubbedBy(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+	return nil, IllegalOperation()
 }
 
 func (bv *BaseValue) MultedBy(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+	return nil, IllegalOperation()
 }
 
 func (bv *BaseValue) DivedBy(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+	return nil, IllegalOperation()
 }
 
 func (bv *BaseValue) PowedBy(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+	return nil, IllegalOperation()
 }
 
 func (bv *BaseValue) ModdedBy(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+	return nil, IllegalOperation()
 }
 
 func (bv *BaseValue) GetComparisonEe(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+	return nil, IllegalOperation()
 }
 
 func (bv *BaseValue) GetComparisonNe(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+	return nil, IllegalOperation()
 }
 
 func (bv *BaseValue) GetComparisonLt(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+	return nil, IllegalOperation()
 }
 
 func (bv *BaseValue) GetComparisonGt(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+	return nil, IllegalOperation()
 }
 
 func (bv *BaseValue) GetComparisonLte(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+	return nil, IllegalOperation()
 }
 
 func (bv *BaseValue) GetComparisonGte(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+	return nil, IllegalOperation()
 }
 
 func (bv *BaseValue) Notted() (Value, error) {
-	return nil, IllegalOperation(bv, nil)
+	return nil, errors.NewCallError("Illegal operation")
 }
 
 func (bv *BaseValue) Negated() (Value, error) {
-	return nil, IllegalOperation(bv, nil)
+	return nil, errors.NewCallError("Illegal operation")
 }
 
 func (bv *BaseValue) XoredBy(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+	return nil, IllegalOperation()
 }
 
 func (bv *BaseValue) BAndedBy(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+	return nil, IllegalOperation()
 }
 
 func (bv *BaseValue) BOredBy(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+	return nil, IllegalOperation()
 }
 
 func (bv *BaseValue) BNotted() (Value, error) {
-	return nil, IllegalOperation(bv, nil)
+	return nil, errors.NewCallError("Illegal operation")
 }
 
 func (bv *BaseValue) BXoredBy(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+	return nil, IllegalOperation()
 }
 
 func (bv *BaseValue) LShiftedBy(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+	return nil, IllegalOperation()
 }
 
 func (bv *BaseValue) RShiftedBy(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+	return nil, IllegalOperation()
 }
 
 func (bv *BaseValue) Execute(args []Value) *RuntimeResult {
-	return NewRuntimeResult().Failure(IllegalOperation(bv, nil))
+	return NewRuntimeResult().Failure(IllegalOperation())
 }
 
 func (bv *BaseValue) Copy() Value {

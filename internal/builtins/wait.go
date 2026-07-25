@@ -18,25 +18,13 @@ func waitFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("wait", 1, "handle")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("wait", 1, "handle"))
 	}
 
 	handleNum, ok := args[0].(*values.Number)
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("wait", shared.TypeNumber, "handle")))
+		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("wait", shared.TypeNumber, "handle"))
 	}
 
 	id64, err := handleNum.AsInt()
@@ -48,30 +36,18 @@ func waitFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	instanceID := int(id64)
 
 	if instanceID == 0 {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidValue("Cannot wait on the main actor (handle 0)")))
+		return res.FailAt(1, shared.Errors.InvalidValue("Cannot wait on the main actor (handle 0)"))
 	}
 
 	orch := orchestrator.Get()
 	inst := orch.GetInstance(instanceID)
 
 	if inst == nil {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid actor handle")))
+		return res.FailAt(1, shared.Errors.InvalidValue("Invalid actor handle"))
 	}
 
 	if !orch.MarkWaited(inst) {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidValue("Actor has already been waited on")))
+		return res.FailAt(1, shared.Errors.InvalidValue("Actor has already been waited on"))
 	}
 
 	selfID := ctx.InstanceID
@@ -100,11 +76,7 @@ func waitFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	orch.EndBlocking(selfInst)
 
 	if !gotResult {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidValue("Deadlock: wait() target cannot finish")))
+		return res.FailAt(1, shared.Errors.InvalidValue("Deadlock: wait() target cannot finish"))
 	}
 
 	orch.RemoveInstance(instanceID)
@@ -117,11 +89,7 @@ func waitFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			return res.Failure(result.Err)
 		}
 
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			result.Err.Error()))
+		return res.FailAt(1, result.Err.Error())
 	}
 
 	if result.Value != nil {

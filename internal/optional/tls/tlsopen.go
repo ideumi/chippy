@@ -9,7 +9,6 @@ package tls
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/optional"
 	"chip-go/internal/values"
 	"crypto/tls"
@@ -21,37 +20,24 @@ func tlsopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 	res := values.NewRuntimeResult()
 
 	if len(args) != 3 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "open"), 3, "host, port, verify")))
+		return res.Fail(
+			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "open"), 3, "host, port, verify"))
 	}
 
 	hostStr, ok := args[0].(*values.String)
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
+		return res.FailAt(1,
 			shared.Errors.InvalidArgTypePositionalWithHint(
-				optional.Prefixed(OptionalName, "open"), shared.PositionFirst, shared.TypeString, "host")))
+				optional.Prefixed(OptionalName, "open"), shared.PositionFirst, shared.TypeString, "host"))
 	}
 
 	portNum, ok := args[1].(*values.Number)
 
 	if !ok {
-		posStart, posEnd := args[1].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
+		return res.FailAt(2,
 			shared.Errors.InvalidArgTypePositionalWithHint(
-				optional.Prefixed(OptionalName, "open"), shared.PositionSecond, shared.TypeNumber, "port")))
+				optional.Prefixed(OptionalName, "open"), shared.PositionSecond, shared.TypeNumber, "port"))
 	}
 
 	port64, err := portNum.AsInt()
@@ -63,11 +49,7 @@ func tlsopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 	port := int(port64)
 
 	if port < 1 || port > 65535 {
-		posStart, posEnd := args[1].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidValue("Port must be between 1 and 65535")))
+		return res.FailAt(2, shared.Errors.InvalidValue("Port must be between 1 and 65535"))
 	}
 
 	verify := true

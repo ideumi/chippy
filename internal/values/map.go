@@ -154,7 +154,7 @@ func (m *Map) AddedTo(other Value) (Value, error) {
 	otherMap, ok := other.(*Map)
 
 	if !ok {
-		return nil, IllegalOperation(m, other)
+		return nil, IllegalOperation()
 	}
 
 	result := m.ShallowCopy()
@@ -170,7 +170,7 @@ func (m *Map) SubbedBy(other Value) (Value, error) {
 	otherStr, ok := other.(*String)
 
 	if !ok {
-		return nil, IllegalOperation(m, other)
+		return nil, IllegalOperation()
 	}
 
 	newMap, found := m.MapRemove(otherStr.Value)
@@ -247,7 +247,7 @@ func (m *Map) GetComparisonNe(other Value) (Value, error) {
 		return NewNumber(result).SetContext(m.context), nil
 	}
 
-	return nil, IllegalOperation(m, other)
+	return nil, IllegalOperation()
 }
 
 func (m *Map) Notted() (Value, error) {

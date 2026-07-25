@@ -9,7 +9,6 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 	"io"
@@ -19,37 +18,23 @@ func sreadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("sread", 2, "handle, maxBytes")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("sread", 2, "handle, maxBytes"))
 	}
 
 	// Get handle argument
 	handleNum, ok := args[0].(*values.Number)
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("sread", shared.PositionFirst, shared.TypeNumber, "handle")))
+		return res.FailAt(1,
+			shared.Errors.InvalidArgTypePositionalWithHint("sread", shared.PositionFirst, shared.TypeNumber, "handle"))
 	}
 
 	// Get maxBytes argument
 	maxBytesNum, ok := args[1].(*values.Number)
 
 	if !ok {
-		posStart, posEnd := args[1].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("sread", shared.PositionSecond, shared.TypeNumber, "maxBytes")))
+		return res.FailAt(2,
+			shared.Errors.InvalidArgTypePositionalWithHint("sread", shared.PositionSecond, shared.TypeNumber, "maxBytes"))
 	}
 
 	handle64, err := handleNum.AsInt()
@@ -69,11 +54,7 @@ func sreadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	// Validate maxBytes
 	if maxBytes <= 0 {
-		posStart, posEnd := args[1].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidValue("maxBytes must be greater than 0")))
+		return res.FailAt(2, shared.Errors.InvalidValue("maxBytes must be greater than 0"))
 	}
 
 	// Get socket handle
@@ -81,11 +62,7 @@ func sreadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	socket, exists := registry.Sockets.Get(handle)
 
 	if !exists {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid socket handle")))
+		return res.FailAt(1, shared.Errors.InvalidValue("Invalid socket handle"))
 	}
 
 	// Prepare buffer
@@ -97,39 +74,24 @@ func sreadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	case "tcp":
 		if socket.Conn == nil {
-			posStart, posEnd := args[0].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.InvalidValue("Socket connection is closed")))
+			return res.FailAt(1, shared.Errors.InvalidValue("Socket connection is closed"))
 		}
 
 		n, err = socket.Conn.Read(buffer)
 
 	case "udp":
 		if socket.UdpConn == nil {
-			posStart, posEnd := args[0].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.InvalidValue("UDP connection is closed")))
+			return res.FailAt(1, shared.Errors.InvalidValue("UDP connection is closed"))
 		}
 
 		n, err = socket.UdpConn.Read(buffer)
 
 	case "listen":
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidValue("Cannot read from listening socket. Use saccept() first")))
+		return res.FailAt(1,
+			shared.Errors.InvalidValue("Cannot read from listening socket. Use saccept() first"))
 
 	default:
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid socket mode")))
+		return res.FailAt(1, shared.Errors.InvalidValue("Invalid socket mode"))
 	}
 
 	// Handle read errors
