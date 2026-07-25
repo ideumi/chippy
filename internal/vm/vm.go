@@ -90,7 +90,7 @@ func (vm *VM) Run() (values.Value, error) {
 
 	for ip < len(code) {
 		op := bytecode.Op(code[ip])
-		span := frame.chunk.Spans[ip]
+		span := frame.chunk.SpanAt(ip)
 		ip++
 
 		var err error

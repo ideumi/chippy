@@ -29,12 +29,11 @@ type Chunk struct {
 	// ...LocalNames is the name of each one.
 	LocalNames []string
 
-	Spans []Span
+	spanIndex   []uint32
+	sharedSpans []Span
+	seenSpans   map[Span]uint32
 
-	// indexSpans records where each part of an index expression was written,
-	// so an error can point at just the collection, the index, or the value
-	// instead of the whole expression. It only improves error messages and
-	// is not written into a bytecode file.
+	// Only improves error messages, not written into bytecode
 	indexSpans map[int]IndexSpanSet
 }
 
@@ -61,19 +60,53 @@ func (c *Chunk) IndexSpansAt(offset int) IndexSpanSet {
 		return spans
 	}
 
-	fallback := c.Spans[offset]
+	fallback := c.SpanAt(offset)
 
 	return IndexSpanSet{Coll: fallback, Idx: fallback, Val: fallback}
 }
 
+func (c *Chunk) shareSpan(span Span) uint32 {
+	if c.seenSpans == nil {
+		c.seenSpans = map[Span]uint32{}
+	}
+
+	if index, ok := c.seenSpans[span]; ok {
+		return index
+	}
+
+	index := uint32(len(c.sharedSpans))
+	c.sharedSpans = append(c.sharedSpans, span)
+	c.seenSpans[span] = index
+
+	return index
+}
+
+func (c *Chunk) SpanAt(offset int) Span {
+	if offset < 0 || offset >= len(c.spanIndex) {
+		return Span{}
+	}
+
+	return c.sharedSpans[c.spanIndex[offset]]
+}
+
+func (c *Chunk) SpanCount() int {
+	return len(c.spanIndex)
+}
+
+func (c *Chunk) FinishBuilding() {
+	c.seenSpans = nil
+}
+
 func (c *Chunk) Emit(op Op, span Span, operands ...uint32) int {
 	offset := len(c.Code)
+	index := c.shareSpan(span)
+
 	c.Code = append(c.Code, byte(op))
-	c.Spans = append(c.Spans, span)
+	c.spanIndex = append(c.spanIndex, index)
 
 	for _, operand := range operands {
 		c.Code = binary.LittleEndian.AppendUint32(c.Code, operand)
-		c.Spans = append(c.Spans, span, span, span, span)
+		c.spanIndex = append(c.spanIndex, index, index, index, index)
 	}
 
 	return offset

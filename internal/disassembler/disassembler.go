@@ -53,8 +53,8 @@ func disassembleFunctions(chunk *bytecode.Chunk, out *strings.Builder) {
 }
 
 func lineAt(chunk *bytecode.Chunk, offset int) int {
-	if offset < len(chunk.Spans) && chunk.Spans[offset].Start != nil {
-		return chunk.Spans[offset].Start.DisplayLine()
+	if offset < chunk.SpanCount() && chunk.SpanAt(offset).Start != nil {
+		return chunk.SpanAt(offset).Start.DisplayLine()
 	}
 
 	return -1

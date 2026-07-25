@@ -61,6 +61,7 @@ func (c *Compiler) Compile(node ast.Node) (*bytecode.Chunk, error) {
 	root := c.currentScope()
 	c.chunk.NumSlots = root.slots
 	c.chunk.LocalNames = root.names
+	c.chunk.FinishBuilding()
 
 	return c.chunk, nil
 }
@@ -621,6 +622,7 @@ func (c *Compiler) compileFuncDef(node *ast.FuncDefNode) error {
 	fnChunk := c.chunk
 	fnChunk.NumSlots = scope.slots
 	fnChunk.LocalNames = scope.names
+	fnChunk.FinishBuilding()
 	c.scopes = c.scopes[:len(c.scopes)-1]
 	c.chunk = parentChunk
 

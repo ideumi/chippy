@@ -133,7 +133,7 @@ func (w *writer) chunk(chunk *Chunk) {
 		w.functionTemplate(fn)
 	}
 
-	w.lineTable(chunk.Spans)
+	w.lineTable(chunk)
 }
 
 func (w *writer) constant(value values.Value) {
@@ -185,7 +185,7 @@ func (w *writer) functionTemplate(template *FunctionTemplate) {
 
 // The source text itself is never stored, so an error from a bytecode file can
 // name the line but cannot print it with the ^ arrows / carets under them.
-func (w *writer) lineTable(spans []Span) {
+func (w *writer) lineTable(chunk *Chunk) {
 	type entry struct {
 		offset uint32
 		line   uint32
@@ -197,7 +197,8 @@ func (w *writer) lineTable(spans []Span) {
 	prevFile := ""
 	haveEntry := false
 
-	for i, span := range spans {
+	for i := 0; i < chunk.SpanCount(); i++ {
+		span := chunk.SpanAt(i)
 		line := 0
 		file := ""
 
@@ -345,7 +346,8 @@ func (r *reader) chunk() *Chunk {
 		chunk.Functions = append(chunk.Functions, r.functionTemplate())
 	}
 
-	chunk.Spans = r.lineTable(codeLen)
+	r.readLineTable(chunk, codeLen)
+	chunk.FinishBuilding()
 
 	return chunk
 }
@@ -395,7 +397,7 @@ func (r *reader) functionTemplate() *FunctionTemplate {
 	return template
 }
 
-func (r *reader) lineTable(codeLen int) []Span {
+func (r *reader) readLineTable(chunk *Chunk, codeLen int) {
 	type entry struct {
 		offset uint32
 		pos    *errors.Position
@@ -413,10 +415,9 @@ func (r *reader) lineTable(codeLen int) []Span {
 	}
 
 	if r.err != nil {
-		return nil
+		return
 	}
 
-	spans := make([]Span, codeLen)
 	current := 0
 
 	for i := 0; i < codeLen; i++ {
@@ -430,8 +431,6 @@ func (r *reader) lineTable(codeLen int) []Span {
 			pos = entries[current].pos
 		}
 
-		spans[i] = Span{Start: pos, End: pos}
+		chunk.spanIndex = append(chunk.spanIndex, chunk.shareSpan(Span{Start: pos, End: pos}))
 	}
-
-	return spans
 }
