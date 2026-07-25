@@ -17,30 +17,30 @@ import (
 
 // PanicCyclic aborts a walk with a runtime error that is recovered into a
 // returned error at the run boundary
-func PanicCyclic(v Value, msg string) {
-	posStart, posEnd := v.GetPos()
+func PanicCyclic(val Value, msg string) {
+	posStart, posEnd := val.GetPos()
 
 	panic(errors.NewRTError(posStart, posEnd, msg))
 }
 
 // EnterWalk guards a walk against cycles and over-deep nesting. Defer the
-// returned func to leave: defer EnterWalk(v, seen, depth)().
-func EnterWalk(v Value, seen map[Value]bool, depth int) func() {
+// returned func to leave: defer EnterWalk(val, seen, depth)().
+func EnterWalk(val Value, seen map[Value]bool, depth int) func() {
 	if depth > constants.LIMIT_VALUE_NESTING_DEPTH {
-		PanicCyclic(v, constants.E_VALUE_TOO_DEEP)
+		PanicCyclic(val, constants.E_VALUE_TOO_DEEP)
 	}
 
-	if seen[v] {
-		PanicCyclic(v, constants.E_CYCLIC_VALUE)
+	if seen[val] {
+		PanicCyclic(val, constants.E_CYCLIC_VALUE)
 	}
 
-	seen[v] = true
+	seen[val] = true
 
-	return func() { delete(seen, v) }
+	return func() { delete(seen, val) }
 }
 
-func walkString(v Value, seen map[Value]bool, depth int) string {
-	switch node := v.(type) {
+func walkString(val Value, seen map[Value]bool, depth int) string {
+	switch node := val.(type) {
 	case nil:
 		return "null"
 	case *List:
@@ -48,12 +48,12 @@ func walkString(v Value, seen map[Value]bool, depth int) string {
 	case *Map:
 		return node.stringWalk(seen, depth)
 	default:
-		return v.String()
+		return val.String()
 	}
 }
 
-func walkCopy(v Value, seen map[Value]bool, depth int) Value {
-	switch node := v.(type) {
+func walkCopy(val Value, seen map[Value]bool, depth int) Value {
+	switch node := val.(type) {
 	case nil:
 		return nil
 	case *List:
@@ -61,22 +61,22 @@ func walkCopy(v Value, seen map[Value]bool, depth int) Value {
 	case *Map:
 		return node.copyWalk(seen, depth)
 	default:
-		return v.Copy()
+		return val.Copy()
 	}
 }
 
-func walkEqual(a, b Value, seen map[Value]bool, depth int) (Value, error) {
-	if al, ok := a.(*List); ok {
-		if _, ok := b.(*List); ok {
-			return al.eqWalk(b, seen, depth)
+func walkEqual(left, right Value, seen map[Value]bool, depth int) (Value, error) {
+	if leftList, ok := left.(*List); ok {
+		if _, ok := right.(*List); ok {
+			return leftList.eqWalk(right, seen, depth)
 		}
 	}
 
-	if am, ok := a.(*Map); ok {
-		if _, ok := b.(*Map); ok {
-			return am.eqWalk(b, seen, depth)
+	if leftMap, ok := left.(*Map); ok {
+		if _, ok := right.(*Map); ok {
+			return leftMap.eqWalk(right, seen, depth)
 		}
 	}
 
-	return a.GetComparisonEe(b)
+	return left.GetComparisonEe(right)
 }

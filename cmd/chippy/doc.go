@@ -291,8 +291,8 @@ func extractDocumentation(filepath string) ([]SymbolDoc, error) {
 		return nil, err
 	}
 
-	l := lexer.NewLexer(filepath, string(content))
-	tokens, err := l.MakeTokens()
+	lex := lexer.NewLexer(filepath, string(content))
+	tokens, err := lex.MakeTokens()
 
 	if err != nil {
 		return nil, err
@@ -460,8 +460,8 @@ func showFileDocumentation(filepath, symbolSignature string) {
 // symbolName returns the signature up to the first '(', trimmed. Constants and
 // vars have no '(', so the whole signature is the name.
 func symbolName(sig string) string {
-	if i := strings.IndexByte(sig, '('); i >= 0 {
-		sig = sig[:i]
+	if paren := strings.IndexByte(sig, '('); paren >= 0 {
+		sig = sig[:paren]
 	}
 
 	return strings.TrimSpace(sig)

@@ -54,13 +54,13 @@ func tlsopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 
 	verify := true
 
-	switch v := args[2].(type) {
+	switch typed := args[2].(type) {
 	case *values.String:
-		if v.Value == "false" || v.Value == "" {
+		if typed.Value == "false" || typed.Value == "" {
 			verify = false
 		}
 	case *values.Number:
-		if !v.IsTrue() {
+		if !typed.IsTrue() {
 			verify = false
 		}
 	}

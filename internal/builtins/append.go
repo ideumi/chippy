@@ -20,7 +20,7 @@ func appendFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	value := args[0]
 
-	switch v := value.(type) {
+	switch typed := value.(type) {
 	case *values.Bytes:
 		valueNum, ok := args[1].(*values.Number)
 
@@ -41,14 +41,14 @@ func appendFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			return res.FailAt(2, "Byte values must be between 0 and 255")
 		}
 
-		newBytes := v.AppendByte(byteValue)
+		newBytes := typed.AppendByte(byteValue)
 
 		return res.Success(newBytes.SetContext(ctx))
 
 	case *values.List:
-		v.Elements = append(v.Elements, args[1].SetContext(ctx))
+		typed.Elements = append(typed.Elements, args[1].SetContext(ctx))
 
-		return res.Success(v)
+		return res.Success(typed)
 
 	default:
 		return res.FailAt(1,

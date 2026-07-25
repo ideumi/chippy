@@ -11,21 +11,21 @@ import (
 	"chip-go/internal/lexer"
 )
 
-func isElse(t *lexer.Token) bool {
-	return t.Type == constants.TT_KEYWORD && (t.Value == "else" || t.Value == "elseif")
+func isElse(tok *lexer.Token) bool {
+	return tok.Type == constants.TT_KEYWORD && (tok.Value == "else" || tok.Value == "elseif")
 }
 
-func isCommentTok(t *lexer.Token) bool {
-	return t.Type == constants.TT_COMMENT || t.Type == constants.TT_DOC_COMMENT
+func isCommentTok(tok *lexer.Token) bool {
+	return tok.Type == constants.TT_COMMENT || tok.Type == constants.TT_DOC_COMMENT
 }
 
-// isTerminator reports whether t ends a statement. A nil t (start of file) counts.
-func isTerminator(t *lexer.Token) bool {
-	if t == nil {
+// isTerminator reports whether tok ends a statement. A nil tok (start of file) counts.
+func isTerminator(tok *lexer.Token) bool {
+	if tok == nil {
 		return true
 	}
 
-	switch t.Type {
+	switch tok.Type {
 	case constants.TT_SEMICOLON, constants.TT_LBRACE, constants.TT_RBRACE:
 		return true
 	}
@@ -33,8 +33,8 @@ func isTerminator(t *lexer.Token) bool {
 	return false
 }
 
-func isCloser(t *lexer.Token) bool {
-	switch t.Type {
+func isCloser(tok *lexer.Token) bool {
+	switch tok.Type {
 	case constants.TT_RBRACE, constants.TT_RPAREN, constants.TT_RSQUARE:
 		return true
 	}
@@ -42,13 +42,13 @@ func isCloser(t *lexer.Token) bool {
 	return false
 }
 
-// isValueEnd reports whether t ends an operand.
-func isValueEnd(t *lexer.Token) bool {
-	if t == nil {
+// isValueEnd reports whether tok ends an operand.
+func isValueEnd(tok *lexer.Token) bool {
+	if tok == nil {
 		return false
 	}
 
-	switch t.Type {
+	switch tok.Type {
 	case constants.TT_INT, constants.TT_FLOAT, constants.TT_STRING,
 		constants.TT_IDENTIFIER, constants.TT_RPAREN, constants.TT_RSQUARE:
 		return true

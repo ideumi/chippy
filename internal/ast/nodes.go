@@ -132,8 +132,8 @@ func (n *MapNode) String() string {
 
 	pairs := make([]string, len(n.KeyNodes))
 
-	for i, k := range n.KeyNodes {
-		pairs[i] = k.String() + ": " + n.ValueNodes[i].String()
+	for i, keyNode := range n.KeyNodes {
+		pairs[i] = keyNode.String() + ": " + n.ValueNodes[i].String()
 	}
 
 	return "m[" + strings.Join(pairs, ", ") + "]"

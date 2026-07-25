@@ -21,13 +21,13 @@ type Orchestrator struct {
 var global *Orchestrator
 
 func New() *Orchestrator {
-	o := &Orchestrator{
+	orch := &Orchestrator{
 		instances: make(map[int]*Instance),
 		nextID:    1,
 	}
 
-	global = o
-	return o
+	global = orch
+	return orch
 }
 
 func Get() *Orchestrator {

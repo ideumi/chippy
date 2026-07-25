@@ -29,38 +29,38 @@ type integerLiteral interface {
 
 // Only for integers: float sources must use NewNumberFromFloat for the NaN/Inf
 // check.
-func NewNumber[T integerLiteral](v T) *Number {
-	switch x := any(v).(type) {
+func NewNumber[T integerLiteral](val T) *Number {
+	switch typed := any(val).(type) {
 
 	case int:
-		return numberFromInt64(int64(x))
+		return numberFromInt64(int64(typed))
 
 	case int8:
-		return numberFromInt64(int64(x))
+		return numberFromInt64(int64(typed))
 
 	case int16:
-		return numberFromInt64(int64(x))
+		return numberFromInt64(int64(typed))
 
 	case int32:
-		return numberFromInt64(int64(x))
+		return numberFromInt64(int64(typed))
 
 	case int64:
-		return numberFromInt64(x)
+		return numberFromInt64(typed)
 
 	case uint:
-		return numberFromUint64(uint64(x))
+		return numberFromUint64(uint64(typed))
 
 	case uint8:
-		return numberFromInt64(int64(x))
+		return numberFromInt64(int64(typed))
 
 	case uint16:
-		return numberFromInt64(int64(x))
+		return numberFromInt64(int64(typed))
 
 	case uint32:
-		return numberFromInt64(int64(x))
+		return numberFromInt64(int64(typed))
 
 	case uint64:
-		return numberFromUint64(x)
+		return numberFromUint64(typed)
 
 	}
 
@@ -69,59 +69,59 @@ func NewNumber[T integerLiteral](v T) *Number {
 
 // NewNumberFromFloat rejects NaN and +-Infinity. Integer-valued floats in int64
 // range are coerced to int storage so a later AsInt is exact.
-func NewNumberFromFloat(v float64) (*Number, error) {
-	if math.IsNaN(v) {
+func NewNumberFromFloat(val float64) (*Number, error) {
+	if math.IsNaN(val) {
 		return nil, fmt.Errorf("Numeric result is NaN")
 	}
 
-	if math.IsInf(v, 0) {
+	if math.IsInf(val, 0) {
 		return nil, fmt.Errorf("Numeric overflow")
 	}
 
-	return numberFromFloat64(v), nil
+	return numberFromFloat64(val), nil
 }
 
 // Private helpers that bypass the NaN/Inf gate. Use only when the caller has
 // already proven the input is finite.
-func numberFromInt64(v int64) *Number {
+func numberFromInt64(val int64) *Number {
 	return &Number{
 		BaseValue: NewBaseValue(),
-		iVal:      v,
+		iVal:      val,
 		isInt:     true,
 	}
 }
 
-func numberFromUint64(v uint64) *Number {
-	if v <= math.MaxInt64 {
-		return numberFromInt64(int64(v))
+func numberFromUint64(val uint64) *Number {
+	if val <= math.MaxInt64 {
+		return numberFromInt64(int64(val))
 	}
 
-	return numberFromFloat64(float64(v))
+	return numberFromFloat64(float64(val))
 }
 
-func numberFromFloat64(v float64) *Number {
-	n := &Number{
+func numberFromFloat64(val float64) *Number {
+	result := &Number{
 		BaseValue: NewBaseValue(),
-		fVal:      v,
+		fVal:      val,
 	}
 
-	if v != math.Trunc(v) {
-		return n
+	if val != math.Trunc(val) {
+		return result
 	}
 
 	// float64(MaxInt64) rounds up to 2^63, so >= is the correct upper guard.
-	if v < math.MinInt64 || v >= float64(math.MaxInt64) {
-		return n
+	if val < math.MinInt64 || val >= float64(math.MaxInt64) {
+		return result
 	}
 
-	n.iVal = int64(v)
-	n.isInt = true
+	result.iVal = int64(val)
+	result.isInt = true
 
-	return n
+	return result
 }
 
-func newBoolNumber(b bool) *Number {
-	if b {
+func newBoolNumber(flag bool) *Number {
+	if flag {
 		return NewNumber(1)
 	}
 
@@ -198,42 +198,42 @@ func (n *Number) IsTrue() bool {
 	return n.fVal != 0
 }
 
-func addInt64(a, b int64) (int64, bool) {
-	if (b > 0 && a > math.MaxInt64-b) || (b < 0 && a < math.MinInt64-b) {
+func addInt64(left, right int64) (int64, bool) {
+	if (right > 0 && left > math.MaxInt64-right) || (right < 0 && left < math.MinInt64-right) {
 		return 0, true
 	}
 
-	return a + b, false
+	return left + right, false
 }
 
-func subInt64(a, b int64) (int64, bool) {
-	if (b < 0 && a > math.MaxInt64+b) || (b > 0 && a < math.MinInt64+b) {
+func subInt64(left, right int64) (int64, bool) {
+	if (right < 0 && left > math.MaxInt64+right) || (right > 0 && left < math.MinInt64+right) {
 		return 0, true
 	}
 
-	return a - b, false
+	return left - right, false
 }
 
-func mulInt64(a, b int64) (int64, bool) {
-	if a == 0 || b == 0 {
+func mulInt64(left, right int64) (int64, bool) {
+	if left == 0 || right == 0 {
 		return 0, false
 	}
 
-	if a == math.MinInt64 && b == -1 {
+	if left == math.MinInt64 && right == -1 {
 		return 0, true
 	}
 
-	if b == math.MinInt64 && a == -1 {
+	if right == math.MinInt64 && left == -1 {
 		return 0, true
 	}
 
-	c := a * b
+	product := left * right
 
-	if c/b != a {
+	if product/right != left {
 		return 0, true
 	}
 
-	return c, false
+	return product, false
 }
 
 func powInt64(base, exp int64) (int64, bool) {
@@ -264,26 +264,26 @@ func powInt64(base, exp int64) (int64, bool) {
 	result := int64(1)
 
 	for i := int64(0); i < exp; i++ {
-		r, ov := mulInt64(result, base)
+		product, overflow := mulInt64(result, base)
 
-		if ov {
+		if overflow {
 			return 0, true
 		}
 
-		result = r
+		result = product
 	}
 
 	return result, false
 }
 
-func wrapFloatResult(v float64, ctx Ctx) (Value, error) {
-	n, err := NewNumberFromFloat(v)
+func wrapFloatResult(val float64, ctx Ctx) (Value, error) {
+	number, err := NewNumberFromFloat(val)
 
 	if err != nil {
 		return nil, errors.NewCallError(err.Error())
 	}
 
-	return n.SetContext(ctx), nil
+	return number.SetContext(ctx), nil
 }
 
 func (n *Number) AddedTo(other Value) (Value, error) {
@@ -459,82 +459,82 @@ func (n *Number) Negated() (Value, error) {
 	return n.Negate(), nil
 }
 
-func compareEqual(a, b *Number) bool {
-	if a.isInt && b.isInt {
-		return a.iVal == b.iVal
+func compareEqual(left, right *Number) bool {
+	if left.isInt && right.isInt {
+		return left.iVal == right.iVal
 	}
 
-	if a.isInt {
-		return floatEqualsInt(b.fVal, a.iVal)
+	if left.isInt {
+		return floatEqualsInt(right.fVal, left.iVal)
 	}
 
-	if b.isInt {
-		return floatEqualsInt(a.fVal, b.iVal)
+	if right.isInt {
+		return floatEqualsInt(left.fVal, right.iVal)
 	}
 
-	return a.fVal == b.fVal
+	return left.fVal == right.fVal
 }
 
-func floatEqualsInt(f float64, i int64) bool {
-	if f != math.Trunc(f) {
+func floatEqualsInt(floatVal float64, intVal int64) bool {
+	if floatVal != math.Trunc(floatVal) {
 		return false
 	}
 
-	if f < math.MinInt64 || f >= float64(math.MaxInt64) {
+	if floatVal < math.MinInt64 || floatVal >= float64(math.MaxInt64) {
 		return false
 	}
 
-	return int64(f) == i
+	return int64(floatVal) == intVal
 }
 
-func compareLess(a, b *Number) bool {
-	if a.isInt && b.isInt {
-		return a.iVal < b.iVal
+func compareLess(left, right *Number) bool {
+	if left.isInt && right.isInt {
+		return left.iVal < right.iVal
 	}
 
-	if a.isInt {
-		return intLessFloat(a.iVal, b.fVal)
+	if left.isInt {
+		return intLessFloat(left.iVal, right.fVal)
 	}
 
-	if b.isInt {
-		return floatLessInt(a.fVal, b.iVal)
+	if right.isInt {
+		return floatLessInt(left.fVal, right.iVal)
 	}
 
-	return a.fVal < b.fVal
+	return left.fVal < right.fVal
 }
 
-func intLessFloat(i int64, f float64) bool {
-	// f at or above 2^63 is greater than every int64.
-	if f >= float64(math.MaxInt64) {
+func intLessFloat(intVal int64, floatVal float64) bool {
+	// floatVal at or above 2^63 is greater than every int64.
+	if floatVal >= float64(math.MaxInt64) {
 		return true
 	}
 
-	// f below MinInt64 is less than every int64.
-	if f < math.MinInt64 {
+	// floatVal below MinInt64 is less than every int64.
+	if floatVal < math.MinInt64 {
 		return false
 	}
 
-	if f == math.Trunc(f) {
-		return i < int64(f)
+	if floatVal == math.Trunc(floatVal) {
+		return intVal < int64(floatVal)
 	}
 
-	return float64(i) < f
+	return float64(intVal) < floatVal
 }
 
-func floatLessInt(f float64, i int64) bool {
-	if f >= float64(math.MaxInt64) {
+func floatLessInt(floatVal float64, intVal int64) bool {
+	if floatVal >= float64(math.MaxInt64) {
 		return false
 	}
 
-	if f < math.MinInt64 {
+	if floatVal < math.MinInt64 {
 		return true
 	}
 
-	if f == math.Trunc(f) {
-		return int64(f) < i
+	if floatVal == math.Trunc(floatVal) {
+		return int64(floatVal) < intVal
 	}
 
-	return f < float64(i)
+	return floatVal < float64(intVal)
 }
 
 func (n *Number) GetComparisonEe(other Value) (Value, error) {
@@ -606,24 +606,24 @@ func (n *Number) XoredBy(other Value) (Value, error) {
 }
 
 // NaN/Inf cannot reach here by invariant.
-func bitwiseInt(n *Number) (int64, error) {
-	if n.isInt {
-		return n.iVal, nil
+func bitwiseInt(number *Number) (int64, error) {
+	if number.isInt {
+		return number.iVal, nil
 	}
 
-	if n.fVal != math.Trunc(n.fVal) {
+	if number.fVal != math.Trunc(number.fVal) {
 		return 0, errors.NewCallError(
 			"Bitwise operation on decimal value")
 
 	}
 
-	if n.fVal < math.MinInt64 || n.fVal >= float64(math.MaxInt64) {
+	if number.fVal < math.MinInt64 || number.fVal >= float64(math.MaxInt64) {
 		return 0, errors.NewCallError(
 			"Bitwise operation on value out of integer range")
 
 	}
 
-	return int64(n.fVal), nil
+	return int64(number.fVal), nil
 }
 
 func (n *Number) BAndedBy(other Value) (Value, error) {
@@ -633,19 +633,19 @@ func (n *Number) BAndedBy(other Value) (Value, error) {
 		return nil, IllegalOperation()
 	}
 
-	a, err := bitwiseInt(n)
+	left, err := bitwiseInt(n)
 
 	if err != nil {
 		return nil, err
 	}
 
-	b, err := bitwiseInt(otherNum)
+	right, err := bitwiseInt(otherNum)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return NewNumber(a & b).SetContext(n.context), nil
+	return NewNumber(left & right).SetContext(n.context), nil
 }
 
 func (n *Number) BOredBy(other Value) (Value, error) {
@@ -655,29 +655,29 @@ func (n *Number) BOredBy(other Value) (Value, error) {
 		return nil, IllegalOperation()
 	}
 
-	a, err := bitwiseInt(n)
+	left, err := bitwiseInt(n)
 
 	if err != nil {
 		return nil, err
 	}
 
-	b, err := bitwiseInt(otherNum)
+	right, err := bitwiseInt(otherNum)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return NewNumber(a | b).SetContext(n.context), nil
+	return NewNumber(left | right).SetContext(n.context), nil
 }
 
 func (n *Number) BNotted() (Value, error) {
-	a, err := bitwiseInt(n)
+	operand, err := bitwiseInt(n)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return NewNumber(^a).SetContext(n.context), nil
+	return NewNumber(^operand).SetContext(n.context), nil
 }
 
 func (n *Number) BXoredBy(other Value) (Value, error) {
@@ -687,19 +687,19 @@ func (n *Number) BXoredBy(other Value) (Value, error) {
 		return nil, IllegalOperation()
 	}
 
-	a, err := bitwiseInt(n)
+	left, err := bitwiseInt(n)
 
 	if err != nil {
 		return nil, err
 	}
 
-	b, err := bitwiseInt(otherNum)
+	right, err := bitwiseInt(otherNum)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return NewNumber(a ^ b).SetContext(n.context), nil
+	return NewNumber(left ^ right).SetContext(n.context), nil
 }
 
 func (n *Number) LShiftedBy(other Value) (Value, error) {
@@ -709,25 +709,25 @@ func (n *Number) LShiftedBy(other Value) (Value, error) {
 		return nil, IllegalOperation()
 	}
 
-	a, err := bitwiseInt(n)
+	left, err := bitwiseInt(n)
 
 	if err != nil {
 		return nil, err
 	}
 
-	b, err := bitwiseInt(otherNum)
+	right, err := bitwiseInt(otherNum)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if b < 0 {
+	if right < 0 {
 		return nil, errors.NewCallError(
 			"Negative shift amount")
 
 	}
 
-	return NewNumber(a << uint64(b)).SetContext(n.context), nil
+	return NewNumber(left << uint64(right)).SetContext(n.context), nil
 }
 
 func (n *Number) RShiftedBy(other Value) (Value, error) {
@@ -737,23 +737,23 @@ func (n *Number) RShiftedBy(other Value) (Value, error) {
 		return nil, IllegalOperation()
 	}
 
-	a, err := bitwiseInt(n)
+	left, err := bitwiseInt(n)
 
 	if err != nil {
 		return nil, err
 	}
 
-	b, err := bitwiseInt(otherNum)
+	right, err := bitwiseInt(otherNum)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if b < 0 {
+	if right < 0 {
 		return nil, errors.NewCallError(
 			"Negative shift amount")
 
 	}
 
-	return NewNumber(a >> uint64(b)).SetContext(n.context), nil
+	return NewNumber(left >> uint64(right)).SetContext(n.context), nil
 }

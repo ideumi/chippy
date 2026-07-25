@@ -22,14 +22,14 @@ func numFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	value := args[0]
 
-	switch v := value.(type) {
+	switch typed := value.(type) {
 
 	case *values.Number:
-		return res.Success(v.Copy().SetContext(ctx))
+		return res.Success(typed.Copy().SetContext(ctx))
 
 	case *values.String:
-		if f, parseErr := strconv.ParseFloat(v.Value, 64); parseErr == nil {
-			num, err := values.NewNumberFromFloat(f)
+		if floatVal, parseErr := strconv.ParseFloat(typed.Value, 64); parseErr == nil {
+			num, err := values.NewNumberFromFloat(floatVal)
 
 			if err != nil {
 				return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
@@ -42,11 +42,11 @@ func numFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	case *values.List:
 		// Trying our best
-		if len(v.Elements) == 0 {
+		if len(typed.Elements) == 0 {
 			return res.Success(values.NewNumber(constants.NUM_NUL).SetContext(ctx))
-		} else if len(v.Elements) == 1 {
+		} else if len(typed.Elements) == 1 {
 			// Try to convert single element
-			if elem := v.Elements[0]; elem != nil {
+			if elem := typed.Elements[0]; elem != nil {
 				if elemNum, ok := elem.(*values.Number); ok {
 					return res.Success(elemNum.Copy().SetContext(ctx))
 				}

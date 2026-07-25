@@ -82,8 +82,8 @@ func indexofFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 
 			target := byte(byteValue)
 
-			for i, b := range container.Data {
-				if b == target {
+			for i, byteVal := range container.Data {
+				if byteVal == target {
 					return res.Success(values.NewNumber(i + 1).SetContext(ctx))
 				}
 			}

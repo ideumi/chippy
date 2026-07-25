@@ -21,15 +21,15 @@ func lenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	value := args[0]
 
-	switch v := value.(type) {
+	switch typed := value.(type) {
 	case *values.String:
-		return res.Success(values.NewNumber(utf8.RuneCountInString(v.Value)).SetContext(ctx))
+		return res.Success(values.NewNumber(utf8.RuneCountInString(typed.Value)).SetContext(ctx))
 	case *values.List:
-		return res.Success(values.NewNumber(len(v.Elements)).SetContext(ctx))
+		return res.Success(values.NewNumber(len(typed.Elements)).SetContext(ctx))
 	case *values.Bytes:
-		return res.Success(values.NewNumber(len(v.Data)).SetContext(ctx))
+		return res.Success(values.NewNumber(len(typed.Data)).SetContext(ctx))
 	case *values.Map:
-		return res.Success(values.NewNumber(len(v.Keys)).SetContext(ctx))
+		return res.Success(values.NewNumber(len(typed.Keys)).SetContext(ctx))
 	default:
 		return res.FailAt(1,
 			shared.Errors.InvalidValue("len() can only be used on strings, lists, bytes, and maps"))

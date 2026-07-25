@@ -91,13 +91,13 @@ func addrToIPPort(addr net.Addr) (string, int) {
 		return "", 0
 	}
 
-	switch a := addr.(type) {
+	switch typed := addr.(type) {
 
 	case *net.TCPAddr:
-		return a.IP.String(), a.Port
+		return typed.IP.String(), typed.Port
 
 	case *net.UDPAddr:
-		return a.IP.String(), a.Port
+		return typed.IP.String(), typed.Port
 	}
 
 	host, portStr, err := net.SplitHostPort(addr.String())

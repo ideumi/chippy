@@ -57,20 +57,20 @@ func swriteFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	}
 
 	// Write based on socket type
-	var n int
+	var written int
 
 	switch socket.Mode {
 	case "tcp":
 		if socket.Conn == nil {
 			return res.FailAt(2, shared.Errors.InvalidValue("Socket connection is closed"))
 		}
-		n, err = socket.Conn.Write(bytesVal.Data)
+		written, err = socket.Conn.Write(bytesVal.Data)
 
 	case "udp":
 		if socket.UdpConn == nil {
 			return res.FailAt(2, shared.Errors.InvalidValue("UDP connection is closed"))
 		}
-		n, err = socket.UdpConn.Write(bytesVal.Data)
+		written, err = socket.UdpConn.Write(bytesVal.Data)
 
 	case "listen":
 		return res.FailAt(2,
@@ -85,5 +85,5 @@ func swriteFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 	}
 
-	return res.Success(values.NewNumber(n).SetContext(ctx))
+	return res.Success(values.NewNumber(written).SetContext(ctx))
 }

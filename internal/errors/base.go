@@ -137,9 +137,9 @@ func (e *BaseError) stringWithArrows() string {
 	return result
 }
 
-func max(a, b int) int {
-	if a > b {
-		return a
+func max(left, right int) int {
+	if left > right {
+		return left
 	}
-	return b
+	return right
 }

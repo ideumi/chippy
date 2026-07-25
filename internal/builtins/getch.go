@@ -42,9 +42,9 @@ func getchSequence() ([]byte, error) {
 	buffer := make([]byte, 8)
 
 	// Read first byte
-	n, err := os.Stdin.Read(buffer[:1])
+	readCount, err := os.Stdin.Read(buffer[:1])
 
-	if err != nil || n == 0 {
+	if err != nil || readCount == 0 {
 		return nil, err
 	}
 
@@ -66,9 +66,9 @@ func getchSequence() ([]byte, error) {
 			done := make(chan bool, 1)
 			go func() {
 				for bytesRead < len(buffer) {
-					n, err := os.Stdin.Read(buffer[bytesRead : bytesRead+1])
+					readCount, err := os.Stdin.Read(buffer[bytesRead : bytesRead+1])
 
-					if err != nil || n == 0 {
+					if err != nil || readCount == 0 {
 						break
 					}
 					bytesRead++
@@ -102,9 +102,9 @@ func getchSequence() ([]byte, error) {
 
 		// Read additional UTF8 bytes
 		for i := 0; i < additionalBytes; i++ {
-			n, err := os.Stdin.Read(buffer[bytesRead : bytesRead+1])
+			readCount, err := os.Stdin.Read(buffer[bytesRead : bytesRead+1])
 
-			if err != nil || n == 0 {
+			if err != nil || readCount == 0 {
 				break
 			}
 

@@ -20,16 +20,16 @@ func packFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	value := args[0]
 
-	switch v := value.(type) {
+	switch typed := value.(type) {
 	case *values.String:
-		bytes := []byte(v.Value)
+		bytes := []byte(typed.Value)
 
 		return res.Success(values.NewBytes(bytes).SetContext(ctx))
 
 	case *values.List:
-		bytes := make([]byte, len(v.Elements))
+		bytes := make([]byte, len(typed.Elements))
 
-		for i, element := range v.Elements {
+		for i, element := range typed.Elements {
 			if element == nil {
 				bytes[i] = 0
 				continue

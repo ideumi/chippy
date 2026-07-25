@@ -80,8 +80,8 @@ func (m *Map) copyWalk(seen map[Value]bool, depth int) Value {
 	copy(newKeys, m.Keys)
 	newEntries := make(map[string]Value, len(m.Entries))
 
-	for k, v := range m.Entries {
-		newEntries[k] = walkCopy(v, seen, depth+1)
+	for key, val := range m.Entries {
+		newEntries[key] = walkCopy(val, seen, depth+1)
 	}
 
 	result := &Map{
@@ -102,8 +102,8 @@ func (m *Map) ShallowCopy() *Map {
 
 	newEntries := make(map[string]Value, len(m.Entries))
 
-	for k, v := range m.Entries {
-		newEntries[k] = v
+	for key, val := range m.Entries {
+		newEntries[key] = val
 	}
 
 	result := &Map{
@@ -139,9 +139,9 @@ func (m *Map) MapRemove(key string) (*Map, bool) {
 	delete(newMap.Entries, key)
 	newKeys := make([]string, 0, len(newMap.Keys)-1)
 
-	for _, k := range newMap.Keys {
-		if k != key {
-			newKeys = append(newKeys, k)
+	for _, existingKey := range newMap.Keys {
+		if existingKey != key {
+			newKeys = append(newKeys, existingKey)
 		}
 	}
 

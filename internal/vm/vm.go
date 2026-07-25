@@ -442,8 +442,8 @@ func (vm *VM) callBuiltin(calleeIdx, argCount int, span bytecode.Span) error {
 	result := vm.stack[calleeIdx].Execute(args)
 
 	if result.Error != nil {
-		if n := result.FailArg; n > 0 && n <= len(args) {
-			if start, end := args[n-1].GetPos(); start != nil {
+		if argPos := result.FailArg; argPos > 0 && argPos <= len(args) {
+			if start, end := args[argPos-1].GetPos(); start != nil {
 				return locate(result.Error, start, end)
 			}
 		}

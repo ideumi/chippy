@@ -22,11 +22,11 @@ func inlineBlocks(src string, tokens []*lexer.Token) map[int]bool {
 	funcBody := make(map[int]bool)
 	pendingFunc := false
 
-	for i, t := range tokens {
+	for i, tok := range tokens {
 		switch {
-		case t.Type == constants.TT_KEYWORD && t.Value == "func":
+		case tok.Type == constants.TT_KEYWORD && tok.Value == "func":
 			pendingFunc = true
-		case t.Type == constants.TT_LBRACE && pendingFunc:
+		case tok.Type == constants.TT_LBRACE && pendingFunc:
 			funcBody[i] = true
 			pendingFunc = false
 		}
@@ -34,8 +34,8 @@ func inlineBlocks(src string, tokens []*lexer.Token) map[int]bool {
 
 	var stack []int
 
-	for i, t := range tokens {
-		switch t.Type {
+	for i, tok := range tokens {
+		switch tok.Type {
 		case constants.TT_LBRACE:
 			stack = append(stack, i)
 		case constants.TT_RBRACE:
@@ -70,8 +70,8 @@ func expandChains(tokens []*lexer.Token, inline map[int]bool) {
 
 	var stack []int
 
-	for i, t := range tokens {
-		switch t.Type {
+	for i, tok := range tokens {
+		switch tok.Type {
 		case constants.TT_LBRACE:
 			head[i] = i
 
@@ -125,8 +125,8 @@ func leafInlineable(tokens []*lexer.Token, open, closeIdx int) bool {
 	firstBody := -1
 	lastBody := -1
 
-	for k := open + 1; k < closeIdx; k++ {
-		switch tokens[k].Type {
+	for idx := open + 1; idx < closeIdx; idx++ {
+		switch tokens[idx].Type {
 		case constants.TT_LBRACE, constants.TT_RBRACE:
 			return false
 		case constants.TT_COMMENT, constants.TT_DOC_COMMENT:
@@ -138,10 +138,10 @@ func leafInlineable(tokens []*lexer.Token, open, closeIdx int) bool {
 		}
 
 		if firstBody == -1 {
-			firstBody = k
+			firstBody = idx
 		}
 
-		lastBody = k
+		lastBody = idx
 	}
 
 	if semis > 1 {
@@ -150,8 +150,8 @@ func leafInlineable(tokens []*lexer.Token, open, closeIdx int) bool {
 
 	// The statement itself must not wrap, so no newline between its first
 	// and last code token. An empty block (firstBody == -1) fits.
-	for k := firstBody; firstBody != -1 && k <= lastBody; k++ {
-		if tokens[k].Type == constants.TT_NEWLINE {
+	for idx := firstBody; firstBody != -1 && idx <= lastBody; idx++ {
+		if tokens[idx].Type == constants.TT_NEWLINE {
 			return false
 		}
 	}
@@ -172,8 +172,8 @@ func headerStart(tokens []*lexer.Token, open int) int {
 	depth := 0
 	first := open
 
-	for k := open - 1; k >= 0; k-- {
-		switch tokens[k].Type {
+	for idx := open - 1; idx >= 0; idx-- {
+		switch tokens[idx].Type {
 		case constants.TT_NEWLINE, constants.TT_COMMENT, constants.TT_DOC_COMMENT:
 			continue
 		case constants.TT_RPAREN, constants.TT_RSQUARE:
@@ -183,13 +183,13 @@ func headerStart(tokens []*lexer.Token, open int) int {
 		}
 
 		if depth == 0 {
-			switch tokens[k].Type {
+			switch tokens[idx].Type {
 			case constants.TT_SEMICOLON, constants.TT_LBRACE, constants.TT_RBRACE:
 				return first
 			}
 		}
 
-		first = k
+		first = idx
 	}
 
 	return first
@@ -198,8 +198,8 @@ func headerStart(tokens []*lexer.Token, open int) int {
 // hasComment reports whether tokens[start:end) contains a comment. A header
 // comment would consume the inlined '{', so a block with one stays expanded.
 func hasComment(tokens []*lexer.Token, start, end int) bool {
-	for k := start; k < end; k++ {
-		if isCommentTok(tokens[k]) {
+	for idx := start; idx < end; idx++ {
+		if isCommentTok(tokens[idx]) {
 			return true
 		}
 	}
@@ -215,21 +215,21 @@ func headerWrapped(tokens []*lexer.Token, start, open int) bool {
 	first := -1
 	last := -1
 
-	for k := start; k < open; k++ {
-		switch tokens[k].Type {
+	for idx := start; idx < open; idx++ {
+		switch tokens[idx].Type {
 		case constants.TT_NEWLINE, constants.TT_COMMENT, constants.TT_DOC_COMMENT:
 			continue
 		}
 
 		if first == -1 {
-			first = k
+			first = idx
 		}
 
-		last = k
+		last = idx
 	}
 
-	for k := first; first != -1 && k <= last; k++ {
-		if tokens[k].Type == constants.TT_NEWLINE {
+	for idx := first; first != -1 && idx <= last; idx++ {
+		if tokens[idx].Type == constants.TT_NEWLINE {
 			return true
 		}
 	}
@@ -246,21 +246,21 @@ func inlineLineWidth(src string, tokens []*lexer.Token, start, closeIdx, indent 
 	var prev *lexer.Token
 	prevUnaryMinus := false
 
-	for k := start; k <= closeIdx; k++ {
-		t := tokens[k]
+	for idx := start; idx <= closeIdx; idx++ {
+		tok := tokens[idx]
 
-		switch t.Type {
+		switch tok.Type {
 		case constants.TT_NEWLINE, constants.TT_COMMENT, constants.TT_DOC_COMMENT:
 			continue
 		}
 
-		if prev != nil && wantSpace(prev, t, prevUnaryMinus) {
+		if prev != nil && wantSpace(prev, tok, prevUnaryMinus) {
 			width++
 		}
 
-		width += utf8.RuneCountInString(src[t.PosStart.Index:t.PosEnd.Index])
-		prevUnaryMinus = t.Type == constants.TT_MINUS && !isValueEnd(prev)
-		prev = t
+		width += utf8.RuneCountInString(src[tok.PosStart.Index:tok.PosEnd.Index])
+		prevUnaryMinus = tok.Type == constants.TT_MINUS && !isValueEnd(prev)
+		prev = tok
 	}
 
 	return width

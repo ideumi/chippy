@@ -39,69 +39,69 @@ func sortFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 // compareValues implements type-aware comparison with precedence:
 // Number < String < List < Bytes < Function < Map
-func compareValues(a, b values.Value, seen map[values.Value]bool, depth int) int {
-	aType := getTypePrecedence(a)
-	bType := getTypePrecedence(b)
+func compareValues(left, right values.Value, seen map[values.Value]bool, depth int) int {
+	leftType := getTypePrecedence(left)
+	rightType := getTypePrecedence(right)
 
 	// Different types: compare by precedence
-	if aType != bType {
-		return aType - bType
+	if leftType != rightType {
+		return leftType - rightType
 	}
 
 	// Same type: natural comparison
-	switch aVal := a.(type) {
+	switch leftVal := left.(type) {
 	case *values.Number:
-		bVal := b.(*values.Number)
+		rightVal := right.(*values.Number)
 
-		if aVal.IsInt() && bVal.IsInt() {
-			aInt, _ := aVal.AsInt()
-			bInt, _ := bVal.AsInt()
+		if leftVal.IsInt() && rightVal.IsInt() {
+			leftInt, _ := leftVal.AsInt()
+			rightInt, _ := rightVal.AsInt()
 
-			if aInt < bInt {
+			if leftInt < rightInt {
 				return -1
 			}
 
-			if aInt > bInt {
+			if leftInt > rightInt {
 				return 1
 			}
 
 			return 0
 		}
 
-		if aVal.AsFloat() < bVal.AsFloat() {
+		if leftVal.AsFloat() < rightVal.AsFloat() {
 			return -1
 		}
 
-		if aVal.AsFloat() > bVal.AsFloat() {
+		if leftVal.AsFloat() > rightVal.AsFloat() {
 			return 1
 		}
 
 		return 0
 
 	case *values.String:
-		bVal := b.(*values.String)
+		rightVal := right.(*values.String)
 
-		return strings.Compare(aVal.Value, bVal.Value)
+		return strings.Compare(leftVal.Value, rightVal.Value)
 
 	case *values.List:
-		bVal := b.(*values.List)
+		rightVal := right.(*values.List)
 
-		return compareLists(aVal, bVal, seen, depth)
+		return compareLists(leftVal, rightVal, seen, depth)
 
 	case *values.Bytes:
-		bVal := b.(*values.Bytes)
+		rightVal := right.(*values.Bytes)
 
-		return compareBytes(aVal.Data, bVal.Data)
+		return compareBytes(leftVal.Data, rightVal.Data)
 
 	default:
 		// Use string representation for everything else
-		return strings.Compare(a.String(), b.String())
+		return strings.Compare(left.String(), right.String())
 	}
 }
 
 // getTypePrecedence returns precedence value for sorting
-func getTypePrecedence(v values.Value) int {
-	switch v.(type) {
+func getTypePrecedence(val values.Value) int {
+	switch val.(type) {
 	case *values.Number:
 		return 0
 	case *values.String:
@@ -120,18 +120,18 @@ func getTypePrecedence(v values.Value) int {
 }
 
 // compareLists compares two lists element by element.
-func compareLists(a, b *values.List, seen map[values.Value]bool, depth int) int {
+func compareLists(left, right *values.List, seen map[values.Value]bool, depth int) int {
 	// Catch cyclic lists
-	defer values.EnterWalk(a, seen, depth)()
+	defer values.EnterWalk(left, seen, depth)()
 
-	minLen := len(a.Elements)
+	minLen := len(left.Elements)
 
-	if len(b.Elements) < minLen {
-		minLen = len(b.Elements)
+	if len(right.Elements) < minLen {
+		minLen = len(right.Elements)
 	}
 
 	for i := 0; i < minLen; i++ {
-		cmp := compareValues(a.Elements[i], b.Elements[i], seen, depth+1)
+		cmp := compareValues(left.Elements[i], right.Elements[i], seen, depth+1)
 
 		if cmp != 0 {
 			return cmp
@@ -139,24 +139,24 @@ func compareLists(a, b *values.List, seen map[values.Value]bool, depth int) int 
 	}
 
 	// If all compared elements are equal, shorter list comes first
-	return len(a.Elements) - len(b.Elements)
+	return len(left.Elements) - len(right.Elements)
 }
 
 // compareBytes compares two byte slices
-func compareBytes(a, b []byte) int {
-	minLen := len(a)
+func compareBytes(left, right []byte) int {
+	minLen := len(left)
 
-	if len(b) < minLen {
-		minLen = len(b)
+	if len(right) < minLen {
+		minLen = len(right)
 	}
 
 	for i := 0; i < minLen; i++ {
-		if a[i] < b[i] {
+		if left[i] < right[i] {
 			return -1
-		} else if a[i] > b[i] {
+		} else if left[i] > right[i] {
 			return 1
 		}
 	}
 
-	return len(a) - len(b)
+	return len(left) - len(right)
 }

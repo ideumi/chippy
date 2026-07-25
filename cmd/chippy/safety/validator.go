@@ -164,8 +164,7 @@ func extractSymbols(filename string) ([]SymbolInfo, error) {
 		return nil, err
 	}
 
-	p := parser.NewParser(tokens)
-	parseResult := p.Parse()
+	parseResult := parser.NewParser(tokens).Parse()
 
 	if parseResult.GetError() != nil {
 		return nil, parseResult.GetError()
@@ -187,11 +186,11 @@ func walkAST(node ast.Node, filename string, symbols *[]SymbolInfo) {
 		return
 	}
 
-	switch n := node.(type) {
+	switch typed := node.(type) {
 	case *ast.FuncDefNode:
 		// Named functions
-		if n.VarNameToken != nil {
-			name, ok := n.VarNameToken.Value.(string)
+		if typed.VarNameToken != nil {
+			name, ok := typed.VarNameToken.Value.(string)
 
 			if !ok {
 				return
@@ -200,7 +199,7 @@ func walkAST(node ast.Node, filename string, symbols *[]SymbolInfo) {
 			*symbols = append(*symbols, SymbolInfo{
 				Name:    name,
 				File:    filename,
-				Line:    n.VarNameToken.PosStart.DisplayLine(),
+				Line:    typed.VarNameToken.PosStart.DisplayLine(),
 				SymType: "function",
 			})
 		}
@@ -208,7 +207,7 @@ func walkAST(node ast.Node, filename string, symbols *[]SymbolInfo) {
 
 	case *ast.VarAssignNode:
 		// Variable idfs
-		name, ok := n.VarNameToken.Value.(string)
+		name, ok := typed.VarNameToken.Value.(string)
 
 		if !ok {
 			return
@@ -217,34 +216,34 @@ func walkAST(node ast.Node, filename string, symbols *[]SymbolInfo) {
 		*symbols = append(*symbols, SymbolInfo{
 			Name:    name,
 			File:    filename,
-			Line:    n.VarNameToken.PosStart.DisplayLine(),
+			Line:    typed.VarNameToken.PosStart.DisplayLine(),
 			SymType: "variable",
 		})
 
 	// Jump in since we are still in file scope:
 	case *ast.IfNode:
-		for _, c := range n.Cases {
-			walkAST(c.Body, filename, symbols)
+		for _, caseClause := range typed.Cases {
+			walkAST(caseClause.Body, filename, symbols)
 		}
 
-		if n.ElseCase != nil {
-			walkAST(n.ElseCase, filename, symbols)
+		if typed.ElseCase != nil {
+			walkAST(typed.ElseCase, filename, symbols)
 		}
 
 	case *ast.ForNode:
-		walkAST(n.BodyNode, filename, symbols)
+		walkAST(typed.BodyNode, filename, symbols)
 
 	case *ast.WhileNode:
-		walkAST(n.BodyNode, filename, symbols)
+		walkAST(typed.BodyNode, filename, symbols)
 
 	case *ast.ListNode:
-		for _, elem := range n.ElementNodes {
+		for _, elem := range typed.ElementNodes {
 			walkAST(elem, filename, symbols)
 		}
 
 	case *ast.BlockNode:
 		// Block bodies and the top-level program are file scope, keep walking
-		for _, elem := range n.ElementNodes {
+		for _, elem := range typed.ElementNodes {
 			walkAST(elem, filename, symbols)
 		}
 	}

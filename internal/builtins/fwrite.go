@@ -61,11 +61,11 @@ func fwriteFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		return res.Success(values.NewNumber(constants.NUM_NUL).SetContext(ctx))
 	}
 
-	n, err := writer.Write(bytesVal.Data)
+	written, err := writer.Write(bytesVal.Data)
 
 	if err != nil {
 		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
 	}
 
-	return res.Success(values.NewNumber(n).SetContext(ctx))
+	return res.Success(values.NewNumber(written).SetContext(ctx))
 }

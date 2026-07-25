@@ -22,25 +22,25 @@ func listFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		// Convert single value to list
 		value := args[0]
 
-		switch v := value.(type) {
+		switch typed := value.(type) {
 
 		case *values.List:
-			return res.Success(v.ShallowCopy().SetContext(ctx))
+			return res.Success(typed.ShallowCopy().SetContext(ctx))
 
 		case *values.String:
 			// Convert string to runes
-			runes := []rune(v.Value)
+			runes := []rune(typed.Value)
 			elements := make([]values.Value, len(runes))
 
-			for i, r := range runes {
-				elements[i] = values.NewString(string(r)).SetContext(ctx)
+			for i, char := range runes {
+				elements[i] = values.NewString(string(char)).SetContext(ctx)
 			}
 
 			return res.Success(values.NewList(elements).SetContext(ctx))
 
 		case *values.Number:
 			// Create single-element list
-			return res.Success(values.NewList([]values.Value{v.SetContext(ctx)}).SetContext(ctx))
+			return res.Success(values.NewList([]values.Value{typed.SetContext(ctx)}).SetContext(ctx))
 
 		default:
 			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))

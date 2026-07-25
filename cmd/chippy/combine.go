@@ -569,8 +569,8 @@ func stripComments(line string) string {
 		}
 
 		if char == '#' && !inString {
-			return strings.TrimRightFunc(line[:i], func(r rune) bool {
-				return r == ' ' || r == '\t'
+			return strings.TrimRightFunc(line[:i], func(trailingChar rune) bool {
+				return trailingChar == ' ' || trailingChar == '\t'
 			})
 		}
 	}

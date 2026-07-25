@@ -31,17 +31,17 @@ func IsolateForTransfer(items ...values.Value) {
 	}
 }
 
-func isolateValue(v values.Value, state *transferState) {
-	switch val := v.(type) {
+func isolateValue(val values.Value, state *transferState) {
+	switch typed := val.(type) {
 	case values.BoundaryClosure:
-		isolateBoundaryClosure(val, state)
+		isolateBoundaryClosure(typed, state)
 	case *values.List:
-		for _, e := range val.Elements {
-			isolateValue(e, state)
+		for _, element := range typed.Elements {
+			isolateValue(element, state)
 		}
 	case *values.Map:
-		for _, e := range val.Entries {
-			isolateValue(e, state)
+		for _, entryVal := range typed.Entries {
+			isolateValue(entryVal, state)
 		}
 	}
 }
@@ -107,30 +107,30 @@ func SnapshotUserGlobals(ctx values.Ctx) ([]string, []values.Value) {
 
 // Functions are skipped here. The variables they captured are looked after by
 // IsolateForTransfer and BindValuesToGlobals instead.
-func DeepRebindContext(v values.Value, ctx values.Ctx) {
-	if v == nil {
+func DeepRebindContext(val values.Value, ctx values.Ctx) {
+	if val == nil {
 		return
 	}
 
-	switch val := v.(type) {
+	switch typed := val.(type) {
 	case values.Callable, *values.BuiltInFunction:
 
 	case *values.List:
-		v.SetContext(ctx)
+		val.SetContext(ctx)
 
-		for _, e := range val.Elements {
-			DeepRebindContext(e, ctx)
+		for _, element := range typed.Elements {
+			DeepRebindContext(element, ctx)
 		}
 
 	case *values.Map:
-		v.SetContext(ctx)
+		val.SetContext(ctx)
 
-		for _, e := range val.Entries {
-			DeepRebindContext(e, ctx)
+		for _, entryVal := range typed.Entries {
+			DeepRebindContext(entryVal, ctx)
 		}
 
 	default:
-		v.SetContext(ctx)
+		val.SetContext(ctx)
 	}
 }
 
@@ -156,12 +156,12 @@ func BindValuesToGlobals(items []values.Value, globals values.Ctx) {
 	}
 }
 
-func bindValue(v values.Value, globals values.Ctx, state *bindState) {
-	switch val := v.(type) {
+func bindValue(val values.Value, globals values.Ctx, state *bindState) {
+	switch typed := val.(type) {
 	case values.BoundaryClosure:
-		val.RebindGlobals(globals)
+		typed.RebindGlobals(globals)
 
-		for _, cell := range val.TransferCells() {
+		for _, cell := range typed.TransferCells() {
 			if state.cells[cell] {
 				continue
 			}
@@ -171,13 +171,13 @@ func bindValue(v values.Value, globals values.Ctx, state *bindState) {
 		}
 
 	case *values.List:
-		for _, e := range val.Elements {
-			bindValue(e, globals, state)
+		for _, element := range typed.Elements {
+			bindValue(element, globals, state)
 		}
 
 	case *values.Map:
-		for _, e := range val.Entries {
-			bindValue(e, globals, state)
+		for _, entryVal := range typed.Entries {
+			bindValue(entryVal, globals, state)
 		}
 	}
 }

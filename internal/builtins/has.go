@@ -84,8 +84,8 @@ func hasFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 		target := byte(byteValue)
 
-		for _, b := range container.Data {
-			if b == target {
+		for _, byteVal := range container.Data {
+			if byteVal == target {
 				return res.Success(values.NewNumber(constants.NUM_TRU).SetContext(ctx))
 			}
 		}

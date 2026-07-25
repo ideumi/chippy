@@ -176,8 +176,8 @@ func signalFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 }
 
 func signalToInt(sig os.Signal) int {
-	if s, ok := sig.(syscall.Signal); ok {
-		return int(s)
+	if typed, ok := sig.(syscall.Signal); ok {
+		return int(typed)
 	}
 
 	return 0

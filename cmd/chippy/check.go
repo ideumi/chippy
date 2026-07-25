@@ -107,8 +107,7 @@ func checkFile(filename string) error {
 		return err
 	}
 
-	p := parser.NewParser(tokens)
-	parseResult := p.Parse()
+	parseResult := parser.NewParser(tokens).Parse()
 
 	if parseResult.GetError() != nil {
 		return parseResult.GetError()

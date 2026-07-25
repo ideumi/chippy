@@ -108,8 +108,8 @@ func parseresponseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeR
 		if keyLower == "content-length" {
 			// Leave contentLength at -1 on garbage so the body defaults to
 			// the remaining data rather than being truncated to empty
-			if n, err := strconv.Atoi(value); err == nil {
-				contentLength = n
+			if parsed, err := strconv.Atoi(value); err == nil {
+				contentLength = parsed
 			}
 		}
 
@@ -158,8 +158,8 @@ func parseresponseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeR
 	return res.Success(nativeMap.SetContext(ctx))
 }
 
-func boolToInt(b bool) int {
-	if b {
+func boolToInt(flag bool) int {
+	if flag {
 		return constants.NUM_TRU
 	}
 

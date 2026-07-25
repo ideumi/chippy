@@ -127,8 +127,8 @@ func settermFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 	return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
 }
 
-func requireTermiosField(m *values.Map, key string, max int64) (int64, *errors.RTError) {
-	num, ok := m.Entries[key].(*values.Number)
+func requireTermiosField(termiosMap *values.Map, key string, max int64) (int64, *errors.RTError) {
+	num, ok := termiosMap.Entries[key].(*values.Number)
 
 	if !ok {
 		return 0, errors.NewCallError(

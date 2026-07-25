@@ -21,22 +21,22 @@ func strFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	value := args[0]
 	var resultStr string
 
-	switch v := value.(type) {
+	switch typed := value.(type) {
 
 	case *values.Number:
-		resultStr = v.String()
+		resultStr = typed.String()
 
 	case *values.String:
-		resultStr = v.Value // Remove quotes for str() conversion
+		resultStr = typed.Value // Remove quotes for str() conversion
 
 	case *values.List:
-		resultStr = v.String()
+		resultStr = typed.String()
 
 	case *values.Bytes:
-		resultStr = v.String()
+		resultStr = typed.String()
 
 	case *values.Map:
-		resultStr = v.String()
+		resultStr = typed.String()
 
 	default:
 		resultStr = value.String()

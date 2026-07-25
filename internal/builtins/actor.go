@@ -85,10 +85,10 @@ func actorFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 		defer func() {
 			defer func() {
-				if r := recover(); r != nil {
+				if recovered := recover(); recovered != nil {
 					fmt.Fprintf(os.Stderr,
 						"chippy: actor %d handle cleanup panicked: %v\n",
-						inst.ID, r)
+						inst.ID, recovered)
 				}
 			}()
 
@@ -96,9 +96,9 @@ func actorFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		}()
 
 		defer func() {
-			if r := recover(); r != nil {
+			if recovered := recover(); recovered != nil {
 				deliver(orchestrator.ActorResult{
-					Err: fmt.Errorf("actor panic: %v", r),
+					Err: fmt.Errorf("actor panic: %v", recovered),
 				})
 			}
 		}()

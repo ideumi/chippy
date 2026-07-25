@@ -15,8 +15,8 @@ import (
 func formatTokens(src string, tokens []*lexer.Token) string {
 	inline := inlineBlocks(src, tokens)
 
-	var b strings.Builder
-	b.Grow(len(src)) // output is roughly the size of the input
+	var builder strings.Builder
+	builder.Grow(len(src)) // output is roughly the size of the input
 
 	braceDepth := 0
 	groupDepth := 0      // open '(' and '['
@@ -28,26 +28,26 @@ func formatTokens(src string, tokens []*lexer.Token) string {
 	var prevSig *lexer.Token // last emitted code token
 	var blockStack []bool    // inline flag for each open '{'
 
-	text := func(t *lexer.Token) string {
-		s := src[t.PosStart.Index:t.PosEnd.Index]
+	text := func(tok *lexer.Token) string {
+		segment := src[tok.PosStart.Index:tok.PosEnd.Index]
 
 		// Trailing whitespace inside a comment is insignificant
-		if isCommentTok(t) {
-			s = strings.TrimRight(s, " \t")
+		if isCommentTok(tok) {
+			segment = strings.TrimRight(segment, " \t")
 		}
 
-		return s
+		return segment
 	}
 
 	writeLineStart := func(tok *lexer.Token, capN int) {
-		n := pendingNewlines
+		count := pendingNewlines
 
-		if n > capN {
-			n = capN
+		if count > capN {
+			count = capN
 		}
 
-		for i := 0; i < n; i++ {
-			b.WriteString("\n")
+		for i := 0; i < count; i++ {
+			builder.WriteString("\n")
 		}
 
 		pendingNewlines = 0
@@ -68,7 +68,7 @@ func formatTokens(src string, tokens []*lexer.Token) string {
 			indent = 0
 		}
 
-		b.WriteString(strings.Repeat("\t", indent))
+		builder.WriteString(strings.Repeat("\t", indent))
 	}
 
 	for idx, tok := range tokens {
@@ -170,12 +170,12 @@ func formatTokens(src string, tokens []*lexer.Token) string {
 
 			writeLineStart(tok, capN)
 		case isComment:
-			b.WriteString(" ")
+			builder.WriteString(" ")
 		case prevSig != nil && wantSpace(prevSig, tok, prevUnaryMinus):
-			b.WriteString(" ")
+			builder.WriteString(" ")
 		}
 
-		b.WriteString(text(tok))
+		builder.WriteString(text(tok))
 		started = true
 
 		switch tok.Type {
@@ -199,7 +199,7 @@ func formatTokens(src string, tokens []*lexer.Token) string {
 		}
 	}
 
-	result := strings.TrimRight(b.String(), " \t\n")
+	result := strings.TrimRight(builder.String(), " \t\n")
 
 	if result != "" {
 		result += "\n"
