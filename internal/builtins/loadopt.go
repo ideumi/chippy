@@ -28,16 +28,16 @@ import (
 // loaded optionals.
 func InstallOpt(opt *optional.Optional, globalCtx values.Ctx) {
 	for name, fn := range opt.Functions {
-		if existing := globalCtx.SymbolTable.Get(name); existing == nil {
+		if existing := globalCtx.Globals.GetByName(name); existing == nil {
 			fn.SetContext(globalCtx)
-			globalCtx.SymbolTable.Set(name, fn)
+			globalCtx.Globals.SetByName(name, fn)
 		}
 	}
 
 	for name, constant := range opt.Constants {
-		if existing := globalCtx.SymbolTable.Get(name); existing == nil {
+		if existing := globalCtx.Globals.GetByName(name); existing == nil {
 			constant.SetContext(globalCtx)
-			globalCtx.SymbolTable.Set(name, constant)
+			globalCtx.Globals.SetByName(name, constant)
 		}
 	}
 }

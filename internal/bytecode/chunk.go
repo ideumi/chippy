@@ -8,6 +8,7 @@ package bytecode
 
 import (
 	"chip-go/internal/errors"
+	"chip-go/internal/globals"
 	"chip-go/internal/values"
 	"encoding/binary"
 )
@@ -35,6 +36,8 @@ type Chunk struct {
 
 	// Only improves error messages, not written into bytecode
 	indexSpans map[int]IndexSpanSet
+
+	globalSlots []int
 }
 
 type IndexSpanSet struct {
@@ -128,6 +131,24 @@ func (c *Chunk) AddFunction(fn *FunctionTemplate) uint32 {
 	c.Functions = append(c.Functions, fn)
 
 	return uint32(len(c.Functions) - 1)
+}
+
+// LinkGlobals resolves every global name in this chunk and in its nested
+// function chunks to its schema slot.
+func (c *Chunk) LinkGlobals(schema *globals.Schema) {
+	c.globalSlots = make([]int, len(c.Names))
+
+	for i, name := range c.Names {
+		c.globalSlots[i] = schema.Intern(name)
+	}
+
+	for _, fn := range c.Functions {
+		fn.Chunk.LinkGlobals(schema)
+	}
+}
+
+func (c *Chunk) GlobalSlot(nameIndex int) int {
+	return c.globalSlots[nameIndex]
 }
 
 func ReadU32(code []byte, offset int) uint32 {

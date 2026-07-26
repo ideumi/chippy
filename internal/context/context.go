@@ -12,11 +12,17 @@ type Trace struct {
 	Pos *errors.Position
 }
 
+type GlobalStore[T any] interface {
+	GetByName(name string) T
+	SetByName(name string, value T)
+	ForEach(fn func(name string, value T))
+}
+
 type Context[T any] struct {
 	DisplayName    string
 	Parent         *Context[T]
 	ParentEntryPos *errors.Position
-	SymbolTable    *SymbolTable[T]
+	Globals        GlobalStore[T]
 	InstanceID     int
 	Trace          *Trace
 }
@@ -29,11 +35,9 @@ func NewContext[T any](displayName string, parent *Context[T], parentEntryPos *e
 	}
 
 	if parent != nil {
-		ctx.SymbolTable = NewSymbolTable(parent.SymbolTable)
 		ctx.InstanceID = parent.InstanceID
 		ctx.Trace = parent.Trace
 	} else {
-		ctx.SymbolTable = NewSymbolTable[T](nil)
 		ctx.Trace = &Trace{}
 	}
 

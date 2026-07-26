@@ -82,14 +82,14 @@ func isolateBoundaryClosure(fn values.BoundaryClosure, state *transferState) {
 // own. A name a function does not define itself is looked up in the globals of
 // the actor running it, so a newly spawned actor needs this copy put back there.
 func SnapshotUserGlobals(ctx values.Ctx) ([]string, []values.Value) {
-	if ctx.SymbolTable == nil {
+	if ctx.Globals == nil {
 		return nil, nil
 	}
 
 	var names []string
 	var snapshot []values.Value
 
-	ctx.SymbolTable.ForEach(func(name string, val values.Value) {
+	ctx.Globals.ForEach(func(name string, val values.Value) {
 		if name == "CHIPRT" {
 			return
 		}

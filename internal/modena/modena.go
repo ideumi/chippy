@@ -12,6 +12,7 @@ import (
 	"chip-go/internal/constants"
 	"chip-go/internal/context"
 	"chip-go/internal/errors"
+	"chip-go/internal/globals"
 	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 	"chip-go/internal/vm"
@@ -21,39 +22,43 @@ import (
 
 type Modena struct {
 	globalContext values.Ctx
+	schema        *globals.Schema
 }
 
 func New() *Modena {
-	mod := newInstance(0, constants.CONTEXT_DISPLAY_NAME)
+	schema := globals.NewSchema()
+
+	mod := newInstance(0, constants.CONTEXT_DISPLAY_NAME, schema)
 
 	orch := orchestrator.New()
 	orch.CreateMain(mod)
 
 	orch.SetFactory(func(instanceID int) orchestrator.Modena {
-		return newInstance(instanceID, fmt.Sprintf("<Actor %d>", instanceID))
+		return newInstance(instanceID, fmt.Sprintf("<Actor %d>", instanceID), schema)
 	})
 
 	return mod
 }
 
-func newInstance(instanceID int, displayName string) *Modena {
+func newInstance(instanceID int, displayName string, schema *globals.Schema) *Modena {
 	globalCtx := context.NewContext[values.Value](displayName, nil, nil)
 	globalCtx.InstanceID = instanceID
+	globalCtx.Globals = values.NewGlobalStore(schema)
 
 	for name, fn := range builtins.GetBuiltins() {
 		fn.SetContext(globalCtx)
-		globalCtx.SymbolTable.Set(name, fn)
+		globalCtx.Globals.SetByName(name, fn)
 	}
 
 	for name, constant := range builtins.GetConstants() {
 		constant.SetContext(globalCtx)
-		globalCtx.SymbolTable.Set(name, constant)
+		globalCtx.Globals.SetByName(name, constant)
 	}
 
 	// Set CHIPRT
-	globalCtx.SymbolTable.Set("CHIPRT", values.NewNumber(instanceID).SetContext(globalCtx))
+	globalCtx.Globals.SetByName("CHIPRT", values.NewNumber(instanceID).SetContext(globalCtx))
 
-	return &Modena{globalContext: globalCtx}
+	return &Modena{globalContext: globalCtx, schema: schema}
 }
 
 func (e *Modena) Run(filename, text string) (retVal values.Value, retErr error) {
@@ -64,6 +69,8 @@ func (e *Modena) Run(filename, text string) (retVal values.Value, retErr error) 
 	if err != nil {
 		return nil, err
 	}
+
+	chunk.LinkGlobals(e.schema)
 
 	return vm.NewVM(chunk, e.globalContext).Run()
 }

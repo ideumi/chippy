@@ -74,10 +74,17 @@ type VM struct {
 	frames   []callFrame
 	forStack []forState
 	ctx      values.Ctx
+	globals  *values.GlobalStore
 }
 
 func NewVM(chunk *bytecode.Chunk, ctx values.Ctx) *VM {
-	vm := &VM{ctx: ctx}
+	store, ok := ctx.Globals.(*values.GlobalStore)
+
+	if !ok {
+		bytecode.ModenaPanic("context has no GlobalStore")
+	}
+
+	vm := &VM{ctx: ctx, globals: store}
 	vm.frames = append(vm.frames, callFrame{chunk: chunk, locals: make([]values.Value, chunk.NumSlots)})
 
 	return vm
@@ -111,32 +118,34 @@ func (vm *VM) Run() (values.Value, error) {
 			vm.discard()
 
 		case bytecode.OpGetGlobal:
-			name := frame.chunk.Names[bytecode.ReadU32(code, ip)]
+			nameIndex := int(bytecode.ReadU32(code, ip))
 			ip += 4
 
-			value := vm.ctx.SymbolTable.Get(name)
+			value := vm.globals.SlotValue(frame.chunk.GlobalSlot(nameIndex))
 
 			if value == nil {
-				return nil, errors.NewRTError(span.Start, span.End, fmt.Sprintf("'%s' is not defined", name))
+				return nil, errors.NewRTError(span.Start, span.End, fmt.Sprintf("'%s' is not defined", frame.chunk.Names[nameIndex]))
 			}
 
 			vm.push(value.SetPos(span.Start, span.End))
 
 		case bytecode.OpDefineGlobal:
-			name := frame.chunk.Names[bytecode.ReadU32(code, ip)]
+			nameIndex := int(bytecode.ReadU32(code, ip))
 			ip += 4
 
-			vm.ctx.SymbolTable.Set(name, vm.peek())
+			vm.globals.SetSlot(frame.chunk.GlobalSlot(nameIndex), vm.peek())
 
 		case bytecode.OpSetGlobal:
-			name := frame.chunk.Names[bytecode.ReadU32(code, ip)]
+			nameIndex := int(bytecode.ReadU32(code, ip))
 			ip += 4
 
-			if !vm.ctx.SymbolTable.Exists(name) {
-				return nil, errors.NewRTError(span.Start, span.End, fmt.Sprintf("'%s' is not defined", name))
+			slot := frame.chunk.GlobalSlot(nameIndex)
+
+			if vm.globals.SlotValue(slot) == nil {
+				return nil, errors.NewRTError(span.Start, span.End, fmt.Sprintf("'%s' is not defined", frame.chunk.Names[nameIndex]))
 			}
 
-			vm.ctx.SymbolTable.SetInScope(name, vm.peek())
+			vm.globals.SetSlot(slot, vm.peek())
 
 		case bytecode.OpJump:
 			ip = int(bytecode.ReadU32(code, ip))

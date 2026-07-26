@@ -123,7 +123,7 @@ func actorFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		}
 
 		for i, name := range globalNames {
-			actorCtx.SymbolTable.Set(name, globalValues[i])
+			actorCtx.Globals.SetByName(name, globalValues[i])
 		}
 
 		for _, arg := range argsCopy {

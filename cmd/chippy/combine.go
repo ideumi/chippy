@@ -273,39 +273,39 @@ func extractCombineConfig(ctx values.Ctx) CombineConfig {
 	config := CombineConfig{}
 
 	// Extract string variables
-	if val := ctx.SymbolTable.Get(constants.CONFIG_PROJECT); val != nil {
+	if val := ctx.Globals.GetByName(constants.CONFIG_PROJECT); val != nil {
 		if str, ok := val.(*values.String); ok {
 			config.Project = str.Value
 		}
 	}
 
-	if val := ctx.SymbolTable.Get(constants.CONFIG_VERSION); val != nil {
+	if val := ctx.Globals.GetByName(constants.CONFIG_VERSION); val != nil {
 		if str, ok := val.(*values.String); ok {
 			config.Version = str.Value
 		}
 	}
 
-	if val := ctx.SymbolTable.Get(constants.CONFIG_LICENCE); val != nil {
+	if val := ctx.Globals.GetByName(constants.CONFIG_LICENCE); val != nil {
 		if str, ok := val.(*values.String); ok {
 			config.Licence = str.Value
 		}
 	}
 
-	if val := ctx.SymbolTable.Get(constants.CONFIG_OUTPUT); val != nil {
+	if val := ctx.Globals.GetByName(constants.CONFIG_OUTPUT); val != nil {
 		if str, ok := val.(*values.String); ok {
 			config.Output = str.Value
 		}
 	}
 
 	// Extract source entry point
-	if val := ctx.SymbolTable.Get(constants.CONFIG_SOURCE); val != nil {
+	if val := ctx.Globals.GetByName(constants.CONFIG_SOURCE); val != nil {
 		if str, ok := val.(*values.String); ok {
 			config.Source = str.Value
 		}
 	}
 
 	// Extract search paths
-	if val := ctx.SymbolTable.Get(constants.CONFIG_PATHS); val != nil {
+	if val := ctx.Globals.GetByName(constants.CONFIG_PATHS); val != nil {
 		if list, ok := val.(*values.List); ok {
 			for _, elem := range list.Elements {
 				if str, ok := elem.(*values.String); ok {
@@ -316,7 +316,7 @@ func extractCombineConfig(ctx values.Ctx) CombineConfig {
 	}
 
 	// Extract external dependencies
-	if val := ctx.SymbolTable.Get(constants.CONFIG_EXTERNAL); val != nil {
+	if val := ctx.Globals.GetByName(constants.CONFIG_EXTERNAL); val != nil {
 		if list, ok := val.(*values.List); ok {
 			for _, elem := range list.Elements {
 				if str, ok := elem.(*values.String); ok {
@@ -327,25 +327,25 @@ func extractCombineConfig(ctx values.Ctx) CombineConfig {
 	}
 
 	// Flags
-	if val := ctx.SymbolTable.Get(constants.CONFIG_STRIP_COMMENTS); val != nil {
+	if val := ctx.Globals.GetByName(constants.CONFIG_STRIP_COMMENTS); val != nil {
 		if num, ok := val.(*values.Number); ok {
 			config.StripComments = num.IsTrue()
 		}
 	}
 
-	if val := ctx.SymbolTable.Get(constants.CONFIG_STRIP_WHITESPACE); val != nil {
+	if val := ctx.Globals.GetByName(constants.CONFIG_STRIP_WHITESPACE); val != nil {
 		if num, ok := val.(*values.Number); ok {
 			config.StripWhitespace = num.IsTrue()
 		}
 	}
 
-	if val := ctx.SymbolTable.Get(constants.CONFIG_ADD_SHEBANG); val != nil {
+	if val := ctx.Globals.GetByName(constants.CONFIG_ADD_SHEBANG); val != nil {
 		if num, ok := val.(*values.Number); ok {
 			config.AddShebang = num.IsTrue()
 		}
 	}
 
-	if val := ctx.SymbolTable.Get(constants.CONFIG_COMPILE); val != nil {
+	if val := ctx.Globals.GetByName(constants.CONFIG_COMPILE); val != nil {
 		if num, ok := val.(*values.Number); ok {
 			config.Compile = num.IsTrue()
 		}
