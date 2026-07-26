@@ -32,7 +32,9 @@ type Chunk struct {
 
 	spanIndex   []uint32
 	sharedSpans []Span
-	seenSpans   map[Span]uint32
+	spanDedup   deduper[Span]
+	nameDedup   deduper[string]
+	constDedup  deduper[string]
 
 	// Only improves error messages, not written into bytecode
 	indexSpans map[int]IndexSpanSet
@@ -69,19 +71,13 @@ func (c *Chunk) IndexSpansAt(offset int) IndexSpanSet {
 }
 
 func (c *Chunk) shareSpan(span Span) uint32 {
-	if c.seenSpans == nil {
-		c.seenSpans = map[Span]uint32{}
+	slot, firstTime := c.spanDedup.add(span)
+
+	if firstTime {
+		c.sharedSpans = append(c.sharedSpans, span)
 	}
 
-	if index, ok := c.seenSpans[span]; ok {
-		return index
-	}
-
-	index := uint32(len(c.sharedSpans))
-	c.sharedSpans = append(c.sharedSpans, span)
-	c.seenSpans[span] = index
-
-	return index
+	return slot
 }
 
 func (c *Chunk) SpanAt(offset int) Span {
@@ -97,7 +93,9 @@ func (c *Chunk) SpanCount() int {
 }
 
 func (c *Chunk) FinishBuilding() {
-	c.seenSpans = nil
+	c.spanDedup.dropLookup()
+	c.nameDedup.dropLookup()
+	c.constDedup.dropLookup()
 }
 
 func (c *Chunk) Emit(op Op, span Span, operands ...uint32) int {
@@ -116,17 +114,26 @@ func (c *Chunk) Emit(op Op, span Span, operands ...uint32) int {
 }
 
 func (c *Chunk) AddConstant(value values.Value) uint32 {
-	c.Constants = append(c.Constants, value)
+	slot, firstTime := c.constDedup.add(values.ConstantIdentity(value))
 
-	return uint32(len(c.Constants) - 1)
+	if firstTime {
+		c.Constants = append(c.Constants, value)
+	}
+
+	return slot
 }
 
 func (c *Chunk) AddName(name string) uint32 {
-	c.Names = append(c.Names, name)
+	slot, firstTime := c.nameDedup.add(name)
 
-	return uint32(len(c.Names) - 1)
+	if firstTime {
+		c.Names = append(c.Names, name)
+	}
+
+	return slot
 }
 
+// No dedup here: each function is compiled once, so it is never a duplicate.
 func (c *Chunk) AddFunction(fn *FunctionTemplate) uint32 {
 	c.Functions = append(c.Functions, fn)
 
