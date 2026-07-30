@@ -53,7 +53,7 @@ func waitFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	selfID := ctx.InstanceID
 	selfInst := orch.GetInstance(selfID)
 
-	cancelCh := orch.BeginBlocking(selfInst, orchestrator.StateBlockedWait)
+	cancelCh := orch.BeginWaitOn(selfInst, inst)
 	orch.CheckDeadlock()
 
 	var result orchestrator.ActorResult

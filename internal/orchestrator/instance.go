@@ -36,6 +36,7 @@ type Instance struct {
 	cancelCh   chan struct{}
 	cancelled  bool
 	waited     bool
+	waitingOn  *Instance
 	loadedOpts []string
 }
 

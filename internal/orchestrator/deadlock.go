@@ -30,12 +30,25 @@ func (o *Orchestrator) BeginBlocking(inst *Instance, state ActorState) chan stru
 	return inst.cancelCh
 }
 
+func (o *Orchestrator) BeginWaitOn(inst, target *Instance) chan struct{} {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+
+	inst.State = StateBlockedWait
+	inst.cancelCh = make(chan struct{})
+	inst.cancelled = false
+	inst.waitingOn = target
+
+	return inst.cancelCh
+}
+
 func (o *Orchestrator) EndBlocking(inst *Instance) {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 
 	inst.State = StateRunning
 	inst.cancelCh = nil
+	inst.waitingOn = nil
 }
 
 // MarkFinished is called by an actor goroutine after it has delivered its result.
@@ -106,6 +119,10 @@ func (o *Orchestrator) CheckDeadlock() {
 
 			stuck = append(stuck, inst)
 		case StateBlockedWait:
+			if inst.waitingOn != nil && inst.waitingOn.State == StateFinished {
+				return
+			}
+
 			stuck = append(stuck, inst)
 		case StateFinished:
 		}
