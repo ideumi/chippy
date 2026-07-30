@@ -368,7 +368,32 @@ func (p *Parser) factor() *ParseResult {
 }
 
 func (p *Parser) power() *ParseResult {
-	return p.binOp(p.call, []string{constants.TT_POW}, nil)
+	res := NewParseResult()
+	left := res.Register(p.call())
+
+	if res.error != nil {
+		return res
+	}
+
+	p.skipWhitespace(res)
+
+	if p.currentTok.Type != constants.TT_POW {
+		return res.Success(left)
+	}
+
+	opTok := p.currentTok
+	res.RegisterAdvancement()
+	p.advance()
+
+	p.skipWhitespace(res)
+
+	right := res.Register(p.factor())
+
+	if res.error != nil {
+		return res
+	}
+
+	return res.Success(ast.NewBinOpNode(left, opTok, right))
 }
 
 func (p *Parser) call() *ParseResult {

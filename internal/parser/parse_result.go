@@ -72,10 +72,6 @@ func (pr *ParseResult) GetNode() ast.Node {
 	return pr.node
 }
 
-func (pr *ParseResult) GetAdvanceCount() int {
-	return pr.advanceCount
-}
-
 func (pr *ParseResult) GetToReverseCount() int {
 	return pr.toReverseCount
 }
