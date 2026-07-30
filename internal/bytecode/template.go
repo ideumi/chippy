@@ -1,6 +1,6 @@
 /*
  *
- * Modena - internal/bytecode/function.go
+ * Modena - internal/bytecode/template.go
  *
  */
 

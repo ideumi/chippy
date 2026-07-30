@@ -9,8 +9,10 @@ package vm
 import (
 	"chip-go/internal/bytecode"
 	"chip-go/internal/constants"
+	"chip-go/internal/context"
 	"chip-go/internal/errors"
 	"chip-go/internal/values"
+	"chip-go/internal/vm/collections"
 	"fmt"
 	"math"
 )
@@ -19,54 +21,60 @@ import (
 // here rather than on the value stack, so one captured by a function defined
 // inside it keeps the same address for as long as that function holds it.
 type callFrame struct {
-	closure  *Function
-	chunk    *bytecode.Chunk
-	ip       int
-	locals   []values.Value
-	forDepth int
-	callSpan bytecode.Span
+	closure *Function
+	chunk   *bytecode.Chunk
+	ip      int
+	locals  []values.Value
+
+	stackBase int
+	forDepth  int
+
+	localsMark int
 }
+
+const noLocalsMark = -1
 
 // forState is one for-loop that is currently running. done means the next step
 // would take the counter past the largest whole number that fits, so the loop
 // must stop.
 type forState struct {
-	isInt           bool
-	done            bool
-	i, end, step    int64
-	fi, fend, fstep float64
+	isInt bool
+	done  bool
+
+	intCounter, intEnd, intStep       int64
+	floatCounter, floatEnd, floatStep float64
 }
 
 func (s *forState) inRange() bool {
 	if s.isInt {
-		return !s.done && ((s.step >= 0 && s.i <= s.end) || (s.step < 0 && s.i >= s.end))
+		return !s.done && ((s.intStep >= 0 && s.intCounter <= s.intEnd) || (s.intStep < 0 && s.intCounter >= s.intEnd))
 	}
 
-	return (s.fstep >= 0 && s.fi <= s.fend) || (s.fstep < 0 && s.fi >= s.fend)
+	return (s.floatStep >= 0 && s.floatCounter <= s.floatEnd) || (s.floatStep < 0 && s.floatCounter >= s.floatEnd)
 }
 
 func (s *forState) counter() (values.Value, error) {
 	if s.isInt {
-		return values.NewNumber(s.i), nil
+		return values.NewNumber(s.intCounter), nil
 	}
 
-	return values.NewNumberFromFloat(s.fi)
+	return values.NewNumberFromFloat(s.floatCounter)
 }
 
 func (s *forState) advance() {
 	if !s.isInt {
-		s.fi += s.fstep
+		s.floatCounter += s.floatStep
 
 		return
 	}
 
-	if (s.step > 0 && s.i > math.MaxInt64-s.step) || (s.step < 0 && s.i < math.MinInt64-s.step) {
+	if (s.intStep > 0 && s.intCounter > math.MaxInt64-s.intStep) || (s.intStep < 0 && s.intCounter < math.MinInt64-s.intStep) {
 		s.done = true
 
 		return
 	}
 
-	s.i += s.step
+	s.intCounter += s.intStep
 }
 
 type VM struct {
@@ -74,17 +82,19 @@ type VM struct {
 	frames   []callFrame
 	forStack []forState
 	ctx      values.Ctx
-	globals  *values.GlobalStore
+	globals  *context.Globals[values.Value]
+
+	locals    []values.Value
+	localsTop int
 }
 
 func NewVM(chunk *bytecode.Chunk, ctx values.Ctx) *VM {
-	store, ok := ctx.Globals.(*values.GlobalStore)
-
-	if !ok {
-		bytecode.ModenaPanic("context has no GlobalStore")
+	if ctx.Globals == nil {
+		errors.ModenaPanic("context has no globals")
 	}
 
-	vm := &VM{ctx: ctx, globals: store}
+	vm := &VM{ctx: ctx, globals: ctx.Globals}
+	vm.stack = make([]values.Value, 0, constants.SIZE_STACK_INITIAL)
 	vm.frames = append(vm.frames, callFrame{chunk: chunk, locals: make([]values.Value, chunk.NumSlots)})
 
 	return vm
@@ -92,12 +102,13 @@ func NewVM(chunk *bytecode.Chunk, ctx values.Ctx) *VM {
 
 func (vm *VM) Run() (values.Value, error) {
 	frame := &vm.frames[len(vm.frames)-1]
-	code := frame.chunk.Code
+	chunk := frame.chunk
+	code := chunk.Code
 	ip := 0
 
 	for ip < len(code) {
 		op := bytecode.Op(code[ip])
-		span := frame.chunk.SpanAt(ip)
+		opStart := ip
 		ip++
 
 		var err error
@@ -107,12 +118,7 @@ func (vm *VM) Run() (values.Value, error) {
 			index := bytecode.ReadU32(code, ip)
 			ip += 4
 
-			// The stored constant is copied as it is loaded, so it
-			// is never shared with the program or given a new source
-			// position.
-			value := frame.chunk.Constants[index].Copy()
-			value.SetContext(vm.ctx).SetPos(span.Start, span.End)
-			vm.push(value)
+			vm.push(chunk.Constants[index])
 
 		case bytecode.OpDiscard:
 			vm.discard()
@@ -121,28 +127,32 @@ func (vm *VM) Run() (values.Value, error) {
 			nameIndex := int(bytecode.ReadU32(code, ip))
 			ip += 4
 
-			value := vm.globals.SlotValue(frame.chunk.GlobalSlot(nameIndex))
+			value := vm.globals.SlotValue(chunk.GlobalSlot(nameIndex))
 
-			if value == nil {
-				return nil, errors.NewRTError(span.Start, span.End, fmt.Sprintf("'%s' is not defined", frame.chunk.Names[nameIndex]))
+			if value.IsUnset() {
+				span := chunk.SpanAt(opStart)
+
+				return values.Value{}, errors.NewRTError(span.Start, span.End, fmt.Sprintf("'%s' is not defined", chunk.Names[nameIndex]))
 			}
 
-			vm.push(value.SetPos(span.Start, span.End))
+			vm.push(value)
 
 		case bytecode.OpDefineGlobal:
 			nameIndex := int(bytecode.ReadU32(code, ip))
 			ip += 4
 
-			vm.globals.SetSlot(frame.chunk.GlobalSlot(nameIndex), vm.peek())
+			vm.globals.SetSlot(chunk.GlobalSlot(nameIndex), vm.peek())
 
 		case bytecode.OpSetGlobal:
 			nameIndex := int(bytecode.ReadU32(code, ip))
 			ip += 4
 
-			slot := frame.chunk.GlobalSlot(nameIndex)
+			slot := chunk.GlobalSlot(nameIndex)
 
-			if vm.globals.SlotValue(slot) == nil {
-				return nil, errors.NewRTError(span.Start, span.End, fmt.Sprintf("'%s' is not defined", frame.chunk.Names[nameIndex]))
+			if vm.globals.SlotValue(slot).IsUnset() {
+				span := chunk.SpanAt(opStart)
+
+				return values.Value{}, errors.NewRTError(span.Start, span.End, fmt.Sprintf("'%s' is not defined", chunk.Names[nameIndex]))
 			}
 
 			vm.globals.SetSlot(slot, vm.peek())
@@ -166,11 +176,13 @@ func (vm *VM) Run() (values.Value, error) {
 
 			value := frame.locals[slot]
 
-			if value == nil {
-				return nil, errors.NewRTError(span.Start, span.End, fmt.Sprintf("'%s' is not defined", frame.chunk.LocalNames[slot]))
+			if value.IsUnset() {
+				span := chunk.SpanAt(opStart)
+
+				return values.Value{}, errors.NewRTError(span.Start, span.End, fmt.Sprintf("'%s' is not defined", chunk.LocalNames[slot]))
 			}
 
-			vm.push(value.SetPos(span.Start, span.End))
+			vm.push(value)
 
 		case bytecode.OpSetLocal:
 			slot := int(bytecode.ReadU32(code, ip))
@@ -184,11 +196,13 @@ func (vm *VM) Run() (values.Value, error) {
 
 			value := *frame.closure.upvalues[index]
 
-			if value == nil {
-				return nil, errors.NewRTError(span.Start, span.End, fmt.Sprintf("'%s' is not defined", frame.closure.template.Upvalues[index].Name))
+			if value.IsUnset() {
+				span := chunk.SpanAt(opStart)
+
+				return values.Value{}, errors.NewRTError(span.Start, span.End, fmt.Sprintf("'%s' is not defined", frame.closure.template.Upvalues[index].Name))
 			}
 
-			vm.push(value.SetPos(span.Start, span.End))
+			vm.push(value)
 
 		case bytecode.OpSetUpvalue:
 			index := int(bytecode.ReadU32(code, ip))
@@ -197,10 +211,10 @@ func (vm *VM) Run() (values.Value, error) {
 			*frame.closure.upvalues[index] = vm.peek()
 
 		case bytecode.OpClosure:
-			template := frame.chunk.Functions[bytecode.ReadU32(code, ip)]
+			template := chunk.Functions[bytecode.ReadU32(code, ip)]
 			ip += 4
 
-			fn := &Function{BaseValue: values.NewBaseValue(), template: template, globals: vm.ctx}
+			fn := &Function{template: template, globals: vm.ctx}
 			fn.upvalues = make([]*values.Value, len(template.Upvalues))
 
 			// A variable captured from the surrounding call points
@@ -215,34 +229,37 @@ func (vm *VM) Run() (values.Value, error) {
 				}
 			}
 
-			vm.push(fn.SetPos(span.Start, span.End))
+			vm.push(values.NewFunctionValue(fn))
 
 		case bytecode.OpCall:
 			argCount := int(bytecode.ReadU32(code, ip))
 			ip += 4
 
 			calleeIdx := len(vm.stack) - 1 - argCount
-			fn, isChippyFunc := vm.stack[calleeIdx].(*Function)
+			fn, isChippyFunc := vm.stack[calleeIdx].FunctionObject().(*Function)
 
 			if !isChippyFunc {
-				if err := vm.callBuiltin(calleeIdx, argCount, span); err != nil {
-					return nil, err
+				if err := vm.callBuiltin(calleeIdx, argCount, chunk, opStart); err != nil {
+					return values.Value{}, err
 				}
 
 				break
 			}
 
-			if err := vm.checkCallDepth(span); err != nil {
-				return nil, err
+			if err := vm.checkCallDepth(chunk, opStart); err != nil {
+				return values.Value{}, err
 			}
 
 			if err := fn.checkArity(argCount); err != nil {
-				return nil, locate(err, span.Start, span.End)
+				span := chunk.SpanAt(opStart)
+
+				return values.Value{}, locate(err, span.Start, span.End)
 			}
 
 			frame.ip = ip
-			frame = vm.pushFrame(fn, calleeIdx, span)
-			code = frame.chunk.Code
+			frame = vm.pushFrame(fn, calleeIdx)
+			chunk = frame.chunk
+			code = chunk.Code
 			ip = 0
 
 		case bytecode.OpReturn:
@@ -252,18 +269,23 @@ func (vm *VM) Run() (values.Value, error) {
 
 			vm.forStack = vm.forStack[:returning.forDepth]
 
+			if returning.localsMark != noLocalsMark {
+				vm.localsTop = returning.localsMark
+			}
+
+			// A return from inside an unfinished expression would
+			// otherwise leave that expressions operands behind.
+			vm.stack = vm.stack[:returning.stackBase]
+
 			if len(vm.frames) == 0 {
 				return retval, nil
 			}
 
-			// The returned value is given the position of the call,
-			// so a later error points at the call and not at somewhere
-			// inside the function. A call made from outside returns
-			// above this and keeps the position it had in the body.
-			vm.push(retval.SetPos(returning.callSpan.Start, returning.callSpan.End))
+			vm.push(retval)
 
 			frame = &vm.frames[len(vm.frames)-1]
-			code = frame.chunk.Code
+			chunk = frame.chunk
+			code = chunk.Code
 			ip = frame.ip
 
 		case bytecode.OpForBegin:
@@ -274,7 +296,9 @@ func (vm *VM) Run() (values.Value, error) {
 			state, err := newForState(start, end, step)
 
 			if err != nil {
-				return nil, locate(err, span.Start, span.End)
+				span := chunk.SpanAt(opStart)
+
+				return values.Value{}, locate(err, span.Start, span.End)
 			}
 
 			vm.forStack = append(vm.forStack, state)
@@ -294,7 +318,9 @@ func (vm *VM) Run() (values.Value, error) {
 			counter, convErr := state.counter()
 
 			if convErr != nil {
-				return nil, errors.NewRTError(span.Start, span.End, convErr.Error())
+				span := chunk.SpanAt(opStart)
+
+				return values.Value{}, errors.NewRTError(span.Start, span.End, convErr.Error())
 			}
 
 			vm.push(counter)
@@ -318,46 +344,46 @@ func (vm *VM) Run() (values.Value, error) {
 			copy(elements, vm.stack[len(vm.stack)-count:])
 			vm.stack = vm.stack[:len(vm.stack)-count]
 
-			vm.push(values.NewList(elements).SetContext(vm.ctx).SetPos(span.Start, span.End))
+			vm.push(values.NewList(elements))
 
 		case bytecode.OpBuildBytes:
 			count := int(bytecode.ReadU32(code, ip))
 			ip += 4
 
-			data, err := bytesFromStack(vm.stack[len(vm.stack)-count:], span)
+			data, err := collections.BuildBytes(vm.stack[len(vm.stack)-count:])
 
 			if err != nil {
-				return nil, err
+				span := chunk.SpanAt(opStart)
+
+				return values.Value{}, locate(err, span.Start, span.End)
 			}
 
 			vm.stack = vm.stack[:len(vm.stack)-count]
-			vm.push(values.NewBytes(data).SetContext(vm.ctx).SetPos(span.Start, span.End))
+			vm.push(values.NewBytes(data))
 
 		case bytecode.OpBuildMap:
 			pairs := int(bytecode.ReadU32(code, ip))
 			ip += 4
 
-			mapValue, err := mapFromStack(vm.stack[len(vm.stack)-2*pairs:], vm.ctx)
+			mapValue, err := collections.BuildMap(vm.stack[len(vm.stack)-2*pairs:])
 
 			if err != nil {
-				return nil, err
+				span := chunk.SpanAt(opStart)
+
+				return values.Value{}, locate(err, span.Start, span.End)
 			}
 
 			vm.stack = vm.stack[:len(vm.stack)-2*pairs]
-			vm.push(mapValue.SetPos(span.Start, span.End))
+			vm.push(mapValue)
 
 		case bytecode.OpIndexGet:
 			index := vm.discard()
 			collection := vm.discard()
 
-			// An error should underline the part at fault, the 99 in
-			// l[99] rather than the whole thing, so each part has
-			// its own position.
-			spans := frame.chunk.IndexSpansAt(ip - 1)
-			result, err := indexGet(collection, index, vm.ctx, spans.Coll, spans.Idx)
+			result, err := collections.Get(collection, index)
 
 			if err != nil {
-				return nil, err
+				return values.Value{}, locateIndexFault(err, chunk, opStart)
 			}
 
 			vm.push(result)
@@ -367,127 +393,287 @@ func (vm *VM) Run() (values.Value, error) {
 			index := vm.discard()
 			collection := vm.discard()
 
-			spans := frame.chunk.IndexSpansAt(ip - 1)
-			result, err := indexSet(collection, index, value, vm.ctx, spans.Coll, spans.Idx, spans.Val)
+			result, err := collections.Set(collection, index, value)
 
 			if err != nil {
-				return nil, err
+				return values.Value{}, locateIndexFault(err, chunk, opStart)
 			}
 
 			vm.push(result)
 
 		case bytecode.OpNeg:
-			err = vm.unaryOp(span, values.Value.Negated)
+			err = vm.unary(vm.peek().Negated())
 
-		case bytecode.OpPos:
-			vm.push(vm.discard().SetPos(span.Start, span.End))
-
-		// Each takes its operands off the top and leaves one result. The
-		// work is handed to the shared values.Value method, so what an
-		// operator means lives in one place.
 		case bytecode.OpNot:
-			err = vm.unaryOp(span, values.Value.Notted)
+			err = vm.unary(vm.peek().Notted())
 		case bytecode.OpBNot:
-			err = vm.unaryOp(span, values.Value.BNotted)
+			err = vm.unary(vm.peek().BNotted())
 
 		case bytecode.OpAdd:
-			err = vm.binaryOp(span, values.Value.AddedTo)
+			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole {
+				if result, overflow := values.AddInt64(left, right); !overflow {
+					err = vm.binary(values.Int(result), nil)
+
+					break
+				}
+			}
+
+			err = vm.binary(vm.left().AddedTo(vm.right()))
 		case bytecode.OpSub:
-			err = vm.binaryOp(span, values.Value.SubbedBy)
+			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole {
+				if result, overflow := values.SubInt64(left, right); !overflow {
+					err = vm.binary(values.Int(result), nil)
+
+					break
+				}
+			}
+
+			err = vm.binary(vm.left().SubbedBy(vm.right()))
 		case bytecode.OpMul:
-			err = vm.binaryOp(span, values.Value.MultedBy)
+			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole {
+				if result, overflow := values.MulInt64(left, right); !overflow {
+					err = vm.binary(values.Int(result), nil)
+
+					break
+				}
+			}
+
+			err = vm.binary(vm.left().MultedBy(vm.right()))
 		case bytecode.OpDiv:
-			err = vm.binaryOp(span, values.Value.DivedBy)
+			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole && right != 0 && left%right == 0 {
+				if !(left == math.MinInt64 && right == -1) {
+					err = vm.binary(values.Int(left/right), nil)
+
+					break
+				}
+			}
+
+			err = vm.binary(vm.left().DivedBy(vm.right()))
 		case bytecode.OpMod:
-			err = vm.binaryOp(span, values.Value.ModdedBy)
+			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole && right != 0 && right != -1 {
+				err = vm.binary(values.Int(left%right), nil)
+
+				break
+			}
+
+			err = vm.binary(vm.left().ModdedBy(vm.right()))
 		case bytecode.OpPow:
-			err = vm.binaryOp(span, values.Value.PowedBy)
+			err = vm.binary(vm.left().PowedBy(vm.right()))
 		case bytecode.OpLShift:
-			err = vm.binaryOp(span, values.Value.LShiftedBy)
+			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole && right >= 0 {
+				err = vm.binary(values.Int(left<<uint64(right)), nil)
+
+				break
+			}
+
+			err = vm.binary(vm.left().LShiftedBy(vm.right()))
 		case bytecode.OpRShift:
-			err = vm.binaryOp(span, values.Value.RShiftedBy)
+			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole && right >= 0 {
+				err = vm.binary(values.Int(left>>uint64(right)), nil)
+
+				break
+			}
+
+			err = vm.binary(vm.left().RShiftedBy(vm.right()))
 		case bytecode.OpEq:
-			err = vm.binaryOp(span, values.Value.GetComparisonEe)
+			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole {
+				err = vm.binary(values.Bool(left == right), nil)
+
+				break
+			}
+
+			err = vm.binary(vm.left().GetComparisonEe(vm.right()))
 		case bytecode.OpNe:
-			err = vm.binaryOp(span, values.Value.GetComparisonNe)
+			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole {
+				err = vm.binary(values.Bool(left != right), nil)
+
+				break
+			}
+
+			err = vm.binary(vm.left().GetComparisonNe(vm.right()))
 		case bytecode.OpLt:
-			err = vm.binaryOp(span, values.Value.GetComparisonLt)
+			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole {
+				err = vm.binary(values.Bool(left < right), nil)
+
+				break
+			}
+
+			err = vm.binary(vm.left().GetComparisonLt(vm.right()))
 		case bytecode.OpGt:
-			err = vm.binaryOp(span, values.Value.GetComparisonGt)
+			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole {
+				err = vm.binary(values.Bool(left > right), nil)
+
+				break
+			}
+
+			err = vm.binary(vm.left().GetComparisonGt(vm.right()))
 		case bytecode.OpLte:
-			err = vm.binaryOp(span, values.Value.GetComparisonLte)
+			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole {
+				err = vm.binary(values.Bool(left <= right), nil)
+
+				break
+			}
+
+			err = vm.binary(vm.left().GetComparisonLte(vm.right()))
 		case bytecode.OpGte:
-			err = vm.binaryOp(span, values.Value.GetComparisonGte)
+			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole {
+				err = vm.binary(values.Bool(left >= right), nil)
+
+				break
+			}
+
+			err = vm.binary(vm.left().GetComparisonGte(vm.right()))
 		case bytecode.OpXor:
-			err = vm.binaryOp(span, values.Value.XoredBy)
+			err = vm.binary(vm.left().XoredBy(vm.right()))
 		case bytecode.OpBAnd:
-			err = vm.binaryOp(span, values.Value.BAndedBy)
+			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole {
+				err = vm.binary(values.Int(left&right), nil)
+
+				break
+			}
+
+			err = vm.binary(vm.left().BAndedBy(vm.right()))
 		case bytecode.OpBOr:
-			err = vm.binaryOp(span, values.Value.BOredBy)
+			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole {
+				err = vm.binary(values.Int(left|right), nil)
+
+				break
+			}
+
+			err = vm.binary(vm.left().BOredBy(vm.right()))
 		case bytecode.OpBXor:
-			err = vm.binaryOp(span, values.Value.BXoredBy)
+			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole {
+				err = vm.binary(values.Int(left^right), nil)
+
+				break
+			}
+
+			err = vm.binary(vm.left().BXoredBy(vm.right()))
 
 		default:
-			bytecode.ModenaPanic("unknown opcode %d, get out the geiger counter", op)
+			errors.ModenaPanic("unknown opcode %d, get out the geiger counter", op)
 		}
 
 		if err != nil {
-			return nil, err
+			span := chunk.SpanAt(opStart)
+
+			return values.Value{}, locate(err, span.Start, span.End)
 		}
 	}
 
-	// The program must leave exactly one value. Anything else is a bug.
 	if len(vm.stack) != 1 {
-		bytecode.ModenaPanic("stack imbalance, %d values left at halt", len(vm.stack))
+		errors.ModenaPanic("stack imbalance, %d values left at halt", len(vm.stack))
 	}
 
 	return vm.stack[0], nil
 }
 
-func (vm *VM) callBuiltin(calleeIdx, argCount int, span bytecode.Span) error {
+func (vm *VM) callBuiltin(calleeIdx, argCount int, chunk *bytecode.Chunk, opStart int) error {
 	args := make([]values.Value, argCount)
 	copy(args, vm.stack[calleeIdx+1:])
 
-	result := vm.stack[calleeIdx].Execute(args)
+	result := vm.stack[calleeIdx].Execute(args, vm.ctx)
 
 	if result.Error != nil {
-		if argPos := result.FailArg; argPos > 0 && argPos <= len(args) {
-			if start, end := args[argPos-1].GetPos(); start != nil {
-				return locate(result.Error, start, end)
+		// A builtin that blames a specific argument underlines that
+		// argument, using the spans the compiler recorded for the call.
+		if argPos := result.FailArg; argPos > 0 {
+			argSpans := chunk.CallArgSpansAt(opStart)
+
+			if argPos <= len(argSpans) && argSpans[argPos-1].Start != nil {
+				argSpan := argSpans[argPos-1]
+
+				return locate(result.Error, argSpan.Start, argSpan.End)
 			}
 		}
+
+		span := chunk.SpanAt(opStart)
 
 		return locate(result.Error, span.Start, span.End)
 	}
 
 	vm.stack = vm.stack[:calleeIdx]
-	vm.push(result.Value.SetPos(span.Start, span.End))
+	vm.push(result.Value)
 
 	return nil
 }
 
-func (vm *VM) checkCallDepth(span bytecode.Span) error {
-	if len(vm.frames) >= constants.LIMIT_CALL_DEPTH {
-		return errors.NewRTError(span.Start, span.End, "Maximum recursion depth exceeded")
+func (vm *VM) checkCallDepth(chunk *bytecode.Chunk, opStart int) error {
+	if len(vm.frames) < constants.LIMIT_CALL_DEPTH {
+		return nil
 	}
 
-	return nil
+	span := chunk.SpanAt(opStart)
+
+	return errors.NewRTError(span.Start, span.End, "Maximum recursion depth exceeded")
 }
 
-func (vm *VM) pushFrame(fn *Function, calleeIdx int, span bytecode.Span) *callFrame {
-	locals := make([]values.Value, fn.template.Chunk.NumSlots)
+// An index error underlines the part at fault, the 99 in l[99] rather than the
+// whole expression.
+func locateIndexFault(err error, chunk *bytecode.Chunk, opStart int) error {
+	fault, ok := err.(*collections.Fault)
+
+	if !ok {
+		return err
+	}
+
+	spans := chunk.IndexSpansAt(opStart)
+	span := spans.Idx
+
+	switch fault.Part {
+	case collections.PartCollection:
+		span = spans.Coll
+	case collections.PartValue:
+		span = spans.Val
+	}
+
+	return locate(fault.Err, span.Start, span.End)
+}
+
+func (vm *VM) pushFrame(fn *Function, calleeIdx int) *callFrame {
+	chunk := fn.template.Chunk
+	locals, mark := vm.takeLocals(chunk)
 	copy(locals, vm.stack[calleeIdx+1:])
 	vm.stack = vm.stack[:calleeIdx]
 
 	vm.frames = append(vm.frames, callFrame{
-		closure:  fn,
-		chunk:    fn.template.Chunk,
-		locals:   locals,
-		forDepth: len(vm.forStack),
-		callSpan: span,
+		closure:    fn,
+		chunk:      chunk,
+		locals:     locals,
+		stackBase:  calleeIdx,
+		forDepth:   len(vm.forStack),
+		localsMark: mark,
 	})
 
 	return &vm.frames[len(vm.frames)-1]
+}
+
+// A call whose locals a nested function captures gets its own, since the shared
+// run is reused as soon as the call returns.
+func (vm *VM) takeLocals(chunk *bytecode.Chunk) ([]values.Value, int) {
+	slots := chunk.NumSlots
+
+	if chunk.LocalsCaptured() {
+		return make([]values.Value, slots), noLocalsMark
+	}
+
+	// Built on the first call, so a vm that never calls anything, such as an
+	// actor running a single builtin, never pays for it.
+	if vm.locals == nil {
+		vm.locals = make([]values.Value, constants.SIZE_LOCALS_SHARED)
+	}
+
+	if vm.localsTop+slots > len(vm.locals) {
+		return make([]values.Value, slots), noLocalsMark
+	}
+
+	mark := vm.localsTop
+	vm.localsTop += slots
+	locals := vm.locals[mark:vm.localsTop]
+
+	clear(locals)
+
+	return locals, mark
 }
 
 // A loop whose start, end and step are all whole numbers counts in whole numbers,
@@ -516,30 +702,26 @@ func newForState(start, end, step values.Value) (forState, error) {
 
 	if startNum.IsInt() && endNum.IsInt() && stepNum.IsInt() {
 		state.isInt = true
-		state.i, _ = startNum.AsInt()
-		state.end, _ = endNum.AsInt()
-		state.step, _ = stepNum.AsInt()
+		state.intCounter, _ = startNum.AsInt()
+		state.intEnd, _ = endNum.AsInt()
+		state.intStep, _ = stepNum.AsInt()
 
 		return state, nil
 	}
 
-	state.fi = startNum.AsFloat()
-	state.fend = endNum.AsFloat()
-	state.fstep = stepNum.AsFloat()
+	state.floatCounter = startNum.AsFloat()
+	state.floatEnd = endNum.AsFloat()
+	state.floatStep = stepNum.AsFloat()
 
 	return state, nil
 }
 
-func forBound(value values.Value, which string) (*values.Number, error) {
-	num, ok := value.(*values.Number)
-
-	if !ok {
-		posStart, posEnd := value.GetPos()
-
-		return nil, errors.NewRTError(posStart, posEnd, which+" value must be a number")
+func forBound(value values.Value, which string) (values.Value, error) {
+	if !value.IsNumber() {
+		return values.Value{}, errors.NewCallError(which + " value must be a number")
 	}
 
-	return num, nil
+	return value, nil
 }
 
 func locate(err error, start, end *errors.Position) error {
@@ -551,33 +733,49 @@ func locate(err error, start, end *errors.Position) error {
 	return err
 }
 
-// binaryOp takes the right operand off the stack first and the left one second,
-// because that is the order they were put there.
-func (vm *VM) binaryOp(span bytecode.Span, op func(values.Value, values.Value) (values.Value, error)) error {
-	right := vm.discard()
-	left := vm.discard()
-
-	result, err := op(left, right)
-
-	if err != nil {
-		return locate(err, span.Start, span.End)
+// left and right are the two operands an operator works on, the left one having
+// been pushed first. They are read in place, and binary writes the result over
+// the left one, so a hot arithmetic op moves nothing on or off the stack beyond
+// that single result.
+func (vm *VM) left() values.Value {
+	if len(vm.stack) < 2 {
+		underflow()
 	}
 
-	vm.push(result.SetPos(span.Start, span.End))
+	return vm.stack[len(vm.stack)-2]
+}
+
+func (vm *VM) right() values.Value {
+	return vm.stack[len(vm.stack)-1]
+}
+
+// The error an operator returns carries no position. The loop puts the position
+// of the instruction on it in one place, once.
+func (vm *VM) binary(result values.Value, opErr error) error {
+	if opErr != nil {
+		return opErr
+	}
+
+	top := len(vm.stack) - 1
+	vm.stack[top-1] = result
+	vm.stack = vm.stack[:top]
 
 	return nil
 }
 
-func (vm *VM) unaryOp(span bytecode.Span, op func(values.Value) (values.Value, error)) error {
-	result, err := op(vm.discard())
-
-	if err != nil {
-		return locate(err, span.Start, span.End)
+func (vm *VM) unary(result values.Value, opErr error) error {
+	if opErr != nil {
+		return opErr
 	}
 
-	vm.push(result.SetPos(span.Start, span.End))
+	vm.stack[len(vm.stack)-1] = result
 
 	return nil
+}
+
+//go:noinline
+func underflow() {
+	errors.ModenaPanic("stack underflow")
 }
 
 func (vm *VM) push(value values.Value) {
@@ -587,7 +785,7 @@ func (vm *VM) push(value values.Value) {
 // A broken chunk fails as a Modena error rather than as a bare Go index panic.
 func (vm *VM) discard() values.Value {
 	if len(vm.stack) == 0 {
-		bytecode.ModenaPanic("stack underflow")
+		underflow()
 	}
 
 	top := len(vm.stack) - 1
@@ -599,7 +797,7 @@ func (vm *VM) discard() values.Value {
 
 func (vm *VM) peek() values.Value {
 	if len(vm.stack) == 0 {
-		bytecode.ModenaPanic("stack underflow")
+		underflow()
 	}
 
 	return vm.stack[len(vm.stack)-1]

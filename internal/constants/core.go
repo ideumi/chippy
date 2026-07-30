@@ -37,11 +37,13 @@ const (
 	NUM_FAL = 0
 	NUM_TRU = 1
 
-	RT_ERROR_TITLE    = "Runtime Error"
-	PANIC_ERROR_TITLE = "Panic"
-	E_INVALID_SYNTAX  = "Syntax Error"
-	E_ILLEGAL_CHAR    = "Illegal Character"
-	E_EXPECTED_CHAR   = "Expected Character"
-	E_CYCLIC_VALUE    = "A value cannot contain itself"
-	E_VALUE_TOO_DEEP  = "Value is nested too deeply to process"
+	RT_ERROR_TITLE      = "Runtime Error"
+	PANIC_ERROR_TITLE   = "Panic"
+	DAMAGED_ERROR_TITLE = "Damaged Program"
+	E_INVALID_SYNTAX    = "Syntax Error"
+	E_ILLEGAL_CHAR      = "Illegal Character"
+	E_EXPECTED_CHAR     = "Expected Character"
+	E_CYCLIC_VALUE      = "A value cannot contain itself"
+	E_VALUE_TOO_DEEP    = "Value is nested too deeply"
+	E_DAMAGED_PROGRAM   = "This program is damaged"
 )

@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/constants/limits.go
+ * Modena - internal/constants/limits.go
  *
  */
 

@@ -4,11 +4,11 @@ Bytecode holds the instructions the compiler produced, together with everything 
 
 You can compile source code to a bytecode file by using ''chippy compile <source>'', or by setting ''Compile'' in a ''combine.chp'' file (see ''chippy doc combine'').
 
-You can see the instructions the compiler produces by disassembling the bytecode file by using ''chippy disasm <file>''.
+You can see the instructions the compiler produces by disassembling a bytecode file by using ''chippy disasm <file>''.
 
 *The File format*
 
-The Chippy bytecode file format is custom and encodes Chippy / Modena bytecode alongside some identifying and supporting data. It is intentionally kept minimal and 1:1 hash reproducible, this means that the same code, on the same version of Chippy, will give you a binary that is byte identical each time. The file format is handled by the Modena serializer.
+The Chippy bytecode file format is custom and encodes Chippy / Modena bytecode alongside some identifying and supporting data. It is intentionally kept minimal and 1:1 hash reproducible, this means that the same code, on the same version of Chippy, will give you a binary that is byte identical each time. The source file name is part of what is written, so compiling identical code under a different file name gives you a different binary. The file format is handled by the Modena serializer.
 
 '''
 +-----------------------------------------------+
@@ -25,7 +25,8 @@ The Chippy bytecode file format is custom and encodes Chippy / Modena bytecode a
 |    names            globals referred to       |
 |    slot count       locals per call frame     |
 |    local names      for diagnostics           |
-|    functions        a nested chunk each       |
+|    functions        name, arity, upvalues     |
+|                     and a nested chunk each   |
 |    line table       offset to file and line   |
 |                                               |
 +-----------------------------------------------+
@@ -34,7 +35,16 @@ shebang        -->  part of the format, this is written unless the ''AddShebang 
 magic          -->  ''0xF8 CHIPPY 0xFF''
 format version -->  in case the format the bytecode serializer produces ever needs to change, this indicates the file format version
 chunk          -->  the code, and everything the code refers to
+constants      -->  only numbers and strings are stored, lists, maps and bytes are built by the instructions themselves when the program runs
 '''
+
+*Damaged Files*
+
+A bytecode file is not checked before it runs.
+
+The engine makes a good faith effort to eliminate a large portion of potential file corruption cases with basic checks, but by design, cannot catch them all, since this would be impossible outside of simulating (somehow) the entire program before it runs.
+
+The best way to deal with this once it occurs is to recombine / recompile your binary from source code.
 
 *Recommended Reading*
 

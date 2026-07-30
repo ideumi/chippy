@@ -273,42 +273,42 @@ func extractCombineConfig(ctx values.Ctx) CombineConfig {
 	config := CombineConfig{}
 
 	// Extract string variables
-	if val := ctx.Globals.GetByName(constants.CONFIG_PROJECT); val != nil {
-		if str, ok := val.(*values.String); ok {
+	if val := ctx.Globals.GetByName(constants.CONFIG_PROJECT); val.IsSet() {
+		if str, ok := values.AsString(val); ok {
 			config.Project = str.Value
 		}
 	}
 
-	if val := ctx.Globals.GetByName(constants.CONFIG_VERSION); val != nil {
-		if str, ok := val.(*values.String); ok {
+	if val := ctx.Globals.GetByName(constants.CONFIG_VERSION); val.IsSet() {
+		if str, ok := values.AsString(val); ok {
 			config.Version = str.Value
 		}
 	}
 
-	if val := ctx.Globals.GetByName(constants.CONFIG_LICENCE); val != nil {
-		if str, ok := val.(*values.String); ok {
+	if val := ctx.Globals.GetByName(constants.CONFIG_LICENCE); val.IsSet() {
+		if str, ok := values.AsString(val); ok {
 			config.Licence = str.Value
 		}
 	}
 
-	if val := ctx.Globals.GetByName(constants.CONFIG_OUTPUT); val != nil {
-		if str, ok := val.(*values.String); ok {
+	if val := ctx.Globals.GetByName(constants.CONFIG_OUTPUT); val.IsSet() {
+		if str, ok := values.AsString(val); ok {
 			config.Output = str.Value
 		}
 	}
 
 	// Extract source entry point
-	if val := ctx.Globals.GetByName(constants.CONFIG_SOURCE); val != nil {
-		if str, ok := val.(*values.String); ok {
+	if val := ctx.Globals.GetByName(constants.CONFIG_SOURCE); val.IsSet() {
+		if str, ok := values.AsString(val); ok {
 			config.Source = str.Value
 		}
 	}
 
 	// Extract search paths
-	if val := ctx.Globals.GetByName(constants.CONFIG_PATHS); val != nil {
-		if list, ok := val.(*values.List); ok {
+	if val := ctx.Globals.GetByName(constants.CONFIG_PATHS); val.IsSet() {
+		if list, ok := values.AsList(val); ok {
 			for _, elem := range list.Elements {
-				if str, ok := elem.(*values.String); ok {
+				if str, ok := values.AsString(elem); ok {
 					config.Paths = append(config.Paths, str.Value)
 				}
 			}
@@ -316,10 +316,10 @@ func extractCombineConfig(ctx values.Ctx) CombineConfig {
 	}
 
 	// Extract external dependencies
-	if val := ctx.Globals.GetByName(constants.CONFIG_EXTERNAL); val != nil {
-		if list, ok := val.(*values.List); ok {
+	if val := ctx.Globals.GetByName(constants.CONFIG_EXTERNAL); val.IsSet() {
+		if list, ok := values.AsList(val); ok {
 			for _, elem := range list.Elements {
-				if str, ok := elem.(*values.String); ok {
+				if str, ok := values.AsString(elem); ok {
 					config.External = append(config.External, str.Value)
 				}
 			}
@@ -327,28 +327,20 @@ func extractCombineConfig(ctx values.Ctx) CombineConfig {
 	}
 
 	// Flags
-	if val := ctx.Globals.GetByName(constants.CONFIG_STRIP_COMMENTS); val != nil {
-		if num, ok := val.(*values.Number); ok {
-			config.StripComments = num.IsTrue()
-		}
+	if val := ctx.Globals.GetByName(constants.CONFIG_STRIP_COMMENTS); val.IsNumber() {
+		config.StripComments = val.IsTrue()
 	}
 
-	if val := ctx.Globals.GetByName(constants.CONFIG_STRIP_WHITESPACE); val != nil {
-		if num, ok := val.(*values.Number); ok {
-			config.StripWhitespace = num.IsTrue()
-		}
+	if val := ctx.Globals.GetByName(constants.CONFIG_STRIP_WHITESPACE); val.IsNumber() {
+		config.StripWhitespace = val.IsTrue()
 	}
 
-	if val := ctx.Globals.GetByName(constants.CONFIG_ADD_SHEBANG); val != nil {
-		if num, ok := val.(*values.Number); ok {
-			config.AddShebang = num.IsTrue()
-		}
+	if val := ctx.Globals.GetByName(constants.CONFIG_ADD_SHEBANG); val.IsNumber() {
+		config.AddShebang = val.IsTrue()
 	}
 
-	if val := ctx.Globals.GetByName(constants.CONFIG_COMPILE); val != nil {
-		if num, ok := val.(*values.Number); ok {
-			config.Compile = num.IsTrue()
-		}
+	if val := ctx.Globals.GetByName(constants.CONFIG_COMPILE); val.IsNumber() {
+		config.Compile = val.IsTrue()
 	}
 
 	return config
@@ -357,6 +349,7 @@ func extractCombineConfig(ctx values.Ctx) CombineConfig {
 func buildDependencyGraph(source string, paths []string, external []string) ([]string, []string, error) {
 	seen := make(map[string]bool)
 	skippedMap := make(map[string]bool)
+
 	var result []string
 
 	// Build external lookup map

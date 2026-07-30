@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/orchestrator/isolate.go
+ * Modena - internal/orchestrator/isolate.go
  *
  */
 
@@ -11,10 +11,21 @@ import (
 )
 
 // transferState remembers each captured variable already copied, so one captured
-// by several functions is copied only once. Cycle handling lives at the point it
-// matters, in isolateBoundaryClosure.
+// by several functions is copied only once, and each list and map already walked,
+// so one that contains itself is walked only once.
 type transferState struct {
-	cells map[*values.Value]*values.Value
+	cells      map[*values.Value]*values.Value
+	containers map[values.Value]bool
+}
+
+func (s *transferState) walked(val values.Value) bool {
+	if s.containers[val] {
+		return true
+	}
+
+	s.containers[val] = true
+
+	return false
 }
 
 // IsolateForTransfer copies the variables every function captured, so the actor
@@ -23,7 +34,8 @@ type transferState struct {
 // one of them is still a single shared variable on the other side.
 func IsolateForTransfer(items ...values.Value) {
 	state := &transferState{
-		cells: make(map[*values.Value]*values.Value),
+		cells:      make(map[*values.Value]*values.Value),
+		containers: make(map[values.Value]bool),
 	}
 
 	for _, item := range items {
@@ -32,15 +44,30 @@ func IsolateForTransfer(items ...values.Value) {
 }
 
 func isolateValue(val values.Value, state *transferState) {
-	switch typed := val.(type) {
-	case values.BoundaryClosure:
-		isolateBoundaryClosure(typed, state)
-	case *values.List:
-		for _, element := range typed.Elements {
+	if closure, ok := values.AsBoundaryClosure(val); ok {
+		isolateBoundaryClosure(closure, state)
+
+		return
+	}
+
+	if list, ok := values.AsList(val); ok {
+		if state.walked(val) {
+			return
+		}
+
+		for _, element := range list.Elements {
 			isolateValue(element, state)
 		}
-	case *values.Map:
-		for _, entryVal := range typed.Entries {
+
+		return
+	}
+
+	if mapVal, ok := values.AsMap(val); ok {
+		if state.walked(val) {
+			return
+		}
+
+		for _, entryVal := range mapVal.Entries {
 			isolateValue(entryVal, state)
 		}
 	}
@@ -67,7 +94,7 @@ func isolateBoundaryClosure(fn values.BoundaryClosure, state *transferState) {
 		state.cells[cell] = snap
 		fresh[i] = snap
 
-		if captured := *cell; captured != nil {
+		if captured := *cell; captured.IsSet() {
 			copied := captured.Copy()
 			*snap = copied
 			isolateValue(copied, state)
@@ -94,7 +121,7 @@ func SnapshotUserGlobals(ctx values.Ctx) ([]string, []values.Value) {
 			return
 		}
 
-		if _, isBuiltin := val.(*values.BuiltInFunction); isBuiltin {
+		if _, isBuiltin := values.AsBuiltIn(val); isBuiltin {
 			return
 		}
 
@@ -105,39 +132,22 @@ func SnapshotUserGlobals(ctx values.Ctx) ([]string, []values.Value) {
 	return names, snapshot
 }
 
-// Functions are skipped here. The variables they captured are looked after by
-// IsolateForTransfer and BindValuesToGlobals instead.
-func DeepRebindContext(val values.Value, ctx values.Ctx) {
-	if val == nil {
-		return
-	}
-
-	switch typed := val.(type) {
-	case values.Callable, *values.BuiltInFunction:
-
-	case *values.List:
-		val.SetContext(ctx)
-
-		for _, element := range typed.Elements {
-			DeepRebindContext(element, ctx)
-		}
-
-	case *values.Map:
-		val.SetContext(ctx)
-
-		for _, entryVal := range typed.Entries {
-			DeepRebindContext(entryVal, ctx)
-		}
-
-	default:
-		val.SetContext(ctx)
-	}
-}
-
 // bindState remembers the captured variables already dealt with, so one shared
 // by several functions, or one that leads back to itself, is handled only once.
+// It remembers lists and maps for the same reason.
 type bindState struct {
-	cells map[*values.Value]bool
+	cells      map[*values.Value]bool
+	containers map[values.Value]bool
+}
+
+func (s *bindState) walked(val values.Value) bool {
+	if s.containers[val] {
+		return true
+	}
+
+	s.containers[val] = true
+
+	return false
 }
 
 // Changing which globals a function points at is what makes a function sent to
@@ -148,7 +158,8 @@ func BindValuesToGlobals(items []values.Value, globals values.Ctx) {
 	}
 
 	state := &bindState{
-		cells: make(map[*values.Value]bool),
+		cells:      make(map[*values.Value]bool),
+		containers: make(map[values.Value]bool),
 	}
 
 	for _, item := range items {
@@ -157,11 +168,10 @@ func BindValuesToGlobals(items []values.Value, globals values.Ctx) {
 }
 
 func bindValue(val values.Value, globals values.Ctx, state *bindState) {
-	switch typed := val.(type) {
-	case values.BoundaryClosure:
-		typed.RebindGlobals(globals)
+	if closure, ok := values.AsBoundaryClosure(val); ok {
+		closure.RebindGlobals(globals)
 
-		for _, cell := range typed.TransferCells() {
+		for _, cell := range closure.TransferCells() {
 			if state.cells[cell] {
 				continue
 			}
@@ -170,13 +180,27 @@ func bindValue(val values.Value, globals values.Ctx, state *bindState) {
 			bindValue(*cell, globals, state)
 		}
 
-	case *values.List:
-		for _, element := range typed.Elements {
+		return
+	}
+
+	if list, ok := values.AsList(val); ok {
+		if state.walked(val) {
+			return
+		}
+
+		for _, element := range list.Elements {
 			bindValue(element, globals, state)
 		}
 
-	case *values.Map:
-		for _, entryVal := range typed.Entries {
+		return
+	}
+
+	if mapVal, ok := values.AsMap(val); ok {
+		if state.walked(val) {
+			return
+		}
+
+		for _, entryVal := range mapVal.Entries {
 			bindValue(entryVal, globals, state)
 		}
 	}

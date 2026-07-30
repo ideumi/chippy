@@ -15,7 +15,7 @@ import (
 )
 
 type Function struct {
-	*values.BaseValue
+	values.OperatorDefaults
 	template *bytecode.FunctionTemplate
 	globals  values.Ctx
 	upvalues []*values.Value
@@ -29,29 +29,12 @@ func (f *Function) String() string {
 	return constants.BASE_FUNC_NAME_FN_ANON
 }
 
-func (f *Function) SetPos(posStart, posEnd *errors.Position) values.Value {
-	f.BaseValue.SetPos(posStart, posEnd)
-	return f
-}
-
-func (f *Function) SetContext(ctx values.Ctx) values.Value {
-	f.BaseValue.SetContext(ctx)
-	return f
-}
-
 func (f *Function) Copy() values.Value {
-	start, end := f.GetPos()
-
-	clone := &Function{
-		BaseValue: values.NewBaseValue(),
-		template:  f.template,
-		globals:   f.globals,
-		upvalues:  f.upvalues,
-	}
-	clone.SetPos(start, end)
-	clone.SetContext(f.GetContext())
-
-	return clone
+	return values.NewFunctionValue(&Function{
+		template: f.template,
+		globals:  f.globals,
+		upvalues: f.upvalues,
+	})
 }
 
 func (f *Function) IsTrue() bool {
@@ -76,9 +59,15 @@ func (f *Function) SetTransferCells(cells []*values.Value) {
 
 func (f *Function) RebindGlobals(globals values.Ctx) {
 	f.globals = globals
+
+	template := *f.template
+	template.Chunk = f.template.Chunk.ForInstance()
+	template.Chunk.LinkGlobals(globals.Globals.Schema())
+
+	f.template = &template
 }
 
-func (f *Function) Execute(args []values.Value) *values.RuntimeResult {
+func (f *Function) Execute(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if err := f.checkArity(len(args)); err != nil {

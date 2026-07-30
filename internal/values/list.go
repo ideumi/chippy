@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/values/list.go
+ * Modena - internal/values/list.go
  *
  */
 
@@ -13,15 +13,20 @@ import (
 )
 
 type List struct {
-	*BaseValue
+	OperatorDefaults
 	Elements []Value
 }
 
-func NewList(elements []Value) *List {
-	return &List{
-		BaseValue: NewBaseValue(),
-		Elements:  elements,
-	}
+func newListObject(elements []Value) *List {
+	return &List{Elements: elements}
+}
+
+func NewList(elements []Value) Value {
+	return fromHeap(TagList, newListObject(elements))
+}
+
+func (l *List) wrap() Value {
+	return fromHeap(TagList, l)
 }
 
 func (l *List) String() string {
@@ -29,12 +34,14 @@ func (l *List) String() string {
 }
 
 func (l *List) stringWalk(seen map[Value]bool, depth int) string {
-	if depth > constants.LIMIT_VALUE_NESTING_DEPTH || seen[l] {
+	self := l.wrap()
+
+	if depth > constants.LIMIT_VALUE_NESTING_DEPTH || seen[self] {
 		return "[...]"
 	}
 
-	seen[l] = true
-	defer delete(seen, l)
+	seen[self] = true
+	defer delete(seen, self)
 
 	elements := make([]string, len(l.Elements))
 
@@ -45,24 +52,12 @@ func (l *List) stringWalk(seen map[Value]bool, depth int) string {
 	return "[" + strings.Join(elements, ", ") + "]"
 }
 
-func (l *List) SetPos(posStart, posEnd *errors.Position) Value {
-	l.BaseValue.SetPos(posStart, posEnd)
-
-	return l
-}
-
-func (l *List) SetContext(ctx Ctx) Value {
-	l.BaseValue.SetContext(ctx)
-
-	return l
-}
-
 func (l *List) Copy() Value {
 	return l.copyWalk(map[Value]bool{}, 0)
 }
 
 func (l *List) copyWalk(seen map[Value]bool, depth int) Value {
-	defer EnterWalk(l, seen, depth)()
+	defer EnterWalk(l.wrap(), seen, depth)()
 
 	newElements := make([]Value, len(l.Elements))
 
@@ -70,22 +65,14 @@ func (l *List) copyWalk(seen map[Value]bool, depth int) Value {
 		newElements[i] = walkCopy(element, seen, depth+1)
 	}
 
-	copy := NewList(newElements)
-	copy.SetPos(l.posStart, l.posEnd)
-	copy.SetContext(l.context)
-
-	return copy
+	return NewList(newElements)
 }
 
-func (l *List) ShallowCopy() *List {
+func (l *List) shallowCopy() *List {
 	newElements := make([]Value, len(l.Elements))
 	copy(newElements, l.Elements)
 
-	result := NewList(newElements)
-	result.SetPos(l.posStart, l.posEnd)
-	result.SetContext(l.context)
-
-	return result
+	return newListObject(newElements)
 }
 
 func (l *List) IsTrue() bool {
@@ -93,67 +80,61 @@ func (l *List) IsTrue() bool {
 }
 
 func (l *List) AddedTo(other Value) (Value, error) {
-	if otherList, ok := other.(*List); ok {
-		newList := l.ShallowCopy()
+	if otherList, ok := AsList(other); ok {
+		newList := l.shallowCopy()
 		newList.Elements = append(newList.Elements, otherList.Elements...)
 
-		return newList, nil
+		return newList.wrap(), nil
 	}
 
-	return nil, IllegalOperation()
+	return Value{}, IllegalOperation()
 }
 
 func (l *List) SubbedBy(other Value) (Value, error) {
-	if otherNum, ok := other.(*Number); ok {
-		if !otherNum.IsInt() {
-			return nil, errors.NewCallError(
-				"Index must be an integer")
-
-		}
-
-		newList := l.ShallowCopy()
-		index := int(otherNum.iVal)
-
-		if index < 1 || index > len(newList.Elements) {
-			return nil, errors.NewCallError(
-				"Element at this index could not be removed from list because index is out of bounds")
-
-		}
-
-		newList.Elements = append(newList.Elements[:index-1], newList.Elements[index:]...)
-
-		return newList, nil
+	if !other.IsNumber() {
+		return Value{}, IllegalOperation()
 	}
 
-	return nil, IllegalOperation()
+	if !other.IsInt() {
+		return Value{}, errors.NewCallError("Index must be an integer")
+	}
+
+	newList := l.shallowCopy()
+	position, _ := other.AsInt()
+	index := int(position)
+
+	if index < 1 || index > len(newList.Elements) {
+		return Value{}, errors.NewCallError(
+			"Element at this index could not be removed from list because index is out of bounds")
+	}
+
+	newList.Elements = append(newList.Elements[:index-1], newList.Elements[index:]...)
+
+	return newList.wrap(), nil
 }
 
 func (l *List) MultedBy(other Value) (Value, error) {
-	if otherNum, ok := other.(*Number); ok {
-		if !otherNum.IsInt() {
-			return nil, errors.NewCallError(
-				"Repeat count must be an integer")
-
-		}
-
-		if otherNum.iVal < 0 {
-			return nil, errors.NewCallError(
-				"Cannot repeat list negative times")
-
-		}
-
-		newElements := []Value{}
-		for i := int64(0); i < otherNum.iVal; i++ {
-			newElements = append(newElements, l.Elements...)
-		}
-
-		result := NewList(newElements)
-		result.SetContext(l.context)
-
-		return result, nil
+	if !other.IsNumber() {
+		return Value{}, IllegalOperation()
 	}
 
-	return nil, IllegalOperation()
+	if !other.IsInt() {
+		return Value{}, errors.NewCallError("Repeat count must be an integer")
+	}
+
+	count, _ := other.AsInt()
+
+	if count < 0 {
+		return Value{}, errors.NewCallError("Cannot repeat list negative times")
+	}
+
+	newElements := []Value{}
+
+	for i := int64(0); i < count; i++ {
+		newElements = append(newElements, l.Elements...)
+	}
+
+	return NewList(newElements), nil
 }
 
 func (l *List) GetComparisonEe(other Value) (Value, error) {
@@ -161,82 +142,63 @@ func (l *List) GetComparisonEe(other Value) (Value, error) {
 }
 
 func (l *List) eqWalk(other Value, seen map[Value]bool, depth int) (Value, error) {
-	defer EnterWalk(l, seen, depth)()
+	leave, err := enterWalk(l.wrap(), seen, depth)
 
-	if otherList, ok := other.(*List); ok {
-		result := constants.NUM_TRU
-
-		if len(l.Elements) != len(otherList.Elements) {
-			result = constants.NUM_FAL
-		} else {
-			for i, element := range l.Elements {
-				otherElement := otherList.Elements[i]
-
-				if element == nil && otherElement == nil {
-					continue
-				}
-
-				if element == nil || otherElement == nil {
-					result = constants.NUM_FAL
-					break
-				}
-
-				comparison, err := walkEqual(element, otherElement, seen, depth+1)
-				if err != nil {
-					return nil, err
-				}
-
-				if compNum, ok := comparison.(*Number); ok {
-					if !compNum.IsTrue() {
-						result = constants.NUM_FAL
-						break
-					}
-				}
-			}
-		}
-
-		return NewNumber(result).SetContext(l.context), nil
+	if err != nil {
+		return Value{}, err
 	}
 
-	return nil, IllegalOperation()
+	defer leave()
+
+	otherList, ok := AsList(other)
+
+	if !ok {
+		return Value{}, IllegalOperation()
+	}
+
+	if len(l.Elements) != len(otherList.Elements) {
+		return Bool(false), nil
+	}
+
+	for i, element := range l.Elements {
+		otherElement := otherList.Elements[i]
+
+		if element.IsUnset() && otherElement.IsUnset() {
+			continue
+		}
+
+		if element.IsUnset() || otherElement.IsUnset() {
+			return Bool(false), nil
+		}
+
+		comparison, err := walkEqual(element, otherElement, seen, depth+1)
+
+		if err != nil {
+			return Value{}, err
+		}
+
+		if !comparison.IsTrue() {
+			return Bool(false), nil
+		}
+	}
+
+	return Bool(true), nil
 }
 
 func (l *List) GetComparisonNe(other Value) (Value, error) {
 	comparison, err := l.GetComparisonEe(other)
 
 	if err != nil {
-		return nil, err
+		return Value{}, err
 	}
 
-	if compNum, ok := comparison.(*Number); ok {
-		result := constants.NUM_TRU
-
-		if compNum.IsTrue() {
-			result = constants.NUM_FAL
-		}
-
-		return NewNumber(result).SetContext(l.context), nil
-	}
-
-	return nil, IllegalOperation()
+	return Bool(!comparison.IsTrue()), nil
 }
 
 func (l *List) Notted() (Value, error) {
-	result := constants.NUM_TRU
-
-	if l.IsTrue() {
-		result = constants.NUM_FAL
-	}
-
-	return NewNumber(result).SetContext(l.context), nil
+	return Bool(!l.IsTrue()), nil
 }
 
 func (l *List) XoredBy(other Value) (Value, error) {
-	result := constants.NUM_FAL
-
-	if l.IsTrue() != other.IsTrue() {
-		result = constants.NUM_TRU
-	}
-
-	return NewNumber(result).SetContext(l.context), nil
+	return Bool(l.IsTrue() != other.IsTrue()), nil
 }

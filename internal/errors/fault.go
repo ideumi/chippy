@@ -1,10 +1,10 @@
 /*
  *
- * Modena - internal/bytecode/fault.go
+ * Modena - internal/errors/fault.go
  *
  */
 
-package bytecode
+package errors
 
 import "fmt"
 

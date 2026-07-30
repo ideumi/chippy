@@ -1,15 +1,12 @@
 /*
  *
- * Modena - internal/globals/schema.go
+ * Modena - internal/context/schema.go
  *
  */
 
-package globals
-
-import "sync"
+package context
 
 type Schema struct {
-	mu     sync.RWMutex
 	byName map[string]int
 	names  []string
 }
@@ -19,9 +16,6 @@ func NewSchema() *Schema {
 }
 
 func (s *Schema) Intern(name string) int {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
 	if slot, ok := s.byName[name]; ok {
 		return slot
 	}
@@ -34,18 +28,12 @@ func (s *Schema) Intern(name string) int {
 }
 
 func (s *Schema) SlotOf(name string) (int, bool) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
 	slot, ok := s.byName[name]
 
 	return slot, ok
 }
 
 func (s *Schema) NameOf(slot int) string {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
 	if slot < 0 || slot >= len(s.names) {
 		return ""
 	}

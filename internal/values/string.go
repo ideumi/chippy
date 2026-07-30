@@ -1,50 +1,73 @@
 /*
  *
- * RR2 - internal/values/string.go
+ * Modena - internal/values/string.go
  *
  */
 
 package values
 
 import (
-	"chip-go/internal/constants"
 	"chip-go/internal/errors"
 	"fmt"
 	"strings"
 )
 
 type String struct {
-	*BaseValue
+	OperatorDefaults
 	Value string
 }
 
-func NewString(value string) *String {
-	return &String{
-		BaseValue: NewBaseValue(),
-		Value:     value,
+func NewString(value string) Value {
+	return fromHeap(TagText, &String{Value: value})
+}
+
+func (s *String) RuneAt(index int) (string, bool) {
+	if index < 1 {
+		return "", false
 	}
+
+	for _, char := range s.Value {
+		index--
+
+		if index == 0 {
+			return string(char), true
+		}
+	}
+
+	return "", false
+}
+
+func (s *String) RuneSlice(start, end int) string {
+	from, to := -1, len(s.Value)
+	index := 0
+
+	for offset := range s.Value {
+		index++
+
+		if index == start {
+			from = offset
+		}
+
+		if index == end+1 {
+			to = offset
+
+			break
+		}
+	}
+
+	if from < 0 {
+		return ""
+	}
+
+	return s.Value[from:to]
 }
 
 func (s *String) String() string {
 	return fmt.Sprintf("\"%s\"", s.Value)
 }
 
-func (s *String) SetPos(posStart, posEnd *errors.Position) Value {
-	s.BaseValue.SetPos(posStart, posEnd)
-	return s
-}
-
-func (s *String) SetContext(ctx Ctx) Value {
-	s.BaseValue.SetContext(ctx)
-	return s
-}
-
 func (s *String) Copy() Value {
-	copy := NewString(s.Value)
-	copy.SetPos(s.posStart, s.posEnd)
-	copy.SetContext(s.context)
-
-	return copy
+	return NewString(s.Value)
 }
 
 func (s *String) IsTrue() bool {
@@ -52,83 +75,51 @@ func (s *String) IsTrue() bool {
 }
 
 func (s *String) AddedTo(other Value) (Value, error) {
-	if otherStr, ok := other.(*String); ok {
-		result := NewString(s.Value + otherStr.Value)
-		result.SetContext(s.context)
-
-		return result, nil
+	if otherStr, ok := AsString(other); ok {
+		return NewString(s.Value + otherStr.Value), nil
 	}
 
-	return nil, IllegalOperation()
+	return Value{}, IllegalOperation()
 }
 
 func (s *String) MultedBy(other Value) (Value, error) {
-	if otherNum, ok := other.(*Number); ok {
-		if !otherNum.IsInt() {
-			return nil, errors.NewCallError(
-				"Repeat count must be an integer")
-
-		}
-
-		if otherNum.iVal < 0 {
-			return nil, errors.NewCallError(
-				"Cannot repeat string negative times")
-
-		}
-
-		result := NewString(strings.Repeat(s.Value, int(otherNum.iVal)))
-		result.SetContext(s.context)
-
-		return result, nil
+	if !other.IsNumber() {
+		return Value{}, IllegalOperation()
 	}
 
-	return nil, IllegalOperation()
+	if !other.IsInt() {
+		return Value{}, errors.NewCallError("Repeat count must be an integer")
+	}
+
+	count, _ := other.AsInt()
+
+	if count < 0 {
+		return Value{}, errors.NewCallError("Cannot repeat string negative times")
+	}
+
+	return NewString(strings.Repeat(s.Value, int(count))), nil
 }
 
 func (s *String) GetComparisonEe(other Value) (Value, error) {
-	if otherStr, ok := other.(*String); ok {
-		result := constants.NUM_FAL
-
-		if s.Value == otherStr.Value {
-			result = constants.NUM_TRU
-		}
-
-		return NewNumber(result).SetContext(s.context), nil
+	if otherStr, ok := AsString(other); ok {
+		return Bool(s.Value == otherStr.Value), nil
 	}
 
-	return nil, IllegalOperation()
+	return Value{}, IllegalOperation()
 }
 
 func (s *String) GetComparisonNe(other Value) (Value, error) {
-	if otherStr, ok := other.(*String); ok {
-		result := constants.NUM_FAL
-
-		if s.Value != otherStr.Value {
-			result = constants.NUM_TRU
-		}
-
-		return NewNumber(result).SetContext(s.context), nil
+	if otherStr, ok := AsString(other); ok {
+		return Bool(s.Value != otherStr.Value), nil
 	}
 
-	return nil, IllegalOperation()
+	return Value{}, IllegalOperation()
 }
 
 func (s *String) Notted() (Value, error) {
-	result := constants.NUM_TRU
-
-	if s.IsTrue() {
-		result = constants.NUM_FAL
-	}
-
-	return NewNumber(result).SetContext(s.context), nil
+	return Bool(!s.IsTrue()), nil
 }
 
 func (s *String) XoredBy(other Value) (Value, error) {
-	result := constants.NUM_FAL
-
-	if s.IsTrue() != other.IsTrue() {
-		result = constants.NUM_TRU
-	}
-
-	return NewNumber(result).SetContext(s.context), nil
+	return Bool(s.IsTrue() != other.IsTrue()), nil
 }

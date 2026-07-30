@@ -1,6 +1,6 @@
 /*
  *
- * Modena - internal/disassembler/disassembler.go
+ * Modena - internal/bytecode/disassembler/disassembler.go
  *
  */
 

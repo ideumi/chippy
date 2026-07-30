@@ -60,9 +60,8 @@ const (
 	OpBXor Op = 40
 
 	OpNeg  Op = 41
-	OpPos  Op = 42
-	OpNot  Op = 43
-	OpBNot Op = 44
+	OpNot  Op = 42
+	OpBNot Op = 43
 )
 
 // OperandKind says what the value after an instruction means, so the disassembler
@@ -135,7 +134,6 @@ var OpTable = map[Op]OpInfo{
 	OpBXor: {"OpBXor", OperandNone},
 
 	OpNeg:  {"OpNeg", OperandNone},
-	OpPos:  {"OpPos", OperandNone},
 	OpNot:  {"OpNot", OperandNone},
 	OpBNot: {"OpBNot", OperandNone},
 }

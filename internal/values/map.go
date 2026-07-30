@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/values/map.go
+ * Modena - internal/values/map.go
  *
  */
 
@@ -8,30 +8,21 @@ package values
 
 import (
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"strings"
 )
 
 type Map struct {
-	*BaseValue
+	OperatorDefaults
 	Keys    []string
 	Entries map[string]Value
 }
 
-func NewMap() *Map {
-	return &Map{
-		BaseValue: NewBaseValue(),
-		Keys:      []string{},
-		Entries:   map[string]Value{},
-	}
+func NewMapFromEntries(keys []string, entries map[string]Value) Value {
+	return fromHeap(TagMap, &Map{Keys: keys, Entries: entries})
 }
 
-func NewMapFromEntries(keys []string, entries map[string]Value) *Map {
-	return &Map{
-		BaseValue: NewBaseValue(),
-		Keys:      keys,
-		Entries:   entries,
-	}
+func (m *Map) wrap() Value {
+	return fromHeap(TagMap, m)
 }
 
 func (m *Map) String() string {
@@ -39,12 +30,14 @@ func (m *Map) String() string {
 }
 
 func (m *Map) stringWalk(seen map[Value]bool, depth int) string {
-	if depth > constants.LIMIT_VALUE_NESTING_DEPTH || seen[m] {
+	self := m.wrap()
+
+	if depth > constants.LIMIT_VALUE_NESTING_DEPTH || seen[self] {
 		return "m[...]"
 	}
 
-	seen[m] = true
-	defer delete(seen, m)
+	seen[self] = true
+	defer delete(seen, self)
 
 	pairs := make([]string, len(m.Keys))
 
@@ -57,24 +50,12 @@ func (m *Map) stringWalk(seen map[Value]bool, depth int) string {
 	return "m[" + strings.Join(pairs, ", ") + "]"
 }
 
-func (m *Map) SetPos(posStart, posEnd *errors.Position) Value {
-	m.BaseValue.SetPos(posStart, posEnd)
-
-	return m
-}
-
-func (m *Map) SetContext(ctx Ctx) Value {
-	m.BaseValue.SetContext(ctx)
-
-	return m
-}
-
 func (m *Map) Copy() Value {
 	return m.copyWalk(map[Value]bool{}, 0)
 }
 
 func (m *Map) copyWalk(seen map[Value]bool, depth int) Value {
-	defer EnterWalk(m, seen, depth)()
+	defer EnterWalk(m.wrap(), seen, depth)()
 
 	newKeys := make([]string, len(m.Keys))
 	copy(newKeys, m.Keys)
@@ -84,19 +65,10 @@ func (m *Map) copyWalk(seen map[Value]bool, depth int) Value {
 		newEntries[key] = walkCopy(val, seen, depth+1)
 	}
 
-	result := &Map{
-		BaseValue: NewBaseValue(),
-		Keys:      newKeys,
-		Entries:   newEntries,
-	}
-
-	result.SetPos(m.posStart, m.posEnd)
-	result.SetContext(m.context)
-
-	return result
+	return NewMapFromEntries(newKeys, newEntries)
 }
 
-func (m *Map) ShallowCopy() *Map {
+func (m *Map) shallowCopy() *Map {
 	newKeys := make([]string, len(m.Keys))
 	copy(newKeys, m.Keys)
 
@@ -106,16 +78,7 @@ func (m *Map) ShallowCopy() *Map {
 		newEntries[key] = val
 	}
 
-	result := &Map{
-		BaseValue: NewBaseValue(),
-		Keys:      newKeys,
-		Entries:   newEntries,
-	}
-
-	result.SetPos(m.posStart, m.posEnd)
-	result.SetContext(m.context)
-
-	return result
+	return &Map{Keys: newKeys, Entries: newEntries}
 }
 
 func (m *Map) IsTrue() bool {
@@ -130,12 +93,12 @@ func (m *Map) Set(key string, val Value) {
 	m.Entries[key] = val
 }
 
-func (m *Map) MapRemove(key string) (*Map, bool) {
+func (m *Map) mapRemove(key string) (*Map, bool) {
 	if _, exists := m.Entries[key]; !exists {
 		return nil, false
 	}
 
-	newMap := m.ShallowCopy()
+	newMap := m.shallowCopy()
 	delete(newMap.Entries, key)
 	newKeys := make([]string, 0, len(newMap.Keys)-1)
 
@@ -151,35 +114,35 @@ func (m *Map) MapRemove(key string) (*Map, bool) {
 }
 
 func (m *Map) AddedTo(other Value) (Value, error) {
-	otherMap, ok := other.(*Map)
+	otherMap, ok := AsMap(other)
 
 	if !ok {
-		return nil, IllegalOperation()
+		return Value{}, IllegalOperation()
 	}
 
-	result := m.ShallowCopy()
+	result := m.shallowCopy()
 
 	for _, key := range otherMap.Keys {
 		result.Set(key, otherMap.Entries[key])
 	}
 
-	return result, nil
+	return result.wrap(), nil
 }
 
 func (m *Map) SubbedBy(other Value) (Value, error) {
-	otherStr, ok := other.(*String)
+	otherStr, ok := AsString(other)
 
 	if !ok {
-		return nil, IllegalOperation()
+		return Value{}, IllegalOperation()
 	}
 
-	newMap, found := m.MapRemove(otherStr.Value)
+	newMap, found := m.mapRemove(otherStr.Value)
 
 	if !found {
-		return NewString(constants.STR_ERR).SetContext(m.context), nil
+		return NewString(constants.STR_ERR), nil
 	}
 
-	return newMap, nil
+	return newMap.wrap(), nil
 }
 
 func (m *Map) GetComparisonEe(other Value) (Value, error) {
@@ -187,85 +150,67 @@ func (m *Map) GetComparisonEe(other Value) (Value, error) {
 }
 
 func (m *Map) eqWalk(other Value, seen map[Value]bool, depth int) (Value, error) {
-	defer EnterWalk(m, seen, depth)()
+	leave, err := enterWalk(m.wrap(), seen, depth)
 
-	otherMap, ok := other.(*Map)
+	if err != nil {
+		return Value{}, err
+	}
+
+	defer leave()
+
+	otherMap, ok := AsMap(other)
 
 	if !ok {
-		return NewNumber(constants.NUM_FAL).SetContext(m.context), nil
+		return Value{}, IllegalOperation()
 	}
 
 	if len(m.Keys) != len(otherMap.Keys) {
-		return NewNumber(constants.NUM_FAL).SetContext(m.context), nil
+		return Bool(false), nil
 	}
 
 	for key, val := range m.Entries {
 		otherVal, exists := otherMap.Entries[key]
 
 		if !exists {
-			return NewNumber(constants.NUM_FAL).SetContext(m.context), nil
+			return Bool(false), nil
 		}
 
-		if val == nil && otherVal == nil {
+		if val.IsUnset() && otherVal.IsUnset() {
 			continue
 		}
 
-		if val == nil || otherVal == nil {
-			return NewNumber(constants.NUM_FAL).SetContext(m.context), nil
+		if val.IsUnset() || otherVal.IsUnset() {
+			return Bool(false), nil
 		}
 
 		comparison, err := walkEqual(val, otherVal, seen, depth+1)
 
 		if err != nil {
-			return nil, err
+			return Value{}, err
 		}
 
-		if compNum, ok := comparison.(*Number); ok {
-			if !compNum.IsTrue() {
-				return NewNumber(constants.NUM_FAL).SetContext(m.context), nil
-			}
+		if !comparison.IsTrue() {
+			return Bool(false), nil
 		}
 	}
 
-	return NewNumber(constants.NUM_TRU).SetContext(m.context), nil
+	return Bool(true), nil
 }
 
 func (m *Map) GetComparisonNe(other Value) (Value, error) {
 	comparison, err := m.GetComparisonEe(other)
 
 	if err != nil {
-		return nil, err
+		return Value{}, err
 	}
 
-	if compNum, ok := comparison.(*Number); ok {
-		result := constants.NUM_TRU
-
-		if compNum.IsTrue() {
-			result = constants.NUM_FAL
-		}
-
-		return NewNumber(result).SetContext(m.context), nil
-	}
-
-	return nil, IllegalOperation()
+	return Bool(!comparison.IsTrue()), nil
 }
 
 func (m *Map) Notted() (Value, error) {
-	result := constants.NUM_TRU
-
-	if m.IsTrue() {
-		result = constants.NUM_FAL
-	}
-
-	return NewNumber(result).SetContext(m.context), nil
+	return Bool(!m.IsTrue()), nil
 }
 
 func (m *Map) XoredBy(other Value) (Value, error) {
-	result := constants.NUM_FAL
-
-	if m.IsTrue() != other.IsTrue() {
-		result = constants.NUM_TRU
-	}
-
-	return NewNumber(result).SetContext(m.context), nil
+	return Bool(m.IsTrue() != other.IsTrue()), nil
 }

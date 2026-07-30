@@ -10,6 +10,7 @@ import (
 	"chip-go/internal/builtins"
 	"chip-go/internal/constants"
 	"chip-go/internal/modena"
+	"chip-go/internal/values"
 	"chip-go/thirdparty/readline"
 	"fmt"
 	"os"
@@ -167,12 +168,12 @@ func runREPL(mod *modena.Modena) {
 
 		if err != nil {
 			fmt.Println(err.Error())
-		} else if result != nil {
+		} else if result.IsSet() {
 			// Print result immediately and clear reference for GC
 			fmt.Println(result.String())
 
 			// Clear the result reference immediately after printing
-			result = nil
+			result = values.Value{}
 		}
 	}
 }
@@ -208,11 +209,11 @@ func runCommand(mod *modena.Modena, command string) {
 	}
 
 	// Print result if not null and not empty
-	if result != nil {
+	if result.IsSet() {
 		fmt.Println(result.String())
 
 		// Clear the result reference immediately after printing
-		result = nil
+		result = values.Value{}
 	}
 }
 

@@ -2,7 +2,7 @@
 
 *The Model*
 
-Chippy does not run your program by walking the syntax tree, which is slow. It compiles the program to bytecode first, and a virtual machine then executes that bytecode. The engine behind this is called "Modena", it contains a bytecode compiler, serializer, virtual machine and disassembler.
+Chippy does not run your program by walking the syntax tree, which is slow. It compiles the program to bytecode first, and a virtual machine then executes that bytecode. The engine behind this is called "Modena", it contains a bytecode compiler, serializer, virtual machine and disassembler. The VM is a stack machine.
 
 *Architecture*
 
@@ -30,7 +30,8 @@ The lexer turns the text into tokens, the parser turns the tokens into a syntax 
           |  constants                |
           |  names                    |
           |  functions                |
-          |  line table               |
+          |  local slots              |
+          |  source spans             |
           +-------------+-------------+
                         |
           +-------------+-------------+
@@ -38,7 +39,8 @@ The lexer turns the text into tokens, the parser turns the tokens into a syntax 
           |                           |
           |  value stack              |
           |  call frames              |
-          |  globals                  |
+          |  local slots              |
+          |  global slots             |
           +-------------+-------------+
                         |
           +-------------+-------------+

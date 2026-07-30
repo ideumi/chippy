@@ -7,8 +7,8 @@
 package main
 
 import (
+	"chip-go/internal/bytecode/disassembler"
 	"chip-go/internal/compiler"
-	"chip-go/internal/disassembler"
 	"fmt"
 	"os"
 )
