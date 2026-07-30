@@ -28,6 +28,7 @@ curl -fsSL https://codeberg.org/ideumi/chippy/raw/branch/main/scripts/net-instal
 - Dynamically typed, imperative (procedural) interpreted programming / scripting language
 - Clean, readable syntax with familiar C-like control flow (`if`, `elseif`, `else`, `while`, `for`)
 - Simple data types: numbers, strings, bytes, lists and maps
+- Bytecode compilable and powered by a stack virtual machine
 - UTF-8 native
 - Functions with proper scoping
 - Very fast startup time
@@ -69,9 +70,11 @@ curl -fsSL https://codeberg.org/ideumi/chippy/raw/branch/main/scripts/net-instal
   - GNOME / GTK
   - Vim
   - VSCodium / VSCode
-- Built-in documentation system (`chippy doc`)
+- Built-in documentation system for language features, builtins and source files (`chippy doc`)
+- Built-in formatter (`chippy format`)
 - Build system (`chippy combine`) with dependency resolution and bundling
     - Syntax validation and symbol collision detection
+- Built-in bytecode compiler (`chippy compile`) and disassembler (`chippy disasm`)
 
 **Hello World Sample**
 ```chippy
