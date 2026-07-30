@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/fread.go
+ * Chippy - internal/builtins/fread.go
  *
  */
 

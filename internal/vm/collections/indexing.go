@@ -1,6 +1,6 @@
 /*
  *
- * Modena - internal/vm/collections/indexing.go
+ * Chippy - internal/vm/collections/indexing.go
  *
  */
 

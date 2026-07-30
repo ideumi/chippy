@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/optional/http/base64decode.go
+ * Chippy - internal/optional/http/base64decode.go
  *
  */
 

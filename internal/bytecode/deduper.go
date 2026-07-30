@@ -1,6 +1,6 @@
 /*
  *
- * Modena - internal/bytecode/deduper.go
+ * Chippy - internal/bytecode/deduper.go
  *
  */
 

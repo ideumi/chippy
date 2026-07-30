@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/errors/base.go
+ * Chippy - internal/errors/base.go
  *
  */
 

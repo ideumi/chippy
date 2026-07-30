@@ -1,6 +1,6 @@
 /*
  *
- * Modena - internal/context/schema.go
+ * Chippy - internal/context/schema.go
  *
  */
 

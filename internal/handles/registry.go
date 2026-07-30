@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/handles/registry.go
+ * Chippy - internal/handles/registry.go
  *
  */
 

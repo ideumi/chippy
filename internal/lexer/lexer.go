@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/lexer/lexer.go
+ * Chippy - internal/lexer/lexer.go
  *
  */
 

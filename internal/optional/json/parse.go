@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/optional/json/parse.go
+ * Chippy - internal/optional/json/parse.go
  *
  */
 

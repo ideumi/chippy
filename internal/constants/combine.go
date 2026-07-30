@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/constants/combine.go
+ * Chippy - internal/constants/combine.go
  *
  */
 

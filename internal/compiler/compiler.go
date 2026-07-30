@@ -1,6 +1,6 @@
 /*
  *
- * Modena - internal/compiler/compiler.go
+ * Chippy - internal/compiler/compiler.go
  *
  */
 

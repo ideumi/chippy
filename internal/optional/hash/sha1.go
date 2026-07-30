@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/optional/hash/sha1.go
+ * Chippy - internal/optional/hash/sha1.go
  *
  */
 

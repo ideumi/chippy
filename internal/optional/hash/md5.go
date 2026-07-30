@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/optional/hash/md5.go
+ * Chippy - internal/optional/hash/md5.go
  *
  */
 

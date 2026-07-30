@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/split.go
+ * Chippy - internal/builtins/split.go
  *
  */
 

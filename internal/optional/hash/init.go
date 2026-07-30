@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/optional/hash/init.go
+ * Chippy - internal/optional/hash/init.go
  *
  */
 

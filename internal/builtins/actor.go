@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/actor.go
+ * Chippy - internal/builtins/actor.go
  *
  */
 

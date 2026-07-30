@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/handles/processhandles.go
+ * Chippy - internal/handles/processhandles.go
  *
  */
 

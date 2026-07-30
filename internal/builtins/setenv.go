@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/setenv.go
+ * Chippy - internal/builtins/setenv.go
  *
  */
 

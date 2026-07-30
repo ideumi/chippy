@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/receive.go
+ * Chippy - internal/builtins/receive.go
  *
  */
 

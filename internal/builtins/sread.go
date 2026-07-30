@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/sread.go
+ * Chippy - internal/builtins/sread.go
  *
  */
 

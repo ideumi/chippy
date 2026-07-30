@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/orchestrator/state.go
+ * Chippy - internal/orchestrator/state.go
  *
  */
 

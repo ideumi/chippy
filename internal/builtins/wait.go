@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/wait.go
+ * Chippy - internal/builtins/wait.go
  *
  */
 

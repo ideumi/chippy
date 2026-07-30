@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/error.go
+ * Chippy - internal/builtins/error.go
  *
  */
 

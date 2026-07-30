@@ -1,6 +1,6 @@
 /*
  *
- * Modena - internal/modena/modena.go
+ * Chippy - internal/modena/modena.go
  *
  */
 

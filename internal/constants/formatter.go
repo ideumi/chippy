@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/constants/formatter.go
+ * Chippy - internal/constants/formatter.go
  *
  */
 

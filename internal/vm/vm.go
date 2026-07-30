@@ -1,6 +1,6 @@
 /*
  *
- * Modena - internal/vm/vm.go
+ * Chippy - internal/vm/vm.go
  *
  */
 

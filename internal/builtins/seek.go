@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/seek.go
+ * Chippy - internal/builtins/seek.go
  *
  */
 

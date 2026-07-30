@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/type.go
+ * Chippy - internal/builtins/type.go
  *
  */
 

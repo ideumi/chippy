@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/send.go
+ * Chippy - internal/builtins/send.go
  *
  */
 

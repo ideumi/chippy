@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/getpid.go
+ * Chippy - internal/builtins/getpid.go
  *
  */
 

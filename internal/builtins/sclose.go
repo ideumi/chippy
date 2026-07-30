@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/sclose.go
+ * Chippy - internal/builtins/sclose.go
  *
  */
 

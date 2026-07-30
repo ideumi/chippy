@@ -1,6 +1,6 @@
 /*
  *
- * Modena - internal/bytecode/serializer/write.go
+ * Chippy - internal/bytecode/serializer/write.go
  *
  */
 

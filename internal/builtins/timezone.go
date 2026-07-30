@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/timezone.go
+ * Chippy - internal/builtins/timezone.go
  *
  */
 

@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/tan.go
+ * Chippy - internal/builtins/tan.go
  *
  */
 

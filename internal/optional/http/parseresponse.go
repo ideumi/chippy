@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/optional/http/parseresponse.go
+ * Chippy - internal/optional/http/parseresponse.go
  *
  */
 

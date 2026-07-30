@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/readlink.go
+ * Chippy - internal/builtins/readlink.go
  *
  */
 

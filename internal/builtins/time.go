@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/time.go
+ * Chippy - internal/builtins/time.go
  *
  */
 

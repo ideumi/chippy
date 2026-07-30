@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/optional/json/shared.go
+ * Chippy - internal/optional/json/shared.go
  *
  */
 

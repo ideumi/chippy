@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/sopen.go
+ * Chippy - internal/builtins/sopen.go
  *
  */
 

@@ -1,6 +1,6 @@
 /*
  *
- * Modena - internal/constants/sizes.go
+ * Chippy - internal/constants/sizes.go
  *
  */
 

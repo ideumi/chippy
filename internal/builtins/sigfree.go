@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/sigfree.go
+ * Chippy - internal/builtins/sigfree.go
  *
  */
 

@@ -1,6 +1,6 @@
 /*
  *
- * Modena - internal/values/bytes.go
+ * Chippy - internal/values/bytes.go
  *
  */
 

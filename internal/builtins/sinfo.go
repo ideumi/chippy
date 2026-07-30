@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/sinfo.go
+ * Chippy - internal/builtins/sinfo.go
  *
  */
 

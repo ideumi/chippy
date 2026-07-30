@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/popen.go
+ * Chippy - internal/builtins/popen.go
  *
  */
 

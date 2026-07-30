@@ -1,6 +1,6 @@
 /*
  *
- * Modena - internal/vm/collections/build.go
+ * Chippy - internal/vm/collections/build.go
  *
  */
 

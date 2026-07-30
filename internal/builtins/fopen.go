@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/fopen.go
+ * Chippy - internal/builtins/fopen.go
  *
  */
 

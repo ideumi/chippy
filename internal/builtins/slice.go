@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/slice.go
+ * Chippy - internal/builtins/slice.go
  *
  */
 

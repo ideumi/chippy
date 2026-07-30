@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/optional/tls/tlsupgrade.go
+ * Chippy - internal/optional/tls/tlsupgrade.go
  *
  */
 

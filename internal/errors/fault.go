@@ -1,6 +1,6 @@
 /*
  *
- * Modena - internal/errors/fault.go
+ * Chippy - internal/errors/fault.go
  *
  */
 

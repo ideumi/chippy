@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/handles/sockethandles.go
+ * Chippy - internal/handles/sockethandles.go
  *
  */
 

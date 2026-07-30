@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/isok.go
+ * Chippy - internal/builtins/isok.go
  *
  */
 

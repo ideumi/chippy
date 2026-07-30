@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/orchestrator/orchestrator.go
+ * Chippy - internal/orchestrator/orchestrator.go
  *
  */
 

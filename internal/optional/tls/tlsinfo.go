@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/optional/tls/tlsinfo.go
+ * Chippy - internal/optional/tls/tlsinfo.go
  *
  */
 

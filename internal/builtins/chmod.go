@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/chmod.go
+ * Chippy - internal/builtins/chmod.go
  *
  */
 

@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/lower.go
+ * Chippy - internal/builtins/lower.go
  *
  */
 

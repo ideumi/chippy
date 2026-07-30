@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/optional/http/formatrequest.go
+ * Chippy - internal/optional/http/formatrequest.go
  *
  */
 

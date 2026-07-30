@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/stat.go
+ * Chippy - internal/builtins/stat.go
  *
  */
 

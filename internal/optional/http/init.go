@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/optional/http/init.go
+ * Chippy - internal/optional/http/init.go
  *
  */
 

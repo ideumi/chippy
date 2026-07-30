@@ -1,6 +1,6 @@
 /*
  *
- * Modena - internal/values/list.go
+ * Chippy - internal/values/list.go
  *
  */
 

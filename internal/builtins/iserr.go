@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/iserr.go
+ * Chippy - internal/builtins/iserr.go
  *
  */
 

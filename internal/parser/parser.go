@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/parser/parser.go
+ * Chippy - internal/parser/parser.go
  *
  */
 

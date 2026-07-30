@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/copy.go
+ * Chippy - internal/builtins/copy.go
  *
  */
 

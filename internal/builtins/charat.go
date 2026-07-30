@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/charat.go
+ * Chippy - internal/builtins/charat.go
  *
  */
 

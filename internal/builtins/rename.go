@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/rename.go
+ * Chippy - internal/builtins/rename.go
  *
  */
 

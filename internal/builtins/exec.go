@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/exec.go
+ * Chippy - internal/builtins/exec.go
  *
  */
 

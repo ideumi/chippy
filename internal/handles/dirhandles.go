@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/handles/dirhandles.go
+ * Chippy - internal/handles/dirhandles.go
  *
  */
 

@@ -1,6 +1,6 @@
 /*
  *
- * Modena - internal/context/globals.go
+ * Chippy - internal/context/globals.go
  *
  */
 

@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/swrite.go
+ * Chippy - internal/builtins/swrite.go
  *
  */
 

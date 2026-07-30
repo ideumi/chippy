@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/getterm.go
+ * Chippy - internal/builtins/getterm.go
  *
  */
 

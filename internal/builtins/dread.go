@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/dread.go
+ * Chippy - internal/builtins/dread.go
  *
  */
 

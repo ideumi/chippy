@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/optional/json/stringify.go
+ * Chippy - internal/optional/json/stringify.go
  *
  */
 

@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/optional/http/dechunk.go
+ * Chippy - internal/optional/http/dechunk.go
  *
  */
 

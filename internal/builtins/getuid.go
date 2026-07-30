@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/getuid.go
+ * Chippy - internal/builtins/getuid.go
  *
  */
 

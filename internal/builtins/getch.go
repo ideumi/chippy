@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/getch.go
+ * Chippy - internal/builtins/getch.go
  *
  */
 

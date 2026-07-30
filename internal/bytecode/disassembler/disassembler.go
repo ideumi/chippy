@@ -1,6 +1,6 @@
 /*
  *
- * Modena - internal/bytecode/disassembler/disassembler.go
+ * Chippy - internal/bytecode/disassembler/disassembler.go
  *
  */
 

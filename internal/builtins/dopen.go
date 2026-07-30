@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/dopen.go
+ * Chippy - internal/builtins/dopen.go
  *
  */
 

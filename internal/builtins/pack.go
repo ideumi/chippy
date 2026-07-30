@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/pack.go
+ * Chippy - internal/builtins/pack.go
  *
  */
 

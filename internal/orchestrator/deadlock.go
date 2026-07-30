@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/orchestrator/deadlock.go
+ * Chippy - internal/orchestrator/deadlock.go
  *
  */
 

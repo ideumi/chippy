@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/constants/core.go
+ * Chippy - internal/constants/core.go
  *
  */
 

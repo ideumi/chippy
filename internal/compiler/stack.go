@@ -1,6 +1,6 @@
 /*
  *
- * Modena - internal/compiler/stack.go
+ * Chippy - internal/compiler/stack.go
  *
  */
 

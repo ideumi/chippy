@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/chdir.go
+ * Chippy - internal/builtins/chdir.go
  *
  */
 

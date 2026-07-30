@@ -1,6 +1,6 @@
 /*
  *
- * Modena - internal/bytecode/chunk.go
+ * Chippy - internal/bytecode/chunk.go
  *
  */
 

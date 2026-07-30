@@ -1,6 +1,6 @@
 /*
  *
- * Modena - internal/compiler/scope.go
+ * Chippy - internal/compiler/scope.go
  *
  */
 

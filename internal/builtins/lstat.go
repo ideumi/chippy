@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/lstat.go
+ * Chippy - internal/builtins/lstat.go
  *
  */
 

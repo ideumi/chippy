@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/sleep.go
+ * Chippy - internal/builtins/sleep.go
  *
  */
 

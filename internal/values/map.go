@@ -1,6 +1,6 @@
 /*
  *
- * Modena - internal/values/map.go
+ * Chippy - internal/values/map.go
  *
  */
 

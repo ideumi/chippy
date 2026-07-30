@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/errors/position.go
+ * Chippy - internal/errors/position.go
  *
  */
 

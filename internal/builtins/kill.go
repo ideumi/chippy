@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/kill.go
+ * Chippy - internal/builtins/kill.go
  *
  */
 

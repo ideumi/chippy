@@ -1,6 +1,6 @@
 /*
  *
- * Modena - internal/bytecode/opcode.go
+ * Chippy - internal/bytecode/opcode.go
  *
  */
 

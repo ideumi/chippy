@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/setterm.go
+ * Chippy - internal/builtins/setterm.go
  *
  */
 

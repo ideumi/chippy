@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/join.go
+ * Chippy - internal/builtins/join.go
  *
  */
 

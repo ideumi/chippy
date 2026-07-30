@@ -1,6 +1,6 @@
 /*
  *
- * Modena - internal/constants/limits.go
+ * Chippy - internal/constants/limits.go
  *
  */
 

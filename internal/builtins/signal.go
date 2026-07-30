@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/signal.go
+ * Chippy - internal/builtins/signal.go
  *
  */
 

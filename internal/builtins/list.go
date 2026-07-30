@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/list.go
+ * Chippy - internal/builtins/list.go
  *
  */
 

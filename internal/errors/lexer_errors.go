@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/errors/lexer_errors.go
+ * Chippy - internal/errors/lexer_errors.go
  *
  */
 

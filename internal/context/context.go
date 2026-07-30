@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/context/context.go
+ * Chippy - internal/context/context.go
  *
  */
 

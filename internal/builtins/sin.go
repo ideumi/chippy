@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/sin.go
+ * Chippy - internal/builtins/sin.go
  *
  */
 

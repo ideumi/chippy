@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/winsize.go
+ * Chippy - internal/builtins/winsize.go
  *
  */
 

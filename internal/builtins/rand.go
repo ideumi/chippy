@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/rand.go
+ * Chippy - internal/builtins/rand.go
  *
  */
 

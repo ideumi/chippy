@@ -1,6 +1,6 @@
 /*
  *
- * Modena - internal/vm/function.go
+ * Chippy - internal/vm/function.go
  *
  */
 

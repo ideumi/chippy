@@ -1,6 +1,6 @@
 /*
  *
- * Modena - internal/orchestrator/isolate.go
+ * Chippy - internal/orchestrator/isolate.go
  *
  */
 

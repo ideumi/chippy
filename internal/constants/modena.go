@@ -1,6 +1,6 @@
 /*
  *
- * Modena - internal/constants/modena.go
+ * Chippy - internal/constants/modena.go
  *
  */
 

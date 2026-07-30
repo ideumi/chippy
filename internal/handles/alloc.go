@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/handles/alloc.go
+ * Chippy - internal/handles/alloc.go
  *
  */
 

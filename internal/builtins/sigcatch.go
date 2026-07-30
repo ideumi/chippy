@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/sigcatch.go
+ * Chippy - internal/builtins/sigcatch.go
  *
  */
 
