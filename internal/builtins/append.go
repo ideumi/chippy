@@ -11,7 +11,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func appendFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func appendFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
@@ -20,11 +20,10 @@ func appendFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	value := args[0]
 
-	switch typed := value.(type) {
-	case *values.Bytes:
-		valueNum, ok := args[1].(*values.Number)
+	if bytesVal, ok := values.AsBytes(value); ok {
+		valueNum := args[1]
 
-		if !ok {
+		if !valueNum.IsNumber() {
 			return res.FailAt(2,
 				shared.Errors.InvalidArgTypePositionalWithHint("append", shared.PositionSecond, shared.TypeNumber, "value"))
 		}
@@ -41,17 +40,17 @@ func appendFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			return res.FailAt(2, "Byte values must be between 0 and 255")
 		}
 
-		newBytes := typed.AppendByte(byteValue)
+		bytesVal.AppendByte(byteValue)
 
-		return res.Success(newBytes.SetContext(ctx))
-
-	case *values.List:
-		typed.Elements = append(typed.Elements, args[1].SetContext(ctx))
-
-		return res.Success(typed)
-
-	default:
-		return res.FailAt(1,
-			shared.Errors.InvalidArgTypePositionalWithHint("append", shared.PositionFirst, shared.TypeListOrBytes, shared.TypeListOrBytes))
+		return res.Success(value)
 	}
+
+	if listVal, ok := values.AsList(value); ok {
+		listVal.Elements = append(listVal.Elements, args[1])
+
+		return res.Success(value)
+	}
+
+	return res.FailAt(1,
+		shared.Errors.InvalidArgTypePositionalWithHint("append", shared.PositionFirst, shared.TypeListOrBytes, shared.TypeListOrBytes))
 }

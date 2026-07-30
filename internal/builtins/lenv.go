@@ -12,14 +12,14 @@ import (
 	"chip-go/thirdparty/runewidth"
 )
 
-func lenvFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func lenvFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("lenv", 1, "string"))
 	}
 
-	stringArg, ok := args[0].(*values.String)
+	stringArg, ok := values.AsString(args[0])
 
 	if !ok {
 		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("lenv", shared.TypeString, "string"))
@@ -28,5 +28,5 @@ func lenvFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	str := stringArg.Value
 	width := runewidth.StringWidth(str)
 
-	return res.Success(values.NewNumber(width).SetContext(ctx))
+	return res.Success(values.NewNumber(width))
 }

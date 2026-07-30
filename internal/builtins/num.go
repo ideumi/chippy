@@ -13,7 +13,7 @@ import (
 	"strconv"
 )
 
-func numFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func numFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -22,40 +22,37 @@ func numFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	value := args[0]
 
-	switch typed := value.(type) {
+	if value.IsNumber() {
+		return res.Success(value.Copy())
+	}
 
-	case *values.Number:
-		return res.Success(typed.Copy().SetContext(ctx))
-
-	case *values.String:
-		if floatVal, parseErr := strconv.ParseFloat(typed.Value, 64); parseErr == nil {
+	if str, ok := values.AsString(value); ok {
+		if floatVal, parseErr := strconv.ParseFloat(str.Value, 64); parseErr == nil {
 			num, err := values.NewNumberFromFloat(floatVal)
 
 			if err != nil {
-				return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+				return res.Success(values.NewString(constants.STR_ERR))
 			}
 
-			return res.Success(num.SetContext(ctx))
+			return res.Success(num)
 		}
 
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
-
-	case *values.List:
-		// Trying our best
-		if len(typed.Elements) == 0 {
-			return res.Success(values.NewNumber(constants.NUM_NUL).SetContext(ctx))
-		} else if len(typed.Elements) == 1 {
-			// Try to convert single element
-			if elem := typed.Elements[0]; elem != nil {
-				if elemNum, ok := elem.(*values.Number); ok {
-					return res.Success(elemNum.Copy().SetContext(ctx))
-				}
-			}
-		}
-
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
-
-	default:
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
+
+	if list, ok := values.AsList(value); ok {
+		// Trying our best
+		if len(list.Elements) == 0 {
+			return res.Success(values.NewNumber(constants.NUM_NUL))
+		} else if len(list.Elements) == 1 {
+			// Try to convert single element
+			if elem := list.Elements[0]; elem.IsNumber() {
+				return res.Success(elem.Copy())
+			}
+		}
+
+		return res.Success(values.NewString(constants.STR_ERR))
+	}
+
+	return res.Success(values.NewString(constants.STR_ERR))
 }

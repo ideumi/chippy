@@ -14,16 +14,16 @@ import (
 	"chip-go/internal/values"
 )
 
-func waitFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func waitFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("wait", 1, "handle"))
 	}
 
-	handleNum, ok := args[0].(*values.Number)
+	handleNum := args[0]
 
-	if !ok {
+	if !handleNum.IsNumber() {
 		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("wait", shared.TypeNumber, "handle"))
 	}
 
@@ -92,7 +92,7 @@ func waitFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		return res.FailAt(1, result.Err.Error())
 	}
 
-	if result.Value != nil {
+	if result.Value.IsSet() {
 		// The actor already isolated returned closures from its own scope
 		// (actor.go calls IsolateForTransfer on returnValue before delivering).
 		// Rebind them onto the waiter's globals so the caller can actually use
@@ -107,5 +107,5 @@ func waitFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		return res.Success(result.Value)
 	}
 
-	return res.Success(values.NewNumber(constants.NUM_NUL).SetContext(ctx))
+	return res.Success(values.NewNumber(constants.NUM_NUL))
 }

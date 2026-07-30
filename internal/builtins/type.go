@@ -11,7 +11,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func typeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func typeFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -19,33 +19,23 @@ func typeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	}
 
 	value := args[0]
-	var typeName string
+	typeName := "unknown"
 
-	switch value.(type) {
-	case *values.Number:
+	if value.IsNumber() {
 		typeName = "number"
-
-	case *values.String:
+	} else if _, ok := values.AsString(value); ok {
 		typeName = "string"
-
-	case *values.List:
+	} else if _, ok := values.AsList(value); ok {
 		typeName = "list"
-
-	case *values.Bytes:
+	} else if _, ok := values.AsBytes(value); ok {
 		typeName = "bytes"
-
-	case *values.Map:
+	} else if _, ok := values.AsMap(value); ok {
 		typeName = "map"
-
-	case *values.BuiltInFunction:
+	} else if _, ok := values.AsBuiltIn(value); ok {
 		typeName = "builtin"
-
-	case values.Callable:
+	} else if _, ok := values.AsCallable(value); ok {
 		typeName = "function"
-
-	default:
-		typeName = "unknown"
 	}
 
-	return res.Success(values.NewString(typeName).SetContext(ctx))
+	return res.Success(values.NewString(typeName))
 }

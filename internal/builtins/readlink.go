@@ -13,14 +13,14 @@ import (
 	"os"
 )
 
-func readlinkFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func readlinkFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("readlink", 1, "path"))
 	}
 
-	pathStr, ok := args[0].(*values.String)
+	pathStr, ok := values.AsString(args[0])
 
 	if !ok {
 		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("readlink", shared.TypeString, "path"))
@@ -29,8 +29,8 @@ func readlinkFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult
 	target, err := os.Readlink(pathStr.Value)
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
-	return res.Success(values.NewString(target).SetContext(ctx))
+	return res.Success(values.NewString(target))
 }

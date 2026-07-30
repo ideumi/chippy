@@ -14,7 +14,7 @@ import (
 	"io"
 )
 
-func sreadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func sreadFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
@@ -22,17 +22,17 @@ func sreadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	}
 
 	// Get handle argument
-	handleNum, ok := args[0].(*values.Number)
+	handleNum := args[0]
 
-	if !ok {
+	if !handleNum.IsNumber() {
 		return res.FailAt(1,
 			shared.Errors.InvalidArgTypePositionalWithHint("sread", shared.PositionFirst, shared.TypeNumber, "handle"))
 	}
 
 	// Get maxBytes argument
-	maxBytesNum, ok := args[1].(*values.Number)
+	maxBytesNum := args[1]
 
-	if !ok {
+	if !maxBytesNum.IsNumber() {
 		return res.FailAt(2,
 			shared.Errors.InvalidArgTypePositionalWithHint("sread", shared.PositionSecond, shared.TypeNumber, "maxBytes"))
 	}
@@ -67,7 +67,7 @@ func sreadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	// Prepare buffer
 	buffer := make([]byte, maxBytes)
-	var n int
+	var bytesRead int
 
 	// Read based on socket type
 	switch socket.Mode {
@@ -77,14 +77,14 @@ func sreadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			return res.FailAt(1, shared.Errors.InvalidValue("Socket connection is closed"))
 		}
 
-		n, err = socket.Conn.Read(buffer)
+		bytesRead, err = socket.Conn.Read(buffer)
 
 	case "udp":
 		if socket.UdpConn == nil {
 			return res.FailAt(1, shared.Errors.InvalidValue("UDP connection is closed"))
 		}
 
-		n, err = socket.UdpConn.Read(buffer)
+		bytesRead, err = socket.UdpConn.Read(buffer)
 
 	case "listen":
 		return res.FailAt(1,
@@ -98,15 +98,15 @@ func sreadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	if err != nil {
 		if err == io.EOF {
 			// EOF
-			return res.Success(values.NewBytes([]byte{}).SetContext(ctx))
+			return res.Success(values.NewBytes([]byte{}))
 		}
 
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
-	if n == 0 {
-		return res.Success(values.NewBytes([]byte{}).SetContext(ctx))
+	if bytesRead == 0 {
+		return res.Success(values.NewBytes([]byte{}))
 	}
 
-	return res.Success(values.NewBytes(buffer[:n]).SetContext(ctx))
+	return res.Success(values.NewBytes(buffer[:bytesRead]))
 }

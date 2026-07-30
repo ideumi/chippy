@@ -12,16 +12,16 @@ import (
 	"chip-go/internal/values"
 )
 
-func receiveFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func receiveFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("receive", 1, "blocking"))
 	}
 
-	blockArg, ok := args[0].(*values.Number)
+	blockArg := args[0]
 
-	if !ok {
+	if !blockArg.IsNumber() {
 		return res.FailAt(1,
 			shared.Errors.InvalidArgTypeWithHint("receive", shared.TypeNumber, "blocking"))
 	}
@@ -52,5 +52,5 @@ func receiveFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 		items = inst.Inbox.ReceiveNonBlocking(globals)
 	}
 
-	return res.Success(values.NewList(items).SetContext(ctx))
+	return res.Success(values.NewList(items))
 }

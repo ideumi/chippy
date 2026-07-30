@@ -14,14 +14,14 @@ import (
 	"os"
 )
 
-func loadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func loadFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("load", 1, "filename"))
 	}
 
-	filename, ok := args[0].(*values.String)
+	filename, ok := values.AsString(args[0])
 
 	if !ok {
 		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("load", shared.TypeString, "filename"))
@@ -45,5 +45,5 @@ func loadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		return res.FailAt(1, "Failed to execute file \""+filename.Value+"\":\n"+err.Error())
 	}
 
-	return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
+	return res.Success(values.NewString(constants.STR_OK))
 }

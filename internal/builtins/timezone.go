@@ -13,16 +13,16 @@ import (
 	"time"
 )
 
-func timezoneFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func timezoneFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("timezone", 1, "timestamp"))
 	}
 
-	tsNum, ok := args[0].(*values.Number)
+	tsNum := args[0]
 
-	if !ok {
+	if !tsNum.IsNumber() {
 		return res.FailAt(1,
 			shared.Errors.InvalidArgTypeWithHint("timezone", shared.TypeNumber, "timestamp"))
 	}
@@ -50,12 +50,12 @@ func timezoneFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult
 	}
 
 	entries := map[string]values.Value{
-		"offsetSeconds":    values.NewNumber(offsetSeconds).SetContext(ctx),
-		"abbreviation":     values.NewString(abbreviation).SetContext(ctx),
-		"isDaylightSaving": values.NewNumber(isDaylightSaving).SetContext(ctx),
+		"offsetSeconds":    values.NewNumber(offsetSeconds),
+		"abbreviation":     values.NewString(abbreviation),
+		"isDaylightSaving": values.NewNumber(isDaylightSaving),
 	}
 
 	result := values.NewMapFromEntries(keys, entries)
 
-	return res.Success(result.SetContext(ctx))
+	return res.Success(result)
 }

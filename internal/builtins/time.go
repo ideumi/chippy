@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func timeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func timeFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 0 {
@@ -28,5 +28,5 @@ func timeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		return res.Fail(err.Error())
 	}
 
-	return res.Success(num.SetContext(ctx))
+	return res.Success(num)
 }

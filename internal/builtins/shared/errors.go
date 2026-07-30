@@ -55,11 +55,6 @@ func (e BuiltinErrors) InvalidValue(constraint string) string {
 	return constraint
 }
 
-// CannotConvert generates error for impossible conversions
-func (e BuiltinErrors) CannotConvert(what, reason string) string {
-	return fmt.Sprintf("Cannot convert %s%s", what, reason)
-}
-
 // Common type names
 const (
 	TypeNumber       = "a number"

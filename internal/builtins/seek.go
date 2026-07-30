@@ -13,30 +13,30 @@ import (
 	"chip-go/internal/values"
 )
 
-func seekFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func seekFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 3 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("seek", 3, "handle, offset, whence"))
 	}
 
-	handleNum, ok := args[0].(*values.Number)
+	handleNum := args[0]
 
-	if !ok {
+	if !handleNum.IsNumber() {
 		return res.FailAt(1,
 			shared.Errors.InvalidArgTypePositionalWithHint("seek", shared.PositionFirst, shared.TypeNumber, "handle"))
 	}
 
-	offsetNum, ok := args[1].(*values.Number)
+	offsetNum := args[1]
 
-	if !ok {
+	if !offsetNum.IsNumber() {
 		return res.FailAt(2,
 			shared.Errors.InvalidArgTypePositionalWithHint("seek", shared.PositionSecond, shared.TypeNumber, "offset"))
 	}
 
-	whenceNum, ok := args[2].(*values.Number)
+	whenceNum := args[2]
 
-	if !ok {
+	if !whenceNum.IsNumber() {
 		return res.FailAt(3,
 			shared.Errors.InvalidArgTypePositionalWithHint("seek", shared.PositionThird, shared.TypeNumber, "whence"))
 	}
@@ -78,8 +78,8 @@ func seekFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	newPos, err := file.Seek(offset, whence)
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
-	return res.Success(values.NewNumber(newPos).SetContext(ctx))
+	return res.Success(values.NewNumber(newPos))
 }

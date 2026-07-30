@@ -12,7 +12,7 @@ import (
 	"os"
 )
 
-func getpidFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func getpidFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 0 {
@@ -21,5 +21,5 @@ func getpidFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	pid := os.Getpid()
 
-	return res.Success(values.NewNumber(pid).SetContext(ctx))
+	return res.Success(values.NewNumber(pid))
 }

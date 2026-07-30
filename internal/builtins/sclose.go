@@ -13,7 +13,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func scloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func scloseFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -21,9 +21,9 @@ func scloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	}
 
 	// Get handle argument
-	handleNum, ok := args[0].(*values.Number)
+	handleNum := args[0]
 
-	if !ok {
+	if !handleNum.IsNumber() {
 		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("sclose", shared.TypeNumber, "handle"))
 	}
 
@@ -68,8 +68,8 @@ func scloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	}
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
-	return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
+	return res.Success(values.NewString(constants.STR_OK))
 }

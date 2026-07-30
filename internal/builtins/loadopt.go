@@ -28,28 +28,26 @@ import (
 // loaded optionals.
 func InstallOpt(opt *optional.Optional, globalCtx values.Ctx) {
 	for name, fn := range opt.Functions {
-		if existing := globalCtx.Globals.GetByName(name); existing == nil {
-			fn.SetContext(globalCtx)
+		if existing := globalCtx.Globals.GetByName(name); existing.IsUnset() {
 			globalCtx.Globals.SetByName(name, fn)
 		}
 	}
 
 	for name, constant := range opt.Constants {
-		if existing := globalCtx.Globals.GetByName(name); existing == nil {
-			constant.SetContext(globalCtx)
+		if existing := globalCtx.Globals.GetByName(name); existing.IsUnset() {
 			globalCtx.Globals.SetByName(name, constant)
 		}
 	}
 }
 
-func loadoptFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func loadoptFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("loadopt", 1, "optional"))
 	}
 
-	optionalName, ok := args[0].(*values.String)
+	optionalName, ok := values.AsString(args[0])
 
 	if !ok {
 		return res.FailAt(1,
@@ -79,5 +77,5 @@ func loadoptFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 		orch.AddLoadedOpt(inst, optionalName.Value)
 	}
 
-	return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
+	return res.Success(values.NewString(constants.STR_OK))
 }

@@ -13,7 +13,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func swriteFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func swriteFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
@@ -21,7 +21,7 @@ func swriteFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	}
 
 	// Get data argument (bytes)
-	bytesVal, ok := args[0].(*values.Bytes)
+	bytesVal, ok := values.AsBytes(args[0])
 
 	if !ok {
 		return res.FailAt(1,
@@ -29,9 +29,9 @@ func swriteFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	}
 
 	// Get handle argument
-	handleNum, ok := args[1].(*values.Number)
+	handleNum := args[1]
 
-	if !ok {
+	if !handleNum.IsNumber() {
 		return res.FailAt(2,
 			shared.Errors.InvalidArgTypePositionalWithHint("swrite", shared.PositionSecond, shared.TypeNumber, "handle"))
 	}
@@ -53,7 +53,7 @@ func swriteFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	}
 
 	if len(bytesVal.Data) == 0 {
-		return res.Success(values.NewNumber(constants.NUM_NUL).SetContext(ctx))
+		return res.Success(values.NewNumber(constants.NUM_NUL))
 	}
 
 	// Write based on socket type
@@ -82,8 +82,8 @@ func swriteFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	// Handle write errors
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
-	return res.Success(values.NewNumber(written).SetContext(ctx))
+	return res.Success(values.NewNumber(written))
 }

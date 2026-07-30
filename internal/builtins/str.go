@@ -11,7 +11,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func strFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func strFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -19,28 +19,10 @@ func strFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	}
 
 	value := args[0]
-	var resultStr string
 
-	switch typed := value.(type) {
-
-	case *values.Number:
-		resultStr = typed.String()
-
-	case *values.String:
-		resultStr = typed.Value // Remove quotes for str() conversion
-
-	case *values.List:
-		resultStr = typed.String()
-
-	case *values.Bytes:
-		resultStr = typed.String()
-
-	case *values.Map:
-		resultStr = typed.String()
-
-	default:
-		resultStr = value.String()
+	if str, ok := values.AsString(value); ok {
+		return res.Success(values.NewString(str.Value))
 	}
 
-	return res.Success(values.NewString(resultStr).SetContext(ctx))
+	return res.Success(values.NewString(value.String()))
 }

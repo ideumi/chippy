@@ -17,7 +17,7 @@ func SetGlobalArgs(arguments []string) {
 	globalArgs = arguments
 }
 
-func argsFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func argsFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 0 {
@@ -28,8 +28,8 @@ func argsFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	elements := make([]values.Value, len(globalArgs))
 
 	for i, arg := range globalArgs {
-		elements[i] = values.NewString(arg).SetContext(ctx)
+		elements[i] = values.NewString(arg)
 	}
 
-	return res.Success(values.NewList(elements).SetContext(ctx))
+	return res.Success(values.NewList(elements))
 }

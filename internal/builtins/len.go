@@ -12,7 +12,7 @@ import (
 	"unicode/utf8"
 )
 
-func lenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func lenFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -21,17 +21,22 @@ func lenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	value := args[0]
 
-	switch typed := value.(type) {
-	case *values.String:
-		return res.Success(values.NewNumber(utf8.RuneCountInString(typed.Value)).SetContext(ctx))
-	case *values.List:
-		return res.Success(values.NewNumber(len(typed.Elements)).SetContext(ctx))
-	case *values.Bytes:
-		return res.Success(values.NewNumber(len(typed.Data)).SetContext(ctx))
-	case *values.Map:
-		return res.Success(values.NewNumber(len(typed.Keys)).SetContext(ctx))
-	default:
-		return res.FailAt(1,
-			shared.Errors.InvalidValue("len() can only be used on strings, lists, bytes, and maps"))
+	if str, ok := values.AsString(value); ok {
+		return res.Success(values.NewNumber(utf8.RuneCountInString(str.Value)))
 	}
+
+	if list, ok := values.AsList(value); ok {
+		return res.Success(values.NewNumber(len(list.Elements)))
+	}
+
+	if bytesVal, ok := values.AsBytes(value); ok {
+		return res.Success(values.NewNumber(len(bytesVal.Data)))
+	}
+
+	if mapVal, ok := values.AsMap(value); ok {
+		return res.Success(values.NewNumber(len(mapVal.Keys)))
+	}
+
+	return res.FailAt(1,
+		shared.Errors.InvalidValue("len() can only be used on strings, lists, bytes, and maps"))
 }

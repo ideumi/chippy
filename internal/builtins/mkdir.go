@@ -14,23 +14,23 @@ import (
 	"syscall"
 )
 
-func mkdirFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func mkdirFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("mkdir", 2, "path, mode"))
 	}
 
-	pathStr, ok := args[0].(*values.String)
+	pathStr, ok := values.AsString(args[0])
 
 	if !ok {
 		return res.FailAt(1,
 			shared.Errors.InvalidArgTypePositionalWithHint("mkdir", shared.PositionFirst, shared.TypeString, "path"))
 	}
 
-	modeNum, ok := args[1].(*values.Number)
+	modeNum := args[1]
 
-	if !ok {
+	if !modeNum.IsNumber() {
 		return res.FailAt(2,
 			shared.Errors.InvalidArgTypePositionalWithHint("mkdir", shared.PositionSecond, shared.TypeNumber, "mode"))
 	}
@@ -52,8 +52,8 @@ func mkdirFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	err = syscall.Mkdir(pathStr.Value, uint32(octalMode))
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
-	return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
+	return res.Success(values.NewString(constants.STR_OK))
 }

@@ -12,16 +12,16 @@ import (
 	"math"
 )
 
-func sinFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func sinFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("sin", 1, "radians"))
 	}
 
-	radiansArg, ok := args[0].(*values.Number)
+	radiansArg := args[0]
 
-	if !ok {
+	if !radiansArg.IsNumber() {
 		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("sin", shared.TypeNumber, "radians"))
 	}
 
@@ -33,5 +33,5 @@ func sinFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		return res.FailAt(1, err.Error())
 	}
 
-	return res.Success(num.SetContext(ctx))
+	return res.Success(num)
 }

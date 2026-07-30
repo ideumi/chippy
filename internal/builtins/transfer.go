@@ -12,23 +12,23 @@ import (
 	"chip-go/internal/values"
 )
 
-func transferFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func transferFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("transfer", 2, "actor, handle"))
 	}
 
-	targetNum, ok := args[0].(*values.Number)
+	targetNum := args[0]
 
-	if !ok {
+	if !targetNum.IsNumber() {
 		return res.FailAt(1,
 			shared.Errors.InvalidArgTypePositionalWithHint("transfer", shared.PositionFirst, shared.TypeNumber, "actor"))
 	}
 
-	handleNum, ok := args[1].(*values.Number)
+	handleNum := args[1]
 
-	if !ok {
+	if !handleNum.IsNumber() {
 		return res.FailAt(2,
 			shared.Errors.InvalidArgTypePositionalWithHint("transfer", shared.PositionSecond, shared.TypeNumber, "handle"))
 	}
@@ -54,5 +54,5 @@ func transferFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult
 		return res.FailAt(2, shared.Errors.InvalidValue(errMsg))
 	}
 
-	return res.Success(values.NewNumber(newID).SetContext(ctx))
+	return res.Success(values.NewNumber(newID))
 }

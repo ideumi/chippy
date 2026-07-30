@@ -13,21 +13,21 @@ import (
 	"os"
 )
 
-func setenvFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func setenvFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("setenv", 2, "name, value"))
 	}
 
-	nameStr, ok := args[0].(*values.String)
+	nameStr, ok := values.AsString(args[0])
 
 	if !ok {
 		return res.FailAt(1,
 			shared.Errors.InvalidArgTypePositionalWithHint("setenv", shared.PositionFirst, shared.TypeString, "name"))
 	}
 
-	valueStr, ok := args[1].(*values.String)
+	valueStr, ok := values.AsString(args[1])
 
 	if !ok {
 		return res.FailAt(2,
@@ -41,5 +41,5 @@ func setenvFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		return res.FailAt(1, "Failed to set environment variable: "+err.Error())
 	}
 
-	return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
+	return res.Success(values.NewString(constants.STR_OK))
 }

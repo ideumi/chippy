@@ -16,7 +16,7 @@ import (
 	"strconv"
 )
 
-func sopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func sopenFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 3 {
@@ -24,7 +24,7 @@ func sopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	}
 
 	// Get address argument
-	addressStr, ok := args[0].(*values.String)
+	addressStr, ok := values.AsString(args[0])
 
 	if !ok {
 		return res.FailAt(1,
@@ -32,15 +32,15 @@ func sopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	}
 
 	// Get port argument
-	portNum, ok := args[1].(*values.Number)
+	portNum := args[1]
 
-	if !ok {
+	if !portNum.IsNumber() {
 		return res.FailAt(2,
 			shared.Errors.InvalidArgTypePositionalWithHint("sopen", shared.PositionSecond, shared.TypeNumber, "port"))
 	}
 
 	// Get mode argument
-	modeStr, ok := args[2].(*values.String)
+	modeStr, ok := values.AsString(args[2])
 
 	if !ok {
 		return res.FailAt(3,
@@ -77,7 +77,7 @@ func sopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		conn, err := net.Dial("tcp", net.JoinHostPort(address, strconv.Itoa(port)))
 
 		if err != nil {
-			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+			return res.Success(values.NewString(constants.STR_ERR))
 		}
 
 		socket.Conn = conn
@@ -87,13 +87,13 @@ func sopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		raddr, err := net.ResolveUDPAddr("udp", net.JoinHostPort(address, strconv.Itoa(port)))
 
 		if err != nil {
-			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx)) // Address resolution failed
+			return res.Success(values.NewString(constants.STR_ERR)) // Address resolution failed
 		}
 
 		conn, err := net.DialUDP("udp", nil, raddr)
 
 		if err != nil {
-			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+			return res.Success(values.NewString(constants.STR_ERR))
 		}
 
 		socket.UdpConn = conn
@@ -104,7 +104,7 @@ func sopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		listener, err := net.Listen("tcp", net.JoinHostPort(address, strconv.Itoa(port)))
 
 		if err != nil {
-			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+			return res.Success(values.NewString(constants.STR_ERR))
 		}
 
 		socket.Listener = listener
@@ -113,5 +113,5 @@ func sopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	handle := registry.Alloc.Alloc()
 	registry.Sockets.Store(handle, socket)
 
-	return res.Success(values.NewNumber(handle).SetContext(ctx))
+	return res.Success(values.NewNumber(handle))
 }

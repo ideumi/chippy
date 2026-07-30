@@ -11,7 +11,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func packFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func packFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -20,24 +20,22 @@ func packFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	value := args[0]
 
-	switch typed := value.(type) {
-	case *values.String:
-		bytes := []byte(typed.Value)
+	if str, ok := values.AsString(value); ok {
+		return res.Success(values.NewBytes([]byte(str.Value)))
+	}
 
-		return res.Success(values.NewBytes(bytes).SetContext(ctx))
+	if list, ok := values.AsList(value); ok {
+		bytes := make([]byte, len(list.Elements))
 
-	case *values.List:
-		bytes := make([]byte, len(typed.Elements))
-
-		for i, element := range typed.Elements {
-			if element == nil {
+		for i, element := range list.Elements {
+			if element.IsUnset() {
 				bytes[i] = 0
 				continue
 			}
 
-			num, ok := element.(*values.Number)
+			num := element
 
-			if !ok {
+			if !num.IsNumber() {
 				return res.FailAt(1, "List elements must be numbers representing bytes")
 			}
 
@@ -56,10 +54,9 @@ func packFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			bytes[i] = byte(byteValue)
 		}
 
-		return res.Success(values.NewBytes(bytes).SetContext(ctx))
-
-	default:
-		return res.FailAt(1,
-			shared.Errors.InvalidArgTypeWithHint("pack", shared.TypeStringOrList, shared.TypeStringOrList))
+		return res.Success(values.NewBytes(bytes))
 	}
+
+	return res.FailAt(1,
+		shared.Errors.InvalidArgTypeWithHint("pack", shared.TypeStringOrList, shared.TypeStringOrList))
 }

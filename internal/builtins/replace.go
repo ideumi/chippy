@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-func replaceFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func replaceFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 3 {
@@ -20,21 +20,21 @@ func replaceFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 			shared.Errors.InvalidArgCountWithHint("replace", 3, "haystack, needle, replacement"))
 	}
 
-	haystackArg, ok := args[0].(*values.String)
+	haystackArg, ok := values.AsString(args[0])
 
 	if !ok {
 		return res.FailAt(1,
 			shared.Errors.InvalidArgTypePositionalWithHint("replace", shared.PositionFirst, shared.TypeString, "haystack"))
 	}
 
-	needleArg, ok := args[1].(*values.String)
+	needleArg, ok := values.AsString(args[1])
 
 	if !ok {
 		return res.FailAt(2,
 			shared.Errors.InvalidArgTypePositionalWithHint("replace", shared.PositionSecond, shared.TypeString, "needle"))
 	}
 
-	replacementArg, ok := args[2].(*values.String)
+	replacementArg, ok := values.AsString(args[2])
 
 	if !ok {
 		return res.FailAt(3,
@@ -51,5 +51,5 @@ func replaceFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 
 	result := strings.ReplaceAll(haystack, needle, replacement)
 
-	return res.Success(values.NewString(result).SetContext(ctx))
+	return res.Success(values.NewString(result))
 }

@@ -15,21 +15,21 @@ import (
 	"strings"
 )
 
-func popenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func popenFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("popen", 2, "command, mode"))
 	}
 
-	commandStr, ok := args[0].(*values.String)
+	commandStr, ok := values.AsString(args[0])
 
 	if !ok {
 		return res.FailAt(1,
 			shared.Errors.InvalidArgTypePositionalWithHint("popen", shared.PositionFirst, shared.TypeString, "command"))
 	}
 
-	modeStr, ok := args[1].(*values.String)
+	modeStr, ok := values.AsString(args[1])
 
 	if !ok {
 		return res.FailAt(2,
@@ -77,5 +77,5 @@ func popenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	handle := registry.Alloc.Alloc()
 	registry.Processes.Store(handle, &procHandle)
 
-	return res.Success(values.NewNumber(handle).SetContext(ctx))
+	return res.Success(values.NewNumber(handle))
 }

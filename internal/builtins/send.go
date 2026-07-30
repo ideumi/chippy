@@ -13,16 +13,16 @@ import (
 	"chip-go/internal/values"
 )
 
-func sendFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func sendFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("send", 2, "handle, value"))
 	}
 
-	handleNum, ok := args[0].(*values.Number)
+	handleNum := args[0]
 
-	if !ok {
+	if !handleNum.IsNumber() {
 		return res.FailAt(1,
 			shared.Errors.InvalidArgTypePositionalWithHint("send", shared.PositionFirst, shared.TypeNumber, "handle"))
 	}
@@ -43,5 +43,5 @@ func sendFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	inst.Inbox.Send(args[1].Copy())
 
-	return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
+	return res.Success(values.NewString(constants.STR_OK))
 }

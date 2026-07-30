@@ -13,23 +13,23 @@ import (
 	"syscall"
 )
 
-func killFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func killFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("kill", 2, "pid, signal"))
 	}
 
-	pidNum, ok := args[0].(*values.Number)
+	pidNum := args[0]
 
-	if !ok {
+	if !pidNum.IsNumber() {
 		return res.FailAt(1,
 			shared.Errors.InvalidArgTypePositionalWithHint("kill", shared.PositionFirst, shared.TypeNumber, "pid"))
 	}
 
-	signalNum, ok := args[1].(*values.Number)
+	signalNum := args[1]
 
-	if !ok {
+	if !signalNum.IsNumber() {
 		return res.FailAt(2,
 			shared.Errors.InvalidArgTypePositionalWithHint("kill", shared.PositionSecond, shared.TypeNumber, "signal"))
 	}
@@ -52,9 +52,9 @@ func killFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	err = syscall.Kill(pid, signal)
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
 	// Success
-	return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
+	return res.Success(values.NewString(constants.STR_OK))
 }

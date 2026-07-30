@@ -14,21 +14,21 @@ import (
 	"os"
 )
 
-func fopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func fopenFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("fopen", 2, "path, mode"))
 	}
 
-	pathStr, ok := args[0].(*values.String)
+	pathStr, ok := values.AsString(args[0])
 
 	if !ok {
 		return res.FailAt(1,
 			shared.Errors.InvalidArgTypePositionalWithHint("fopen", shared.PositionFirst, shared.TypeString, "path"))
 	}
 
-	modeStr, ok := args[1].(*values.String)
+	modeStr, ok := values.AsString(args[1])
 
 	if !ok {
 		return res.FailAt(2,
@@ -56,12 +56,12 @@ func fopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	file, err := os.OpenFile(path, flag, 0644)
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
 	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
 	handle := registry.Alloc.Alloc()
 	registry.Files.Store(handle, file)
 
-	return res.Success(values.NewNumber(handle).SetContext(ctx))
+	return res.Success(values.NewNumber(handle))
 }

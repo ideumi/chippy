@@ -11,9 +11,9 @@ import (
 	"chip-go/internal/values"
 )
 
-func GetBuiltins() map[string]*values.BuiltInFunction {
+func GetBuiltins() map[string]values.Value {
 
-	return map[string]*values.BuiltInFunction{
+	return map[string]values.Value{
 
 		// System functions
 		"off":     values.NewBuiltInFunction("off", offFunction),

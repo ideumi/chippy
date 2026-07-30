@@ -12,7 +12,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func iserrFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func iserrFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -21,11 +21,11 @@ func iserrFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	value := args[0]
 
-	if str, ok := value.(*values.String); ok {
+	if str, ok := values.AsString(value); ok {
 		if str.Value == constants.STR_ERR {
-			return res.Success(values.NewNumber(constants.NUM_TRU).SetContext(ctx))
+			return res.Success(values.NewNumber(constants.NUM_TRU))
 		}
 	}
 
-	return res.Success(values.NewNumber(constants.NUM_FAL).SetContext(ctx))
+	return res.Success(values.NewNumber(constants.NUM_FAL))
 }

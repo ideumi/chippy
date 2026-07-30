@@ -14,16 +14,16 @@ import (
 	"io"
 )
 
-func dreadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func dreadFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("dread", 1, "handle"))
 	}
 
-	handleNum, ok := args[0].(*values.Number)
+	handleNum := args[0]
 
-	if !ok {
+	if !handleNum.IsNumber() {
 		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("dread", shared.TypeNumber, "handle"))
 	}
 
@@ -47,15 +47,15 @@ func dreadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	if readErr != nil {
 		if readErr == io.EOF {
 			// End of directory
-			return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
+			return res.Success(values.NewString(constants.STR_OK))
 		}
 
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
 	if len(entries) == 0 {
-		return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_OK))
 	}
 
-	return res.Success(values.NewString(entries[0].Name()).SetContext(ctx))
+	return res.Success(values.NewString(entries[0].Name()))
 }

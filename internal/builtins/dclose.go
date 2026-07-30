@@ -13,15 +13,15 @@ import (
 	"chip-go/internal/values"
 )
 
-func dcloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func dcloseFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("dclose", 1, "handle"))
 	}
 
-	handleNum, ok := args[0].(*values.Number)
-	if !ok {
+	handleNum := args[0]
+	if !handleNum.IsNumber() {
 		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("dclose", shared.TypeNumber, "handle"))
 	}
 
@@ -44,8 +44,8 @@ func dcloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	err = handle.DirFile.Close()
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
-	return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
+	return res.Success(values.NewString(constants.STR_OK))
 }

@@ -19,14 +19,14 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-func settermFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func settermFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("setterm", 1, "state"))
 	}
 
-	argMap, ok := args[0].(*values.Map)
+	argMap, ok := values.AsMap(args[0])
 
 	if !ok {
 		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("setterm", shared.TypeMap, "state"))
@@ -121,16 +121,16 @@ func settermFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 	fd := int(os.Stdin.Fd())
 
 	if err := unix.IoctlSetTermios(fd, unix.TCSETSW, &termios); err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
-	return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
+	return res.Success(values.NewString(constants.STR_OK))
 }
 
 func requireTermiosField(termiosMap *values.Map, key string, max int64) (int64, *errors.RTError) {
-	num, ok := termiosMap.Entries[key].(*values.Number)
+	num := termiosMap.Entries[key]
 
-	if !ok {
+	if !num.IsNumber() {
 		return 0, errors.NewCallError(
 			shared.Errors.InvalidValue(fmt.Sprintf("state key '%s' must be a number", key)))
 	}

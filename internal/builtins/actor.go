@@ -8,6 +8,7 @@ package builtins
 
 import (
 	"chip-go/internal/builtins/shared"
+	"chip-go/internal/errors"
 	"chip-go/internal/optional"
 	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
@@ -15,14 +16,14 @@ import (
 	"os"
 )
 
-func actorFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func actorFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) < 1 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("actor", 1, "function, ...args"))
 	}
 
-	fn, ok := args[0].(values.Callable)
+	fn, ok := values.AsCallable(args[0])
 
 	if !ok {
 		return res.FailAt(1,
@@ -47,7 +48,7 @@ func actorFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	inst := orch.CreateActor()
 
-	fnCopy := fn.Copy()
+	fnCopy := args[0].Copy()
 	argsCopy := make([]values.Value, len(fnArgs))
 
 	for i, arg := range fnArgs {
@@ -97,9 +98,7 @@ func actorFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 		defer func() {
 			if recovered := recover(); recovered != nil {
-				deliver(orchestrator.ActorResult{
-					Err: fmt.Errorf("actor panic: %v", recovered),
-				})
+				deliver(orchestrator.ActorResult{Err: actorPanicError(recovered)})
 			}
 		}()
 
@@ -126,20 +125,12 @@ func actorFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			actorCtx.Globals.SetByName(name, globalValues[i])
 		}
 
-		for _, arg := range argsCopy {
-			orchestrator.DeepRebindContext(arg, actorCtx)
-		}
-
-		for _, val := range globalValues {
-			orchestrator.DeepRebindContext(val, actorCtx)
-		}
-
 		toBind := append([]values.Value{fnCopy}, argsCopy...)
 		toBind = append(toBind, globalValues...)
 
 		orchestrator.BindValuesToGlobals(toBind, actorCtx)
 
-		result := fnCopy.Execute(argsCopy)
+		result := fnCopy.Execute(argsCopy, actorCtx)
 
 		if result.Error != nil {
 			deliver(orchestrator.ActorResult{Err: result.Error})
@@ -147,22 +138,24 @@ func actorFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			return
 		}
 
-		var returnValue values.Value
-
-		if result.FuncReturnValue != nil {
-			returnValue = result.FuncReturnValue
-		} else {
-			returnValue = result.Value
-		}
+		returnValue := result.Value
 
 		// A returned function can still point at variables belonging to
 		// the actor, isolate before sending it back.
-		if returnValue != nil {
+		if returnValue.IsSet() {
 			orchestrator.IsolateForTransfer(returnValue)
 		}
 
 		deliver(orchestrator.ActorResult{Value: returnValue})
 	}()
 
-	return res.Success(values.NewNumber(inst.ID).SetContext(ctx))
+	return res.Success(values.NewNumber(inst.ID))
+}
+
+func actorPanicError(recovered any) error {
+	if rtErr, ok := recovered.(*errors.RTError); ok {
+		return rtErr
+	}
+
+	return fmt.Errorf("actor panic: %v", recovered)
 }

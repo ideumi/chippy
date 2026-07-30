@@ -120,7 +120,7 @@ func getchSequence() ([]byte, error) {
 	return buffer[:bytesRead], nil
 }
 
-func getchFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func getchFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 0 {
@@ -130,8 +130,8 @@ func getchFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	bytes, err := getchSequence()
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
-	return res.Success(values.NewBytes(bytes).SetContext(ctx))
+	return res.Success(values.NewBytes(bytes))
 }

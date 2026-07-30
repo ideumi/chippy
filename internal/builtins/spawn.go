@@ -14,14 +14,14 @@ import (
 	"syscall"
 )
 
-func spawnFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func spawnFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("spawn", 1, "args"))
 	}
 
-	argsList, ok := args[0].(*values.List)
+	argsList, ok := values.AsList(args[0])
 
 	if !ok {
 		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("spawn", shared.TypeList, "args"))
@@ -30,7 +30,7 @@ func spawnFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	var spawnArgs []string
 
 	for _, elem := range argsList.Elements {
-		str, ok := elem.(*values.String)
+		str, ok := values.AsString(elem)
 
 		if !ok {
 			return res.FailAt(1, shared.Errors.InvalidValue("All arguments must be strings"))
@@ -52,7 +52,7 @@ func spawnFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	proc, err := os.StartProcess(spawnArgs[0], spawnArgs, attr)
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
 	pid := proc.Pid
@@ -60,5 +60,5 @@ func spawnFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	// Release the process so it doesn't become a zombie
 	go proc.Wait()
 
-	return res.Success(values.NewNumber(pid).SetContext(ctx))
+	return res.Success(values.NewNumber(pid))
 }

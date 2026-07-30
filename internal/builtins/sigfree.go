@@ -15,14 +15,14 @@ import (
 	"syscall"
 )
 
-func sigfreeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func sigfreeFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("sigfree", 1, "signums"))
 	}
 
-	listArg, ok := args[0].(*values.List)
+	listArg, ok := values.AsList(args[0])
 
 	if !ok {
 		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("sigfree", shared.TypeList, "signums"))
@@ -31,9 +31,9 @@ func sigfreeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 	sigs := make([]syscall.Signal, 0, len(listArg.Elements))
 
 	for _, el := range listArg.Elements {
-		num, ok := el.(*values.Number)
+		num := el
 
-		if !ok {
+		if !num.IsNumber() {
 			return res.FailAt(1, shared.Errors.InvalidValue("All signums must be numbers"))
 		}
 
@@ -68,5 +68,5 @@ func sigfreeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 		orchestrator.Get().CheckDeadlock()
 	}
 
-	return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
+	return res.Success(values.NewString(constants.STR_OK))
 }

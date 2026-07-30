@@ -14,16 +14,16 @@ import (
 	"strconv"
 )
 
-func sinfoFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func sinfoFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("sinfo", 1, "handle"))
 	}
 
-	handleNum, ok := args[0].(*values.Number)
+	handleNum := args[0]
 
-	if !ok {
+	if !handleNum.IsNumber() {
 		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("sinfo", shared.TypeNumber, "handle"))
 	}
 
@@ -74,16 +74,16 @@ func sinfoFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	}
 
 	entries := map[string]values.Value{
-		"mode":       values.NewString(socket.Mode).SetContext(ctx),
-		"localIp":    values.NewString(localIp).SetContext(ctx),
-		"localPort":  values.NewNumber(localPort).SetContext(ctx),
-		"remoteIp":   values.NewString(remoteIp).SetContext(ctx),
-		"remotePort": values.NewNumber(remotePort).SetContext(ctx),
+		"mode":       values.NewString(socket.Mode),
+		"localIp":    values.NewString(localIp),
+		"localPort":  values.NewNumber(localPort),
+		"remoteIp":   values.NewString(remoteIp),
+		"remotePort": values.NewNumber(remotePort),
 	}
 
 	result := values.NewMapFromEntries(keys, entries)
 
-	return res.Success(result.SetContext(ctx))
+	return res.Success(result)
 }
 
 func addrToIPPort(addr net.Addr) (string, int) {

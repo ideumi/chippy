@@ -14,23 +14,23 @@ import (
 	"io"
 )
 
-func fwriteFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func fwriteFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("fwrite", 2, "bytes, handle"))
 	}
 
-	bytesVal, ok := args[0].(*values.Bytes)
+	bytesVal, ok := values.AsBytes(args[0])
 
 	if !ok {
 		return res.FailAt(1,
 			shared.Errors.InvalidArgTypePositionalWithHint("fwrite", shared.PositionFirst, shared.TypeBytes, shared.TypeBytes))
 	}
 
-	handleNum, ok := args[1].(*values.Number)
+	handleNum := args[1]
 
-	if !ok {
+	if !handleNum.IsNumber() {
 		return res.FailAt(2,
 			shared.Errors.InvalidArgTypePositionalWithHint("fwrite", shared.PositionSecond, shared.TypeNumber, "handle"))
 	}
@@ -58,14 +58,14 @@ func fwriteFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	}
 
 	if len(bytesVal.Data) == 0 {
-		return res.Success(values.NewNumber(constants.NUM_NUL).SetContext(ctx))
+		return res.Success(values.NewNumber(constants.NUM_NUL))
 	}
 
 	written, err := writer.Write(bytesVal.Data)
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
-	return res.Success(values.NewNumber(written).SetContext(ctx))
+	return res.Success(values.NewNumber(written))
 }

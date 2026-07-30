@@ -108,7 +108,7 @@ func tryConsumeSignal(inst *orchestrator.Instance) (os.Signal, bool) {
 	return sig, got
 }
 
-func signalFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func signalFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 0 {
@@ -129,7 +129,7 @@ func signalFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	// Fast path: signal already queued.
 	if sig, ok := tryConsumeSignal(inst); ok {
-		return res.Success(values.NewNumber(signalToInt(sig)).SetContext(ctx))
+		return res.Success(values.NewNumber(signalToInt(sig)))
 	}
 
 	wakeup := make(chan struct{}, 1)
@@ -148,7 +148,7 @@ func signalFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	// before signalWaiters saw us, leaving no wakeup queued for us while
 	// signalProbe still reports liveness.
 	if sig, ok := tryConsumeSignal(inst); ok {
-		return res.Success(values.NewNumber(signalToInt(sig)).SetContext(ctx))
+		return res.Success(values.NewNumber(signalToInt(sig)))
 	}
 
 	cancelCh := orch.BeginBlocking(inst, orchestrator.StateBlockedSignal)
@@ -158,13 +158,13 @@ func signalFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		select {
 		case <-wakeup:
 			if sig, ok := tryConsumeSignal(inst); ok {
-				return res.Success(values.NewNumber(signalToInt(sig)).SetContext(ctx))
+				return res.Success(values.NewNumber(signalToInt(sig)))
 			}
 
 		case <-cancelCh:
 			// A signal may have landed during the cancel race.
 			if sig, ok := tryConsumeSignal(inst); ok {
-				return res.Success(values.NewNumber(signalToInt(sig)).SetContext(ctx))
+				return res.Success(values.NewNumber(signalToInt(sig)))
 			}
 
 			orch.EndBlocking(inst)

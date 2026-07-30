@@ -12,16 +12,16 @@ import (
 	"os"
 )
 
-func offFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func offFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("off", 1, "exitCode"))
 	}
 
-	exitCode, ok := args[0].(*values.Number)
+	exitCode := args[0]
 
-	if !ok {
+	if !exitCode.IsNumber() {
 		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("off", shared.TypeNumber, "exitCode"))
 	}
 
@@ -38,5 +38,6 @@ func offFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	}
 
 	os.Exit(code)
-	return nil
+
+	return values.RuntimeResult{}
 }

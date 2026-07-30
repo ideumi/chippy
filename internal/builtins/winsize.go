@@ -15,7 +15,7 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-func winsizeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func winsizeFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 0 {
@@ -27,11 +27,11 @@ func winsizeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 	ws, err := unix.IoctlGetWinsize(fd, unix.TIOCGWINSZ)
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
-	rows := values.NewNumber(ws.Row).SetContext(ctx)
-	cols := values.NewNumber(ws.Col).SetContext(ctx)
+	rows := values.NewNumber(ws.Row)
+	cols := values.NewNumber(ws.Col)
 
 	result := values.NewMapFromEntries(
 		[]string{"rows", "columns"},
@@ -41,5 +41,5 @@ func winsizeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 		},
 	)
 
-	return res.Success(result.SetContext(ctx))
+	return res.Success(result)
 }

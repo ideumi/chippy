@@ -13,16 +13,16 @@ import (
 	"crypto/rand"
 )
 
-func randFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func randFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("rand", 1, "count"))
 	}
 
-	bytesNum, ok := args[0].(*values.Number)
+	bytesNum := args[0]
 
-	if !ok {
+	if !bytesNum.IsNumber() {
 		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("rand", shared.TypeNumber, "count"))
 	}
 
@@ -42,8 +42,8 @@ func randFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	_, err = rand.Read(buf)
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
-	return res.Success(values.NewBytes(buf).SetContext(ctx))
+	return res.Success(values.NewBytes(buf))
 }

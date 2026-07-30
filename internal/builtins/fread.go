@@ -14,23 +14,23 @@ import (
 	"io"
 )
 
-func freadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func freadFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("fread", 2, "handle, count"))
 	}
 
-	handleNum, ok := args[0].(*values.Number)
+	handleNum := args[0]
 
-	if !ok {
+	if !handleNum.IsNumber() {
 		return res.FailAt(1,
 			shared.Errors.InvalidArgTypePositionalWithHint("fread", shared.PositionFirst, shared.TypeNumber, "handle"))
 	}
 
-	countNum, ok := args[1].(*values.Number)
+	countNum := args[1]
 
-	if !ok {
+	if !countNum.IsNumber() {
 		return res.FailAt(2,
 			shared.Errors.InvalidArgTypePositionalWithHint("fread", shared.PositionSecond, shared.TypeNumber, "count"))
 	}
@@ -69,19 +69,19 @@ func freadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	}
 
 	var buffer []byte
-	var n int
+	var bytesRead int
 
 	if count == 0 {
 		buffer, err = io.ReadAll(reader)
-		n = len(buffer)
+		bytesRead = len(buffer)
 	} else {
 		buffer = make([]byte, count)
-		n, err = io.ReadFull(reader, buffer)
+		bytesRead, err = io.ReadFull(reader, buffer)
 	}
 
 	if err != nil && err != io.EOF && err != io.ErrUnexpectedEOF {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
-	return res.Success(values.NewBytes(buffer[:n]).SetContext(ctx))
+	return res.Success(values.NewBytes(buffer[:bytesRead]))
 }

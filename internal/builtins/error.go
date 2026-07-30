@@ -11,14 +11,14 @@ import (
 	"chip-go/internal/values"
 )
 
-func errorFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func errorFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("error", 1, "error message"))
 	}
 
-	message, ok := args[0].(*values.String)
+	message, ok := values.AsString(args[0])
 
 	if !ok {
 		return res.FailAt(1,

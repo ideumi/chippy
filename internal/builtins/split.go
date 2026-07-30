@@ -12,21 +12,21 @@ import (
 	"strings"
 )
 
-func splitFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func splitFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("split", 2, "string, delimiter"))
 	}
 
-	stringArg, ok := args[0].(*values.String)
+	stringArg, ok := values.AsString(args[0])
 
 	if !ok {
 		return res.FailAt(1,
 			shared.Errors.InvalidArgTypePositionalWithHint("split", shared.PositionFirst, shared.TypeString, "string"))
 	}
 
-	delimiterArg, ok := args[1].(*values.String)
+	delimiterArg, ok := values.AsString(args[1])
 
 	if !ok {
 		return res.FailAt(2,
@@ -45,10 +45,10 @@ func splitFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	elements := make([]values.Value, len(parts))
 
 	for i, part := range parts {
-		elements[i] = values.NewString(part).SetContext(ctx)
+		elements[i] = values.NewString(part)
 	}
 
 	result := values.NewList(elements)
 
-	return res.Success(result.SetContext(ctx))
+	return res.Success(result)
 }

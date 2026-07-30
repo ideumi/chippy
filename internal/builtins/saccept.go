@@ -14,7 +14,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func sacceptFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func sacceptFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -22,9 +22,9 @@ func sacceptFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 	}
 
 	// Get server handle argument
-	handleNum, ok := args[0].(*values.Number)
+	handleNum := args[0]
 
-	if !ok {
+	if !handleNum.IsNumber() {
 		return res.FailAt(1,
 			shared.Errors.InvalidArgTypeWithHint("saccept", shared.TypeNumber, "serverHandle"))
 	}
@@ -59,7 +59,7 @@ func sacceptFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 	conn, err := serverSocket.Listener.Accept()
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
 	// Create new socket handle for the accepted connection
@@ -72,5 +72,5 @@ func sacceptFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 
 	registry.Sockets.Store(clientHandle, clientSocket)
 
-	return res.Success(values.NewNumber(clientHandle).SetContext(ctx))
+	return res.Success(values.NewNumber(clientHandle))
 }

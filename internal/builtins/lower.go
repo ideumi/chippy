@@ -12,14 +12,14 @@ import (
 	"strings"
 )
 
-func lowerFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func lowerFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("lower", 1, "string"))
 	}
 
-	stringArg, ok := args[0].(*values.String)
+	stringArg, ok := values.AsString(args[0])
 
 	if !ok {
 		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("lower", shared.TypeString, "string"))
@@ -28,5 +28,5 @@ func lowerFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	str := stringArg.Value
 	result := strings.ToLower(str)
 
-	return res.Success(values.NewString(result).SetContext(ctx))
+	return res.Success(values.NewString(result))
 }

@@ -13,16 +13,16 @@ import (
 	"chip-go/internal/values"
 )
 
-func fsyncFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func fsyncFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("fsync", 1, "handle"))
 	}
 
-	handleNum, ok := args[0].(*values.Number)
+	handleNum := args[0]
 
-	if !ok {
+	if !handleNum.IsNumber() {
 		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("fsync", shared.TypeNumber, "handle"))
 	}
 
@@ -43,8 +43,8 @@ func fsyncFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	err = file.Sync()
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
-	return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
+	return res.Success(values.NewString(constants.STR_OK))
 }

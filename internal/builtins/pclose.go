@@ -14,16 +14,16 @@ import (
 	"os/exec"
 )
 
-func pcloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func pcloseFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("pclose", 1, "handle"))
 	}
 
-	handleNum, ok := args[0].(*values.Number)
+	handleNum := args[0]
 
-	if !ok {
+	if !handleNum.IsNumber() {
 		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("pclose", shared.TypeNumber, "handle"))
 	}
 
@@ -72,9 +72,9 @@ func pcloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			exitCode = exitErr.ExitCode()
 		} else {
 			// Some other error (process could not run etc.)
-			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+			return res.Success(values.NewString(constants.STR_ERR))
 		}
 	}
 
-	return res.Success(values.NewNumber(exitCode).SetContext(ctx))
+	return res.Success(values.NewNumber(exitCode))
 }

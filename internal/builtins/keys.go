@@ -11,14 +11,14 @@ import (
 	"chip-go/internal/values"
 )
 
-func keysFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func keysFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("keys", 1, "map"))
 	}
 
-	mapVal, ok := args[0].(*values.Map)
+	mapVal, ok := values.AsMap(args[0])
 
 	if !ok {
 		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("keys", shared.TypeMap, "map"))
@@ -27,8 +27,8 @@ func keysFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	elements := make([]values.Value, len(mapVal.Keys))
 
 	for i, key := range mapVal.Keys {
-		elements[i] = values.NewString(key).SetContext(ctx)
+		elements[i] = values.NewString(key)
 	}
 
-	return res.Success(values.NewList(elements).SetContext(ctx))
+	return res.Success(values.NewList(elements))
 }
