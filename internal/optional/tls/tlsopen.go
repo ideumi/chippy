@@ -16,7 +16,7 @@ import (
 	"strconv"
 )
 
-func tlsopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func tlsopenFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 3 {
@@ -24,7 +24,7 @@ func tlsopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "open"), 3, "host, port, verify"))
 	}
 
-	hostStr, ok := args[0].(*values.String)
+	hostStr, ok := values.AsString(args[0])
 
 	if !ok {
 		return res.FailAt(1,
@@ -32,9 +32,9 @@ func tlsopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 				optional.Prefixed(OptionalName, "open"), shared.PositionFirst, shared.TypeString, "host"))
 	}
 
-	portNum, ok := args[1].(*values.Number)
+	portNum := args[1]
 
-	if !ok {
+	if !portNum.IsNumber() {
 		return res.FailAt(2,
 			shared.Errors.InvalidArgTypePositionalWithHint(
 				optional.Prefixed(OptionalName, "open"), shared.PositionSecond, shared.TypeNumber, "port"))
@@ -54,13 +54,12 @@ func tlsopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 
 	verify := true
 
-	switch typed := args[2].(type) {
-	case *values.String:
-		if typed.Value == "false" || typed.Value == "" {
+	if str, ok := values.AsString(args[2]); ok {
+		if str.Value == "false" || str.Value == "" {
 			verify = false
 		}
-	case *values.Number:
-		if !typed.IsTrue() {
+	} else if args[2].IsNumber() {
+		if !args[2].IsTrue() {
 			verify = false
 		}
 	}
@@ -74,7 +73,7 @@ func tlsopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 	conn, err := tls.Dial("tcp", address, tlsConfig)
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
 	handle := getNextTLSHandle(ctx)
@@ -85,5 +84,5 @@ func tlsopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 		Closed: false,
 	})
 
-	return res.Success(values.NewNumber(handle).SetContext(ctx))
+	return res.Success(values.NewNumber(handle))
 }

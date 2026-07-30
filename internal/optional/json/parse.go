@@ -14,7 +14,7 @@ import (
 	"encoding/json"
 )
 
-func parseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func parseFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -22,7 +22,7 @@ func parseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "parse"), 1, "jsonStr"))
 	}
 
-	jsonStr, ok := args[0].(*values.String)
+	jsonStr, ok := values.AsString(args[0])
 
 	if !ok {
 		return res.FailAt(1,
@@ -32,7 +32,7 @@ func parseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	var raw interface{}
 
 	if err := json.Unmarshal([]byte(jsonStr.Value), &raw); err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
 	result := unmarshalValue(raw, ctx)

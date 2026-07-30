@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-func formatrequestFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func formatrequestFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 4 {
@@ -23,7 +23,7 @@ func formatrequestFunction(args []values.Value, ctx values.Ctx) *values.RuntimeR
 			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "formatrequest"), 4, "method, path, headers, body"))
 	}
 
-	methodStr, ok := args[0].(*values.String)
+	methodStr, ok := values.AsString(args[0])
 
 	if !ok {
 		return res.FailAt(1,
@@ -31,7 +31,7 @@ func formatrequestFunction(args []values.Value, ctx values.Ctx) *values.RuntimeR
 				optional.Prefixed(OptionalName, "formatrequest"), shared.PositionFirst, shared.TypeString, "method"))
 	}
 
-	pathStr, ok := args[1].(*values.String)
+	pathStr, ok := values.AsString(args[1])
 
 	if !ok {
 		return res.FailAt(2,
@@ -39,7 +39,7 @@ func formatrequestFunction(args []values.Value, ctx values.Ctx) *values.RuntimeR
 				optional.Prefixed(OptionalName, "formatrequest"), shared.PositionSecond, shared.TypeString, "path"))
 	}
 
-	headersList, ok := args[2].(*values.List)
+	headersList, ok := values.AsList(args[2])
 
 	if !ok {
 		return res.FailAt(3,
@@ -47,7 +47,7 @@ func formatrequestFunction(args []values.Value, ctx values.Ctx) *values.RuntimeR
 				optional.Prefixed(OptionalName, "formatrequest"), shared.PositionThird, shared.TypeList, "headers"))
 	}
 
-	bodyBytes, ok := args[3].(*values.Bytes)
+	bodyBytes, ok := values.AsBytes(args[3])
 
 	if !ok {
 		return res.FailAt(4,
@@ -76,15 +76,15 @@ func formatrequestFunction(args []values.Value, ctx values.Ctx) *values.RuntimeR
 	hasConnection := false
 
 	for _, elem := range headersList.Elements {
-		pair, ok := elem.(*values.List)
+		pair, ok := values.AsList(elem)
 
 		if !ok || len(pair.Elements) != 2 {
 			return res.FailAt(3,
 				shared.Errors.InvalidValue("Headers must be a list of [key, value] pairs"))
 		}
 
-		key, ok1 := pair.Elements[0].(*values.String)
-		val, ok2 := pair.Elements[1].(*values.String)
+		key, ok1 := values.AsString(pair.Elements[0])
+		val, ok2 := values.AsString(pair.Elements[1])
 
 		if !ok1 || !ok2 {
 			return res.FailAt(3, shared.Errors.InvalidValue("Header keys and values must be strings"))
@@ -126,5 +126,5 @@ func formatrequestFunction(args []values.Value, ctx values.Ctx) *values.RuntimeR
 		buf.Write(bodyBytes.Data)
 	}
 
-	return res.Success(values.NewBytes(buf.Bytes()).SetContext(ctx))
+	return res.Success(values.NewBytes(buf.Bytes()))
 }

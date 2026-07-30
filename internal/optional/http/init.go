@@ -17,12 +17,12 @@ func init() {
 	optional.RegisterFactory(OptionalName, GetSection)
 }
 
-func GetSection() (map[string]*values.BuiltInFunction, map[string]values.Value) {
+func GetSection() (map[string]values.Value, map[string]values.Value) {
 	return getFunctions(), getConstants()
 }
 
-func getFunctions() map[string]*values.BuiltInFunction {
-	return map[string]*values.BuiltInFunction{
+func getFunctions() map[string]values.Value {
+	return map[string]values.Value{
 		optional.Prefixed(OptionalName, "parseurl"):      values.NewBuiltInFunction(optional.Prefixed(OptionalName, "parseurl"), parseurlFunction),
 		optional.Prefixed(OptionalName, "formatrequest"): values.NewBuiltInFunction(optional.Prefixed(OptionalName, "formatrequest"), formatrequestFunction),
 		optional.Prefixed(OptionalName, "parseresponse"): values.NewBuiltInFunction(optional.Prefixed(OptionalName, "parseresponse"), parseresponseFunction),

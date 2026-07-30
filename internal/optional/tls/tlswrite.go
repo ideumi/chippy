@@ -13,7 +13,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func tlswriteFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func tlswriteFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
@@ -21,7 +21,7 @@ func tlswriteFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult
 			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "write"), 2, "data, handle"))
 	}
 
-	dataBytes, ok := args[0].(*values.Bytes)
+	dataBytes, ok := values.AsBytes(args[0])
 
 	if !ok {
 		return res.FailAt(1,
@@ -29,9 +29,9 @@ func tlswriteFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult
 				optional.Prefixed(OptionalName, "write"), shared.PositionFirst, shared.TypeBytes, "data"))
 	}
 
-	handleNum, ok := args[1].(*values.Number)
+	handleNum := args[1]
 
-	if !ok {
+	if !handleNum.IsNumber() {
 		return res.FailAt(2,
 			shared.Errors.InvalidArgTypePositionalWithHint(
 				optional.Prefixed(OptionalName, "write"), shared.PositionSecond, shared.TypeNumber, "handle"))
@@ -57,8 +57,8 @@ func tlswriteFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult
 	n, err := tlsHandle.Conn.Write(dataBytes.Data)
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
-	return res.Success(values.NewNumber(n).SetContext(ctx))
+	return res.Success(values.NewNumber(n))
 }

@@ -13,7 +13,7 @@ import (
 	"chip-go/internal/values"
 )
 
-func tlscloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func tlscloseFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -21,9 +21,9 @@ func tlscloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult
 			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "close"), 1, "handle"))
 	}
 
-	handleNum, ok := args[0].(*values.Number)
+	handleNum := args[0]
 
-	if !ok {
+	if !handleNum.IsNumber() {
 		return res.FailAt(1,
 			shared.Errors.InvalidArgTypeWithHint(
 				optional.Prefixed(OptionalName, "close"), shared.TypeNumber, "handle"))
@@ -52,8 +52,8 @@ func tlscloseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult
 	removeTLSHandle(ctx, handle)
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
-	return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
+	return res.Success(values.NewString(constants.STR_OK))
 }

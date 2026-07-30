@@ -14,7 +14,7 @@ import (
 	"encoding/json"
 )
 
-func stringifyFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func stringifyFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -25,14 +25,14 @@ func stringifyFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResul
 	goValue, err := marshalValue(args[0], map[values.Value]bool{}, 0)
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
 	jsonBytes, err := json.Marshal(goValue)
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
-	return res.Success(values.NewString(string(jsonBytes)).SetContext(ctx))
+	return res.Success(values.NewString(string(jsonBytes)))
 }

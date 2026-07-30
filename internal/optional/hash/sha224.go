@@ -14,7 +14,7 @@ import (
 	"crypto/sha256"
 )
 
-func sha224Function(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func sha224Function(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -22,7 +22,7 @@ func sha224Function(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "sha224"), 1, "bytes"))
 	}
 
-	bytesVal, ok := args[0].(*values.Bytes)
+	bytesVal, ok := values.AsBytes(args[0])
 
 	if !ok {
 		return res.FailAt(1,

@@ -14,7 +14,7 @@ import (
 	"encoding/base64"
 )
 
-func base64decodeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func base64decodeFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -22,7 +22,7 @@ func base64decodeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeRe
 			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "base64decode"), 1, "text"))
 	}
 
-	str, ok := args[0].(*values.String)
+	str, ok := values.AsString(args[0])
 
 	if !ok {
 		return res.FailAt(1,
@@ -32,8 +32,8 @@ func base64decodeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeRe
 	decoded, err := base64.StdEncoding.DecodeString(str.Value)
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
-	return res.Success(values.NewBytes(decoded).SetContext(ctx))
+	return res.Success(values.NewBytes(decoded))
 }

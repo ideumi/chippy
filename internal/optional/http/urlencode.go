@@ -13,7 +13,7 @@ import (
 	"net/url"
 )
 
-func urlencodeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func urlencodeFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -21,7 +21,7 @@ func urlencodeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResul
 			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "urlencode"), 1, "text"))
 	}
 
-	str, ok := args[0].(*values.String)
+	str, ok := values.AsString(args[0])
 
 	if !ok {
 		return res.FailAt(1,
@@ -30,5 +30,5 @@ func urlencodeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResul
 
 	encoded := url.QueryEscape(str.Value)
 
-	return res.Success(values.NewString(encoded).SetContext(ctx))
+	return res.Success(values.NewString(encoded))
 }

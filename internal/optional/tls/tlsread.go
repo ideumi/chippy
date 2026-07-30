@@ -14,7 +14,7 @@ import (
 	"io"
 )
 
-func tlsreadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func tlsreadFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
@@ -22,17 +22,17 @@ func tlsreadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "read"), 2, "handle, maxBytes"))
 	}
 
-	handleNum, ok := args[0].(*values.Number)
+	handleNum := args[0]
 
-	if !ok {
+	if !handleNum.IsNumber() {
 		return res.FailAt(1,
 			shared.Errors.InvalidArgTypePositionalWithHint(
 				optional.Prefixed(OptionalName, "read"), shared.PositionFirst, shared.TypeNumber, "handle"))
 	}
 
-	maxBytesNum, ok := args[1].(*values.Number)
+	maxBytesNum := args[1]
 
-	if !ok {
+	if !maxBytesNum.IsNumber() {
 		return res.FailAt(2,
 			shared.Errors.InvalidArgTypePositionalWithHint(
 				optional.Prefixed(OptionalName, "read"), shared.PositionSecond, shared.TypeNumber, "maxBytes"))
@@ -72,15 +72,15 @@ func tlsreadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 
 	// If we got data, return it (even if EOF came with it)
 	if n > 0 {
-		return res.Success(values.NewBytes(buffer[:n]).SetContext(ctx))
+		return res.Success(values.NewBytes(buffer[:n]))
 	}
 
 	// n == 0: no data read
 	// Treat EOF and explicit "no error" as clean connection close
 	if err == nil || err == io.EOF {
-		return res.Success(values.NewBytes([]byte{}).SetContext(ctx))
+		return res.Success(values.NewBytes([]byte{}))
 	}
 
 	// Any other error is a problem
-	return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+	return res.Success(values.NewString(constants.STR_ERR))
 }

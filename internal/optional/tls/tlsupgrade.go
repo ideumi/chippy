@@ -15,7 +15,7 @@ import (
 	"crypto/tls"
 )
 
-func tlsupgradeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func tlsupgradeFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 3 {
@@ -24,15 +24,15 @@ func tlsupgradeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResu
 				optional.Prefixed(OptionalName, "upgrade"), 3, "socketHandle, certPath, keyPath"))
 	}
 
-	handleNum, ok := args[0].(*values.Number)
+	handleNum := args[0]
 
-	if !ok {
+	if !handleNum.IsNumber() {
 		return res.FailAt(1,
 			shared.Errors.InvalidArgTypePositionalWithHint(
 				optional.Prefixed(OptionalName, "upgrade"), shared.PositionFirst, shared.TypeNumber, "socketHandle"))
 	}
 
-	certPathStr, ok := args[1].(*values.String)
+	certPathStr, ok := values.AsString(args[1])
 
 	if !ok {
 		return res.FailAt(2,
@@ -40,7 +40,7 @@ func tlsupgradeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResu
 				optional.Prefixed(OptionalName, "upgrade"), shared.PositionSecond, shared.TypeString, "certPath"))
 	}
 
-	keyPathStr, ok := args[2].(*values.String)
+	keyPathStr, ok := values.AsString(args[2])
 
 	if !ok {
 		return res.FailAt(3,
@@ -78,7 +78,7 @@ func tlsupgradeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResu
 		registry.Sockets.Remove(socketHandle)
 		registry.Alloc.Free(socketHandle)
 
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
 	tlsConfig := &tls.Config{
@@ -92,7 +92,7 @@ func tlsupgradeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResu
 		registry.Sockets.Remove(socketHandle)
 		registry.Alloc.Free(socketHandle)
 
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
 	registry.Sockets.Remove(socketHandle)
@@ -106,5 +106,5 @@ func tlsupgradeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResu
 		Closed: false,
 	})
 
-	return res.Success(values.NewNumber(clientHandle).SetContext(ctx))
+	return res.Success(values.NewNumber(clientHandle))
 }

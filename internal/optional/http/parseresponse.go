@@ -16,7 +16,7 @@ import (
 	"strings"
 )
 
-func parseresponseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func parseresponseFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -24,7 +24,7 @@ func parseresponseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeR
 			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "parseresponse"), 1, "responseBytes"))
 	}
 
-	responseBytes, ok := args[0].(*values.Bytes)
+	responseBytes, ok := values.AsBytes(args[0])
 	if !ok {
 		return res.FailAt(1,
 			shared.Errors.InvalidArgTypeWithHint(
@@ -37,7 +37,7 @@ func parseresponseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeR
 	headerEnd := bytes.Index(data, []byte("\r\n\r\n"))
 
 	if headerEnd == -1 {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
 	headerSection := string(data[:headerEnd])
@@ -47,7 +47,7 @@ func parseresponseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeR
 	lines := strings.Split(headerSection, "\r\n")
 
 	if len(lines) == 0 {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
 	statusLine := lines[0]
@@ -55,13 +55,13 @@ func parseresponseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeR
 	parts := strings.SplitN(statusLine, " ", 3)
 
 	if len(parts) < 2 {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
 	statusCode, err := strconv.Atoi(parts[1])
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
 	/* status like required in RFC 9110/9112:
@@ -99,9 +99,9 @@ func parseresponseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeR
 		value := strings.TrimSpace(line[colonIdx+1:])
 
 		headersList = append(headersList, values.NewList([]values.Value{
-			values.NewString(key).SetContext(ctx),
-			values.NewString(value).SetContext(ctx),
-		}).SetContext(ctx))
+			values.NewString(key),
+			values.NewString(value),
+		}))
 
 		keyLower := strings.ToLower(key)
 
@@ -147,15 +147,15 @@ func parseresponseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeR
 	nativeMap := values.NewMapFromEntries(
 		[]string{"statusCode", "statusText", "headers", "body", "chunked"},
 		map[string]values.Value{
-			"statusCode": values.NewNumber(statusCode).SetContext(ctx),
-			"statusText": values.NewString(statusText).SetContext(ctx),
-			"headers":    values.NewList(headersList).SetContext(ctx),
-			"body":       values.NewBytes(body).SetContext(ctx),
-			"chunked":    values.NewNumber(boolToInt(isChunked)).SetContext(ctx),
+			"statusCode": values.NewNumber(statusCode),
+			"statusText": values.NewString(statusText),
+			"headers":    values.NewList(headersList),
+			"body":       values.NewBytes(body),
+			"chunked":    values.NewNumber(boolToInt(isChunked)),
 		},
 	)
 
-	return res.Success(nativeMap.SetContext(ctx))
+	return res.Success(nativeMap)
 }
 
 func boolToInt(flag bool) int {

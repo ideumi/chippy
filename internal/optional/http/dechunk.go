@@ -16,7 +16,7 @@ import (
 	"strings"
 )
 
-func dechunkFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func dechunkFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
@@ -24,7 +24,7 @@ func dechunkFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "dechunk"), 1, "chunkedBytes"))
 	}
 
-	chunkedBytes, ok := args[0].(*values.Bytes)
+	chunkedBytes, ok := values.AsBytes(args[0])
 
 	if !ok {
 		return res.FailAt(1,
@@ -41,7 +41,7 @@ func dechunkFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 		lineEnd := bytes.Index(data[pos:], []byte("\r\n"))
 
 		if lineEnd == -1 {
-			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+			return res.Success(values.NewString(constants.STR_ERR))
 		}
 
 		// Parse chunk size
@@ -57,7 +57,7 @@ func dechunkFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 		chunkSize, err := strconv.ParseInt(sizeLine, 16, 64)
 
 		if err != nil || chunkSize < 0 {
-			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+			return res.Success(values.NewString(constants.STR_ERR))
 		}
 
 		pos += lineEnd + 2 // Skip size line and \r\n
@@ -69,7 +69,7 @@ func dechunkFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 
 		// Read chunk data and compare against remaining length to avoid overflow
 		if chunkSize > int64(len(data)-pos) {
-			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+			return res.Success(values.NewString(constants.STR_ERR))
 		}
 
 		result.Write(data[pos : pos+int(chunkSize)])
@@ -77,11 +77,11 @@ func dechunkFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 
 		// Skip trailing \r\n after chunk data
 		if pos+2 > len(data) || data[pos] != '\r' || data[pos+1] != '\n' {
-			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+			return res.Success(values.NewString(constants.STR_ERR))
 		}
 
 		pos += 2
 	}
 
-	return res.Success(values.NewBytes(result.Bytes()).SetContext(ctx))
+	return res.Success(values.NewBytes(result.Bytes()))
 }

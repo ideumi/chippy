@@ -23,31 +23,31 @@ const (
 func unmarshalValue(val interface{}, ctx values.Ctx) values.Value {
 	switch typed := val.(type) {
 	case nil:
-		return values.NewString(jsonNull).SetContext(ctx)
+		return values.NewString(jsonNull)
 	case bool:
 		if typed {
-			return values.NewString(jsonTrue).SetContext(ctx)
+			return values.NewString(jsonTrue)
 		}
 
-		return values.NewString(jsonFalse).SetContext(ctx)
+		return values.NewString(jsonFalse)
 	case float64:
 		num, err := values.NewNumberFromFloat(typed)
 
 		if err != nil {
-			return values.NewString(constants.STR_ERR).SetContext(ctx)
+			return values.NewString(constants.STR_ERR)
 		}
 
-		return num.SetContext(ctx)
+		return num
 	case string:
-		return values.NewString(typed).SetContext(ctx)
+		return values.NewString(typed)
 	case []interface{}:
-		list := values.NewList([]values.Value{})
+		elements := make([]values.Value, 0, len(typed))
 
 		for _, item := range typed {
-			list.Elements = append(list.Elements, unmarshalValue(item, ctx))
+			elements = append(elements, unmarshalValue(item, ctx))
 		}
 
-		return list.SetContext(ctx)
+		return values.NewList(elements)
 	case map[string]interface{}:
 		/* NOTE:
 		 * Sort keys for repeatable output.
@@ -68,18 +68,17 @@ func unmarshalValue(val interface{}, ctx values.Ctx) values.Value {
 			entries[key] = unmarshalValue(typed[key], ctx)
 		}
 
-		return values.NewMapFromEntries(keys, entries).SetContext(ctx)
+		return values.NewMapFromEntries(keys, entries)
 	default:
-		return values.NewString(constants.STR_ERR).SetContext(ctx)
+		return values.NewString(constants.STR_ERR)
 	}
 }
 
 // marshalValue converts Chippy values to Go JSON values
 func marshalValue(val values.Value, seen map[values.Value]bool, depth int) (interface{}, error) {
-	switch typed := val.(type) {
-	case *values.Number:
-		if typed.IsInt() {
-			intVal, err := typed.AsInt()
+	if val.IsNumber() {
+		if val.IsInt() {
+			intVal, err := val.AsInt()
 
 			if err != nil {
 				return nil, err
@@ -88,10 +87,12 @@ func marshalValue(val values.Value, seen map[values.Value]bool, depth int) (inte
 			return intVal, nil
 		}
 
-		return typed.AsFloat(), nil
-	case *values.String:
+		return val.AsFloat(), nil
+	}
+
+	if str, ok := values.AsString(val); ok {
 		// Check for special JSON constants
-		switch typed.Value {
+		switch str.Value {
 		case jsonTrue:
 			return true, nil
 		case jsonFalse:
@@ -99,22 +100,24 @@ func marshalValue(val values.Value, seen map[values.Value]bool, depth int) (inte
 		case jsonNull:
 			return nil, nil
 		default:
-			return typed.Value, nil
+			return str.Value, nil
 		}
-	case *values.Map:
-		defer values.EnterWalk(typed, seen, depth)()
+	}
+
+	if mapVal, ok := values.AsMap(val); ok {
+		defer values.EnterWalk(val, seen, depth)()
 
 		result := make(map[string]interface{})
 
-		for _, key := range typed.Keys {
-			val := typed.Entries[key]
+		for _, key := range mapVal.Keys {
+			entry := mapVal.Entries[key]
 
-			if val == nil {
+			if entry.IsUnset() {
 				result[key] = nil
 				continue
 			}
 
-			goVal, err := marshalValue(val, seen, depth+1)
+			goVal, err := marshalValue(entry, seen, depth+1)
 
 			if err != nil {
 				return nil, err
@@ -124,12 +127,14 @@ func marshalValue(val values.Value, seen map[values.Value]bool, depth int) (inte
 		}
 
 		return result, nil
-	case *values.List:
-		defer values.EnterWalk(typed, seen, depth)()
+	}
 
-		result := make([]interface{}, len(typed.Elements))
+	if list, ok := values.AsList(val); ok {
+		defer values.EnterWalk(val, seen, depth)()
 
-		for i, elem := range typed.Elements {
+		result := make([]interface{}, len(list.Elements))
+
+		for i, elem := range list.Elements {
 			goVal, err := marshalValue(elem, seen, depth+1)
 
 			if err != nil {
@@ -140,7 +145,7 @@ func marshalValue(val values.Value, seen map[values.Value]bool, depth int) (inte
 		}
 
 		return result, nil
-	default:
-		return nil, fmt.Errorf("unsupported type")
 	}
+
+	return nil, fmt.Errorf("unsupported type")
 }

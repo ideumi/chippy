@@ -13,11 +13,11 @@ import (
 
 type Optional struct {
 	Name      string
-	Functions map[string]*values.BuiltInFunction
+	Functions map[string]values.Value
 	Constants map[string]values.Value
 }
 
-type OptionalFactory func() (map[string]*values.BuiltInFunction, map[string]values.Value)
+type OptionalFactory func() (map[string]values.Value, map[string]values.Value)
 
 var optionalFactories = make(map[string]OptionalFactory)
 
