@@ -109,6 +109,9 @@ or by using the...
 2. Extract: `tar -xf chippy-<version>-linux-<arch>.tar.xz`.
 3. Run `sudo ./install.sh` (or `./install.sh` on Termux) from inside the extracted directory.
 
+> I will only provide compiled artifacts for the most recent release, if a new release replaces it, the old artifacts will be erased on release and i will archive them privately. 
+> This is to not burden Codeberg with hosting files no one is likely to download, the hosting is free after all. If you need an old release, download the source code and [build it yourself](#building-from-source).
+
 ## Getting Started
 
 Once installed, the interpreter is `chippy`. Run `chippy --help` for an overview of the available commands.
