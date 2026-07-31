@@ -3,7 +3,7 @@
 # Combine configuration file
 #
 
-# Project metadata
+# Metadata
 
 var Project = "avant";
 var Version = "1.0.2";
@@ -31,8 +31,14 @@ if not iserr(homePath)
 Paths = Paths + ["../../lib"];
 Paths = Paths + ["/usr/lib/chippy"];
 
+# Dependencies combine shouldn't bundle and just keep as loads
+
+var External = [];
+
 # Options
+
+var Compile = true;
+var AddShebang = true;
 
 var StripComments = true;
 var StripWhitespace = true;
-var AddShebang = true;
