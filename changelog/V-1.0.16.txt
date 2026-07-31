@@ -1,0 +1,34 @@
+What's New:
+
+	- builtins:
+		- added winsize()
+		- added actor(function, arg1, arg2, ...), send(handle, value), receive(blocking), wait(handle), transfer(actor, handle) for concurrency
+		- added signal(), sigcatch(signums), sigfree(signums) for OS signal handling
+		- added CHIPRT constant
+		- loadopt(optional): loaded optionals are inherited by actors
+		- affected builtins and optionals updated to new handle system
+
+	- corelib:
+		- libterm.chh: removed GetTerminalSize() and DTSZ
+
+	- rr2:
+		- bug: function values no longer have their captured scope overwritten at the call site
+		- handles subsystem moved and rearchitected
+		- actor concurrency model added
+		- new orchestrator subsystem
+			- actor management
+			- message inboxes
+			- cross-actor handle transfer
+			- cross-actor value isolation
+			- deadlock detection
+		- reject bitwise and shift operations on decimal numbers outright
+
+	- misc:
+		- concurrent webserver example added under misc/server/mp
+		- minor cleanups
+
+FYI Breaking: If you use GetTerminalSize() from libterm.chh, update it to use the winsize() builtin and your program should work as before.
+RR2 will now throw a Runtime Error when decimal numbers are passed into bitwise or shift operations.
+
+1ba83d4bb5c9cbb9b6e6a20c789d128c6282b6f5da6cef10c57e14133b370ae7  chiplang-1.0.16-linux-aarch64.tar.xz
+032786522550f135caff4fce05f352e7cc116c3c469d0b5b9a345b4ce2f07b30  chiplang-1.0.16-linux-x86_64.tar.xz

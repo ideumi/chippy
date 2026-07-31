@@ -1,0 +1,15 @@
+What's New:
+
+	- doc:
+		- bug: documentation for list(value1, value2, ...) was inaccessible due to "list" special keyword
+			- "chippy doc" now gives the list of all available documentation topics
+			- Removed special index case
+				- index.chpdoc was removed
+
+FYI Breaking:
+
+	- "chippy doc list" now gives documentation for the list(value1, value2, ...) builtin
+	- "chippy doc" now gives the list of all available documentation topics
+
+786ccb0aa821a34b6ac94375758806e7bd2540ce8b915999d649603ea8823f38  chippy-1.0.24-linux-aarch64.tar.xz
+96601a93743b489295933fe6ac832ec0643d4f1e0cb552a294fe1ca7a333349c  chippy-1.0.24-linux-x86_64.tar.xz

@@ -1,0 +1,38 @@
+What's New:
+
+	- builtins:
+		- keys(map) added
+		- has(container, needle) added
+		- slice(container, start, end) added
+		- indexof(haystack, needle) extended to lists and bytes
+		- len(map) now supported
+		- type(value) now returns "map" for maps
+		- sort(list) is now stable
+		- str(value) on a list now quotes string elements
+		- substr(string, start, length) removed
+		- bsubstr(bytes, start, length) removed
+		- indexof(haystack, needle) now returns err on an empty string or bytes needle instead of RTError
+
+	- corelib:
+		- libmap.chh removed
+		- libstrings.chh: Contains(value, needle) removed
+		- libhttp.chh: updated to use native maps
+		- libjson.chh: JsonParse now returns native maps
+
+	- optionals:
+		- http: parseresponse and parseurl now return native maps
+		- json: objects now returned as native maps
+
+	- rr2:
+		- map type added
+		- b and m are now reserved keywords
+
+FYI Breaking: substr(string, start, length) and bsubstr(bytes, start, length) removed, migrate your code to use slice(container, start, end) (take into account that the third arg has changed from length to end position, see chippy doc slice)
+libmap.chh removed, migrate your code to use native maps (chippy doc listops will help).
+libstrings.chh: Contains(value, needle) was removed, migrate your code to use has(container, needle) (see chippy doc has).
+b and m can no longer be used as variable or parameter names (chippy check will flag those in your code).
+HTTP/JSON return values changed from libmap format to native maps, your code will have to be migrated to native maps (chippy doc listops will help).
+indexof(haystack, needle) now returns err on an empty string or bytes needle instead of RTError
+
+591b10d9318f032f101da232acf90a326a6e8066a9212cc02c448e80a3e139be  chiplang-1.0.14-linux-aarch64.tar.xz
+7b4bafe9e2d8bbaa595935301056728981448c89234afbe77c5ffb2c343f90cc  chiplang-1.0.14-linux-x86_64.tar.xz

@@ -1,0 +1,44 @@
+What's New:
+
+	- rr2:
+		- lexer: bytes and maps are now separate lexer token types and no longer just keywords
+		- removed platform checks for unsupported platforms
+
+	- builtins:
+		- added timezone(timestamp)
+
+	- corelib:
+		- libtime.chh:
+			- added EquationOfTime(timestamp)
+			- added SolarOffset(longitude, timestamp)
+
+		- libgregorian.chh: add SetLocalTimezoneOffset() + some formatting
+
+		- libavantjien.chh:
+			- decoupled from libgregorian
+			- apparent-solar time calculation
+			- realign cycles
+
+		- libavantjien.chh:
+			- added AVANTLONGITUDE
+			- added AvantjienSolarOffset(timestamp)
+			- added AvantjienHour(timestamp)
+			- added AvantjienMinute(timestamp)
+			- added FormatAvantjienClock(timestamp)
+			- added FormatAvantjienTimePeriod(timestamp)
+
+	- doc:
+		- chippy doc <file> <symbol> now allows searching for symbol names in files by using <symbol> as a search query
+
+	- installer:
+		- removed legacy uninstallation path for old project name
+
+	- misc:
+		- go.mod bumped to 1.26.4
+		- avant:
+			- updated to new libavantjien.chh
+			- add config file logic for longitude configuration
+			- drop timezone.chh
+
+da6d24009f0615ce3689004c6a124ca4023ac79f7380198e6cabf5b8efbc3cbf  chippy-1.0.22-linux-aarch64.tar.xz
+f18caefca5f8f5cd5170b435ef6465a0cccc68acf4b1f0b97337d694db63f89d  chippy-1.0.22-linux-x86_64.tar.xz

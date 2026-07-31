@@ -1,0 +1,35 @@
+What's New:
+
+	- builtins:
+		- bsubstr(bytes, start, length) added
+		- spawn(args) added
+
+	- corelib:
+		- added libhash.chh to corelib
+			- md5, sha1, sha224, sha256, sha384, sha512, sha3-224, sha3-256, sha3-384, sha3-512
+		- libhttp.chh: bug: Host header missing port for non-standard ports
+		- libhttp.chh: bug: cross-origin redirect check now includes port
+		- libhttp.chh: bug: Transfer-Encoding now takes precedence over Content-Length
+		- libhttp.chh: bug: duplicate Content-Length and Server headers in server responses
+		- libhttp.chh: bug: relative redirect path normalization mangled query strings
+		- libhttp.chh: chunked transfer encoding now uses proper chunk framing
+		- libhttp.chh: add close-delimited response support
+		- libhttp.chh: add 1xx informational response handling
+		- libhttp.chh: add HttpParseRequest(requestBytes) with full header and body parsing
+		- libhttp.chh: HttpServe / HttpServeTLS upgraded to full request parsing with body support
+		- libhttp.chh: remove ParseHttpRequestLine, replaced by HttpParseRequest
+		- libhttp.chh: general cleanup and refactoring
+		- libsubprocess.chh: move Spawn(command) to new spawn(args) builtin
+
+	- optionals:
+		- added hash optional
+		- http: bug: formatrequest now always sends Content-Length, even for empty bodies
+		- http: bug: parseresponse no longer clamps body to Content-Length when chunked
+
+	- other stuff:
+		- fix misc/mandelbrot no longer working due to the fix in 709788fe12
+
+FYI Breaking: ParseHttpRequestLine(requestBytes) has been removed, use HttpParseRequest(requestBytes) instead. Spawn(command) now uses the spawn(args) builtin, meaning the spawned process is no longer bound to its parent.
+
+346aede9ed3c83c9b561e8af4819fe428f86a3f9405130bd2a36685bfbcadbcc  chiplang-1.0.13-linux-aarch64.tar.xz
+241825b1414e38276596b6ac4bac11c846be447bee790c3dc90d645977f269ea  chiplang-1.0.13-linux-x86_64.tar.xz

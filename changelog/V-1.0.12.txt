@@ -1,0 +1,17 @@
+What's New:
+
+	- builtins:
+		- utime(path, atime, mtime) and lutime(path, atime, mtime) added
+		- lstat, stat: bug: expose STATMTIME, STATATIME, STATCTIME properly
+
+	- corelib:
+		- libtermios.chh: bug: fix missing parameter prefix in SetTitle
+
+	- rr2:
+		- interpreter: bug: call to SetContext in visitVarAccessNode corrupts function scope on reentry
+
+	- other stuff:
+		- update build system to allow for cross compilation for amd64 and aarch64 with make release-all
+
+4b80391a92465626832aa7f51b430d24ed3457f25d07a2bbad9d4b1ca9af9172  chiplang-1.0.12-linux-aarch64.tar.xz
+d4ef3df5dfc081d81c27189694aba2e5d0d8659c99b6d5c589324a0d99d3c25f  chiplang-1.0.12-linux-x86_64.tar.xz

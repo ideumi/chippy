@@ -1,0 +1,39 @@
+What's New:
+
+	- combine:
+		- chippy combine new created combine.chp with spaces instead of tabs
+
+	- builtins:
+		- added sinfo(handle)
+		- made error messages of some builtins more consistent
+
+	- optionals:
+		- removed _tls_accept_(socketHandle, certPath, keyPath)
+		- added _tls_upgrade_(socketHandle, certPath, keyPath) and _tls_info_(handle)
+		- made error message in _tls_close_(handle) more consistent
+
+	- corelib:
+		- libhttp.chh: HttpServe(port, handler, state) and HttpServeTLS(port, certPath, keyPath, handler, state) are now multi actor and no longer single threaded
+		- libtls.chh: added TlsUpgrade(socketHandle, certPath, keyPath) and TlsInfo(handle)
+		- libtls.chh: simplified TlsAccept to use TlsUpgrade
+
+	- misc:
+		- removed server/mp example
+		- ported server/tls and server/sockets to multi actor HttpServe(TLS)
+		- added peer information to server/tls and server/sockets examples
+		- added TLS SNI information to server/tls example
+
+	- scripts:
+		- added net-install.sh script
+
+FYI Breaking:
+
+	- libhttp.chh: HttpServe(port, handler, state) and HttpServeTLS(port, certPath, keyPath, handler, state) are now multi actor and no longer single threaded, your code will need to be updated:
+		- HttpServe(port, handler, state) and HttpServeTLS(port, certPath, keyPath, handler, state) have gained a state parameter
+		- The handlers signature is now handler(state, request):
+			- See:
+				chippy doc /usr/lib/chiplang/libhttp.chh "HttpServe(port, handler, state)"
+				chippy doc /usr/lib/chiplang/libhttp.chh "HttpServeTLS(port, certPath, keyPath, handler, state)"
+
+c95b2079669baeb9a13bc54a83e6ed13f8eef0ebfdcca1ebd032fd206f5da4b6  chiplang-1.0.18-linux-aarch64.tar.xz
+820fc86410eebe2d62894ddecc69a4b88941ef44b5d77fcdabd51889c35fbd61  chiplang-1.0.18-linux-x86_64.tar.xz
