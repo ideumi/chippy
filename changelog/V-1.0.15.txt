@@ -29,6 +29,3 @@ What's New:
 FYI Breaking: libtermios.chh is no longer a thing, have your program use libterm.chh instead, the API is the same so no code changes are needed.
 If you used BytesToHex(bytes) from libhash.chh, you now need to load libbytes.chh instead.
 band, bor, bnot, bxor, and xor can no longer be used as variable or parameter names (chippy check will flag those in your code).
-
-68017ad5ce65e54a31fdc770bebee55edda4aa3305c6344971dc7fa4fc2ca297  chiplang-1.0.15-linux-aarch64.tar.xz
-b675bc06e962af8be163e42bd5ad04e9f5093f3b3a425b1f397c24223207df70  chiplang-1.0.15-linux-x86_64.tar.xz

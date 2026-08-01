@@ -47,6 +47,3 @@ FYI Breaking:
 		- Reinstall your editor integration from ide/
 
 	- The project url has changed to https://codeberg.org/ideumi/chippy, update your deployment scripts, though codeberg should redirect the old url for some time, so no rush
-
-de434544c4e692f10eeaf50f605cf52ab6bd4a95d4ebba687dabcd73520b0093  chippy-1.0.20-linux-aarch64.tar.xz
-b5dd9744cd4a9b8ff183eee339a9cca83c27110c66e0adf8cf75e3193a83d2e5  chippy-1.0.20-linux-x86_64.tar.xz

@@ -46,6 +46,3 @@ FYI Breaking:
 	libmath.chh PI and E were trimmed by one decimal digit.
 
 	Integer arithmetic above 2⁵³ used to lose precision silently. It no longer does. Check your code.
-
-7c8a6dd0e6944355c280ebd7fd38ca5643b316368e3e1889575c16a5309d2151  chiplang-1.0.17-linux-aarch64.tar.xz
-7bf162802e29f943e4b9e196fdfdaed8109afb043095a82a9f6a69ba13fc5332  chiplang-1.0.17-linux-x86_64.tar.xz

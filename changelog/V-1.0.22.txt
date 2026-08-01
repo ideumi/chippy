@@ -39,6 +39,3 @@ What's New:
 			- updated to new libavantjien.chh
 			- add config file logic for longitude configuration
 			- drop timezone.chh
-
-da6d24009f0615ce3689004c6a124ca4023ac79f7380198e6cabf5b8efbc3cbf  chippy-1.0.22-linux-aarch64.tar.xz
-f18caefca5f8f5cd5170b435ef6465a0cccc68acf4b1f0b97337d694db63f89d  chippy-1.0.22-linux-x86_64.tar.xz

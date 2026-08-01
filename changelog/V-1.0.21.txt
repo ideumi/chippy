@@ -17,6 +17,3 @@ What's New:
 
 	- misc:
 		- formatted code with chippy format all
-
-df98396a7cbd5227827a27f1df4060a6d131923cf4c3c55ca26b3ebf46cf1d3a  chippy-1.0.21-linux-aarch64.tar.xz
-7bcefbaf2543051d0fa6c07c3215450c23ee00810707e675b6bdc8ca092020dd  chippy-1.0.21-linux-x86_64.tar.xz

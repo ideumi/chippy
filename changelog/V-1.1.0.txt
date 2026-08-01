@@ -1,0 +1,60 @@
+What's New:
+
+	- New code name for the 1.1.x series:
+		- 'rixosa' (after Machetornis rixosa)
+			- CHIPCN has been updated
+
+	- rr2:
+		- the RoadRunner2 tree walking interpreter has been removed
+
+	- modena:
+		- added the Modena engine
+			- Modena is a new execution engine consisting of a bytecode compiler, disassembler, bytecode virtual machine as well as a serializer for the bytecode file format
+				- the engine executes code now much faster than RR2
+				- the engine now uses significantly less memory than RR2
+				- the engine now has a much cleaner scoping model
+
+		- load(filename) now accepts compiled bytecode files as well as source files
+		- exceeding the maximum recursion depth now raises RTError instead of crashing
+		- builtin argument count errors now point at the call itself rather than at the first argument
+		- indexing a map with a key that is not set now raises RTError
+
+	- parser:
+		- exponentials are now right associative
+
+	- builtins:
+		- updated builtins for modena
+		- several cleanups and streamlining
+
+	- optionals:
+		- updated optionals for modena
+
+	- chippy:
+		- added "chippy disasm <file>" command
+		- added "chippy compile <source>", "chippy compile <source> <out>" commands
+
+	- combine:
+		- updated for modena
+		- Added "Compile" option to the combine configuration
+			- Updated the "chippy combine new" default template
+
+	- orchestrator:
+		- updated for modena
+		- bug: do not report a deadlock when the wait(handle) target is already done
+
+	- misc:
+		- various cleanups, streamlining and improvements across the entire codebase
+
+FYI Breaking:
+
+	- Alongside the new engine comes a new scoping model. Chippy now uses a new model that features a Global, Function as well as a Block Scope which may break your existing applications if you relied on the previous scoping model for functionality. I presume most well written code will work just fine. See "chippy doc scoping".
+
+	- "chippy combine new" now produces a configuration that produces compiled bundles by default. Regenerate your combine.chp files.
+
+	- "chippy combine" now produces compiled bundles by default, to disable this, declare "var Compile = false;" in your combine.chp.
+
+	- Indexing a map with a key that is not set now raises RTError instead of returning err. If your code accesses maps without checking if the key is contained via has(container, needle), your code will need to be updated.
+
+	- Exponentiation aka (x^y) is now right associative.
+
+	- Since Modena is a new engine and the changes were rather ambitious, while I have conducted extensive testing of the language features, there is a possibility that bugs and issues may have snuck their way in that I have not found yet. If you find such an issue, I would appreciate it if you could file a bug report on the issues page: https://codeberg.org/ideumi/chippy/issues

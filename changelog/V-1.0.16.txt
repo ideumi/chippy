@@ -29,6 +29,3 @@ What's New:
 
 FYI Breaking: If you use GetTerminalSize() from libterm.chh, update it to use the winsize() builtin and your program should work as before.
 RR2 will now throw a Runtime Error when decimal numbers are passed into bitwise or shift operations.
-
-1ba83d4bb5c9cbb9b6e6a20c789d128c6282b6f5da6cef10c57e14133b370ae7  chiplang-1.0.16-linux-aarch64.tar.xz
-032786522550f135caff4fce05f352e7cc116c3c469d0b5b9a345b4ce2f07b30  chiplang-1.0.16-linux-x86_64.tar.xz

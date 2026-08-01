@@ -33,6 +33,3 @@ libstrings.chh: Contains(value, needle) was removed, migrate your code to use ha
 b and m can no longer be used as variable or parameter names (chippy check will flag those in your code).
 HTTP/JSON return values changed from libmap format to native maps, your code will have to be migrated to native maps (chippy doc listops will help).
 indexof(haystack, needle) now returns err on an empty string or bytes needle instead of RTError
-
-591b10d9318f032f101da232acf90a326a6e8066a9212cc02c448e80a3e139be  chiplang-1.0.14-linux-aarch64.tar.xz
-7b4bafe9e2d8bbaa595935301056728981448c89234afbe77c5ffb2c343f90cc  chiplang-1.0.14-linux-x86_64.tar.xz

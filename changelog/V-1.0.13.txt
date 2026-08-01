@@ -30,6 +30,3 @@ What's New:
 		- fix misc/mandelbrot no longer working due to the fix in 709788fe12
 
 FYI Breaking: ParseHttpRequestLine(requestBytes) has been removed, use HttpParseRequest(requestBytes) instead. Spawn(command) now uses the spawn(args) builtin, meaning the spawned process is no longer bound to its parent.
-
-346aede9ed3c83c9b561e8af4819fe428f86a3f9405130bd2a36685bfbcadbcc  chiplang-1.0.13-linux-aarch64.tar.xz
-241825b1414e38276596b6ac4bac11c846be447bee790c3dc90d645977f269ea  chiplang-1.0.13-linux-x86_64.tar.xz

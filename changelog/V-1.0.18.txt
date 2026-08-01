@@ -34,6 +34,3 @@ FYI Breaking:
 			- See:
 				chippy doc /usr/lib/chiplang/libhttp.chh "HttpServe(port, handler, state)"
 				chippy doc /usr/lib/chiplang/libhttp.chh "HttpServeTLS(port, certPath, keyPath, handler, state)"
-
-c95b2079669baeb9a13bc54a83e6ed13f8eef0ebfdcca1ebd032fd206f5da4b6  chiplang-1.0.18-linux-aarch64.tar.xz
-820fc86410eebe2d62894ddecc69a4b88941ef44b5d77fcdabd51889c35fbd61  chiplang-1.0.18-linux-x86_64.tar.xz
