@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/chmod.go
+ * Chippy - internal/builtins/chmod.go
  *
  */
 
@@ -9,45 +9,30 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/values"
 	"strconv"
 	"syscall"
 )
 
-func chmodFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func chmodFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("chmod", 2, "path, mode")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("chmod", 2, "path, mode"))
 	}
 
-	pathStr, ok := args[0].(*values.String)
+	pathStr, ok := values.AsString(args[0])
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("chmod", shared.PositionFirst, shared.TypeString, "path")))
+		return res.FailAt(1,
+			shared.Errors.InvalidArgTypePositionalWithHint("chmod", shared.PositionFirst, shared.TypeString, "path"))
 	}
 
-	modeNum, ok := args[1].(*values.Number)
+	modeNum := args[1]
 
-	if !ok {
-		posStart, posEnd := args[1].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("chmod", shared.PositionSecond, shared.TypeNumber, "mode")))
+	if !modeNum.IsNumber() {
+		return res.FailAt(2,
+			shared.Errors.InvalidArgTypePositionalWithHint("chmod", shared.PositionSecond, shared.TypeNumber, "mode"))
 	}
 
 	mode64, err := modeNum.AsInt()
@@ -61,18 +46,14 @@ func chmodFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	octalMode, err := strconv.ParseInt(modeStr, 8, 32)
 
 	if err != nil {
-		posStart, posEnd := args[1].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			"Invalid octal mode: "+modeStr))
+		return res.FailAt(2, "Invalid octal mode: "+modeStr)
 	}
 
 	err = syscall.Chmod(pathStr.Value, uint32(octalMode))
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
-	return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
+	return res.Success(values.NewString(constants.STR_OK))
 }

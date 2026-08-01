@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/optional/http/base64encode.go
+ * Chippy - internal/optional/http/base64encode.go
  *
  */
 
@@ -8,38 +8,27 @@ package http
 
 import (
 	"chip-go/internal/builtins/shared"
-	"chip-go/internal/errors"
 	"chip-go/internal/optional"
 	"chip-go/internal/values"
 	"encoding/base64"
 )
 
-func base64encodeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func base64encodeFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "base64encode"), 1, "bytes")))
+		return res.Fail(
+			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "base64encode"), 1, "bytes"))
 	}
 
-	dataBytes, ok := args[0].(*values.Bytes)
+	dataBytes, ok := values.AsBytes(args[0])
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint(optional.Prefixed(OptionalName, "base64encode"), shared.TypeBytes, "bytes")))
+		return res.FailAt(1,
+			shared.Errors.InvalidArgTypeWithHint(optional.Prefixed(OptionalName, "base64encode"), shared.TypeBytes, "bytes"))
 	}
 
 	encoded := base64.StdEncoding.EncodeToString(dataBytes.Data)
 
-	return res.Success(values.NewString(encoded).SetContext(ctx))
+	return res.Success(values.NewString(encoded))
 }

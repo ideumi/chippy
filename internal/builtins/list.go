@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/list.go
+ * Chippy - internal/builtins/list.go
  *
  */
 
@@ -9,50 +9,50 @@ package builtins
 import (
 	"chip-go/internal/constants"
 	"chip-go/internal/values"
+	"unicode/utf8"
 )
 
-func listFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func listFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	// Errors are handled differently here, since list() takes an arbitrary amount of args.
 	if len(args) == 0 {
 		// Create empty list
-		return res.Success(values.NewList([]values.Value{}).SetContext(ctx))
+		return res.Success(values.NewList([]values.Value{}))
 	} else if len(args) == 1 {
 		// Convert single value to list
 		value := args[0]
 
-		switch v := value.(type) {
+		if listVal, ok := values.AsList(value); ok {
+			elements := make([]values.Value, len(listVal.Elements))
+			copy(elements, listVal.Elements)
 
-		case *values.List:
-			return res.Success(v.ShallowCopy().SetContext(ctx))
+			return res.Success(values.NewList(elements))
+		}
 
-		case *values.String:
-			// Convert string to runes
-			runes := []rune(v.Value)
-			elements := make([]values.Value, len(runes))
+		if str, ok := values.AsString(value); ok {
+			elements := make([]values.Value, 0, utf8.RuneCountInString(str.Value))
 
-			for i, r := range runes {
-				elements[i] = values.NewString(string(r)).SetContext(ctx)
+			for _, char := range str.Value {
+				elements = append(elements, values.NewString(string(char)))
 			}
 
-			return res.Success(values.NewList(elements).SetContext(ctx))
-
-		case *values.Number:
-			// Create single-element list
-			return res.Success(values.NewList([]values.Value{v.SetContext(ctx)}).SetContext(ctx))
-
-		default:
-			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+			return res.Success(values.NewList(elements))
 		}
+
+		if value.IsNumber() {
+			return res.Success(values.NewList([]values.Value{value}))
+		}
+
+		return res.Success(values.NewString(constants.STR_ERR))
 	} else {
 		// Create list from multiple arguments
 		elements := make([]values.Value, len(args))
 
 		for i, arg := range args {
-			elements[i] = arg.SetContext(ctx)
+			elements[i] = arg
 		}
 
-		return res.Success(values.NewList(elements).SetContext(ctx))
+		return res.Success(values.NewList(elements))
 	}
 }

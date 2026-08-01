@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/loadopt.go
+ * Chippy - internal/builtins/loadopt.go
  *
  */
 
@@ -9,7 +9,6 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/optional"
 	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
@@ -29,66 +28,45 @@ import (
 // loaded optionals.
 func InstallOpt(opt *optional.Optional, globalCtx values.Ctx) {
 	for name, fn := range opt.Functions {
-		if existing := globalCtx.SymbolTable.Get(name); existing == nil {
-			fn.SetContext(globalCtx)
-			globalCtx.SymbolTable.Set(name, fn)
+		if existing := globalCtx.Globals.GetByName(name); existing.IsUnset() {
+			globalCtx.Globals.SetByName(name, fn)
 		}
 	}
 
 	for name, constant := range opt.Constants {
-		if existing := globalCtx.SymbolTable.Get(name); existing == nil {
-			constant.SetContext(globalCtx)
-			globalCtx.SymbolTable.Set(name, constant)
+		if existing := globalCtx.Globals.GetByName(name); existing.IsUnset() {
+			globalCtx.Globals.SetByName(name, constant)
 		}
 	}
 }
 
-func loadoptFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func loadoptFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("loadopt", 1, "optional")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("loadopt", 1, "optional"))
 	}
 
-	optionalName, ok := args[0].(*values.String)
+	optionalName, ok := values.AsString(args[0])
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("loadopt", shared.TypeString, "optional")))
+		return res.FailAt(1,
+			shared.Errors.InvalidArgTypeWithHint("loadopt", shared.TypeString, "optional"))
 	}
 
 	opt, exists := optional.GetOptional(optionalName.Value)
 
 	if !exists {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			"Optional \""+optionalName.Value+"\" does not exist"))
+		return res.FailAt(1, "Optional \""+optionalName.Value+"\" does not exist")
 	}
 
-	roadRunner := orchestrator.Get().GetRR2ForContext(ctx.InstanceID)
+	mod := orchestrator.Get().GetModenaForContext(ctx.InstanceID)
 
-	if roadRunner == nil {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			"RoadRunner2 not available"))
+	if mod == nil {
+		return res.FailAt(1, "Modena not available")
 	}
 
-	globalCtx := roadRunner.GetGlobalContext()
+	globalCtx := mod.GetGlobalContext()
 
 	InstallOpt(opt, globalCtx)
 
@@ -99,5 +77,5 @@ func loadoptFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 		orch.AddLoadedOpt(inst, optionalName.Value)
 	}
 
-	return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
+	return res.Success(values.NewString(constants.STR_OK))
 }

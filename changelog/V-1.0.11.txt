@@ -1,0 +1,7 @@
+What's New:
+
+	- builtins:
+		- chmod, mkdir: support 4 digit modes instead of silently dropping
+		- stat, lstat: return STATMODE as a decimal to agree with chmod and mkdir
+
+	FYI Breaking: If you previously passed output from stat(path) or lstat(path) into chmod(path, mode) or mkdir(path, mode), you very likely did some numeral system conversion, this is no longer needed as stat now returns the correct decimal value consistent with chmod and mkdir.

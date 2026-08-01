@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/sinfo.go
+ * Chippy - internal/builtins/sinfo.go
  *
  */
 
@@ -8,36 +8,23 @@ package builtins
 
 import (
 	"chip-go/internal/builtins/shared"
-	"chip-go/internal/errors"
 	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 	"net"
 	"strconv"
 )
 
-func sinfoFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func sinfoFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("sinfo", 1, "handle")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("sinfo", 1, "handle"))
 	}
 
-	handleNum, ok := args[0].(*values.Number)
+	handleNum := args[0]
 
-	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("sinfo", shared.TypeNumber, "handle")))
+	if !handleNum.IsNumber() {
+		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("sinfo", shared.TypeNumber, "handle"))
 	}
 
 	handle64, err := handleNum.AsInt()
@@ -52,11 +39,7 @@ func sinfoFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	socket, exists := registry.Sockets.Get(handle)
 
 	if !exists {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid socket handle")))
+		return res.FailAt(1, shared.Errors.InvalidValue("Invalid socket handle"))
 	}
 
 	var localIp, remoteIp string
@@ -91,16 +74,16 @@ func sinfoFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	}
 
 	entries := map[string]values.Value{
-		"mode":       values.NewString(socket.Mode).SetContext(ctx),
-		"localIp":    values.NewString(localIp).SetContext(ctx),
-		"localPort":  values.NewNumber(localPort).SetContext(ctx),
-		"remoteIp":   values.NewString(remoteIp).SetContext(ctx),
-		"remotePort": values.NewNumber(remotePort).SetContext(ctx),
+		"mode":       values.NewString(socket.Mode),
+		"localIp":    values.NewString(localIp),
+		"localPort":  values.NewNumber(localPort),
+		"remoteIp":   values.NewString(remoteIp),
+		"remotePort": values.NewNumber(remotePort),
 	}
 
 	result := values.NewMapFromEntries(keys, entries)
 
-	return res.Success(result.SetContext(ctx))
+	return res.Success(result)
 }
 
 func addrToIPPort(addr net.Addr) (string, int) {
@@ -108,13 +91,13 @@ func addrToIPPort(addr net.Addr) (string, int) {
 		return "", 0
 	}
 
-	switch a := addr.(type) {
+	switch typed := addr.(type) {
 
 	case *net.TCPAddr:
-		return a.IP.String(), a.Port
+		return typed.IP.String(), typed.Port
 
 	case *net.UDPAddr:
-		return a.IP.String(), a.Port
+		return typed.IP.String(), typed.Port
 	}
 
 	host, portStr, err := net.SplitHostPort(addr.String())

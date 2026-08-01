@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/constants/doc.go
+ * Chippy - internal/constants/doc.go
  *
  */
 

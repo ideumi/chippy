@@ -1,0 +1,60 @@
+What's New:
+
+	- rr2:
+		- lists, maps and bytes are now mutable reference types
+			- index assignment mutates the container in place
+			- operators +, - and * now return shallow copies
+			- strings are now immutable, string index assignment removed
+			- building up lists, maps and bytes in place (append, index assignment) no longer degrades performance quadratically
+
+		- assignment is now a statement, it can no longer be nested or chained
+
+		- a self referential value now prints as [...], or m[...] for maps
+			- copying or comparing a self referential value raises RTError
+
+		- statement sequences are now a distinct block node
+			- a block evaluates to the value of its last statement
+			- loop and function bodies no longer allocate a throwaway list each iteration
+			- while and for loops should now be generally ~5% faster per iteration
+
+		- comments and doc comments are now captured as tokens
+		- various parser and interpreter cleanups
+
+	- builtins:
+		- added copy(value) for fully independent copies
+		- append(container, value) and sort(list) now mutate in place and return the container
+		- num(value) and list(value) now return err on a failed conversion instead of raising RTError
+		- slice(container, start, end) now returns shallow copies
+
+	- optionals:
+		- json: guard against self referential values
+
+	- corelib:
+		- libstrings.chh: added ReplaceCharAt(value, idx, char)
+		- libterm.chh: MakeRaw(state) now returns a copy and leaves state untouched
+		- libraries updated for mutable collections
+
+	- misc:
+		- added misc/doc2html
+		- misc/snake updated for mutable collections
+
+FYI Breaking:
+
+	- Lists, maps and bytes are now mutable reference types, your code will likely need to be updated:
+		- See chippy doc mutability
+
+	- Index assignment now mutates the container in place, append(container, value) and sort(list) mutate in place and return the same object:
+		- The old x = append(x, v) and x = sort(x) still work but are redundant
+
+	- Assignment is now a statement, not an expression, it can no longer be nested or chained:
+		- x = x[i] = v, a = b = c and var y = (a[i] = v) no longer parse, write x[i] = v
+
+	- The operators +, - and * and slice(container, start, end) now return shallow copies:
+		- Mutating a nested list, map or bytes affects both
+			- Use copy(value) for a fully independent copy
+
+	- String index assignment (s[i] = v) now raises RTError since strings are immutable:
+		- See the new ReplaceCharAt(value, idx, char) in libstrings.chh
+
+	- num(value) and list(value) now return err when a value cannot be converted:
+		- Check with iserr(value)

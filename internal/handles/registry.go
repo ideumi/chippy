@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/handles/registry.go
+ * Chippy - internal/handles/registry.go
  *
  */
 
@@ -21,7 +21,7 @@ type HandleRegistry struct {
 }
 
 func NewHandleRegistry() *HandleRegistry {
-	r := &HandleRegistry{
+	registry := &HandleRegistry{
 		Alloc:     NewHandleAllocator(StdioMaxID + 1),
 		Files:     NewFileHandles(),
 		Dirs:      NewDirHandles(),
@@ -30,16 +30,16 @@ func NewHandleRegistry() *HandleRegistry {
 		Optional:  NewOptHandles(),
 	}
 
-	r.managers = []HandleManager{
-		r.Files, r.Dirs, r.Sockets, r.Processes, r.Optional,
+	registry.managers = []HandleManager{
+		registry.Files, registry.Dirs, registry.Sockets, registry.Processes, registry.Optional,
 	}
 
-	return r
+	return registry
 }
 
 func (r *HandleRegistry) CloseAll() {
-	for _, m := range r.managers {
-		m.CloseAll()
+	for _, manager := range r.managers {
+		manager.CloseAll()
 	}
 }
 

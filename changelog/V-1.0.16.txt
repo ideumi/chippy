@@ -1,0 +1,31 @@
+What's New:
+
+	- builtins:
+		- added winsize()
+		- added actor(function, arg1, arg2, ...), send(handle, value), receive(blocking), wait(handle), transfer(actor, handle) for concurrency
+		- added signal(), sigcatch(signums), sigfree(signums) for OS signal handling
+		- added CHIPRT constant
+		- loadopt(optional): loaded optionals are inherited by actors
+		- affected builtins and optionals updated to new handle system
+
+	- corelib:
+		- libterm.chh: removed GetTerminalSize() and DTSZ
+
+	- rr2:
+		- bug: function values no longer have their captured scope overwritten at the call site
+		- handles subsystem moved and rearchitected
+		- actor concurrency model added
+		- new orchestrator subsystem
+			- actor management
+			- message inboxes
+			- cross-actor handle transfer
+			- cross-actor value isolation
+			- deadlock detection
+		- reject bitwise and shift operations on decimal numbers outright
+
+	- misc:
+		- concurrent webserver example added under misc/server/mp
+		- minor cleanups
+
+FYI Breaking: If you use GetTerminalSize() from libterm.chh, update it to use the winsize() builtin and your program should work as before.
+RR2 will now throw a Runtime Error when decimal numbers are passed into bitwise or shift operations.

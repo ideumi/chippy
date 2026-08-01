@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/append.go
+ * Chippy - internal/builtins/append.go
  *
  */
 
@@ -8,37 +8,24 @@ package builtins
 
 import (
 	"chip-go/internal/builtins/shared"
-	"chip-go/internal/errors"
 	"chip-go/internal/values"
 )
 
-func appendFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func appendFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("append", 2, "list, value")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("append", 2, "list, value"))
 	}
 
 	value := args[0]
 
-	switch v := value.(type) {
-	case *values.Bytes:
-		valueNum, ok := args[1].(*values.Number)
+	if bytesVal, ok := values.AsBytes(value); ok {
+		valueNum := args[1]
 
-		if !ok {
-			posStart, posEnd := args[1].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("append", shared.PositionSecond, shared.TypeNumber, "value")))
+		if !valueNum.IsNumber() {
+			return res.FailAt(2,
+				shared.Errors.InvalidArgTypePositionalWithHint("append", shared.PositionSecond, shared.TypeNumber, "value"))
 		}
 
 		byte64, err := valueNum.AsInt()
@@ -50,27 +37,20 @@ func appendFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		byteValue := int(byte64)
 
 		if byteValue < 0 || byteValue > 255 {
-			posStart, posEnd := args[1].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				"Byte values must be between 0 and 255"))
+			return res.FailAt(2, "Byte values must be between 0 and 255")
 		}
 
-		newBytes := v.AppendByte(byteValue)
+		bytesVal.AppendByte(byteValue)
 
-		return res.Success(newBytes.SetContext(ctx))
-
-	case *values.List:
-		v.Elements = append(v.Elements, args[1].SetContext(ctx))
-
-		return res.Success(v)
-
-	default:
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("append", shared.PositionFirst, shared.TypeListOrBytes, shared.TypeListOrBytes)))
+		return res.Success(value)
 	}
+
+	if listVal, ok := values.AsList(value); ok {
+		listVal.Elements = append(listVal.Elements, args[1])
+
+		return res.Success(value)
+	}
+
+	return res.FailAt(1,
+		shared.Errors.InvalidArgTypePositionalWithHint("append", shared.PositionFirst, shared.TypeListOrBytes, shared.TypeListOrBytes))
 }

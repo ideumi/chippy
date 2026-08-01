@@ -1,0 +1,14 @@
+What's New:
+
+	- builtins:
+		- utime(path, atime, mtime) and lutime(path, atime, mtime) added
+		- lstat, stat: bug: expose STATMTIME, STATATIME, STATCTIME properly
+
+	- corelib:
+		- libtermios.chh: bug: fix missing parameter prefix in SetTitle
+
+	- rr2:
+		- interpreter: bug: call to SetContext in visitVarAccessNode corrupts function scope on reentry
+
+	- other stuff:
+		- update build system to allow for cross compilation for amd64 and aarch64 with make release-all

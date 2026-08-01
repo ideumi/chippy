@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/signal.go
+ * Chippy - internal/builtins/signal.go
  *
  */
 
@@ -8,7 +8,6 @@ package builtins
 
 import (
 	"chip-go/internal/builtins/shared"
-	"chip-go/internal/errors"
 	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 	"os"
@@ -109,15 +108,11 @@ func tryConsumeSignal(inst *orchestrator.Instance) (os.Signal, bool) {
 	return sig, got
 }
 
-func signalFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func signalFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 0 {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCount("signal", 0)))
+		return res.Fail(shared.Errors.InvalidArgCount("signal", 0))
 	}
 
 	signalMu.Lock()
@@ -129,14 +124,12 @@ func signalFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	inst := orch.GetInstance(instanceID)
 
 	if inst == nil {
-		return res.Failure(errors.NewRTError(
-			nil, nil,
-			shared.Errors.InvalidValue("Invalid actor handle")))
+		return res.Fail(shared.Errors.InvalidValue("Invalid actor handle"))
 	}
 
 	// Fast path: signal already queued.
 	if sig, ok := tryConsumeSignal(inst); ok {
-		return res.Success(values.NewNumber(signalToInt(sig)).SetContext(ctx))
+		return res.Success(values.NewNumber(signalToInt(sig)))
 	}
 
 	wakeup := make(chan struct{}, 1)
@@ -155,7 +148,7 @@ func signalFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	// before signalWaiters saw us, leaving no wakeup queued for us while
 	// signalProbe still reports liveness.
 	if sig, ok := tryConsumeSignal(inst); ok {
-		return res.Success(values.NewNumber(signalToInt(sig)).SetContext(ctx))
+		return res.Success(values.NewNumber(signalToInt(sig)))
 	}
 
 	cancelCh := orch.BeginBlocking(inst, orchestrator.StateBlockedSignal)
@@ -165,27 +158,26 @@ func signalFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		select {
 		case <-wakeup:
 			if sig, ok := tryConsumeSignal(inst); ok {
-				return res.Success(values.NewNumber(signalToInt(sig)).SetContext(ctx))
+				return res.Success(values.NewNumber(signalToInt(sig)))
 			}
 
 		case <-cancelCh:
 			// A signal may have landed during the cancel race.
 			if sig, ok := tryConsumeSignal(inst); ok {
-				return res.Success(values.NewNumber(signalToInt(sig)).SetContext(ctx))
+				return res.Success(values.NewNumber(signalToInt(sig)))
 			}
 
 			orch.EndBlocking(inst)
 
-			return res.Failure(errors.NewRTError(
-				nil, nil,
-				shared.Errors.InvalidValue("Deadlock: signal() blocked with no signals being caught")))
+			return res.Fail(
+				shared.Errors.InvalidValue("Deadlock: signal() blocked with no signals being caught"))
 		}
 	}
 }
 
 func signalToInt(sig os.Signal) int {
-	if s, ok := sig.(syscall.Signal); ok {
-		return int(s)
+	if typed, ok := sig.(syscall.Signal); ok {
+		return int(typed)
 	}
 
 	return 0

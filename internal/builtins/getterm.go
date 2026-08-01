@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/getterm.go
+ * Chippy - internal/builtins/getterm.go
  *
  */
 
@@ -9,7 +9,6 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/values"
 	"os"
 
@@ -53,19 +52,11 @@ var termiosCcIndices = []struct {
 	{"VEOL2", 16},
 }
 
-func gettermFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func gettermFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 0 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCount("getterm", 0)))
+		return res.Fail(shared.Errors.InvalidArgCount("getterm", 0))
 	}
 
 	fd := int(os.Stdin.Fd())
@@ -73,27 +64,27 @@ func gettermFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 	termios, err := unix.IoctlGetTermios(fd, unix.TCGETS)
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
 	keys := append([]string{}, termiosScalarKeys...)
 
 	entries := map[string]values.Value{
-		"iflag":  values.NewNumber(termios.Iflag).SetContext(ctx),
-		"oflag":  values.NewNumber(termios.Oflag).SetContext(ctx),
-		"cflag":  values.NewNumber(termios.Cflag).SetContext(ctx),
-		"lflag":  values.NewNumber(termios.Lflag).SetContext(ctx),
-		"line":   values.NewNumber(termios.Line).SetContext(ctx),
-		"ispeed": values.NewNumber(termios.Ispeed).SetContext(ctx),
-		"ospeed": values.NewNumber(termios.Ospeed).SetContext(ctx),
+		"iflag":  values.NewNumber(termios.Iflag),
+		"oflag":  values.NewNumber(termios.Oflag),
+		"cflag":  values.NewNumber(termios.Cflag),
+		"lflag":  values.NewNumber(termios.Lflag),
+		"line":   values.NewNumber(termios.Line),
+		"ispeed": values.NewNumber(termios.Ispeed),
+		"ospeed": values.NewNumber(termios.Ospeed),
 	}
 
 	for _, cc := range termiosCcIndices {
 		keys = append(keys, cc.name)
-		entries[cc.name] = values.NewNumber(termios.Cc[cc.index]).SetContext(ctx)
+		entries[cc.name] = values.NewNumber(termios.Cc[cc.index])
 	}
 
 	result := values.NewMapFromEntries(keys, entries)
 
-	return res.Success(result.SetContext(ctx))
+	return res.Success(result)
 }

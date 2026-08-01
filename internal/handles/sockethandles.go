@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/handles/sockethandles.go
+ * Chippy - internal/handles/sockethandles.go
  *
  */
 
@@ -72,19 +72,19 @@ func (sh *SocketHandles) CloseAll() {
 	}
 }
 
-func closeSocket(s *SocketHandle) {
-	switch s.Mode {
+func closeSocket(socket *SocketHandle) {
+	switch socket.Mode {
 	case "tcp":
-		if s.Conn != nil {
-			s.Conn.Close()
+		if socket.Conn != nil {
+			socket.Conn.Close()
 		}
 	case "udp":
-		if s.UdpConn != nil {
-			s.UdpConn.Close()
+		if socket.UdpConn != nil {
+			socket.UdpConn.Close()
 		}
 	case "listen":
-		if s.Listener != nil {
-			s.Listener.Close()
+		if socket.Listener != nil {
+			socket.Listener.Close()
 		}
 	}
 }

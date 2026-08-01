@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/setterm.go
+ * Chippy - internal/builtins/setterm.go
  *
  */
 
@@ -19,32 +19,18 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-func settermFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func settermFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("setterm", 1, "state")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("setterm", 1, "state"))
 	}
 
-	argMap, ok := args[0].(*values.Map)
+	argMap, ok := values.AsMap(args[0])
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("setterm", shared.TypeMap, "state")))
+		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("setterm", shared.TypeMap, "state"))
 	}
-
-	posStart, posEnd := args[0].GetPos()
 
 	var missing []string
 
@@ -75,42 +61,40 @@ func settermFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 			detail = fmt.Sprintf("state is missing keys: %s", strings.Join(quoted, ", "))
 		}
 
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidValue(detail)))
+		return res.Fail(shared.Errors.InvalidValue(detail))
 	}
 
-	iflag, rtErr := requireTermiosField(argMap, "iflag", math.MaxUint32, posStart, posEnd)
+	iflag, rtErr := requireTermiosField(argMap, "iflag", math.MaxUint32)
 	if rtErr != nil {
 		return res.Failure(rtErr)
 	}
 
-	oflag, rtErr := requireTermiosField(argMap, "oflag", math.MaxUint32, posStart, posEnd)
+	oflag, rtErr := requireTermiosField(argMap, "oflag", math.MaxUint32)
 	if rtErr != nil {
 		return res.Failure(rtErr)
 	}
 
-	cflag, rtErr := requireTermiosField(argMap, "cflag", math.MaxUint32, posStart, posEnd)
+	cflag, rtErr := requireTermiosField(argMap, "cflag", math.MaxUint32)
 	if rtErr != nil {
 		return res.Failure(rtErr)
 	}
 
-	lflag, rtErr := requireTermiosField(argMap, "lflag", math.MaxUint32, posStart, posEnd)
+	lflag, rtErr := requireTermiosField(argMap, "lflag", math.MaxUint32)
 	if rtErr != nil {
 		return res.Failure(rtErr)
 	}
 
-	line, rtErr := requireTermiosField(argMap, "line", math.MaxUint8, posStart, posEnd)
+	line, rtErr := requireTermiosField(argMap, "line", math.MaxUint8)
 	if rtErr != nil {
 		return res.Failure(rtErr)
 	}
 
-	ispeed, rtErr := requireTermiosField(argMap, "ispeed", math.MaxUint32, posStart, posEnd)
+	ispeed, rtErr := requireTermiosField(argMap, "ispeed", math.MaxUint32)
 	if rtErr != nil {
 		return res.Failure(rtErr)
 	}
 
-	ospeed, rtErr := requireTermiosField(argMap, "ospeed", math.MaxUint32, posStart, posEnd)
+	ospeed, rtErr := requireTermiosField(argMap, "ospeed", math.MaxUint32)
 	if rtErr != nil {
 		return res.Failure(rtErr)
 	}
@@ -126,7 +110,7 @@ func settermFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 	termios.Ospeed = uint32(ospeed)
 
 	for _, cc := range termiosCcIndices {
-		value, rtErr := requireTermiosField(argMap, cc.name, math.MaxUint8, posStart, posEnd)
+		value, rtErr := requireTermiosField(argMap, cc.name, math.MaxUint8)
 		if rtErr != nil {
 			return res.Failure(rtErr)
 		}
@@ -137,18 +121,17 @@ func settermFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 	fd := int(os.Stdin.Fd())
 
 	if err := unix.IoctlSetTermios(fd, unix.TCSETSW, &termios); err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
-	return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
+	return res.Success(values.NewString(constants.STR_OK))
 }
 
-func requireTermiosField(m *values.Map, key string, max int64, posStart, posEnd *errors.Position) (int64, *errors.RTError) {
-	num, ok := m.Entries[key].(*values.Number)
+func requireTermiosField(termiosMap *values.Map, key string, max int64) (int64, *errors.RTError) {
+	num := termiosMap.Entries[key]
 
-	if !ok {
-		return 0, errors.NewRTError(
-			posStart, posEnd,
+	if !num.IsNumber() {
+		return 0, errors.NewCallError(
 			shared.Errors.InvalidValue(fmt.Sprintf("state key '%s' must be a number", key)))
 	}
 
@@ -159,8 +142,7 @@ func requireTermiosField(m *values.Map, key string, max int64, posStart, posEnd 
 	}
 
 	if intVal < 0 || intVal > max {
-		return 0, errors.NewRTError(
-			posStart, posEnd,
+		return 0, errors.NewCallError(
 			shared.Errors.InvalidValue(fmt.Sprintf("state key '%s' value %d is out of range [0, %d]", key, intVal, max)))
 	}
 

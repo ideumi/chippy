@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/lexer/token.go
+ * Chippy - internal/lexer/token.go
  *
  */
 

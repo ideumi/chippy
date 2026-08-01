@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/errors/base.go
+ * Chippy - internal/errors/base.go
  *
  */
 
@@ -33,7 +33,7 @@ func (e *BaseError) AsString() string {
 	result := fmt.Sprintf("\033[1;35m%s\033[0m: %s", e.ErrorName, e.Details)
 
 	if e.PosStart != nil {
-		result += fmt.Sprintf("\n\033[1;32mFile %s, line %d\033[0m", e.PosStart.File, e.PosStart.Line+1)
+		result += fmt.Sprintf("\n\033[1;32mFile %s, line %d\033[0m", e.PosStart.File, e.PosStart.DisplayLine())
 
 		if e.PosStart.Text != "" {
 			result += "\n\n" + e.stringWithArrows()
@@ -137,9 +137,9 @@ func (e *BaseError) stringWithArrows() string {
 	return result
 }
 
-func max(a, b int) int {
-	if a > b {
-		return a
+func max(left, right int) int {
+	if left > right {
+		return left
 	}
-	return b
+	return right
 }

@@ -1,0 +1,36 @@
+What's New:
+
+	- libhttp.chh: support for http handling:
+		- requests
+		- base64 encoding / decoding
+		- url encoding / decoding
+		- chunked transfer encoding support
+		- server via tls and sockets
+			- example in misc/server/
+
+	- libtls.chh: support for tls socket connections:
+		- client and server connections
+		- certificate auth
+			- See misc/server/tls/certs
+
+	- rr2:
+		- builtins/shared: seperated process and file handles
+		- parser: trailing commas in lists, function calls, and parameters
+		- parser: optional newlines after keywords, operators and delimiters
+		- parser: more flexible code formatting
+		- lexer: bug: enforce single-line strings
+
+	- builtins:
+		- removed select()
+
+	- combine:
+		- combine: bug: config validation prevents StripWhitespace without StripComments
+		- combine: bug: preserve blank lines in license headers
+		- combine: bug: remove comment only lines without leaving blanks on StripComments
+
+	- ide:
+		- added modulo operator syntax highlighting (forgot to do after 0feec9ccbd)
+		- updated installation path instructions
+
+	- other stuff:
+		- added new quickstart guide

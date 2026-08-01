@@ -1,0 +1,48 @@
+What's New:
+
+	- corelib:
+		- bug: libmath: Pow(base, exp) could produce NaN
+		- bug: librandom: RandomInt(min, max) hangs for ranges >256
+		- libstat.chh: constants STATSIZE to STATTYPE have been removed
+		- libinput.chh: InputPw() updated to getterm(), setterm(state) map usage
+		- libterm.chh: Termios field byte offsets removed (TIFLAG to TVTIME)
+		- libterm.chh: MakeRaw(state) updated to getterm(), setterm(state) map usage
+		- libmath.chh: INTMAX and INTMIN added
+		- libmath.chh: PI and E trimmed by one decimal digit
+		- libpaths.chh: Basename(path) and Dirname(path) now strip trailing slashes
+
+	- rr2:
+		- major engine cleanups
+			- generic context
+		- number system refactor
+			- integer arithmetic over 2^53
+			- overflow promotes to float
+			- NaN and +-Infinity are rejected
+			- for loops preserve precision above 2^53
+
+	- builtins:
+		- updated for new number system
+		- signal(): implementation polished
+		- lstat(path), stat(path): now return a map instead of a list
+		- winsize(): now returns a map instead of a list
+		- getterm(): now returns a map instead of a list
+		- setterm(state): the state argument now only accepts complete state map
+
+	- optionals:
+		- updated for new number system
+
+	- misc:
+		- go.mod bumped to 1.24.4
+		- added misc/snake
+
+FYI Breaking:
+
+	lstat(path), stat(path), winsize(), getterm() and setterm(state) have been ported to the map type, your projects will have to be updated, consult chippy doc [topic] for relevant map keys.
+
+	libstat.chh constants STATSIZE to STATTYPE have been removed, use the relevant map keys.
+
+	libterm.chh Termios field byte offsets removed: TIFLAG to TVTIME, use the relevant map keys.
+
+	libmath.chh PI and E were trimmed by one decimal digit.
+
+	Integer arithmetic above 2⁵³ used to lose precision silently. It no longer does. Check your code.

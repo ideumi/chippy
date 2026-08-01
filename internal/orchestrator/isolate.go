@@ -1,164 +1,207 @@
 /*
  *
- * RR2 - internal/orchestrator/isolate.go
+ * Chippy - internal/orchestrator/isolate.go
  *
  */
 
 package orchestrator
 
 import (
-	"chip-go/internal/context"
 	"chip-go/internal/values"
 )
 
-// IsolateForTransfer snapshots every closure's captured environment onto a fresh
-// detached context so calls on the receiving actor don't race the sender's writes.
-// cycles dedupes shared captures and terminates recursion.
-func IsolateForTransfer(v values.Value, cycles map[values.Ctx]values.Ctx) {
-	if v == nil {
+// transferState remembers each captured variable already copied, so one captured
+// by several functions is copied only once, and each list and map already walked,
+// so one that contains itself is walked only once.
+type transferState struct {
+	cells      map[*values.Value]*values.Value
+	containers map[values.Value]bool
+}
+
+func (s *transferState) walked(val values.Value) bool {
+	if s.containers[val] {
+		return true
+	}
+
+	s.containers[val] = true
+
+	return false
+}
+
+// IsolateForTransfer copies the variables every function captured, so the actor
+// receiving them cannot read one while the sender is still writing to it. All
+// the items share a single transferState, so a variable captured by more than
+// one of them is still a single shared variable on the other side.
+func IsolateForTransfer(items ...values.Value) {
+	state := &transferState{
+		cells:      make(map[*values.Value]*values.Value),
+		containers: make(map[values.Value]bool),
+	}
+
+	for _, item := range items {
+		isolateValue(item, state)
+	}
+}
+
+func isolateValue(val values.Value, state *transferState) {
+	if closure, ok := values.AsBoundaryClosure(val); ok {
+		isolateBoundaryClosure(closure, state)
+
 		return
 	}
 
-	switch val := v.(type) {
-	case *values.Function:
-		isolateTransferFunction(val, cycles)
-	case *values.List:
-		for _, e := range val.Elements {
-			IsolateForTransfer(e, cycles)
+	if list, ok := values.AsList(val); ok {
+		if state.walked(val) {
+			return
 		}
-	case *values.Map:
-		for _, e := range val.Entries {
-			IsolateForTransfer(e, cycles)
+
+		for _, element := range list.Elements {
+			isolateValue(element, state)
+		}
+
+		return
+	}
+
+	if mapVal, ok := values.AsMap(val); ok {
+		if state.walked(val) {
+			return
+		}
+
+		for _, entryVal := range mapVal.Entries {
+			isolateValue(entryVal, state)
 		}
 	}
 }
 
-func isolateTransferFunction(fn *values.Function, cycles map[values.Ctx]values.Ctx) {
-	origCtx := fn.GetContext()
+// Every captured variable is replaced by a new one holding a copy, so the receiver
+// shares nothing with the variables the sender is still using. Globals are not
+// copied here. They are found by name and attached to the receiver's own globals
+// on delivery.
+func isolateBoundaryClosure(fn values.BoundaryClosure, state *transferState) {
+	old := fn.TransferCells()
+	fresh := make([]*values.Value, len(old))
 
-	if origCtx == nil {
-		return
-	}
-
-	if existing, found := cycles[origCtx]; found {
-		fn.SetContext(existing)
-		return
-	}
-
-	detached := context.NewContext[values.Value]("<sent>", nil, nil)
-	cycles[origCtx] = detached
-
-	var chain []values.Ctx
-
-	for c := origCtx; c != nil; c = c.Parent {
-		chain = append(chain, c)
-	}
-
-	// Outer-to-inner so inner names shadow outer.
-	for i := len(chain) - 1; i >= 0; i-- {
-		if chain[i].SymbolTable == nil {
+	for i, cell := range old {
+		if snap, found := state.cells[cell]; found {
+			fresh[i] = snap
 			continue
 		}
 
-		chain[i].SymbolTable.ForEach(func(name string, val values.Value) {
-			if name == "CHIPRT" {
-				return
-			}
+		// The new variable is recorded before its contents are walked,
+		// so a capture that leads back to itself finds it already there
+		// and stops.
+		snap := new(values.Value)
+		state.cells[cell] = snap
+		fresh[i] = snap
 
-			// Builtins are stateless. The receiver reaches its own copies
-			// through its globals once the detached context is parented.
-			if _, isBuiltin := val.(*values.BuiltInFunction); isBuiltin {
-				return
-			}
-
-			snap := val.Copy()
-			IsolateForTransfer(snap, cycles)
-			detached.SymbolTable.Set(name, snap)
-		})
+		if captured := *cell; captured.IsSet() {
+			copied := captured.Copy()
+			*snap = copied
+			isolateValue(copied, state)
+		}
 	}
 
-	fn.SetContext(detached)
+	fn.SetTransferCells(fresh)
 }
 
-// DeepRebindContext stamps ctx onto every non-function value in the graph.
-// Functions are skipped; their context is the closure capture, handled by
-// IsolateForTransfer.
-func DeepRebindContext(v values.Value, ctx values.Ctx) {
-	if v == nil {
-		return
+// SnapshotUserGlobals makes a deep copy of the globals the user's program
+// defined. Builtins and CHIPRT are left out because every actor already has its
+// own. A name a function does not define itself is looked up in the globals of
+// the actor running it, so a newly spawned actor needs this copy put back there.
+func SnapshotUserGlobals(ctx values.Ctx) ([]string, []values.Value) {
+	if ctx.Globals == nil {
+		return nil, nil
 	}
 
-	switch val := v.(type) {
-	case *values.Function, *values.BuiltInFunction:
+	var names []string
+	var snapshot []values.Value
 
-	case *values.List:
-		v.SetContext(ctx)
-
-		for _, e := range val.Elements {
-			DeepRebindContext(e, ctx)
+	ctx.Globals.ForEach(func(name string, val values.Value) {
+		if name == "CHIPRT" {
+			return
 		}
 
-	case *values.Map:
-		v.SetContext(ctx)
-
-		for _, e := range val.Entries {
-			DeepRebindContext(e, ctx)
+		if _, isBuiltin := values.AsBuiltIn(val); isBuiltin {
+			return
 		}
 
-	default:
-		v.SetContext(ctx)
-	}
+		names = append(names, name)
+		snapshot = append(snapshot, val.Copy())
+	})
+
+	return names, snapshot
 }
 
-// BindValuesToGlobals parents every detached closure context onto the receiver's
-// globals so sent functions can resolve builtins and see the receiver's InstanceID.
+// bindState remembers the captured variables already dealt with, so one shared
+// by several functions, or one that leads back to itself, is handled only once.
+// It remembers lists and maps for the same reason.
+type bindState struct {
+	cells      map[*values.Value]bool
+	containers map[values.Value]bool
+}
+
+func (s *bindState) walked(val values.Value) bool {
+	if s.containers[val] {
+		return true
+	}
+
+	s.containers[val] = true
+
+	return false
+}
+
+// Changing which globals a function points at is what makes a function sent to
+// another actor find that actor's builtins and CHIPRT rather than the sender's.
 func BindValuesToGlobals(items []values.Value, globals values.Ctx) {
 	if globals == nil {
 		return
 	}
 
-	visited := make(map[values.Ctx]bool)
+	state := &bindState{
+		cells:      make(map[*values.Value]bool),
+		containers: make(map[values.Value]bool),
+	}
 
 	for _, item := range items {
-		bindValueToGlobals(item, globals, visited)
+		bindValue(item, globals, state)
 	}
 }
 
-func bindValueToGlobals(v values.Value, globals values.Ctx, visited map[values.Ctx]bool) {
-	if v == nil {
+func bindValue(val values.Value, globals values.Ctx, state *bindState) {
+	if closure, ok := values.AsBoundaryClosure(val); ok {
+		closure.RebindGlobals(globals)
+
+		for _, cell := range closure.TransferCells() {
+			if state.cells[cell] {
+				continue
+			}
+
+			state.cells[cell] = true
+			bindValue(*cell, globals, state)
+		}
+
 		return
 	}
 
-	switch val := v.(type) {
-	case *values.Function:
-		c := val.GetContext()
-
-		if c == nil || visited[c] {
+	if list, ok := values.AsList(val); ok {
+		if state.walked(val) {
 			return
 		}
 
-		visited[c] = true
-		c.Parent = globals
-		c.InstanceID = globals.InstanceID
-
-		if c.SymbolTable != nil && globals.SymbolTable != nil {
-			c.SymbolTable.SetParent(globals.SymbolTable)
+		for _, element := range list.Elements {
+			bindValue(element, globals, state)
 		}
 
-		if c.SymbolTable != nil {
-			c.SymbolTable.ForEach(func(name string, inner values.Value) {
-				bindValueToGlobals(inner, globals, visited)
-			})
+		return
+	}
+
+	if mapVal, ok := values.AsMap(val); ok {
+		if state.walked(val) {
+			return
 		}
 
-	case *values.List:
-		for _, e := range val.Elements {
-			bindValueToGlobals(e, globals, visited)
-		}
-
-	case *values.Map:
-		for _, e := range val.Entries {
-			bindValueToGlobals(e, globals, visited)
+		for _, entryVal := range mapVal.Entries {
+			bindValue(entryVal, globals, state)
 		}
 	}
 }

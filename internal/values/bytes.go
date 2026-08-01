@@ -1,28 +1,28 @@
 /*
  *
- * RR2 - internal/values/bytes.go
+ * Chippy - internal/values/bytes.go
  *
  */
 
 package values
 
 import (
-	"chip-go/internal/constants"
 	"chip-go/internal/errors"
 	"fmt"
 	"strings"
 )
 
 type Bytes struct {
-	*BaseValue
+	OperatorDefaults
 	Data []byte
 }
 
-func NewBytes(data []byte) *Bytes {
-	return &Bytes{
-		BaseValue: NewBaseValue(),
-		Data:      data,
-	}
+func newBytesObject(data []byte) *Bytes {
+	return &Bytes{Data: data}
+}
+
+func NewBytes(data []byte) Value {
+	return fromHeap(TagBytes, newBytesObject(data))
 }
 
 func (b *Bytes) String() string {
@@ -39,43 +39,15 @@ func (b *Bytes) String() string {
 	return "b[" + strings.Join(elements, ", ") + "]"
 }
 
-func (b *Bytes) SetPos(posStart, posEnd *errors.Position) Value {
-	b.BaseValue.SetPos(posStart, posEnd)
-
-	return b
-}
-
-func (b *Bytes) SetContext(ctx Ctx) Value {
-	b.BaseValue.SetContext(ctx)
-
-	return b
-}
-
 func (b *Bytes) Copy() Value {
 	dataCopy := make([]byte, len(b.Data))
 	copy(dataCopy, b.Data)
 
-	newBytes := NewBytes(dataCopy)
-	newBytes.SetPos(b.posStart, b.posEnd)
-	newBytes.SetContext(b.context)
-
-	return newBytes
+	return NewBytes(dataCopy)
 }
 
 func (b *Bytes) IsTrue() bool {
 	return len(b.Data) > 0
-}
-
-func (b *Bytes) Length() int {
-	return len(b.Data)
-}
-
-func (b *Bytes) GetElement(index int) *Number {
-	if index < 1 || index > len(b.Data) {
-		return nil
-	}
-
-	return NewNumber(b.Data[index-1]).SetContext(b.context).(*Number)
 }
 
 func (b *Bytes) AppendByte(value int) *Bytes {
@@ -84,156 +56,115 @@ func (b *Bytes) AppendByte(value int) *Bytes {
 	return b
 }
 
-func (b *Bytes) ToList() *List {
-	elements := make([]Value, len(b.Data))
+func (b *Bytes) bytesEqual(other Value) (isBytes, equal bool) {
+	otherBytes, ok := AsBytes(other)
 
-	for i, byteVal := range b.Data {
-		elements[i] = NewNumber(byteVal).SetContext(b.context)
+	if !ok {
+		return false, false
 	}
 
-	return NewList(elements).SetPos(b.posStart, b.posEnd).SetContext(b.context).(*List)
+	if len(b.Data) != len(otherBytes.Data) {
+		return true, false
+	}
+
+	for i, byteVal := range b.Data {
+		if byteVal != otherBytes.Data[i] {
+			return true, false
+		}
+	}
+
+	return true, true
 }
 
 func (b *Bytes) GetComparisonEe(other Value) (Value, error) {
-	if otherBytes, ok := other.(*Bytes); ok {
-		result := constants.NUM_FAL
+	isBytes, equal := b.bytesEqual(other)
 
-		if len(b.Data) == len(otherBytes.Data) {
-			equal := true
-
-			for i, byte1 := range b.Data {
-				if byte1 != otherBytes.Data[i] {
-					equal = false
-					break
-				}
-			}
-
-			if equal {
-				result = constants.NUM_TRU
-			}
-		}
-
-		return NewNumber(result).SetContext(b.context), nil
+	if !isBytes {
+		return Value{}, IllegalOperation()
 	}
 
-	return nil, IllegalOperation(b, other)
+	return Bool(equal), nil
 }
 
 func (b *Bytes) GetComparisonNe(other Value) (Value, error) {
-	if otherBytes, ok := other.(*Bytes); ok {
-		result := constants.NUM_TRU
+	isBytes, equal := b.bytesEqual(other)
 
-		if len(b.Data) == len(otherBytes.Data) {
-			equal := true
-
-			for i, byte1 := range b.Data {
-				if byte1 != otherBytes.Data[i] {
-					equal = false
-					break
-				}
-			}
-
-			if equal {
-				result = constants.NUM_FAL
-			}
-		}
-
-		return NewNumber(result).SetContext(b.context), nil
+	if !isBytes {
+		return Value{}, IllegalOperation()
 	}
 
-	return nil, IllegalOperation(b, other)
+	return Bool(!equal), nil
 }
 
 func (b *Bytes) Notted() (Value, error) {
-	result := constants.NUM_TRU
-
-	if b.IsTrue() {
-		result = constants.NUM_FAL
-	}
-
-	return NewNumber(result).SetContext(b.context), nil
+	return Bool(!b.IsTrue()), nil
 }
 
 func (b *Bytes) XoredBy(other Value) (Value, error) {
-	result := constants.NUM_FAL
-
-	if b.IsTrue() != other.IsTrue() {
-		result = constants.NUM_TRU
-	}
-
-	return NewNumber(result).SetContext(b.context), nil
+	return Bool(b.IsTrue() != other.IsTrue()), nil
 }
 
 func (b *Bytes) MultedBy(other Value) (Value, error) {
-	if otherNum, ok := other.(*Number); ok {
-
-		if !otherNum.IsInt() {
-			return nil, errors.NewRTError(
-				otherNum.posStart, otherNum.posEnd,
-				"Repeat count must be an integer")
-
-		}
-
-		if otherNum.iVal < 0 {
-			return nil, errors.NewRTError(
-				otherNum.posStart, otherNum.posEnd,
-				"Cannot repeat bytes negative times")
-
-		}
-
-		repeatCount := int(otherNum.iVal)
-		newData := make([]byte, len(b.Data)*repeatCount)
-
-		for i := 0; i < repeatCount; i++ {
-			copy(newData[i*len(b.Data):], b.Data)
-		}
-
-		return NewBytes(newData).SetContext(b.context), nil
+	if !other.IsNumber() {
+		return Value{}, IllegalOperation()
 	}
 
-	return nil, IllegalOperation(b, other)
+	if !other.IsInt() {
+		return Value{}, errors.NewCallError("Repeat count must be an integer")
+	}
+
+	count, _ := other.AsInt()
+
+	if count < 0 {
+		return Value{}, errors.NewCallError("Cannot repeat bytes negative times")
+	}
+
+	repeatCount := int(count)
+	newData := make([]byte, len(b.Data)*repeatCount)
+
+	for i := 0; i < repeatCount; i++ {
+		copy(newData[i*len(b.Data):], b.Data)
+	}
+
+	return NewBytes(newData), nil
 }
 
 func (b *Bytes) SubbedBy(other Value) (Value, error) {
-	if otherNum, ok := other.(*Number); ok {
-
-		if !otherNum.IsInt() {
-			return nil, errors.NewRTError(
-				otherNum.posStart, otherNum.posEnd,
-				"Index must be an integer")
-
-		}
-
-		index := int(otherNum.iVal)
-
-		if index < 1 || index > len(b.Data) {
-			return nil, errors.NewRTError(
-				otherNum.posStart, otherNum.posEnd,
-				"Byte at this index could not be removed from bytes because index is out of bounds")
-
-		}
-
-		newData := make([]byte, len(b.Data)-1)
-
-		copy(newData[:index-1], b.Data[:index-1])
-		copy(newData[index-1:], b.Data[index:])
-
-		return NewBytes(newData).SetContext(b.context), nil
+	if !other.IsNumber() {
+		return Value{}, IllegalOperation()
 	}
 
-	return nil, IllegalOperation(b, other)
+	if !other.IsInt() {
+		return Value{}, errors.NewCallError("Index must be an integer")
+	}
+
+	position, _ := other.AsInt()
+	index := int(position)
+
+	if index < 1 || index > len(b.Data) {
+		return Value{}, errors.NewCallError(
+			"Byte at this index could not be removed from bytes because index is out of bounds")
+	}
+
+	newData := make([]byte, len(b.Data)-1)
+
+	copy(newData[:index-1], b.Data[:index-1])
+	copy(newData[index-1:], b.Data[index:])
+
+	return NewBytes(newData), nil
 }
 
 func (b *Bytes) AddedTo(other Value) (Value, error) {
+	otherBytes, ok := AsBytes(other)
 
-	if otherBytes, ok := other.(*Bytes); ok {
-		newData := make([]byte, len(b.Data)+len(otherBytes.Data))
-
-		copy(newData, b.Data)
-		copy(newData[len(b.Data):], otherBytes.Data)
-
-		return NewBytes(newData).SetContext(b.context), nil
+	if !ok {
+		return Value{}, IllegalOperation()
 	}
 
-	return nil, IllegalOperation(b, other)
+	newData := make([]byte, len(b.Data)+len(otherBytes.Data))
+
+	copy(newData, b.Data)
+	copy(newData[len(b.Data):], otherBytes.Data)
+
+	return NewBytes(newData), nil
 }

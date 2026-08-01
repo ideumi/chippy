@@ -1,0 +1,13 @@
+What's New:
+
+	- ide:
+		- Added ide files for the vscode / vscodium editor
+
+	- corelib / optionals:
+		- libprint.chh: bug: invalid operation rterror(s) when passing anything other than string to anything other than Print or Printe
+		- json: bug: output was not deterministic but random (see https://go.dev/doc/go1#iteration)
+
+	- combine:
+		- bug: multiline ifs / any statement representing multiple tokens split across multiple lines caused token corruption if StripWhitespace
+
+	- Codebase maintenance

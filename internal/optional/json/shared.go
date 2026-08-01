@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/optional/json/shared.go
+ * Chippy - internal/optional/json/shared.go
  *
  */
 
@@ -21,77 +21,78 @@ const (
 
 // unmarshalValue converts Go JSON values to Chippy values
 func unmarshalValue(val interface{}, ctx values.Ctx) values.Value {
-	switch v := val.(type) {
+	switch typed := val.(type) {
 	case nil:
-		return values.NewString(jsonNull).SetContext(ctx)
+		return values.NewString(jsonNull)
 	case bool:
-		if v {
-			return values.NewString(jsonTrue).SetContext(ctx)
+		if typed {
+			return values.NewString(jsonTrue)
 		}
 
-		return values.NewString(jsonFalse).SetContext(ctx)
+		return values.NewString(jsonFalse)
 	case float64:
-		num, err := values.NewNumberFromFloat(v)
+		num, err := values.NewNumberFromFloat(typed)
 
 		if err != nil {
-			return values.NewString(constants.STR_ERR).SetContext(ctx)
+			return values.NewString(constants.STR_ERR)
 		}
 
-		return num.SetContext(ctx)
+		return num
 	case string:
-		return values.NewString(v).SetContext(ctx)
+		return values.NewString(typed)
 	case []interface{}:
-		list := values.NewList([]values.Value{})
+		elements := make([]values.Value, 0, len(typed))
 
-		for _, item := range v {
-			list.Elements = append(list.Elements, unmarshalValue(item, ctx))
+		for _, item := range typed {
+			elements = append(elements, unmarshalValue(item, ctx))
 		}
 
-		return list.SetContext(ctx)
+		return values.NewList(elements)
 	case map[string]interface{}:
 		/* NOTE:
 		 * Sort keys for repeatable output.
 		 * Work around https://go.dev/doc/go1#iteration instead of silently
 		 * breaking things...
 		 */
-		keys := make([]string, 0, len(v))
+		keys := make([]string, 0, len(typed))
 
-		for key := range v {
+		for key := range typed {
 			keys = append(keys, key)
 		}
 
 		sort.Strings(keys)
 
-		entries := make(map[string]values.Value, len(v))
+		entries := make(map[string]values.Value, len(typed))
 
 		for _, key := range keys {
-			entries[key] = unmarshalValue(v[key], ctx)
+			entries[key] = unmarshalValue(typed[key], ctx)
 		}
 
-		return values.NewMapFromEntries(keys, entries).SetContext(ctx)
+		return values.NewMapFromEntries(keys, entries)
 	default:
-		return values.NewString(constants.STR_ERR).SetContext(ctx)
+		return values.NewString(constants.STR_ERR)
 	}
 }
 
 // marshalValue converts Chippy values to Go JSON values
 func marshalValue(val values.Value, seen map[values.Value]bool, depth int) (interface{}, error) {
-	switch v := val.(type) {
-	case *values.Number:
-		if v.IsInt() {
-			i, err := v.AsInt()
+	if val.IsNumber() {
+		if val.IsInt() {
+			intVal, err := val.AsInt()
 
 			if err != nil {
 				return nil, err
 			}
 
-			return i, nil
+			return intVal, nil
 		}
 
-		return v.AsFloat(), nil
-	case *values.String:
+		return val.AsFloat(), nil
+	}
+
+	if str, ok := values.AsString(val); ok {
 		// Check for special JSON constants
-		switch v.Value {
+		switch str.Value {
 		case jsonTrue:
 			return true, nil
 		case jsonFalse:
@@ -99,22 +100,24 @@ func marshalValue(val values.Value, seen map[values.Value]bool, depth int) (inte
 		case jsonNull:
 			return nil, nil
 		default:
-			return v.Value, nil
+			return str.Value, nil
 		}
-	case *values.Map:
-		defer values.EnterWalk(v, seen, depth)()
+	}
+
+	if mapVal, ok := values.AsMap(val); ok {
+		defer values.EnterWalk(val, seen, depth)()
 
 		result := make(map[string]interface{})
 
-		for _, key := range v.Keys {
-			val := v.Entries[key]
+		for _, key := range mapVal.Keys {
+			entry := mapVal.Entries[key]
 
-			if val == nil {
+			if entry.IsUnset() {
 				result[key] = nil
 				continue
 			}
 
-			goVal, err := marshalValue(val, seen, depth+1)
+			goVal, err := marshalValue(entry, seen, depth+1)
 
 			if err != nil {
 				return nil, err
@@ -124,12 +127,14 @@ func marshalValue(val values.Value, seen map[values.Value]bool, depth int) (inte
 		}
 
 		return result, nil
-	case *values.List:
-		defer values.EnterWalk(v, seen, depth)()
+	}
 
-		result := make([]interface{}, len(v.Elements))
+	if list, ok := values.AsList(val); ok {
+		defer values.EnterWalk(val, seen, depth)()
 
-		for i, elem := range v.Elements {
+		result := make([]interface{}, len(list.Elements))
+
+		for i, elem := range list.Elements {
 			goVal, err := marshalValue(elem, seen, depth+1)
 
 			if err != nil {
@@ -140,7 +145,7 @@ func marshalValue(val values.Value, seen map[values.Value]bool, depth int) (inte
 		}
 
 		return result, nil
-	default:
-		return nil, fmt.Errorf("unsupported type")
 	}
+
+	return nil, fmt.Errorf("unsupported type")
 }

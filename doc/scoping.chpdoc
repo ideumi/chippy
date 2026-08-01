@@ -1,40 +1,135 @@
 *Scoping* | V-$CHIPVR ($CHIPCN)
 
-RR2 implements a simple two-level scoping model where variables and functions belong to either file scope or function scope.
+Every variable belongs to one of three scopes: the file's globals, a function body, or a block. Where you declared it decides which one it is, and that decides how long it lives and who can read it.
 
 *Scope Levels*
 
-''File Scope'' - Variables and functions declared at the top level of a file or within ''if'', ''while'', or ''for'' blocks are accessible throughout the entire file after declaration.
+''Global Scope''   - Declared at the top level of a file, outside every block.
 
-''Function Scope'' - Variables declared inside a function body are local to that function and cannot be accessed from outside.
+''Function Scope'' - Declared in a function body.
 
-*Block Behavior*
+''Block Scope''    - Declared inside an ''if'', ''while'', or ''for'' body.
 
-Chip's ''if'', ''while'', and ''for'' blocks do not create new scopes. Variables declared inside these blocks belong to their parent scope:
+*Global Scope*
+
+A variable or function declared at the top level of a file is available for the rest of that file, and to every file pulled in with ''load(filename)''. Globals are shared by name, which is how a program built from several files fits together:
 
 '''
-var x = 5;
+var greeting = "hello";
 
-if true
+func Greet()
 {
-    var y = 10;  # belongs to file scope
+    # this reads the global
+    return greeting;
 }
-
-var z = y;  # accessible here
 '''
 
-*Function Isolation*
+*Function Scope*
 
-Only functions create new scopes. Variables declared in a function are isolated and inaccessible outside:
+A variable declared in a function body is available only while that call runs, and only inside that function:
 
 '''
-func MyFunc()
+func DeclareLocal()
 {
     var local = 20;
 }
 
-MyFunc();
-var x = local;  # Kaboom
+DeclareLocal();
+
+# local is gone
+var x = local;
 '''
 
-I'll probably change this behaviour at some point when it annoys me or causes problems.
+Every call gets its own locals, so a function that calls itself does not tread on the values of the call that started it.
+
+A function written inside another function can use the outer function's variables. Both sides work on the same variable, so each sees what the other writes:
+
+'''
+func MakeCounter(start)
+{
+    var n = start;
+
+    return func()
+    {
+        n = n + 1;
+
+        return n;
+    };
+}
+
+# result is 2
+var result = MakeCounter(1)();
+
+'''
+
+Each call to ''MakeCounter(start)'' gets its own ''n'', so two counters made this way do not affect each other.
+
+*Block Scope*
+
+A ''var'' declared inside an ''if'', ''while'', or ''for'' body can be used for the rest of that body, but not after it. This holds at the top level of a file too: a ''var'' inside a block is never a global.
+
+'''
+if true
+{
+    var y = 10;
+
+    # same block, thus fine
+    var doubled = y * 2;
+}
+
+# y is gone here
+var z = y;
+'''
+
+The ''for'' variable belongs to its loop and is not available afterwards:
+
+'''
+for i = 1 to 3
+{
+    # i is 1, 2, 3
+}
+
+# i is gone here
+var n = i;
+'''
+
+A block may reuse a name from further out. It is a separate variable, and the one outside is unchanged once the block ends:
+
+'''
+var v = "outer";
+
+for v = 1 to 2
+{
+    # v counts 1, 2 in here
+}
+
+# v is "outer" again
+'''
+
+*Writing to a Name*
+
+Only ''var'' declares. Writing to a name without it looks outwards for a variable that already exists and writes to that one, so a block or a function can update state around it:
+
+'''
+var count = 0;
+
+for i = 1 to 3
+{
+    # writes to the count above
+    count = count + 1;
+}
+
+# count is 3
+'''
+
+If a name doesn't exist anywhere, there is nothing to write to and the program fails hard:
+
+'''
+# Not declared, thus runtime error
+undeclared = 1;
+'''
+
+*Recommended Reading*
+
+''chippy doc engine''
+''chippy doc concurrency''

@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/constants/tokens.go
+ * Chippy - internal/constants/tokens.go
  *
  */
 

@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/getch.go
+ * Chippy - internal/builtins/getch.go
  *
  */
 
@@ -13,7 +13,6 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/values"
 	"os"
 	"time"
@@ -43,9 +42,9 @@ func getchSequence() ([]byte, error) {
 	buffer := make([]byte, 8)
 
 	// Read first byte
-	n, err := os.Stdin.Read(buffer[:1])
+	readCount, err := os.Stdin.Read(buffer[:1])
 
-	if err != nil || n == 0 {
+	if err != nil || readCount == 0 {
 		return nil, err
 	}
 
@@ -67,9 +66,9 @@ func getchSequence() ([]byte, error) {
 			done := make(chan bool, 1)
 			go func() {
 				for bytesRead < len(buffer) {
-					n, err := os.Stdin.Read(buffer[bytesRead : bytesRead+1])
+					readCount, err := os.Stdin.Read(buffer[bytesRead : bytesRead+1])
 
-					if err != nil || n == 0 {
+					if err != nil || readCount == 0 {
 						break
 					}
 					bytesRead++
@@ -103,9 +102,9 @@ func getchSequence() ([]byte, error) {
 
 		// Read additional UTF8 bytes
 		for i := 0; i < additionalBytes; i++ {
-			n, err := os.Stdin.Read(buffer[bytesRead : bytesRead+1])
+			readCount, err := os.Stdin.Read(buffer[bytesRead : bytesRead+1])
 
-			if err != nil || n == 0 {
+			if err != nil || readCount == 0 {
 				break
 			}
 
@@ -121,26 +120,18 @@ func getchSequence() ([]byte, error) {
 	return buffer[:bytesRead], nil
 }
 
-func getchFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func getchFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 0 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCount("getch", 0)))
+		return res.Fail(shared.Errors.InvalidArgCount("getch", 0))
 	}
 
 	bytes, err := getchSequence()
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
-	return res.Success(values.NewBytes(bytes).SetContext(ctx))
+	return res.Success(values.NewBytes(bytes))
 }

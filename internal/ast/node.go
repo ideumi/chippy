@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/ast/node.go
+ * Chippy - internal/ast/node.go
  *
  */
 

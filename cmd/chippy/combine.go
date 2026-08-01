@@ -10,8 +10,9 @@ import (
 	"bufio"
 	"chip-go/cmd/chippy/formatter"
 	"chip-go/cmd/chippy/safety"
+	"chip-go/internal/compiler"
 	"chip-go/internal/constants"
-	"chip-go/internal/roadrunner"
+	"chip-go/internal/modena"
 	"chip-go/internal/values"
 	"fmt"
 	"os"
@@ -37,19 +38,19 @@ func reportCollisions(collisions []safety.SymbolCollision) {
 			fmt.Printf("\n  %s '%s' collides with %s:\n", collision.Locations[0].SymType, collision.Name, collision.SymType)
 
 			for _, loc := range collision.Locations {
-				fmt.Printf("    - %s:%d\n", loc.File, loc.Line+1)
+				fmt.Printf("    - %s:%d\n", loc.File, loc.Line)
 			}
 		} else if collision.IsSameFile() {
 			fmt.Printf("\n  %s '%s' defined multiple times in %s:\n", collision.SymType, collision.Name, collision.GetFirstFile())
 
 			for _, loc := range collision.Locations {
-				fmt.Printf("    - %s:%d\n", loc.File, loc.Line+1)
+				fmt.Printf("    - %s:%d\n", loc.File, loc.Line)
 			}
 		} else {
 			fmt.Printf("\n  %s '%s' defined in multiple files:\n", collision.SymType, collision.Name)
 
 			for _, loc := range collision.Locations {
-				fmt.Printf("    - %s:%d\n", loc.File, loc.Line+1)
+				fmt.Printf("    - %s:%d\n", loc.File, loc.Line)
 			}
 		}
 	}
@@ -91,7 +92,7 @@ func generateTemplateCombineFile() error {
 		return fmt.Errorf("file '%s' already exists, rejected", constants.COMBINE_DEFAULT_FILENAME)
 	}
 
-	template := constants.COMBINE_SHEBANG + `
+	template := constants.CHIPPY_SHEBANG + `
 #
 # Combine configuration file
 #
@@ -129,9 +130,11 @@ var External = [];
 
 # Options
 
+var Compile = true;
+var AddShebang = true;
+
 var StripComments = true;
 var StripWhitespace = true;
-var AddShebang = true;
 `
 
 	err := os.WriteFile(constants.COMBINE_DEFAULT_FILENAME, []byte(template), constants.FILE_PERM_READABLE)
@@ -153,17 +156,17 @@ func executeCombine(combineFile string) error {
 		return fmt.Errorf("reading combine file '%s': %w", combineFile, err)
 	}
 
-	rr := roadrunner.NewRoadRunner2()
+	mod := modena.New()
 
 	// Run combine.chp
-	_, err = rr.Run(combineFile, string(content))
+	_, err = mod.Run(combineFile, string(content))
 
 	if err != nil {
 		return fmt.Errorf("executing combine file '%s': %w", combineFile, err)
 	}
 
 	// Extract configuration from context
-	config := extractCombineConfig(rr.GetGlobalContext())
+	config := extractCombineConfig(mod.GetGlobalContext())
 
 	if config.Project == "" {
 		return fmt.Errorf("project name not specified in '%s'", combineFile)
@@ -263,48 +266,49 @@ type CombineConfig struct {
 	StripComments   bool
 	StripWhitespace bool
 	AddShebang      bool
+	Compile         bool
 }
 
 func extractCombineConfig(ctx values.Ctx) CombineConfig {
 	config := CombineConfig{}
 
 	// Extract string variables
-	if val := ctx.SymbolTable.Get(constants.CONFIG_PROJECT); val != nil {
-		if str, ok := val.(*values.String); ok {
+	if val := ctx.Globals.GetByName(constants.CONFIG_PROJECT); val.IsSet() {
+		if str, ok := values.AsString(val); ok {
 			config.Project = str.Value
 		}
 	}
 
-	if val := ctx.SymbolTable.Get(constants.CONFIG_VERSION); val != nil {
-		if str, ok := val.(*values.String); ok {
+	if val := ctx.Globals.GetByName(constants.CONFIG_VERSION); val.IsSet() {
+		if str, ok := values.AsString(val); ok {
 			config.Version = str.Value
 		}
 	}
 
-	if val := ctx.SymbolTable.Get(constants.CONFIG_LICENCE); val != nil {
-		if str, ok := val.(*values.String); ok {
+	if val := ctx.Globals.GetByName(constants.CONFIG_LICENCE); val.IsSet() {
+		if str, ok := values.AsString(val); ok {
 			config.Licence = str.Value
 		}
 	}
 
-	if val := ctx.SymbolTable.Get(constants.CONFIG_OUTPUT); val != nil {
-		if str, ok := val.(*values.String); ok {
+	if val := ctx.Globals.GetByName(constants.CONFIG_OUTPUT); val.IsSet() {
+		if str, ok := values.AsString(val); ok {
 			config.Output = str.Value
 		}
 	}
 
 	// Extract source entry point
-	if val := ctx.SymbolTable.Get(constants.CONFIG_SOURCE); val != nil {
-		if str, ok := val.(*values.String); ok {
+	if val := ctx.Globals.GetByName(constants.CONFIG_SOURCE); val.IsSet() {
+		if str, ok := values.AsString(val); ok {
 			config.Source = str.Value
 		}
 	}
 
 	// Extract search paths
-	if val := ctx.SymbolTable.Get(constants.CONFIG_PATHS); val != nil {
-		if list, ok := val.(*values.List); ok {
+	if val := ctx.Globals.GetByName(constants.CONFIG_PATHS); val.IsSet() {
+		if list, ok := values.AsList(val); ok {
 			for _, elem := range list.Elements {
-				if str, ok := elem.(*values.String); ok {
+				if str, ok := values.AsString(elem); ok {
 					config.Paths = append(config.Paths, str.Value)
 				}
 			}
@@ -312,10 +316,10 @@ func extractCombineConfig(ctx values.Ctx) CombineConfig {
 	}
 
 	// Extract external dependencies
-	if val := ctx.SymbolTable.Get(constants.CONFIG_EXTERNAL); val != nil {
-		if list, ok := val.(*values.List); ok {
+	if val := ctx.Globals.GetByName(constants.CONFIG_EXTERNAL); val.IsSet() {
+		if list, ok := values.AsList(val); ok {
 			for _, elem := range list.Elements {
-				if str, ok := elem.(*values.String); ok {
+				if str, ok := values.AsString(elem); ok {
 					config.External = append(config.External, str.Value)
 				}
 			}
@@ -323,22 +327,20 @@ func extractCombineConfig(ctx values.Ctx) CombineConfig {
 	}
 
 	// Flags
-	if val := ctx.SymbolTable.Get(constants.CONFIG_STRIP_COMMENTS); val != nil {
-		if num, ok := val.(*values.Number); ok {
-			config.StripComments = num.IsTrue()
-		}
+	if val := ctx.Globals.GetByName(constants.CONFIG_STRIP_COMMENTS); val.IsNumber() {
+		config.StripComments = val.IsTrue()
 	}
 
-	if val := ctx.SymbolTable.Get(constants.CONFIG_STRIP_WHITESPACE); val != nil {
-		if num, ok := val.(*values.Number); ok {
-			config.StripWhitespace = num.IsTrue()
-		}
+	if val := ctx.Globals.GetByName(constants.CONFIG_STRIP_WHITESPACE); val.IsNumber() {
+		config.StripWhitespace = val.IsTrue()
 	}
 
-	if val := ctx.SymbolTable.Get(constants.CONFIG_ADD_SHEBANG); val != nil {
-		if num, ok := val.(*values.Number); ok {
-			config.AddShebang = num.IsTrue()
-		}
+	if val := ctx.Globals.GetByName(constants.CONFIG_ADD_SHEBANG); val.IsNumber() {
+		config.AddShebang = val.IsTrue()
+	}
+
+	if val := ctx.Globals.GetByName(constants.CONFIG_COMPILE); val.IsNumber() {
+		config.Compile = val.IsTrue()
 	}
 
 	return config
@@ -347,6 +349,7 @@ func extractCombineConfig(ctx values.Ctx) CombineConfig {
 func buildDependencyGraph(source string, paths []string, external []string) ([]string, []string, error) {
 	seen := make(map[string]bool)
 	skippedMap := make(map[string]bool)
+
 	var result []string
 
 	// Build external lookup map
@@ -455,7 +458,7 @@ func generateCombinedFile(config CombineConfig, files []string) error {
 
 	// Add shebang if requested
 	if config.AddShebang {
-		combined.WriteString(constants.COMBINE_SHEBANG + "\n")
+		combined.WriteString(constants.CHIPPY_SHEBANG + "\n")
 	}
 
 	// Add project header
@@ -513,11 +516,26 @@ func generateCombinedFile(config CombineConfig, files []string) error {
 		}
 	}
 
-	// Write output file
-	err := os.WriteFile(config.Output, []byte(output), constants.FILE_PERM_EXECUTABLE)
+	if config.Compile {
+		return writeCompiledBundle(config.Output, output, config.AddShebang)
+	}
+
+	if err := os.WriteFile(config.Output, []byte(output), constants.FILE_PERM_EXECUTABLE); err != nil {
+		return fmt.Errorf("writing output file '%s': %w", config.Output, err)
+	}
+
+	return nil
+}
+
+func writeCompiledBundle(outputPath, source string, addShebang bool) error {
+	compiled, err := compiler.CompileToBytecode(outputPath, source, addShebang)
 
 	if err != nil {
-		return fmt.Errorf("writing output file '%s': %w", config.Output, err)
+		return fmt.Errorf("compiling bundle: %w", err)
+	}
+
+	if err := os.WriteFile(outputPath, compiled, constants.FILE_PERM_EXECUTABLE); err != nil {
+		return fmt.Errorf("writing output file '%s': %w", outputPath, err)
 	}
 
 	return nil
@@ -544,8 +562,8 @@ func stripComments(line string) string {
 		}
 
 		if char == '#' && !inString {
-			return strings.TrimRightFunc(line[:i], func(r rune) bool {
-				return r == ' ' || r == '\t'
+			return strings.TrimRightFunc(line[:i], func(trailingChar rune) bool {
+				return trailingChar == ' ' || trailingChar == '\t'
 			})
 		}
 	}

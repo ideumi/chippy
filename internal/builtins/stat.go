@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/stat.go
+ * Chippy - internal/builtins/stat.go
  *
  */
 
@@ -9,7 +9,6 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/values"
 	"os"
 	"syscall"
@@ -35,35 +34,23 @@ func fileModeToChmod(mode os.FileMode) int {
 	return special*1000 + int(owner)*100 + int(group)*10 + int(other)
 }
 
-func statFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func statFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("stat", 1, "path")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("stat", 1, "path"))
 	}
 
-	pathStr, ok := args[0].(*values.String)
+	pathStr, ok := values.AsString(args[0])
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("stat", shared.TypeString, "path")))
+		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("stat", shared.TypeString, "path"))
 	}
 
 	fileInfo, err := os.Stat(pathStr.Value)
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
 	var uid, gid uint32
@@ -129,20 +116,20 @@ func statFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	}
 
 	entries := map[string]values.Value{
-		"size":     values.NewNumber(fileInfo.Size()).SetContext(ctx),
-		"modified": values.NewNumber(mtime).SetContext(ctx),
-		"accessed": values.NewNumber(atime).SetContext(ctx),
-		"changed":  values.NewNumber(ctime).SetContext(ctx),
-		"mode":     values.NewNumber(fileModeToChmod(fileInfo.Mode())).SetContext(ctx),
-		"userId":   values.NewNumber(uid).SetContext(ctx),
-		"groupId":  values.NewNumber(gid).SetContext(ctx),
-		"links":    values.NewNumber(nlink).SetContext(ctx),
-		"inode":    values.NewNumber(ino).SetContext(ctx),
-		"device":   values.NewNumber(dev).SetContext(ctx),
-		"type":     values.NewString(fileType).SetContext(ctx),
+		"size":     values.NewNumber(fileInfo.Size()),
+		"modified": values.NewNumber(mtime),
+		"accessed": values.NewNumber(atime),
+		"changed":  values.NewNumber(ctime),
+		"mode":     values.NewNumber(fileModeToChmod(fileInfo.Mode())),
+		"userId":   values.NewNumber(uid),
+		"groupId":  values.NewNumber(gid),
+		"links":    values.NewNumber(nlink),
+		"inode":    values.NewNumber(ino),
+		"device":   values.NewNumber(dev),
+		"type":     values.NewString(fileType),
 	}
 
 	result := values.NewMapFromEntries(keys, entries)
 
-	return res.Success(result.SetContext(ctx))
+	return res.Success(result)
 }

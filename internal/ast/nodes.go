@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/ast/nodes.go
+ * Chippy - internal/ast/nodes.go
  *
  */
 
@@ -132,8 +132,8 @@ func (n *MapNode) String() string {
 
 	pairs := make([]string, len(n.KeyNodes))
 
-	for i, k := range n.KeyNodes {
-		pairs[i] = k.String() + ": " + n.ValueNodes[i].String()
+	for i, keyNode := range n.KeyNodes {
+		pairs[i] = keyNode.String() + ": " + n.ValueNodes[i].String()
 	}
 
 	return "m[" + strings.Join(pairs, ", ") + "]"
@@ -343,14 +343,7 @@ type CallNode struct {
 	ArgNodes   []Node
 }
 
-func NewCallNode(nodeToCall Node, argNodes []Node) *CallNode {
-	var posEnd *errors.Position
-	if len(argNodes) > 0 {
-		posEnd = argNodes[len(argNodes)-1].GetPosEnd()
-	} else {
-		posEnd = nodeToCall.GetPosEnd()
-	}
-
+func NewCallNode(nodeToCall Node, argNodes []Node, posEnd *errors.Position) *CallNode {
 	return &CallNode{
 		BaseNode:   NewBaseNode(nodeToCall.GetPosStart(), posEnd),
 		NodeToCall: nodeToCall,

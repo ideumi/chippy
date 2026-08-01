@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/orchestrator/orchestrator.go
+ * Chippy - internal/orchestrator/orchestrator.go
  *
  */
 
@@ -15,36 +15,36 @@ type Orchestrator struct {
 	instances map[int]*Instance
 	nextID    int
 	mu        sync.RWMutex
-	factory   RR2Factory
+	factory   ModenaFactory
 }
 
 var global *Orchestrator
 
 func New() *Orchestrator {
-	o := &Orchestrator{
+	orch := &Orchestrator{
 		instances: make(map[int]*Instance),
 		nextID:    1,
 	}
 
-	global = o
-	return o
+	global = orch
+	return orch
 }
 
 func Get() *Orchestrator {
 	return global
 }
 
-func (o *Orchestrator) SetFactory(factory RR2Factory) {
+func (o *Orchestrator) SetFactory(factory ModenaFactory) {
 	o.factory = factory
 }
 
-func (o *Orchestrator) CreateMain(rr RR2Interface) *Instance {
+func (o *Orchestrator) CreateMain(mod Modena) *Instance {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 
 	inst := &Instance{
 		ID:       0,
-		RR:       rr,
+		Modena:   mod,
 		Registry: handles.NewHandleRegistry(),
 		Inbox:    NewInbox(),
 	}
@@ -73,9 +73,9 @@ func (o *Orchestrator) CreateActor() *Instance {
 	return inst
 }
 
-func (o *Orchestrator) InitActorRR2(inst *Instance) {
+func (o *Orchestrator) InitActorModena(inst *Instance) {
 	if o.factory != nil {
-		inst.RR = o.factory(inst.ID)
+		inst.Modena = o.factory(inst.ID)
 	}
 }
 

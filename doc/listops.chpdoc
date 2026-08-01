@@ -17,7 +17,7 @@ Indices are 1-based.
 ''+'' - Merge two maps (right-hand / incoming side wins on key conflict)
 ''-'' - Remove a key by string: ''map - "key"''
 
-''map["key"]'' - Access value by key (''err'' if key not found)
+''map["key"]'' - Access value by key (runtime error if key not found)
 ''map["key"] = value'' - Set key to value in place
 
 See ''chippy doc mutability'', ''chippy doc keys'' and ''chippy doc has''.

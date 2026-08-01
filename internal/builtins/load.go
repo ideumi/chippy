@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/load.go
+ * Chippy - internal/builtins/load.go
  *
  */
 
@@ -9,66 +9,41 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 	"os"
 )
 
-func loadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func loadFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("load", 1, "filename")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("load", 1, "filename"))
 	}
 
-	filename, ok := args[0].(*values.String)
+	filename, ok := values.AsString(args[0])
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("load", shared.TypeString, "filename")))
+		return res.FailAt(1, shared.Errors.InvalidArgTypeWithHint("load", shared.TypeString, "filename"))
 	}
 
 	content, err := os.ReadFile(filename.Value)
 
 	if err != nil {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			"Failed to load file \""+filename.Value+"\": "+err.Error()))
+		return res.FailAt(1, "Failed to load file \""+filename.Value+"\": "+err.Error())
 	}
 
-	roadRunner := orchestrator.Get().GetRR2ForContext(ctx.InstanceID)
+	mod := orchestrator.Get().GetModenaForContext(ctx.InstanceID)
 
-	if roadRunner == nil {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			"RoadRunner2 not available"))
+	if mod == nil {
+		return res.FailAt(1, "Modena not available")
 	}
 
-	_, err = roadRunner.Run(filename.Value, string(content))
+	_, err = mod.Run(filename.Value, string(content))
 
 	if err != nil {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			"Failed to execute file \""+filename.Value+"\":\n"+err.Error()))
+		return res.FailAt(1, "Failed to execute file \""+filename.Value+"\":\n"+err.Error())
 	}
 
-	return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
+	return res.Success(values.NewString(constants.STR_OK))
 }

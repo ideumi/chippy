@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/pack.go
+ * Chippy - internal/builtins/pack.go
  *
  */
 
@@ -8,49 +8,35 @@ package builtins
 
 import (
 	"chip-go/internal/builtins/shared"
-	"chip-go/internal/errors"
 	"chip-go/internal/values"
 )
 
-func packFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func packFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("pack", 1, "value")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("pack", 1, "value"))
 	}
 
 	value := args[0]
 
-	switch v := value.(type) {
-	case *values.String:
-		bytes := []byte(v.Value)
+	if str, ok := values.AsString(value); ok {
+		return res.Success(values.NewBytes([]byte(str.Value)))
+	}
 
-		return res.Success(values.NewBytes(bytes).SetContext(ctx))
+	if list, ok := values.AsList(value); ok {
+		bytes := make([]byte, len(list.Elements))
 
-	case *values.List:
-		bytes := make([]byte, len(v.Elements))
-
-		for i, element := range v.Elements {
-			if element == nil {
+		for i, element := range list.Elements {
+			if element.IsUnset() {
 				bytes[i] = 0
 				continue
 			}
 
-			num, ok := element.(*values.Number)
+			num := element
 
-			if !ok {
-				posStart, posEnd := args[0].GetPos()
-				return res.Failure(errors.NewRTError(
-					posStart, posEnd,
-					"List elements must be numbers representing bytes"))
+			if !num.IsNumber() {
+				return res.FailAt(1, "List elements must be numbers representing bytes")
 			}
 
 			byte64, err := num.AsInt()
@@ -62,21 +48,15 @@ func packFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			byteValue := int(byte64)
 
 			if byteValue < 0 || byteValue > 255 {
-				posStart, posEnd := args[0].GetPos()
-				return res.Failure(errors.NewRTError(
-					posStart, posEnd,
-					"Byte values must be between 0 and 255"))
+				return res.FailAt(1, "Byte values must be between 0 and 255")
 			}
 
 			bytes[i] = byte(byteValue)
 		}
 
-		return res.Success(values.NewBytes(bytes).SetContext(ctx))
-
-	default:
-		posStart, posEnd := args[0].GetPos()
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("pack", shared.TypeStringOrList, shared.TypeStringOrList)))
+		return res.Success(values.NewBytes(bytes))
 	}
+
+	return res.FailAt(1,
+		shared.Errors.InvalidArgTypeWithHint("pack", shared.TypeStringOrList, shared.TypeStringOrList))
 }

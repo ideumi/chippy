@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/shared/errors.go
+ * Chippy - internal/builtins/shared/errors.go
  *
  */
 
@@ -53,11 +53,6 @@ func (e BuiltinErrors) InvalidArgTypePositionalWithHint(funcName string, positio
 // InvalidValue generates error for value constraint violations
 func (e BuiltinErrors) InvalidValue(constraint string) string {
 	return constraint
-}
-
-// CannotConvert generates error for impossible conversions
-func (e BuiltinErrors) CannotConvert(what, reason string) string {
-	return fmt.Sprintf("Cannot convert %s%s", what, reason)
 }
 
 // Common type names

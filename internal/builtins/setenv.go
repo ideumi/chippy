@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/setenv.go
+ * Chippy - internal/builtins/setenv.go
  *
  */
 
@@ -9,56 +9,37 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/values"
 	"os"
 )
 
-func setenvFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func setenvFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("setenv", 2, "name, value")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("setenv", 2, "name, value"))
 	}
 
-	nameStr, ok := args[0].(*values.String)
+	nameStr, ok := values.AsString(args[0])
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("setenv", shared.PositionFirst, shared.TypeString, "name")))
+		return res.FailAt(1,
+			shared.Errors.InvalidArgTypePositionalWithHint("setenv", shared.PositionFirst, shared.TypeString, "name"))
 	}
 
-	valueStr, ok := args[1].(*values.String)
+	valueStr, ok := values.AsString(args[1])
 
 	if !ok {
-		posStart, posEnd := args[1].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("setenv", shared.PositionSecond, shared.TypeString, "value")))
+		return res.FailAt(2,
+			shared.Errors.InvalidArgTypePositionalWithHint("setenv", shared.PositionSecond, shared.TypeString, "value"))
 	}
 
 	// Set environment variable
 	err := os.Setenv(nameStr.Value, valueStr.Value)
 
 	if err != nil {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			"Failed to set environment variable: "+err.Error()))
+		return res.FailAt(1, "Failed to set environment variable: "+err.Error())
 	}
 
-	return res.Success(values.NewString(constants.STR_OK).SetContext(ctx))
+	return res.Success(values.NewString(constants.STR_OK))
 }

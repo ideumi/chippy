@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/context/context.go
+ * Chippy - internal/context/context.go
  *
  */
 
@@ -12,16 +12,20 @@ type Trace struct {
 	Pos *errors.Position
 }
 
-type Context[T any] struct {
+type Storable interface {
+	IsSet() bool
+}
+
+type Context[T Storable] struct {
 	DisplayName    string
 	Parent         *Context[T]
 	ParentEntryPos *errors.Position
-	SymbolTable    *SymbolTable[T]
+	Globals        *Globals[T]
 	InstanceID     int
 	Trace          *Trace
 }
 
-func NewContext[T any](displayName string, parent *Context[T], parentEntryPos *errors.Position) *Context[T] {
+func NewContext[T Storable](displayName string, parent *Context[T], parentEntryPos *errors.Position) *Context[T] {
 	ctx := &Context[T]{
 		DisplayName:    displayName,
 		Parent:         parent,
@@ -29,11 +33,9 @@ func NewContext[T any](displayName string, parent *Context[T], parentEntryPos *e
 	}
 
 	if parent != nil {
-		ctx.SymbolTable = NewSymbolTable(parent.SymbolTable)
 		ctx.InstanceID = parent.InstanceID
 		ctx.Trace = parent.Trace
 	} else {
-		ctx.SymbolTable = NewSymbolTable[T](nil)
 		ctx.Trace = &Trace{}
 	}
 

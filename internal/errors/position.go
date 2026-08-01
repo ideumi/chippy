@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/errors/position.go
+ * Chippy - internal/errors/position.go
  *
  */
 
@@ -51,6 +51,10 @@ func (p *Position) Copy() *Position {
 	}
 }
 
+func (p *Position) DisplayLine() int {
+	return p.Line + 1
+}
+
 func (p *Position) String() string {
-	return fmt.Sprintf("File %s, line %d", p.File, p.Line+1)
+	return fmt.Sprintf("File %s, line %d", p.File, p.DisplayLine())
 }

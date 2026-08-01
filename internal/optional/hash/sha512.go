@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/optional/hash/sha512.go
+ * Chippy - internal/optional/hash/sha512.go
  *
  */
 
@@ -8,36 +8,25 @@ package hash
 
 import (
 	"chip-go/internal/builtins/shared"
-	"chip-go/internal/errors"
 	"chip-go/internal/optional"
 	"chip-go/internal/values"
 
 	"crypto/sha512"
 )
 
-func sha512Function(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func sha512Function(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "sha512"), 1, "bytes")))
+		return res.Fail(
+			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "sha512"), 1, "bytes"))
 	}
 
-	bytesVal, ok := args[0].(*values.Bytes)
+	bytesVal, ok := values.AsBytes(args[0])
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint(optional.Prefixed(OptionalName, "sha512"), shared.TypeBytes, "bytes")))
+		return res.FailAt(1,
+			shared.Errors.InvalidArgTypeWithHint(optional.Prefixed(OptionalName, "sha512"), shared.TypeBytes, "bytes"))
 	}
 
 	hash := sha512.Sum512(bytesVal.Data)

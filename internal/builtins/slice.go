@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/slice.go
+ * Chippy - internal/builtins/slice.go
  *
  */
 
@@ -8,45 +8,30 @@ package builtins
 
 import (
 	"chip-go/internal/builtins/shared"
-	"chip-go/internal/errors"
 	"chip-go/internal/values"
+	"unicode/utf8"
 )
 
-func sliceFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func sliceFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 3 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("slice", 3, "container, start, end")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("slice", 3, "container, start, end"))
 	}
 
-	switch container := args[0].(type) {
-	case *values.String:
-		startNum, ok := args[1].(*values.Number)
+	if container, ok := values.AsString(args[0]); ok {
+		startNum := args[1]
 
-		if !ok {
-			posStart, posEnd := args[1].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionSecond, shared.TypeNumber, "start")))
+		if !startNum.IsNumber() {
+			return res.FailAt(2,
+				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionSecond, shared.TypeNumber, "start"))
 		}
 
-		endNum, ok := args[2].(*values.Number)
+		endNum := args[2]
 
-		if !ok {
-			posStart, posEnd := args[2].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionThird, shared.TypeNumber, "end")))
+		if !endNum.IsNumber() {
+			return res.FailAt(3,
+				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionThird, shared.TypeNumber, "end"))
 		}
 
 		start64, err := startNum.AsInt()
@@ -65,45 +50,35 @@ func sliceFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		end := int(end64)
 
 		if start < 1 {
-			posStart, posEnd := args[1].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				"Start must be >= 1"))
+			return res.FailAt(2, "Start must be >= 1")
 		}
 
-		runes := []rune(container.Value)
-		size := len(runes)
+		size := utf8.RuneCountInString(container.Value)
 
 		if start > size || end < start {
-			return res.Success(values.NewString("").SetContext(ctx))
+			return res.Success(values.NewString(""))
 		}
 
 		if end > size {
 			end = size
 		}
 
-		return res.Success(values.NewString(string(runes[start-1 : end])).SetContext(ctx))
+		return res.Success(values.NewString(container.RuneSlice(start, end)))
+	}
 
-	case *values.List:
-		startNum, ok := args[1].(*values.Number)
+	if container, ok := values.AsList(args[0]); ok {
+		startNum := args[1]
 
-		if !ok {
-			posStart, posEnd := args[1].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionSecond, shared.TypeNumber, "start")))
+		if !startNum.IsNumber() {
+			return res.FailAt(2,
+				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionSecond, shared.TypeNumber, "start"))
 		}
 
-		endNum, ok := args[2].(*values.Number)
+		endNum := args[2]
 
-		if !ok {
-			posStart, posEnd := args[2].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionThird, shared.TypeNumber, "end")))
+		if !endNum.IsNumber() {
+			return res.FailAt(3,
+				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionThird, shared.TypeNumber, "end"))
 		}
 
 		start64, err := startNum.AsInt()
@@ -122,18 +97,14 @@ func sliceFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		end := int(end64)
 
 		if start < 1 {
-			posStart, posEnd := args[1].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				"Start must be >= 1"))
+			return res.FailAt(2, "Start must be >= 1")
 		}
 
 		elements := container.Elements
 		size := len(elements)
 
 		if start > size || end < start {
-			return res.Success(values.NewList([]values.Value{}).SetContext(ctx))
+			return res.Success(values.NewList([]values.Value{}))
 		}
 
 		if end > size {
@@ -143,27 +114,22 @@ func sliceFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		result := make([]values.Value, end-(start-1))
 		copy(result, elements[start-1:end])
 
-		return res.Success(values.NewList(result).SetContext(ctx))
+		return res.Success(values.NewList(result))
+	}
 
-	case *values.Bytes:
-		startNum, ok := args[1].(*values.Number)
+	if container, ok := values.AsBytes(args[0]); ok {
+		startNum := args[1]
 
-		if !ok {
-			posStart, posEnd := args[1].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionSecond, shared.TypeNumber, "start")))
+		if !startNum.IsNumber() {
+			return res.FailAt(2,
+				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionSecond, shared.TypeNumber, "start"))
 		}
 
-		endNum, ok := args[2].(*values.Number)
+		endNum := args[2]
 
-		if !ok {
-			posStart, posEnd := args[2].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionThird, shared.TypeNumber, "end")))
+		if !endNum.IsNumber() {
+			return res.FailAt(3,
+				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionThird, shared.TypeNumber, "end"))
 		}
 
 		start64, err := startNum.AsInt()
@@ -182,18 +148,14 @@ func sliceFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		end := int(end64)
 
 		if start < 1 {
-			posStart, posEnd := args[1].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				"Start must be >= 1"))
+			return res.FailAt(2, "Start must be >= 1")
 		}
 
 		data := container.Data
 		size := len(data)
 
 		if start > size || end < start {
-			return res.Success(values.NewBytes([]byte{}).SetContext(ctx))
+			return res.Success(values.NewBytes([]byte{}))
 		}
 
 		if end > size {
@@ -203,13 +165,9 @@ func sliceFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		result := make([]byte, end-(start-1))
 		copy(result, data[start-1:end])
 
-		return res.Success(values.NewBytes(result).SetContext(ctx))
-
-	default:
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionFirst, "a string, list, or bytes", "container")))
+		return res.Success(values.NewBytes(result))
 	}
+
+	return res.FailAt(1,
+		shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionFirst, "a string, list, or bytes", "container"))
 }

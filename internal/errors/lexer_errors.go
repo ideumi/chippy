@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/errors/lexer_errors.go
+ * Chippy - internal/errors/lexer_errors.go
  *
  */
 
@@ -45,5 +45,14 @@ type RTError struct {
 func NewRTError(posStart, posEnd *Position, details string) *RTError {
 	return &RTError{
 		BaseError: NewBaseError(posStart, posEnd, constants.RT_ERROR_TITLE, details),
+	}
+}
+
+func NewCallError(details string) *RTError {
+	return &RTError{
+		BaseError: &BaseError{
+			ErrorName: constants.RT_ERROR_TITLE,
+			Details:   details,
+		},
 	}
 }

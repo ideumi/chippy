@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/timezone.go
+ * Chippy - internal/builtins/timezone.go
  *
  */
 
@@ -9,34 +9,22 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/values"
 	"time"
 )
 
-func timezoneFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func timezoneFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("timezone", 1, "timestamp")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("timezone", 1, "timestamp"))
 	}
 
-	tsNum, ok := args[0].(*values.Number)
+	tsNum := args[0]
 
-	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("timezone", shared.TypeNumber, "timestamp")))
+	if !tsNum.IsNumber() {
+		return res.FailAt(1,
+			shared.Errors.InvalidArgTypeWithHint("timezone", shared.TypeNumber, "timestamp"))
 	}
 
 	tsSeconds, err := tsNum.AsInt()
@@ -62,12 +50,12 @@ func timezoneFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult
 	}
 
 	entries := map[string]values.Value{
-		"offsetSeconds":    values.NewNumber(offsetSeconds).SetContext(ctx),
-		"abbreviation":     values.NewString(abbreviation).SetContext(ctx),
-		"isDaylightSaving": values.NewNumber(isDaylightSaving).SetContext(ctx),
+		"offsetSeconds":    values.NewNumber(offsetSeconds),
+		"abbreviation":     values.NewString(abbreviation),
+		"isDaylightSaving": values.NewNumber(isDaylightSaving),
 	}
 
 	result := values.NewMapFromEntries(keys, entries)
 
-	return res.Success(result.SetContext(ctx))
+	return res.Success(result)
 }

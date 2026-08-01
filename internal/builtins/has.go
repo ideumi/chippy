@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/has.go
+ * Chippy - internal/builtins/has.go
  *
  */
 
@@ -9,53 +9,41 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/values"
 	"strings"
 )
 
-func hasFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func hasFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("has", 2, "container, needle")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("has", 2, "container, needle"))
 	}
 
-	switch container := args[0].(type) {
-	case *values.String:
-		needleStr, ok := args[1].(*values.String)
+	if container, ok := values.AsString(args[0]); ok {
+		needleStr, ok := values.AsString(args[1])
 
 		if !ok {
-			posStart, posEnd := args[1].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("has", shared.PositionSecond, shared.TypeString, "needle")))
+			return res.FailAt(2,
+				shared.Errors.InvalidArgTypePositionalWithHint("has", shared.PositionSecond, shared.TypeString, "needle"))
 		}
 
 		if needleStr.Value == "" {
-			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+			return res.Success(values.NewString(constants.STR_ERR))
 		}
 
 		if strings.Contains(container.Value, needleStr.Value) {
-			return res.Success(values.NewNumber(constants.NUM_TRU).SetContext(ctx))
+			return res.Success(values.NewNumber(constants.NUM_TRU))
 		}
 
-		return res.Success(values.NewNumber(constants.NUM_FAL).SetContext(ctx))
+		return res.Success(values.NewNumber(constants.NUM_FAL))
+	}
 
-	case *values.List:
+	if container, ok := values.AsList(args[0]); ok {
 		needle := args[1]
 
 		for _, element := range container.Elements {
-			if element == nil {
+			if element.IsUnset() {
 				continue
 			}
 
@@ -65,24 +53,20 @@ func hasFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 				continue
 			}
 
-			if compNum, ok := comparison.(*values.Number); ok {
-				if compNum.IsTrue() {
-					return res.Success(values.NewNumber(constants.NUM_TRU).SetContext(ctx))
-				}
+			if comparison.IsNumber() && comparison.IsTrue() {
+				return res.Success(values.NewNumber(constants.NUM_TRU))
 			}
 		}
 
-		return res.Success(values.NewNumber(constants.NUM_FAL).SetContext(ctx))
+		return res.Success(values.NewNumber(constants.NUM_FAL))
+	}
 
-	case *values.Bytes:
-		needleNum, ok := args[1].(*values.Number)
+	if container, ok := values.AsBytes(args[0]); ok {
+		needleNum := args[1]
 
-		if !ok {
-			posStart, posEnd := args[1].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("has", shared.PositionSecond, shared.TypeNumber, "bytes")))
+		if !needleNum.IsNumber() {
+			return res.FailAt(2,
+				shared.Errors.InvalidArgTypePositionalWithHint("has", shared.PositionSecond, shared.TypeNumber, "bytes"))
 		}
 
 		byte64, err := needleNum.AsInt()
@@ -94,41 +78,35 @@ func hasFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		byteValue := int(byte64)
 
 		if byteValue < 0 || byteValue > 255 {
-			return res.Success(values.NewNumber(constants.NUM_FAL).SetContext(ctx))
+			return res.Success(values.NewNumber(constants.NUM_FAL))
 		}
 
 		target := byte(byteValue)
 
-		for _, b := range container.Data {
-			if b == target {
-				return res.Success(values.NewNumber(constants.NUM_TRU).SetContext(ctx))
+		for _, byteVal := range container.Data {
+			if byteVal == target {
+				return res.Success(values.NewNumber(constants.NUM_TRU))
 			}
 		}
 
-		return res.Success(values.NewNumber(constants.NUM_FAL).SetContext(ctx))
+		return res.Success(values.NewNumber(constants.NUM_FAL))
+	}
 
-	case *values.Map:
-		keyStr, ok := args[1].(*values.String)
+	if container, ok := values.AsMap(args[0]); ok {
+		keyStr, ok := values.AsString(args[1])
 
 		if !ok {
-			posStart, posEnd := args[1].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("has", shared.PositionSecond, shared.TypeString, "key")))
+			return res.FailAt(2,
+				shared.Errors.InvalidArgTypePositionalWithHint("has", shared.PositionSecond, shared.TypeString, "key"))
 		}
 
 		if _, exists := container.Entries[keyStr.Value]; exists {
-			return res.Success(values.NewNumber(constants.NUM_TRU).SetContext(ctx))
+			return res.Success(values.NewNumber(constants.NUM_TRU))
 		}
 
-		return res.Success(values.NewNumber(constants.NUM_FAL).SetContext(ctx))
-
-	default:
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("has", shared.PositionFirst, "a string, list, bytes, or map", "container")))
+		return res.Success(values.NewNumber(constants.NUM_FAL))
 	}
+
+	return res.FailAt(1,
+		shared.Errors.InvalidArgTypePositionalWithHint("has", shared.PositionFirst, "a string, list, bytes, or map", "container"))
 }

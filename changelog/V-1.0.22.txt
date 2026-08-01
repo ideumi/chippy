@@ -1,0 +1,41 @@
+What's New:
+
+	- rr2:
+		- lexer: bytes and maps are now separate lexer token types and no longer just keywords
+		- removed platform checks for unsupported platforms
+
+	- builtins:
+		- added timezone(timestamp)
+
+	- corelib:
+		- libtime.chh:
+			- added EquationOfTime(timestamp)
+			- added SolarOffset(longitude, timestamp)
+
+		- libgregorian.chh: add SetLocalTimezoneOffset() + some formatting
+
+		- libavantjien.chh:
+			- decoupled from libgregorian
+			- apparent-solar time calculation
+			- realign cycles
+
+		- libavantjien.chh:
+			- added AVANTLONGITUDE
+			- added AvantjienSolarOffset(timestamp)
+			- added AvantjienHour(timestamp)
+			- added AvantjienMinute(timestamp)
+			- added FormatAvantjienClock(timestamp)
+			- added FormatAvantjienTimePeriod(timestamp)
+
+	- doc:
+		- chippy doc <file> <symbol> now allows searching for symbol names in files by using <symbol> as a search query
+
+	- installer:
+		- removed legacy uninstallation path for old project name
+
+	- misc:
+		- go.mod bumped to 1.26.4
+		- avant:
+			- updated to new libavantjien.chh
+			- add config file logic for longitude configuration
+			- drop timezone.chh

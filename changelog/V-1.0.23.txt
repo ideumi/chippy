@@ -1,0 +1,34 @@
+What's New:
+
+	- combine:
+		- trailing newlines now get trimmed
+		- readable output now gets formatted via chippy format
+
+	- rr2:
+		- interpreter panics are now properly intercepted and displayed
+
+	- corelib:
+		libhttp.chh: support for IPv6
+
+	- builtins:
+		- has(container, needle): treat out of range as not found in bytes instead of throwing RTError
+		- indexof(haystack, needle): treat out of range as not found in bytes instead of throwing RTError
+		- int(value): now returns err instead of throwing RTError on inconvertible values
+		- sopen(address, port, mode): support for IPv6
+
+	- optional
+		- http:
+			- bug: dechunk, parseresponse: fixed some under/overflow cases
+		- tls:
+			- tlsopen: support for IPv6
+
+	- other:
+		- various code cleanups and consistency fixes
+
+FYI Breaking:
+
+	- has(container, needle): treat out of range as not found in bytes instead of throwing RTError.
+	- indexof(haystack, needle): treat out of range as not found in bytes instead of throwing RTError
+	- int(value): now returns err instead of throwing RTError on inconvertible values.
+
+	- combine now produces slightly different output (see above changes) compared to the previous version, meaning if you combine a program with 1.0.22 and then with 1.0.23, you will get different hashes, this is expected.

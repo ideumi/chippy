@@ -1,0 +1,19 @@
+What's New:
+
+	- cmd:
+		- refactored the formatter engine
+			- reverted the formatter from K&R to the tried and true Chippy style
+			- increased robustness
+			- separated concerns
+
+	- corelib:
+		- formatted code with chippy format all
+
+	- combine:
+		- reverted the "chippy combine new" template to the Chippy style
+
+	- installer:
+		- formatted code with chippy format all
+
+	- misc:
+		- formatted code with chippy format all

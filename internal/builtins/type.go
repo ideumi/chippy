@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/type.go
+ * Chippy - internal/builtins/type.go
  *
  */
 
@@ -8,53 +8,34 @@ package builtins
 
 import (
 	"chip-go/internal/builtins/shared"
-	"chip-go/internal/errors"
 	"chip-go/internal/values"
 )
 
-func typeFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func typeFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("type", 1, "value")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("type", 1, "value"))
 	}
 
 	value := args[0]
-	var typeName string
+	typeName := "unknown"
 
-	switch value.(type) {
-	case *values.Number:
+	if value.IsNumber() {
 		typeName = "number"
-
-	case *values.String:
+	} else if _, ok := values.AsString(value); ok {
 		typeName = "string"
-
-	case *values.List:
+	} else if _, ok := values.AsList(value); ok {
 		typeName = "list"
-
-	case *values.Bytes:
+	} else if _, ok := values.AsBytes(value); ok {
 		typeName = "bytes"
-
-	case *values.Map:
+	} else if _, ok := values.AsMap(value); ok {
 		typeName = "map"
-
-	case *values.Function:
-		typeName = "function"
-
-	case *values.BuiltInFunction:
+	} else if _, ok := values.AsBuiltIn(value); ok {
 		typeName = "builtin"
-
-	default:
-		typeName = "unknown"
+	} else if _, ok := values.AsCallable(value); ok {
+		typeName = "function"
 	}
 
-	return res.Success(values.NewString(typeName).SetContext(ctx))
+	return res.Success(values.NewString(typeName))
 }

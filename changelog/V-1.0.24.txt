@@ -1,0 +1,12 @@
+What's New:
+
+	- doc:
+		- bug: documentation for list(value1, value2, ...) was inaccessible due to "list" special keyword
+			- "chippy doc" now gives the list of all available documentation topics
+			- Removed special index case
+				- index.chpdoc was removed
+
+FYI Breaking:
+
+	- "chippy doc list" now gives documentation for the list(value1, value2, ...) builtin
+	- "chippy doc" now gives the list of all available documentation topics

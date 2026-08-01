@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/constants/combine.go
+ * Chippy - internal/constants/combine.go
  *
  */
 
@@ -10,7 +10,6 @@ const (
 	// Combine tool defaults
 
 	COMBINE_DEFAULT_FILENAME = "combine.chp"
-	COMBINE_SHEBANG          = "#!/usr/bin/chippy"
 
 	// File permissions
 
@@ -29,4 +28,5 @@ const (
 	CONFIG_STRIP_WHITESPACE = "StripWhitespace"
 	CONFIG_ADD_SHEBANG      = "AddShebang"
 	CONFIG_EXTERNAL         = "External"
+	CONFIG_COMPILE          = "Compile"
 )

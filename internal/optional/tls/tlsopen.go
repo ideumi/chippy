@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/optional/tls/tlsopen.go
+ * Chippy - internal/optional/tls/tlsopen.go
  *
  */
 
@@ -9,7 +9,6 @@ package tls
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/optional"
 	"chip-go/internal/values"
 	"crypto/tls"
@@ -17,41 +16,28 @@ import (
 	"strconv"
 )
 
-func tlsopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func tlsopenFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 3 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "open"), 3, "host, port, verify")))
+		return res.Fail(
+			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "open"), 3, "host, port, verify"))
 	}
 
-	hostStr, ok := args[0].(*values.String)
+	hostStr, ok := values.AsString(args[0])
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
+		return res.FailAt(1,
 			shared.Errors.InvalidArgTypePositionalWithHint(
-				optional.Prefixed(OptionalName, "open"), shared.PositionFirst, shared.TypeString, "host")))
+				optional.Prefixed(OptionalName, "open"), shared.PositionFirst, shared.TypeString, "host"))
 	}
 
-	portNum, ok := args[1].(*values.Number)
+	portNum := args[1]
 
-	if !ok {
-		posStart, posEnd := args[1].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
+	if !portNum.IsNumber() {
+		return res.FailAt(2,
 			shared.Errors.InvalidArgTypePositionalWithHint(
-				optional.Prefixed(OptionalName, "open"), shared.PositionSecond, shared.TypeNumber, "port")))
+				optional.Prefixed(OptionalName, "open"), shared.PositionSecond, shared.TypeNumber, "port"))
 	}
 
 	port64, err := portNum.AsInt()
@@ -63,22 +49,17 @@ func tlsopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 	port := int(port64)
 
 	if port < 1 || port > 65535 {
-		posStart, posEnd := args[1].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidValue("Port must be between 1 and 65535")))
+		return res.FailAt(2, shared.Errors.InvalidValue("Port must be between 1 and 65535"))
 	}
 
 	verify := true
 
-	switch v := args[2].(type) {
-	case *values.String:
-		if v.Value == "false" || v.Value == "" {
+	if str, ok := values.AsString(args[2]); ok {
+		if str.Value == "false" || str.Value == "" {
 			verify = false
 		}
-	case *values.Number:
-		if !v.IsTrue() {
+	} else if args[2].IsNumber() {
+		if !args[2].IsTrue() {
 			verify = false
 		}
 	}
@@ -92,7 +73,7 @@ func tlsopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 	conn, err := tls.Dial("tcp", address, tlsConfig)
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
 	handle := getNextTLSHandle(ctx)
@@ -103,5 +84,5 @@ func tlsopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 		Closed: false,
 	})
 
-	return res.Success(values.NewNumber(handle).SetContext(ctx))
+	return res.Success(values.NewNumber(handle))
 }

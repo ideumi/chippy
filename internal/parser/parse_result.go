@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/parser/parse_result.go
+ * Chippy - internal/parser/parse_result.go
  *
  */
 
@@ -70,10 +70,6 @@ func (pr *ParseResult) GetError() error {
 
 func (pr *ParseResult) GetNode() ast.Node {
 	return pr.node
-}
-
-func (pr *ParseResult) GetAdvanceCount() int {
-	return pr.advanceCount
 }
 
 func (pr *ParseResult) GetToReverseCount() int {

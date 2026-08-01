@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/unpack.go
+ * Chippy - internal/builtins/unpack.go
  *
  */
 
@@ -8,35 +8,23 @@ package builtins
 
 import (
 	"chip-go/internal/builtins/shared"
-	"chip-go/internal/errors"
 	"chip-go/internal/values"
 )
 
-func unpackFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func unpackFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("unpack", 1, "bytes")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("unpack", 1, "bytes"))
 	}
 
-	bytesVal, ok := args[0].(*values.Bytes)
+	bytesVal, ok := values.AsBytes(args[0])
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("unpack", shared.TypeBytes, shared.TypeBytes)))
+		return res.FailAt(1,
+			shared.Errors.InvalidArgTypeWithHint("unpack", shared.TypeBytes, shared.TypeBytes))
 	}
 
 	// Convert bytes to string without UTF-8 validation
-	return res.Success(values.NewString(string(bytesVal.Data)).SetContext(ctx))
+	return res.Success(values.NewString(string(bytesVal.Data)))
 }

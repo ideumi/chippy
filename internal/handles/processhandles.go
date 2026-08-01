@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/handles/processhandles.go
+ * Chippy - internal/handles/processhandles.go
  *
  */
 
@@ -72,24 +72,24 @@ func (ph *ProcessHandles) CloseAll() {
 	}
 }
 
-func closeProcess(p *ProcessHandle) {
-	if p.Cmd != nil && p.Cmd.Process != nil {
-		p.Cmd.Process.Kill()
+func closeProcess(process *ProcessHandle) {
+	if process.Cmd != nil && process.Cmd.Process != nil {
+		process.Cmd.Process.Kill()
 	}
 
-	if p.Stdin != nil {
-		p.Stdin.Close()
+	if process.Stdin != nil {
+		process.Stdin.Close()
 	}
 
-	if p.Stdout != nil {
-		p.Stdout.Close()
+	if process.Stdout != nil {
+		process.Stdout.Close()
 	}
 
-	if p.Stderr != nil {
-		p.Stderr.Close()
+	if process.Stderr != nil {
+		process.Stderr.Close()
 	}
 
-	if p.Cmd != nil {
-		p.Cmd.Wait()
+	if process.Cmd != nil {
+		process.Cmd.Wait()
 	}
 }

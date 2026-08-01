@@ -30,11 +30,17 @@ if not iserr(homePath)
 
 Paths = Paths + ["../lib/"];
 
+# Dependencies combine shouldn't bundle and just keep as loads
+
+var External = [];
+
 # Options
 
 # Keep this intentionally human readable
 # so users know what they run.
 
+var Compile = false;
+var AddShebang = true;
+
 var StripComments = false;
 var StripWhitespace = false;
-var AddShebang = true;

@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/optional/http/parseurl.go
+ * Chippy - internal/optional/http/parseurl.go
  *
  */
 
@@ -9,49 +9,38 @@ package http
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/optional"
 	"chip-go/internal/values"
 	"net/url"
 	"strconv"
 )
 
-func parseurlFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func parseurlFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "parseurl"), 1, "url")))
+		return res.Fail(
+			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "parseurl"), 1, "url"))
 	}
 
-	urlStr, ok := args[0].(*values.String)
+	urlStr, ok := values.AsString(args[0])
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
+		return res.FailAt(1,
 			shared.Errors.InvalidArgTypeWithHint(
-				optional.Prefixed(OptionalName, "parseurl"), shared.TypeString, "url")))
+				optional.Prefixed(OptionalName, "parseurl"), shared.TypeString, "url"))
 	}
 
 	parsedURL, err := url.Parse(urlStr.Value)
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
 	// Require scheme and host for absolute URLs
 	// Empty URLs or URLs without scheme/host should return error
 	if urlStr.Value == "" || (parsedURL.Scheme == "" && parsedURL.Host == "") {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
 	// Determine port
@@ -79,13 +68,13 @@ func parseurlFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult
 	nativeMap := values.NewMapFromEntries(
 		[]string{"scheme", "host", "port", "path", "query"},
 		map[string]values.Value{
-			"scheme": values.NewString(parsedURL.Scheme).SetContext(ctx),
-			"host":   values.NewString(parsedURL.Hostname()).SetContext(ctx),
-			"port":   values.NewNumber(portNum).SetContext(ctx),
-			"path":   values.NewString(path).SetContext(ctx),
-			"query":  values.NewString(parsedURL.RawQuery).SetContext(ctx),
+			"scheme": values.NewString(parsedURL.Scheme),
+			"host":   values.NewString(parsedURL.Hostname()),
+			"port":   values.NewNumber(portNum),
+			"path":   values.NewString(path),
+			"query":  values.NewString(parsedURL.RawQuery),
 		},
 	)
 
-	return res.Success(nativeMap.SetContext(ctx))
+	return res.Success(nativeMap)
 }

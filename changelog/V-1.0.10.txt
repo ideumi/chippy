@@ -1,0 +1,6 @@
+What's New:
+
+	- corelib:
+		- libhttp.chh: automatic redirect following
+
+	FYI Breaking: HttpGet and HttpPost now follow up to 10 redirects. If you don't want that, update your program to use HttpGetNoRedirect or HttpPostNoRedirect respectively.

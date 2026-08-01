@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/indexof.go
+ * Chippy - internal/builtins/indexof.go
  *
  */
 
@@ -10,55 +10,44 @@ import (
 	"bytes"
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/values"
 	"strings"
+	"unicode/utf8"
 )
 
-func indexofFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func indexofFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("indexof", 2, "haystack, needle")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("indexof", 2, "haystack, needle"))
 	}
 
-	switch container := args[0].(type) {
-	case *values.String:
-		needleArg, ok := args[1].(*values.String)
+	if container, ok := values.AsString(args[0]); ok {
+		needleArg, ok := values.AsString(args[1])
 
 		if !ok {
-			posStart, posEnd := args[1].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("indexof", shared.PositionSecond, shared.TypeString, "needle")))
+			return res.FailAt(2,
+				shared.Errors.InvalidArgTypePositionalWithHint("indexof", shared.PositionSecond, shared.TypeString, "needle"))
 		}
 
 		needle := needleArg.Value
 
 		if len(needle) == 0 {
-			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+			return res.Success(values.NewString(constants.STR_ERR))
 		}
 
 		byteIndex := strings.Index(container.Value, needle)
 
 		if byteIndex == -1 {
-			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+			return res.Success(values.NewString(constants.STR_ERR))
 		}
 
-		runeIndex := len([]rune(container.Value[:byteIndex]))
+		runeIndex := utf8.RuneCountInString(container.Value[:byteIndex])
 
-		return res.Success(values.NewNumber(runeIndex + 1).SetContext(ctx))
+		return res.Success(values.NewNumber(runeIndex + 1))
+	}
 
-	case *values.List:
+	if container, ok := values.AsList(args[0]); ok {
 		needle := args[1]
 
 		for i, element := range container.Elements {
@@ -68,18 +57,16 @@ func indexofFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 				continue
 			}
 
-			if compNum, ok := comparison.(*values.Number); ok {
-				if compNum.IsTrue() {
-					return res.Success(values.NewNumber(i + 1).SetContext(ctx))
-				}
+			if comparison.IsNumber() && comparison.IsTrue() {
+				return res.Success(values.NewNumber(i + 1))
 			}
 		}
 
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
+	}
 
-	case *values.Bytes:
-		switch needle := args[1].(type) {
-		case *values.Number:
+	if container, ok := values.AsBytes(args[0]); ok {
+		if needle := args[1]; needle.IsNumber() {
 			byte64, err := needle.AsInt()
 
 			if err != nil {
@@ -89,45 +76,38 @@ func indexofFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult 
 			byteValue := int(byte64)
 
 			if byteValue < 0 || byteValue > 255 {
-				return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+				return res.Success(values.NewString(constants.STR_ERR))
 			}
 
 			target := byte(byteValue)
 
-			for i, b := range container.Data {
-				if b == target {
-					return res.Success(values.NewNumber(i + 1).SetContext(ctx))
+			for i, byteVal := range container.Data {
+				if byteVal == target {
+					return res.Success(values.NewNumber(i + 1))
 				}
 			}
 
-			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+			return res.Success(values.NewString(constants.STR_ERR))
+		}
 
-		case *values.Bytes:
+		if needle, ok := values.AsBytes(args[1]); ok {
 			if len(needle.Data) == 0 {
-				return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+				return res.Success(values.NewString(constants.STR_ERR))
 			}
 
 			idx := bytes.Index(container.Data, needle.Data)
 
 			if idx == -1 {
-				return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+				return res.Success(values.NewString(constants.STR_ERR))
 			}
 
-			return res.Success(values.NewNumber(idx + 1).SetContext(ctx))
-
-		default:
-			posStart, posEnd := args[1].GetPos()
-
-			return res.Failure(errors.NewRTError(
-				posStart, posEnd,
-				shared.Errors.InvalidArgTypePositionalWithHint("indexof", shared.PositionSecond, "a number or bytes", "needle")))
+			return res.Success(values.NewNumber(idx + 1))
 		}
 
-	default:
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("indexof", shared.PositionFirst, "a string, list, or bytes", "haystack")))
+		return res.FailAt(2,
+			shared.Errors.InvalidArgTypePositionalWithHint("indexof", shared.PositionSecond, "a number or bytes", "needle"))
 	}
+
+	return res.FailAt(1,
+		shared.Errors.InvalidArgTypePositionalWithHint("indexof", shared.PositionFirst, "a string, list, or bytes", "haystack"))
 }

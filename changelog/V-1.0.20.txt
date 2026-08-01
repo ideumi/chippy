@@ -1,0 +1,49 @@
+What's New:
+
+	- project:
+		- dropped the ChipLang/chiplang name for Chippy/chippy
+
+	- cmd:
+		- added chippy format and chippy format check commands, see chippy -h
+		- added a new formatter engine
+
+	- corelib:
+		- updated to the new style
+
+	- combine:
+		- updated the "chippy combine new" template to the new style
+
+	- installer:
+		- updated to the new installation paths
+		- now cleans up the old /usr/lib/chiplang path on install and uninstall
+
+	- misc:
+		- updated combine.chp files to the new paths
+		- updated to the new style
+
+	- scripts:
+		- updated net-install.sh and make-release.sh to the new name, paths and project url
+
+	- other stuff:
+		- make now also runs chippy format check all on installer, lib and misc
+
+FYI Breaking:
+
+	- The installer now installs to the following paths:
+		FHS:
+			corelib: /usr/lib/chippy
+			docs: /usr/share/doc/chippy
+		Termux:
+			corelib: /data/data/com.termux/files/usr/lib/chippy
+			docs: /data/data/com.termux/files/usr/share/doc/chippy
+
+		Your combine.chp files will need to be updated to these new paths
+
+	- The REPL history file moved from ~/.ChipLangHistory to ~/.ChippyHistory:
+		- If you want to keep your history, just rename ~/.ChipLangHistory to ~/.ChippyHistory
+		- Your existing REPL history will not be automatically carried over
+
+	- Editor integrations were renamed from chiplang.* to chippy.*:
+		- Reinstall your editor integration from ide/
+
+	- The project url has changed to https://codeberg.org/ideumi/chippy, update your deployment scripts, though codeberg should redirect the old url for some time, so no rush

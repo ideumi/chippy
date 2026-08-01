@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/fread.go
+ * Chippy - internal/builtins/fread.go
  *
  */
 
@@ -9,45 +9,30 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
 	"io"
 )
 
-func freadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func freadFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 2 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("fread", 2, "handle, count")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("fread", 2, "handle, count"))
 	}
 
-	handleNum, ok := args[0].(*values.Number)
+	handleNum := args[0]
 
-	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("fread", shared.PositionFirst, shared.TypeNumber, "handle")))
+	if !handleNum.IsNumber() {
+		return res.FailAt(1,
+			shared.Errors.InvalidArgTypePositionalWithHint("fread", shared.PositionFirst, shared.TypeNumber, "handle"))
 	}
 
-	countNum, ok := args[1].(*values.Number)
+	countNum := args[1]
 
-	if !ok {
-		posStart, posEnd := args[1].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("fread", shared.PositionSecond, shared.TypeNumber, "count")))
+	if !countNum.IsNumber() {
+		return res.FailAt(2,
+			shared.Errors.InvalidArgTypePositionalWithHint("fread", shared.PositionSecond, shared.TypeNumber, "count"))
 	}
 
 	handle64, err := handleNum.AsInt()
@@ -66,11 +51,7 @@ func freadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	count := int(count64)
 
 	if count < 0 {
-		posStart, posEnd := args[1].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidValue("Count must be non-negative")))
+		return res.FailAt(2, shared.Errors.InvalidValue("Count must be non-negative"))
 	}
 
 	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
@@ -84,27 +65,23 @@ func freadFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	} else if procExists && procHandle.Stdout != nil {
 		reader = procHandle.Stdout
 	} else {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid handle")))
+		return res.FailAt(1, shared.Errors.InvalidValue("Invalid handle"))
 	}
 
 	var buffer []byte
-	var n int
+	var bytesRead int
 
 	if count == 0 {
 		buffer, err = io.ReadAll(reader)
-		n = len(buffer)
+		bytesRead = len(buffer)
 	} else {
 		buffer = make([]byte, count)
-		n, err = io.ReadFull(reader, buffer)
+		bytesRead, err = io.ReadFull(reader, buffer)
 	}
 
 	if err != nil && err != io.EOF && err != io.ErrUnexpectedEOF {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
-	return res.Success(values.NewBytes(buffer[:n]).SetContext(ctx))
+	return res.Success(values.NewBytes(buffer[:bytesRead]))
 }

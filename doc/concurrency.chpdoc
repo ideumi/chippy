@@ -122,7 +122,7 @@ The runtime tracks every blocking call (''receive(true)'', ''wait(handle)'', ''s
 |    Main     |    |   Actor 1   |    |   Actor N   |
 | CHIPRT = 0  |    | CHIPRT = 1  |    | CHIPRT = N  |
 +-------------+    +-------------+    +-------------+
-|  RR2        |    |  RR2        |    |  RR2        |
+|  Modena VM  |    |  Modena VM  |    |  Modena VM  |
 |  Handles    |    |  Handles    |    |  Handles    |
 |  Inbox      |    |  Inbox      |    |  Inbox      |
 |  ResultCh   |    |  ResultCh   |    |  ResultCh   |

@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/actor.go
+ * Chippy - internal/builtins/actor.go
  *
  */
 
@@ -16,34 +16,26 @@ import (
 	"os"
 )
 
-func actorFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func actorFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) < 1 {
-		return res.Failure(errors.NewRTError(
-			nil, nil,
-			shared.Errors.InvalidArgCountWithHint("actor", 1, "function, ...args")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("actor", 1, "function, ...args"))
 	}
 
-	fn, ok := args[0].(*values.Function)
+	fn, ok := values.AsCallable(args[0])
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypeWithHint("actor", shared.TypeFunction, "handler")))
+		return res.FailAt(1,
+			shared.Errors.InvalidArgTypeWithHint("actor", shared.TypeFunction, "handler"))
 	}
 
 	fnArgs := args[1:]
 
-	if len(fnArgs) != len(fn.ArgNames) {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
+	if len(fnArgs) != fn.ArgCount() {
+		return res.FailAt(1,
 			shared.Errors.InvalidValue(fmt.Sprintf("handler '%s' expects %d argument(s), got %d",
-				fn.Name, len(fn.ArgNames), len(fnArgs)))))
+				fn.CallableName(), fn.ArgCount(), len(fnArgs))))
 	}
 
 	orch := orchestrator.Get()
@@ -56,23 +48,19 @@ func actorFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	inst := orch.CreateActor()
 
-	fnCopy := fn.Copy().(*values.Function)
+	fnCopy := args[0].Copy()
 	argsCopy := make([]values.Value, len(fnArgs))
 
 	for i, arg := range fnArgs {
 		argsCopy[i] = arg.Copy()
 	}
 
-	// The handler and its args were copied from the spawner but may still
-	// reference the spawner's context. Isolate them so the actor can't reach
-	// back into spawner scope. The cycles map is shared so references into
-	// the same context get rewritten consistently across all values.
-	cycles := make(map[values.Ctx]values.Ctx)
-	orchestrator.IsolateForTransfer(fnCopy, cycles)
+	globalNames, globalValues := orchestrator.SnapshotUserGlobals(ctx)
 
-	for _, arg := range argsCopy {
-		orchestrator.IsolateForTransfer(arg, cycles)
-	}
+	transfer := append([]values.Value{fnCopy}, argsCopy...)
+	transfer = append(transfer, globalValues...)
+
+	orchestrator.IsolateForTransfer(transfer...)
 
 	go func() {
 		sent := false
@@ -85,9 +73,12 @@ func actorFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			inst.SendResult(result)
 		}
 
-		// Order matters: innermost recover converts a body panic into a
-		// result, then handles are closed, then the orchestrator is told
-		// we're finished. Declared in reverse so LIFO gives that order.
+		// A panic in the handler is turned into a result first, then the
+		// open handles are closed, and only then is the orchestrator told
+		// the actor has finished.
+
+		// Go defer runs in the opposite order to how it is written. So
+		// it's all backwards here.
 		defer func() {
 			orch.MarkFinished(inst)
 			orch.CheckDeadlock()
@@ -95,10 +86,10 @@ func actorFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 		defer func() {
 			defer func() {
-				if r := recover(); r != nil {
+				if recovered := recover(); recovered != nil {
 					fmt.Fprintf(os.Stderr,
 						"chippy: actor %d handle cleanup panicked: %v\n",
-						inst.ID, r)
+						inst.ID, recovered)
 				}
 			}()
 
@@ -106,16 +97,14 @@ func actorFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		}()
 
 		defer func() {
-			if r := recover(); r != nil {
-				deliver(orchestrator.ActorResult{
-					Err: fmt.Errorf("actor panic: %v", r),
-				})
+			if recovered := recover(); recovered != nil {
+				deliver(orchestrator.ActorResult{Err: actorPanicError(recovered)})
 			}
 		}()
 
-		orch.InitActorRR2(inst)
+		orch.InitActorModena(inst)
 
-		if inst.RR == nil {
+		if inst.Modena == nil {
 			deliver(orchestrator.ActorResult{
 				Err: fmt.Errorf("failed to create actor runtime"),
 			})
@@ -123,7 +112,7 @@ func actorFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			return
 		}
 
-		actorCtx := inst.RR.GetGlobalContext()
+		actorCtx := inst.Modena.GetGlobalContext()
 
 		for _, optName := range inheritedOpts {
 			if opt, exists := optional.GetOptional(optName); exists {
@@ -132,14 +121,16 @@ func actorFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			}
 		}
 
-		for _, arg := range argsCopy {
-			orchestrator.DeepRebindContext(arg, actorCtx)
+		for i, name := range globalNames {
+			actorCtx.Globals.SetByName(name, globalValues[i])
 		}
 
 		toBind := append([]values.Value{fnCopy}, argsCopy...)
+		toBind = append(toBind, globalValues...)
+
 		orchestrator.BindValuesToGlobals(toBind, actorCtx)
 
-		result := fnCopy.Execute(argsCopy)
+		result := fnCopy.Execute(argsCopy, actorCtx)
 
 		if result.Error != nil {
 			deliver(orchestrator.ActorResult{Err: result.Error})
@@ -147,23 +138,24 @@ func actorFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 			return
 		}
 
-		var returnValue values.Value
+		returnValue := result.Value
 
-		if result.FuncReturnValue != nil {
-			returnValue = result.FuncReturnValue
-		} else {
-			returnValue = result.Value
-		}
-
-		// If the actor returns a closure, it may still reference the
-		// actor's context. Isolate it before delivery so the receiver
-		// can use it without reaching back into this actor's scope.
-		if returnValue != nil {
-			orchestrator.IsolateForTransfer(returnValue, make(map[values.Ctx]values.Ctx))
+		// A returned function can still point at variables belonging to
+		// the actor, isolate before sending it back.
+		if returnValue.IsSet() {
+			orchestrator.IsolateForTransfer(returnValue)
 		}
 
 		deliver(orchestrator.ActorResult{Value: returnValue})
 	}()
 
-	return res.Success(values.NewNumber(inst.ID).SetContext(ctx))
+	return res.Success(values.NewNumber(inst.ID))
+}
+
+func actorPanicError(recovered any) error {
+	if rtErr, ok := recovered.(*errors.RTError); ok {
+		return rtErr
+	}
+
+	return fmt.Errorf("actor panic: %v", recovered)
 }

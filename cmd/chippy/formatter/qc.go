@@ -50,14 +50,14 @@ func verifyEquivalent(filename string, orig []*lexer.Token, out string) error {
 	wantC := commentCounts(orig)
 	haveC := commentCounts(got)
 
-	for c, n := range wantC {
-		if haveC[c] != n {
+	for commentKey, count := range wantC {
+		if haveC[commentKey] != count {
 			return bugError("a comment was dropped or altered")
 		}
 	}
 
-	for c, n := range haveC {
-		if wantC[c] != n {
+	for commentKey, count := range haveC {
+		if wantC[commentKey] != count {
 			return bugError("a comment was added or altered")
 		}
 	}
@@ -72,13 +72,13 @@ func bugError(format string, args ...interface{}) error {
 func codeTokens(toks []*lexer.Token) []*lexer.Token {
 	var out []*lexer.Token
 
-	for _, t := range toks {
-		switch t.Type {
+	for _, tok := range toks {
+		switch tok.Type {
 		case constants.TT_NEWLINE, constants.TT_EOF, constants.TT_COMMENT, constants.TT_DOC_COMMENT:
 			continue
 		}
 
-		out = append(out, t)
+		out = append(out, tok)
 	}
 
 	return out
@@ -87,19 +87,19 @@ func codeTokens(toks []*lexer.Token) []*lexer.Token {
 func commentCounts(toks []*lexer.Token) map[comment]int {
 	counts := make(map[comment]int)
 
-	for _, t := range toks {
-		switch t.Type {
+	for _, tok := range toks {
+		switch tok.Type {
 		case constants.TT_COMMENT:
-			counts[comment{false, commentText(t)}]++
+			counts[comment{false, commentText(tok)}]++
 		case constants.TT_DOC_COMMENT:
-			counts[comment{true, commentText(t)}]++
+			counts[comment{true, commentText(tok)}]++
 		}
 	}
 
 	return counts
 }
 
-func commentText(t *lexer.Token) string {
-	s, _ := t.Value.(string)
-	return strings.TrimRight(s, " \t")
+func commentText(tok *lexer.Token) string {
+	text, _ := tok.Value.(string)
+	return strings.TrimRight(text, " \t")
 }

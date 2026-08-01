@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/optional/json/init.go
+ * Chippy - internal/optional/json/init.go
  *
  */
 
@@ -17,12 +17,12 @@ func init() {
 	optional.RegisterFactory(OptionalName, GetSection)
 }
 
-func GetSection() (map[string]*values.BuiltInFunction, map[string]values.Value) {
+func GetSection() (map[string]values.Value, map[string]values.Value) {
 	return getFunctions(), getConstants()
 }
 
-func getFunctions() map[string]*values.BuiltInFunction {
-	return map[string]*values.BuiltInFunction{
+func getFunctions() map[string]values.Value {
+	return map[string]values.Value{
 
 		optional.Prefixed(OptionalName, "parse"): values.NewBuiltInFunction(optional.Prefixed(OptionalName, "parse"), parseFunction),
 

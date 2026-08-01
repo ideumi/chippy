@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/orchestrator/inbox.go
+ * Chippy - internal/orchestrator/inbox.go
  *
  */
 
@@ -11,7 +11,8 @@ import (
 	"sync"
 )
 
-// Lock order: Orchestrator.mu before Inbox.mu.
+// When both locks are needed, Orchestrator.mu is taken first and Inbox.mu second.
+// Anything that takes them the other way round can deadlock against this.
 type Inbox struct {
 	mu     sync.Mutex
 	items  []values.Value
@@ -32,10 +33,11 @@ func (in *Inbox) HasItems() bool {
 	return len(in.items) > 0
 }
 
-// Send takes ownership of val: callers must not touch val afterwards because
-// isolation rebinds any closures inside it.
+// Send takes val over. The caller must not use it again afterwards, because any
+// function inside it has the variables it captured replaced with copies and no
+// longer points at the ones the caller is still using.
 func (in *Inbox) Send(val values.Value) {
-	IsolateForTransfer(val, make(map[values.Ctx]values.Ctx))
+	IsolateForTransfer(val)
 
 	in.mu.Lock()
 	in.items = append(in.items, val)

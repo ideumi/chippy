@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/optional/http/parseresponse.go
+ * Chippy - internal/optional/http/parseresponse.go
  *
  */
 
@@ -10,36 +10,25 @@ import (
 	"bytes"
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/optional"
 	"chip-go/internal/values"
 	"strconv"
 	"strings"
 )
 
-func parseresponseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func parseresponseFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "parseresponse"), 1, "responseBytes")))
+		return res.Fail(
+			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "parseresponse"), 1, "responseBytes"))
 	}
 
-	responseBytes, ok := args[0].(*values.Bytes)
+	responseBytes, ok := values.AsBytes(args[0])
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
+		return res.FailAt(1,
 			shared.Errors.InvalidArgTypeWithHint(
-				optional.Prefixed(OptionalName, "parseresponse"), shared.TypeBytes, "responseBytes")))
+				optional.Prefixed(OptionalName, "parseresponse"), shared.TypeBytes, "responseBytes"))
 	}
 
 	data := responseBytes.Data
@@ -48,7 +37,7 @@ func parseresponseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeR
 	headerEnd := bytes.Index(data, []byte("\r\n\r\n"))
 
 	if headerEnd == -1 {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
 	headerSection := string(data[:headerEnd])
@@ -58,7 +47,7 @@ func parseresponseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeR
 	lines := strings.Split(headerSection, "\r\n")
 
 	if len(lines) == 0 {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
 	statusLine := lines[0]
@@ -66,13 +55,13 @@ func parseresponseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeR
 	parts := strings.SplitN(statusLine, " ", 3)
 
 	if len(parts) < 2 {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
 	statusCode, err := strconv.Atoi(parts[1])
 
 	if err != nil {
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
 	/* status like required in RFC 9110/9112:
@@ -110,17 +99,17 @@ func parseresponseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeR
 		value := strings.TrimSpace(line[colonIdx+1:])
 
 		headersList = append(headersList, values.NewList([]values.Value{
-			values.NewString(key).SetContext(ctx),
-			values.NewString(value).SetContext(ctx),
-		}).SetContext(ctx))
+			values.NewString(key),
+			values.NewString(value),
+		}))
 
 		keyLower := strings.ToLower(key)
 
 		if keyLower == "content-length" {
 			// Leave contentLength at -1 on garbage so the body defaults to
 			// the remaining data rather than being truncated to empty
-			if n, err := strconv.Atoi(value); err == nil {
-				contentLength = n
+			if parsed, err := strconv.Atoi(value); err == nil {
+				contentLength = parsed
 			}
 		}
 
@@ -158,19 +147,19 @@ func parseresponseFunction(args []values.Value, ctx values.Ctx) *values.RuntimeR
 	nativeMap := values.NewMapFromEntries(
 		[]string{"statusCode", "statusText", "headers", "body", "chunked"},
 		map[string]values.Value{
-			"statusCode": values.NewNumber(statusCode).SetContext(ctx),
-			"statusText": values.NewString(statusText).SetContext(ctx),
-			"headers":    values.NewList(headersList).SetContext(ctx),
-			"body":       values.NewBytes(body).SetContext(ctx),
-			"chunked":    values.NewNumber(boolToInt(isChunked)).SetContext(ctx),
+			"statusCode": values.NewNumber(statusCode),
+			"statusText": values.NewString(statusText),
+			"headers":    values.NewList(headersList),
+			"body":       values.NewBytes(body),
+			"chunked":    values.NewNumber(boolToInt(isChunked)),
 		},
 	)
 
-	return res.Success(nativeMap.SetContext(ctx))
+	return res.Success(nativeMap)
 }
 
-func boolToInt(b bool) int {
-	if b {
+func boolToInt(flag bool) int {
+	if flag {
 		return constants.NUM_TRU
 	}
 

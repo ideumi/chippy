@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/num.go
+ * Chippy - internal/builtins/num.go
  *
  */
 
@@ -9,62 +9,50 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/values"
 	"strconv"
 )
 
-func numFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func numFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 1 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("num", 1, "value")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("num", 1, "value"))
 	}
 
 	value := args[0]
 
-	switch v := value.(type) {
+	if value.IsNumber() {
+		return res.Success(value.Copy())
+	}
 
-	case *values.Number:
-		return res.Success(v.Copy().SetContext(ctx))
-
-	case *values.String:
-		if f, parseErr := strconv.ParseFloat(v.Value, 64); parseErr == nil {
-			num, err := values.NewNumberFromFloat(f)
+	if str, ok := values.AsString(value); ok {
+		if floatVal, parseErr := strconv.ParseFloat(str.Value, 64); parseErr == nil {
+			num, err := values.NewNumberFromFloat(floatVal)
 
 			if err != nil {
-				return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+				return res.Success(values.NewString(constants.STR_ERR))
 			}
 
-			return res.Success(num.SetContext(ctx))
+			return res.Success(num)
 		}
 
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
-
-	case *values.List:
-		// Trying our best
-		if len(v.Elements) == 0 {
-			return res.Success(values.NewNumber(constants.NUM_NUL).SetContext(ctx))
-		} else if len(v.Elements) == 1 {
-			// Try to convert single element
-			if elem := v.Elements[0]; elem != nil {
-				if elemNum, ok := elem.(*values.Number); ok {
-					return res.Success(elemNum.Copy().SetContext(ctx))
-				}
-			}
-		}
-
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
-
-	default:
-		return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+		return res.Success(values.NewString(constants.STR_ERR))
 	}
+
+	if list, ok := values.AsList(value); ok {
+		// Trying our best
+		if len(list.Elements) == 0 {
+			return res.Success(values.NewNumber(constants.NUM_NUL))
+		} else if len(list.Elements) == 1 {
+			// Try to convert single element
+			if elem := list.Elements[0]; elem.IsNumber() {
+				return res.Success(elem.Copy())
+			}
+		}
+
+		return res.Success(values.NewString(constants.STR_ERR))
+	}
+
+	return res.Success(values.NewString(constants.STR_ERR))
 }

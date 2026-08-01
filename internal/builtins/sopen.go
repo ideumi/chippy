@@ -1,6 +1,6 @@
 /*
  *
- * RR2 - internal/builtins/sopen.go
+ * Chippy - internal/builtins/sopen.go
  *
  */
 
@@ -9,7 +9,6 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/constants"
-	"chip-go/internal/errors"
 	"chip-go/internal/handles"
 	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
@@ -17,52 +16,35 @@ import (
 	"strconv"
 )
 
-func sopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
+func sopenFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
 	if len(args) != 3 {
-		var posStart, posEnd *errors.Position
-
-		if len(args) > 0 {
-			posStart, posEnd = args[0].GetPos()
-		}
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgCountWithHint("sopen", 3, "address, port, mode")))
+		return res.Fail(shared.Errors.InvalidArgCountWithHint("sopen", 3, "address, port, mode"))
 	}
 
 	// Get address argument
-	addressStr, ok := args[0].(*values.String)
+	addressStr, ok := values.AsString(args[0])
 
 	if !ok {
-		posStart, posEnd := args[0].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("sopen", shared.PositionFirst, shared.TypeString, "address")))
+		return res.FailAt(1,
+			shared.Errors.InvalidArgTypePositionalWithHint("sopen", shared.PositionFirst, shared.TypeString, "address"))
 	}
 
 	// Get port argument
-	portNum, ok := args[1].(*values.Number)
+	portNum := args[1]
 
-	if !ok {
-		posStart, posEnd := args[1].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("sopen", shared.PositionSecond, shared.TypeNumber, "port")))
+	if !portNum.IsNumber() {
+		return res.FailAt(2,
+			shared.Errors.InvalidArgTypePositionalWithHint("sopen", shared.PositionSecond, shared.TypeNumber, "port"))
 	}
 
 	// Get mode argument
-	modeStr, ok := args[2].(*values.String)
+	modeStr, ok := values.AsString(args[2])
 
 	if !ok {
-		posStart, posEnd := args[2].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidArgTypePositionalWithHint("sopen", shared.PositionThird, shared.TypeString, "mode")))
+		return res.FailAt(3,
+			shared.Errors.InvalidArgTypePositionalWithHint("sopen", shared.PositionThird, shared.TypeString, "mode"))
 	}
 
 	port64, err := portNum.AsInt()
@@ -77,20 +59,12 @@ func sopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 
 	// Validate mode
 	if mode != "tcp" && mode != "udp" && mode != "listen" {
-		posStart, posEnd := args[2].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidValue("Invalid mode. Use 'tcp', 'udp', or 'listen'")))
+		return res.FailAt(3, shared.Errors.InvalidValue("Invalid mode. Use 'tcp', 'udp', or 'listen'"))
 	}
 
 	// Validate port range
 	if port < 1 || port > 65535 {
-		posStart, posEnd := args[1].GetPos()
-
-		return res.Failure(errors.NewRTError(
-			posStart, posEnd,
-			shared.Errors.InvalidValue("Port must be between 1 and 65535")))
+		return res.FailAt(2, shared.Errors.InvalidValue("Port must be between 1 and 65535"))
 	}
 
 	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
@@ -103,7 +77,7 @@ func sopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		conn, err := net.Dial("tcp", net.JoinHostPort(address, strconv.Itoa(port)))
 
 		if err != nil {
-			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+			return res.Success(values.NewString(constants.STR_ERR))
 		}
 
 		socket.Conn = conn
@@ -113,13 +87,13 @@ func sopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		raddr, err := net.ResolveUDPAddr("udp", net.JoinHostPort(address, strconv.Itoa(port)))
 
 		if err != nil {
-			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx)) // Address resolution failed
+			return res.Success(values.NewString(constants.STR_ERR)) // Address resolution failed
 		}
 
 		conn, err := net.DialUDP("udp", nil, raddr)
 
 		if err != nil {
-			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+			return res.Success(values.NewString(constants.STR_ERR))
 		}
 
 		socket.UdpConn = conn
@@ -130,7 +104,7 @@ func sopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 		listener, err := net.Listen("tcp", net.JoinHostPort(address, strconv.Itoa(port)))
 
 		if err != nil {
-			return res.Success(values.NewString(constants.STR_ERR).SetContext(ctx))
+			return res.Success(values.NewString(constants.STR_ERR))
 		}
 
 		socket.Listener = listener
@@ -139,5 +113,5 @@ func sopenFunction(args []values.Value, ctx values.Ctx) *values.RuntimeResult {
 	handle := registry.Alloc.Alloc()
 	registry.Sockets.Store(handle, socket)
 
-	return res.Success(values.NewNumber(handle).SetContext(ctx))
+	return res.Success(values.NewNumber(handle))
 }

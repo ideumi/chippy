@@ -1,94 +1,39 @@
 /*
  *
- * RR2 - internal/values/value.go
+ * Chippy - internal/values/value.go
  *
  */
 
 package values
 
 import (
+	"chip-go/internal/constants"
 	"chip-go/internal/context"
 	"chip-go/internal/errors"
 )
 
 type Ctx = *context.Context[Value]
 
-type RuntimeResult struct {
-	Value              Value
-	Error              error
-	FuncReturnValue    Value
-	LoopShouldContinue bool
-	LoopShouldBreak    bool
-}
+type Tag uint8
 
-func NewRuntimeResult() *RuntimeResult {
-	return &RuntimeResult{}
-}
+const (
+	TagUnset Tag = 0
+	TagInt   Tag = 1
+	TagFloat Tag = 2
+	TagText  Tag = 3
+	TagList  Tag = 4
+	TagMap   Tag = 5
+	TagBytes Tag = 6
+	TagFunc  Tag = 7
+)
 
-func (rr *RuntimeResult) reset() {
-	rr.Value = nil
-	rr.Error = nil
-	rr.FuncReturnValue = nil
-	rr.LoopShouldContinue = false
-	rr.LoopShouldBreak = false
-}
-
-func (rr *RuntimeResult) Register(res *RuntimeResult) Value {
-	if res.Error != nil {
-		rr.Error = res.Error
-	}
-	rr.FuncReturnValue = res.FuncReturnValue
-	rr.LoopShouldContinue = res.LoopShouldContinue
-	rr.LoopShouldBreak = res.LoopShouldBreak
-
-	return res.Value
-}
-
-func (rr *RuntimeResult) Success(value Value) *RuntimeResult {
-	rr.reset()
-	rr.Value = value
-
-	return rr
-}
-
-func (rr *RuntimeResult) SuccessReturn(value Value) *RuntimeResult {
-	rr.reset()
-	rr.FuncReturnValue = value
-
-	return rr
-}
-
-func (rr *RuntimeResult) SuccessContinue() *RuntimeResult {
-	rr.reset()
-	rr.LoopShouldContinue = true
-
-	return rr
-}
-
-func (rr *RuntimeResult) SuccessBreak() *RuntimeResult {
-	rr.reset()
-	rr.LoopShouldBreak = true
-
-	return rr
-}
-
-func (rr *RuntimeResult) Failure(err error) *RuntimeResult {
-	rr.reset()
-	rr.Error = err
-
-	return rr
-}
-
-func (rr *RuntimeResult) ShouldReturn() bool {
-	return rr.Error != nil || rr.FuncReturnValue != nil || rr.LoopShouldContinue || rr.LoopShouldBreak
-}
-
-type Value interface {
+// Every value that is not a number is a heapObject held behind a Value's ref.
+// Numbers live inline in the Value itself, so they never allocate.
+type heapObject interface {
 	String() string
-	SetPos(posStart, posEnd *errors.Position) Value
-	SetContext(ctx Ctx) Value
-	GetPos() (*errors.Position, *errors.Position)
-	GetContext() Ctx
+	IsTrue() bool
+	Copy() Value
+	Execute(args []Value, ctx Ctx) RuntimeResult
 
 	AddedTo(other Value) (Value, error)
 	SubbedBy(other Value) (Value, error)
@@ -105,6 +50,7 @@ type Value interface {
 	GetComparisonGte(other Value) (Value, error)
 
 	Notted() (Value, error)
+	Negated() (Value, error)
 	XoredBy(other Value) (Value, error)
 
 	BAndedBy(other Value) (Value, error)
@@ -113,150 +59,417 @@ type Value interface {
 	BXoredBy(other Value) (Value, error)
 	LShiftedBy(other Value) (Value, error)
 	RShiftedBy(other Value) (Value, error)
-
-	Execute(args []Value) *RuntimeResult
-	Copy() Value
-	IsTrue() bool
 }
 
-type BaseValue struct {
-	posStart *errors.Position
-	posEnd   *errors.Position
-	context  Ctx
+type Value struct {
+	tag Tag
+
+	num uint64
+
+	ref heapObject
 }
 
-func NewBaseValue() *BaseValue {
-	return &BaseValue{}
+func (v Value) Tag() Tag {
+	return v.tag
 }
 
-func (bv *BaseValue) SetPos(posStart, posEnd *errors.Position) Value {
-	bv.posStart = posStart
-	bv.posEnd = posEnd
-	return bv
+func (v Value) IsNumber() bool {
+	return v.tag == TagInt || v.tag == TagFloat
 }
 
-func (bv *BaseValue) SetContext(ctx Ctx) Value {
-	bv.context = ctx
-	return bv
+func (v Value) IsSet() bool {
+	return v.tag != TagUnset
 }
 
-func (bv *BaseValue) GetPos() (*errors.Position, *errors.Position) {
-	return bv.posStart, bv.posEnd
+func (v Value) IsUnset() bool {
+	return v.tag == TagUnset
 }
 
-func (bv *BaseValue) GetContext() Ctx {
-	return bv.context
-}
-
-func IllegalOperation(left, right Value) error {
-	if right == nil {
-		leftPos, leftEnd := left.GetPos()
-		return errors.NewRTError(
-			leftPos, leftEnd,
-			"Illegal operation")
-
+// FunctionObject lets the vm reach its own function type behind a value.
+func (v Value) FunctionObject() any {
+	if v.tag != TagFunc {
+		return nil
 	}
 
-	leftPos, _ := left.GetPos()
-	_, rightPos := right.GetPos()
-	return errors.NewRTError(
-		leftPos, rightPos,
-		"Illegal operation")
-
+	return v.ref
 }
 
-func (bv *BaseValue) AddedTo(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+func fromHeap(tag Tag, ref heapObject) Value {
+	return Value{tag: tag, ref: ref}
 }
 
-func (bv *BaseValue) SubbedBy(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+func NewFunctionValue(fn heapObject) Value {
+	return fromHeap(TagFunc, fn)
 }
 
-func (bv *BaseValue) MultedBy(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+func IllegalOperation() error {
+	return errors.NewCallError("Illegal operation")
 }
 
-func (bv *BaseValue) DivedBy(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+func (v Value) String() string {
+	switch v.tag {
+	case TagUnset:
+		return "null"
+	case TagInt, TagFloat:
+		return v.numberString()
+	default:
+		return v.ref.String()
+	}
 }
 
-func (bv *BaseValue) PowedBy(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+func (v Value) IsTrue() bool {
+	switch v.tag {
+	case TagUnset:
+		return false
+	case TagInt:
+		return v.intVal() != 0
+	case TagFloat:
+		return v.floatVal() != 0
+	default:
+		return v.ref.IsTrue()
+	}
 }
 
-func (bv *BaseValue) ModdedBy(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+func (v Value) Copy() Value {
+	if v.tag == TagUnset || v.IsNumber() {
+		return v
+	}
+
+	return v.ref.Copy()
 }
 
-func (bv *BaseValue) GetComparisonEe(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+func (v Value) Execute(args []Value, ctx Ctx) RuntimeResult {
+	if v.IsNumber() {
+		return NewRuntimeResult().Failure(IllegalOperation())
+	}
+
+	return v.ref.Execute(args, ctx)
 }
 
-func (bv *BaseValue) GetComparisonNe(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+func (v Value) AddedTo(other Value) (Value, error) {
+	if v.IsNumber() {
+		return v.numberAddedTo(other)
+	}
+
+	return v.ref.AddedTo(other)
 }
 
-func (bv *BaseValue) GetComparisonLt(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+func (v Value) SubbedBy(other Value) (Value, error) {
+	if v.IsNumber() {
+		return v.numberSubbedBy(other)
+	}
+
+	return v.ref.SubbedBy(other)
 }
 
-func (bv *BaseValue) GetComparisonGt(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+func (v Value) MultedBy(other Value) (Value, error) {
+	if v.IsNumber() {
+		return v.numberMultedBy(other)
+	}
+
+	return v.ref.MultedBy(other)
 }
 
-func (bv *BaseValue) GetComparisonLte(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+func (v Value) DivedBy(other Value) (Value, error) {
+	if v.IsNumber() {
+		return v.numberDivedBy(other)
+	}
+
+	return v.ref.DivedBy(other)
 }
 
-func (bv *BaseValue) GetComparisonGte(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+func (v Value) PowedBy(other Value) (Value, error) {
+	if v.IsNumber() {
+		return v.numberPowedBy(other)
+	}
+
+	return v.ref.PowedBy(other)
 }
 
-func (bv *BaseValue) Notted() (Value, error) {
-	return nil, IllegalOperation(bv, nil)
+func (v Value) ModdedBy(other Value) (Value, error) {
+	if v.IsNumber() {
+		return v.numberModdedBy(other)
+	}
+
+	return v.ref.ModdedBy(other)
 }
 
-func (bv *BaseValue) XoredBy(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+func (v Value) GetComparisonEe(other Value) (Value, error) {
+	if v.IsNumber() {
+		return v.numberComparison(other, comparisonEe)
+	}
+
+	return v.ref.GetComparisonEe(other)
 }
 
-func (bv *BaseValue) BAndedBy(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+func (v Value) GetComparisonNe(other Value) (Value, error) {
+	if v.IsNumber() {
+		return v.numberComparison(other, comparisonNe)
+	}
+
+	return v.ref.GetComparisonNe(other)
 }
 
-func (bv *BaseValue) BOredBy(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+func (v Value) GetComparisonLt(other Value) (Value, error) {
+	if v.IsNumber() {
+		return v.numberComparison(other, comparisonLt)
+	}
+
+	return v.ref.GetComparisonLt(other)
 }
 
-func (bv *BaseValue) BNotted() (Value, error) {
-	return nil, IllegalOperation(bv, nil)
+func (v Value) GetComparisonGt(other Value) (Value, error) {
+	if v.IsNumber() {
+		return v.numberComparison(other, comparisonGt)
+	}
+
+	return v.ref.GetComparisonGt(other)
 }
 
-func (bv *BaseValue) BXoredBy(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+func (v Value) GetComparisonLte(other Value) (Value, error) {
+	if v.IsNumber() {
+		return v.numberComparison(other, comparisonLte)
+	}
+
+	return v.ref.GetComparisonLte(other)
 }
 
-func (bv *BaseValue) LShiftedBy(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+func (v Value) GetComparisonGte(other Value) (Value, error) {
+	if v.IsNumber() {
+		return v.numberComparison(other, comparisonGte)
+	}
+
+	return v.ref.GetComparisonGte(other)
 }
 
-func (bv *BaseValue) RShiftedBy(other Value) (Value, error) {
-	return nil, IllegalOperation(bv, other)
+func (v Value) Notted() (Value, error) {
+	if v.IsNumber() {
+		return Bool(!v.IsTrue()), nil
+	}
+
+	return v.ref.Notted()
 }
 
-func (bv *BaseValue) Execute(args []Value) *RuntimeResult {
-	return NewRuntimeResult().Failure(IllegalOperation(bv, nil))
+func (v Value) Negated() (Value, error) {
+	if v.IsNumber() {
+		return v.numberNegated(), nil
+	}
+
+	return v.ref.Negated()
 }
 
-func (bv *BaseValue) Copy() Value {
-	panic("Copy method not implemented")
+func (v Value) XoredBy(other Value) (Value, error) {
+	if v.IsNumber() {
+		return Bool(v.IsTrue() != other.IsTrue()), nil
+	}
+
+	return v.ref.XoredBy(other)
 }
 
-func (bv *BaseValue) IsTrue() bool {
+func (v Value) BAndedBy(other Value) (Value, error) {
+	if v.IsNumber() {
+		return v.numberBitwise(other, bitwiseAnd)
+	}
+
+	return v.ref.BAndedBy(other)
+}
+
+func (v Value) BOredBy(other Value) (Value, error) {
+	if v.IsNumber() {
+		return v.numberBitwise(other, bitwiseOr)
+	}
+
+	return v.ref.BOredBy(other)
+}
+
+func (v Value) BNotted() (Value, error) {
+	if v.IsNumber() {
+		return v.numberBNotted()
+	}
+
+	return v.ref.BNotted()
+}
+
+func (v Value) BXoredBy(other Value) (Value, error) {
+	if v.IsNumber() {
+		return v.numberBitwise(other, bitwiseXor)
+	}
+
+	return v.ref.BXoredBy(other)
+}
+
+func (v Value) LShiftedBy(other Value) (Value, error) {
+	if v.IsNumber() {
+		return v.numberShift(other, shiftLeft)
+	}
+
+	return v.ref.LShiftedBy(other)
+}
+
+func (v Value) RShiftedBy(other Value) (Value, error) {
+	if v.IsNumber() {
+		return v.numberShift(other, shiftRight)
+	}
+
+	return v.ref.RShiftedBy(other)
+}
+
+// OperatorDefaults gives every heap type a default of "illegal operation" for
+// each operator, so a type only implements the ones it actually supports.
+type OperatorDefaults struct{}
+
+func (OperatorDefaults) String() string {
+	return "Value"
+}
+
+func (OperatorDefaults) IsTrue() bool {
 	return false
 }
 
-func (bv *BaseValue) String() string {
-	return "Value"
+func (OperatorDefaults) Copy() Value {
+	panic("Copy not implemented")
+}
+
+func (OperatorDefaults) Execute(args []Value, ctx Ctx) RuntimeResult {
+	return NewRuntimeResult().Failure(IllegalOperation())
+}
+
+func (OperatorDefaults) AddedTo(other Value) (Value, error)  { return Value{}, IllegalOperation() }
+func (OperatorDefaults) SubbedBy(other Value) (Value, error) { return Value{}, IllegalOperation() }
+func (OperatorDefaults) MultedBy(other Value) (Value, error) { return Value{}, IllegalOperation() }
+func (OperatorDefaults) DivedBy(other Value) (Value, error)  { return Value{}, IllegalOperation() }
+func (OperatorDefaults) PowedBy(other Value) (Value, error)  { return Value{}, IllegalOperation() }
+func (OperatorDefaults) ModdedBy(other Value) (Value, error) { return Value{}, IllegalOperation() }
+
+func (OperatorDefaults) GetComparisonEe(other Value) (Value, error) {
+	return Value{}, IllegalOperation()
+}
+func (OperatorDefaults) GetComparisonNe(other Value) (Value, error) {
+	return Value{}, IllegalOperation()
+}
+func (OperatorDefaults) GetComparisonLt(other Value) (Value, error) {
+	return Value{}, IllegalOperation()
+}
+func (OperatorDefaults) GetComparisonGt(other Value) (Value, error) {
+	return Value{}, IllegalOperation()
+}
+func (OperatorDefaults) GetComparisonLte(other Value) (Value, error) {
+	return Value{}, IllegalOperation()
+}
+func (OperatorDefaults) GetComparisonGte(other Value) (Value, error) {
+	return Value{}, IllegalOperation()
+}
+
+func (OperatorDefaults) Notted() (Value, error)             { return Value{}, IllegalOperation() }
+func (OperatorDefaults) Negated() (Value, error)            { return Value{}, IllegalOperation() }
+func (OperatorDefaults) XoredBy(other Value) (Value, error) { return Value{}, IllegalOperation() }
+
+func (OperatorDefaults) BAndedBy(other Value) (Value, error)   { return Value{}, IllegalOperation() }
+func (OperatorDefaults) BOredBy(other Value) (Value, error)    { return Value{}, IllegalOperation() }
+func (OperatorDefaults) BNotted() (Value, error)               { return Value{}, IllegalOperation() }
+func (OperatorDefaults) BXoredBy(other Value) (Value, error)   { return Value{}, IllegalOperation() }
+func (OperatorDefaults) LShiftedBy(other Value) (Value, error) { return Value{}, IllegalOperation() }
+func (OperatorDefaults) RShiftedBy(other Value) (Value, error) { return Value{}, IllegalOperation() }
+
+// The As* helpers unwrap a value's heap object, and report false for a number or
+// for the wrong kind.
+func AsString(value Value) (*String, bool) {
+	object, ok := value.ref.(*String)
+	return object, ok
+}
+
+func AsList(value Value) (*List, bool) {
+	object, ok := value.ref.(*List)
+	return object, ok
+}
+
+func AsMap(value Value) (*Map, bool) {
+	object, ok := value.ref.(*Map)
+	return object, ok
+}
+
+func AsBytes(value Value) (*Bytes, bool) {
+	object, ok := value.ref.(*Bytes)
+	return object, ok
+}
+
+func AsBuiltIn(value Value) (*BuiltInFunction, bool) {
+	object, ok := value.ref.(*BuiltInFunction)
+	return object, ok
+}
+
+func AsCallable(value Value) (Callable, bool) {
+	object, ok := value.ref.(Callable)
+	return object, ok
+}
+
+func AsBoundaryClosure(value Value) (BoundaryClosure, bool) {
+	object, ok := value.ref.(BoundaryClosure)
+	return object, ok
+}
+
+func AsInts(left, right Value) (int64, int64, bool) {
+	return int64(left.num), int64(right.num), left.tag == TagInt && right.tag == TagInt
+}
+
+func enterWalk(val Value, seen map[Value]bool, depth int) (func(), error) {
+	if depth > constants.LIMIT_VALUE_NESTING_DEPTH {
+		return nil, errors.NewCallError(constants.E_VALUE_TOO_DEEP)
+	}
+
+	if seen[val] {
+		return nil, errors.NewCallError(constants.E_CYCLIC_VALUE)
+	}
+
+	seen[val] = true
+
+	return func() { delete(seen, val) }, nil
+}
+
+// EnterWalk is enterWalk for a walk with nowhere to return an error, such as Copy
+// and sort.
+func EnterWalk(val Value, seen map[Value]bool, depth int) func() {
+	leave, err := enterWalk(val, seen, depth)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return leave
+}
+
+func walkString(val Value, seen map[Value]bool, depth int) string {
+	switch val.tag {
+	case TagUnset:
+		return "null"
+	case TagList:
+		return val.ref.(*List).stringWalk(seen, depth)
+	case TagMap:
+		return val.ref.(*Map).stringWalk(seen, depth)
+	default:
+		return val.String()
+	}
+}
+
+func walkCopy(val Value, seen map[Value]bool, depth int) Value {
+	switch val.tag {
+	case TagList:
+		return val.ref.(*List).copyWalk(seen, depth)
+	case TagMap:
+		return val.ref.(*Map).copyWalk(seen, depth)
+	default:
+		return val.Copy()
+	}
+}
+
+func walkEqual(left, right Value, seen map[Value]bool, depth int) (Value, error) {
+	if left.tag == TagList && right.tag == TagList {
+		return left.ref.(*List).eqWalk(right, seen, depth)
+	}
+
+	if left.tag == TagMap && right.tag == TagMap {
+		return left.ref.(*Map).eqWalk(right, seen, depth)
+	}
+
+	return left.GetComparisonEe(right)
 }
