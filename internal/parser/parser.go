@@ -1050,7 +1050,7 @@ func (p *Parser) tryParseElseifElse() *ParseResult {
 	if next.Matches(constants.TT_KEYWORD, "else") {
 		p.skipWhitespace(res)
 
-		elseCase := res.Register(p.ifExprC())
+		elseCase := res.Register(p.elseExpr())
 
 		if res.error != nil {
 			return res
@@ -1066,7 +1066,7 @@ func (p *Parser) tryParseElseifElse() *ParseResult {
 	return nil
 }
 
-func (p *Parser) ifExprC() *ParseResult {
+func (p *Parser) elseExpr() *ParseResult {
 	res := NewParseResult()
 	var elseCase ast.Node
 
