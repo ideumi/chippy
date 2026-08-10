@@ -63,7 +63,9 @@ func NewNumber[T integerLiteral](val T) Value {
 		return numberFromUint64(typed)
 	}
 
-	panic("NewNumber: unreachable")
+	errors.ModenaPanic("NewNumber: unreachable")
+
+	return Value{}
 }
 
 func numberFromUint64(val uint64) Value {

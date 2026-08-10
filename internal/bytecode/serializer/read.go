@@ -180,7 +180,6 @@ func (r *reader) chunk() *bytecode.Chunk {
 		chunk.Functions = append(chunk.Functions, r.functionTemplate())
 	}
 
-	r.readLineTable(chunk, codeLen)
 	chunk.FinishBuilding()
 
 	return chunk
@@ -229,42 +228,4 @@ func (r *reader) functionTemplate() *bytecode.FunctionTemplate {
 	template.Chunk = r.chunk()
 
 	return template
-}
-
-func (r *reader) readLineTable(chunk *bytecode.Chunk, codeLen int) {
-	type entry struct {
-		offset uint32
-		pos    *errors.Position
-	}
-
-	nEntries := int(r.u32())
-
-	var entries []entry
-
-	for i := 0; i < nEntries && r.err == nil; i++ {
-		offset := r.u32()
-		line := int(r.u32())
-		file := r.str()
-		entries = append(entries, entry{offset: offset, pos: errors.NewPosition(0, line, 0, file, "")})
-	}
-
-	if r.err != nil {
-		return
-	}
-
-	current := 0
-
-	for i := 0; i < codeLen; i++ {
-		for current+1 < len(entries) && entries[current+1].offset <= uint32(i) {
-			current++
-		}
-
-		var pos *errors.Position
-
-		if len(entries) > 0 {
-			pos = entries[current].pos
-		}
-
-		chunk.AppendSpan(bytecode.Span{Start: pos, End: pos})
-	}
 }

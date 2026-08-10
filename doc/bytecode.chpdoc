@@ -8,7 +8,7 @@ You can see the instructions the compiler produces by disassembling a bytecode f
 
 *The File format*
 
-The Chippy bytecode file format is custom and encodes Chippy / Modena bytecode alongside some identifying and supporting data. It is intentionally kept minimal and 1:1 hash reproducible, this means that the same code, on the same version of Chippy, will give you a binary that is byte identical each time. The source file name is part of what is written, so compiling identical code under a different file name gives you a different binary. The file format is handled by the Modena serializer.
+The Chippy bytecode file format is custom and encodes Chippy / Modena bytecode alongside some identifying and supporting data. It is intentionally kept minimal and 1:1 hash reproducible, this means that the same code, on the same version of Chippy, will give you a binary that is byte identical each time. Nothing about where the source came from is written, so compiling identical code under a different file name gives you the same binary. The file format is handled by the Modena serializer.
 
 '''
 +-----------------------------------------------+
@@ -27,7 +27,6 @@ The Chippy bytecode file format is custom and encodes Chippy / Modena bytecode a
 |    local names      for diagnostics           |
 |    functions        name, arity, upvalues     |
 |                     and a nested chunk each   |
-|    line table       offset to file and line   |
 |                                               |
 +-----------------------------------------------+
 
