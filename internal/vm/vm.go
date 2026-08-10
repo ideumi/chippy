@@ -162,6 +162,7 @@ func (vm *VM) Run() (values.Value, error) {
 
 		// Reads the top value without taking it, so 'and' and 'or' can
 		// leave their result behind for the compiler to discard.
+
 		case bytecode.OpJumpIfFalse:
 			target := bytecode.ReadU32(code, ip)
 			ip += 4
@@ -406,6 +407,7 @@ func (vm *VM) Run() (values.Value, error) {
 
 		case bytecode.OpNot:
 			err = vm.unary(vm.peek().Notted())
+
 		case bytecode.OpBNot:
 			err = vm.unary(vm.peek().BNotted())
 
@@ -419,6 +421,7 @@ func (vm *VM) Run() (values.Value, error) {
 			}
 
 			err = vm.binary(vm.left().AddedTo(vm.right()))
+
 		case bytecode.OpSub:
 			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole {
 				if result, overflow := values.SubInt64(left, right); !overflow {
@@ -429,6 +432,7 @@ func (vm *VM) Run() (values.Value, error) {
 			}
 
 			err = vm.binary(vm.left().SubbedBy(vm.right()))
+
 		case bytecode.OpMul:
 			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole {
 				if result, overflow := values.MulInt64(left, right); !overflow {
@@ -439,6 +443,7 @@ func (vm *VM) Run() (values.Value, error) {
 			}
 
 			err = vm.binary(vm.left().MultedBy(vm.right()))
+
 		case bytecode.OpDiv:
 			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole && right != 0 && left%right == 0 {
 				if !(left == math.MinInt64 && right == -1) {
@@ -449,6 +454,7 @@ func (vm *VM) Run() (values.Value, error) {
 			}
 
 			err = vm.binary(vm.left().DivedBy(vm.right()))
+
 		case bytecode.OpMod:
 			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole && right != 0 && right != -1 {
 				err = vm.binary(values.Int(left%right), nil)
@@ -457,8 +463,10 @@ func (vm *VM) Run() (values.Value, error) {
 			}
 
 			err = vm.binary(vm.left().ModdedBy(vm.right()))
+
 		case bytecode.OpPow:
 			err = vm.binary(vm.left().PowedBy(vm.right()))
+
 		case bytecode.OpLShift:
 			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole && right >= 0 {
 				err = vm.binary(values.Int(left<<uint64(right)), nil)
@@ -467,6 +475,7 @@ func (vm *VM) Run() (values.Value, error) {
 			}
 
 			err = vm.binary(vm.left().LShiftedBy(vm.right()))
+
 		case bytecode.OpRShift:
 			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole && right >= 0 {
 				err = vm.binary(values.Int(left>>uint64(right)), nil)
@@ -475,6 +484,7 @@ func (vm *VM) Run() (values.Value, error) {
 			}
 
 			err = vm.binary(vm.left().RShiftedBy(vm.right()))
+
 		case bytecode.OpEq:
 			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole {
 				err = vm.binary(values.Bool(left == right), nil)
@@ -483,6 +493,7 @@ func (vm *VM) Run() (values.Value, error) {
 			}
 
 			err = vm.binary(vm.left().GetComparisonEe(vm.right()))
+
 		case bytecode.OpNe:
 			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole {
 				err = vm.binary(values.Bool(left != right), nil)
@@ -491,6 +502,7 @@ func (vm *VM) Run() (values.Value, error) {
 			}
 
 			err = vm.binary(vm.left().GetComparisonNe(vm.right()))
+
 		case bytecode.OpLt:
 			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole {
 				err = vm.binary(values.Bool(left < right), nil)
@@ -499,6 +511,7 @@ func (vm *VM) Run() (values.Value, error) {
 			}
 
 			err = vm.binary(vm.left().GetComparisonLt(vm.right()))
+
 		case bytecode.OpGt:
 			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole {
 				err = vm.binary(values.Bool(left > right), nil)
@@ -507,6 +520,7 @@ func (vm *VM) Run() (values.Value, error) {
 			}
 
 			err = vm.binary(vm.left().GetComparisonGt(vm.right()))
+
 		case bytecode.OpLte:
 			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole {
 				err = vm.binary(values.Bool(left <= right), nil)
@@ -515,6 +529,7 @@ func (vm *VM) Run() (values.Value, error) {
 			}
 
 			err = vm.binary(vm.left().GetComparisonLte(vm.right()))
+
 		case bytecode.OpGte:
 			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole {
 				err = vm.binary(values.Bool(left >= right), nil)
@@ -523,8 +538,10 @@ func (vm *VM) Run() (values.Value, error) {
 			}
 
 			err = vm.binary(vm.left().GetComparisonGte(vm.right()))
+
 		case bytecode.OpXor:
 			err = vm.binary(vm.left().XoredBy(vm.right()))
+
 		case bytecode.OpBAnd:
 			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole {
 				err = vm.binary(values.Int(left&right), nil)
@@ -533,6 +550,7 @@ func (vm *VM) Run() (values.Value, error) {
 			}
 
 			err = vm.binary(vm.left().BAndedBy(vm.right()))
+
 		case bytecode.OpBOr:
 			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole {
 				err = vm.binary(values.Int(left|right), nil)
@@ -541,6 +559,7 @@ func (vm *VM) Run() (values.Value, error) {
 			}
 
 			err = vm.binary(vm.left().BOredBy(vm.right()))
+
 		case bytecode.OpBXor:
 			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole {
 				err = vm.binary(values.Int(left^right), nil)
