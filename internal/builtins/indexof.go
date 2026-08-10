@@ -42,6 +42,10 @@ func indexofFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 			return res.Success(values.NewString(constants.STR_ERR))
 		}
 
+		if container.IsASCII() {
+			return res.Success(values.NewNumber(byteIndex + 1))
+		}
+
 		runeIndex := utf8.RuneCountInString(container.Value[:byteIndex])
 
 		return res.Success(values.NewNumber(runeIndex + 1))
@@ -50,7 +54,7 @@ func indexofFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	if container, ok := values.AsList(args[0]); ok {
 		needle := args[1]
 
-		for i, element := range container.Elements {
+		for index, element := range container.Elements {
 			comparison, err := element.GetComparisonEe(needle)
 
 			if err != nil {
@@ -58,7 +62,7 @@ func indexofFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 			}
 
 			if comparison.IsNumber() && comparison.IsTrue() {
-				return res.Success(values.NewNumber(i + 1))
+				return res.Success(values.NewNumber(index + 1))
 			}
 		}
 
@@ -81,9 +85,9 @@ func indexofFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 
 			target := byte(byteValue)
 
-			for i, byteVal := range container.Data {
+			for index, byteVal := range container.Data {
 				if byteVal == target {
-					return res.Success(values.NewNumber(i + 1))
+					return res.Success(values.NewNumber(index + 1))
 				}
 			}
 

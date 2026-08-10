@@ -9,7 +9,6 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/values"
-	"unicode/utf8"
 )
 
 func lenFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
@@ -22,7 +21,7 @@ func lenFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	value := args[0]
 
 	if str, ok := values.AsString(value); ok {
-		return res.Success(values.NewNumber(utf8.RuneCountInString(str.Value)))
+		return res.Success(values.NewNumber(str.RuneCount()))
 	}
 
 	if list, ok := values.AsList(value); ok {
