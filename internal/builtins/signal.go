@@ -17,8 +17,8 @@ import (
 
 // Signal handling runs a forwarder goroutine that drains the raw os/signal channel
 // into a managed queue, then broadcasts a wakeup to every actor blocked in
-// signal(). Consumers pop from the queue atomically with their state transition,
-// closing the race with the deadlock detector.
+// signal(). Consumers discard from the queue atomically with their state
+// transition, closing the race with the deadlock detector.
 //
 // Lock order: orchestrator.mu before signalMu.
 

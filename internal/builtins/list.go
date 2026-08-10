@@ -14,7 +14,8 @@ import (
 func listFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	res := values.NewRuntimeResult()
 
-	// Errors are handled differently here, since list() takes an arbitrary amount of args.
+	// Errors are handled differently here, since list() takes an arbitrary
+	// amount of args.
 	if len(args) == 0 {
 		return res.Success(values.NewList([]values.Value{}))
 	}

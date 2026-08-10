@@ -92,7 +92,8 @@ func (p *Parser) Parse() *ParseResult {
 
 	p.skipWhitespace(res)
 
-	// Only error if there are non-EOF tokens remaining that aren't newlines or comments
+	// Only error if there are non-EOF tokens remaining that aren't newlines
+	// or comments
 	if p.currentTok != nil && p.currentTok.Type != constants.TT_EOF {
 		return res.Failure(errors.NewInvalidSyntaxError(
 			p.currentTok.PosStart, p.currentTok.PosEnd,
@@ -129,7 +130,8 @@ func (p *Parser) statements() *ParseResult {
 
 		statements = append(statements, statement)
 
-		// Check if this is a compound statement, they don't require semicolons after their closing brace
+		// Check if this is a compound statement, they don't require
+		// semicolons after their closing brace
 		isCompoundStatement := false
 
 		switch statement.(type) {
@@ -149,7 +151,8 @@ func (p *Parser) statements() *ParseResult {
 			res.RegisterAdvancement()
 			p.advance()
 		} else {
-			// Compound statements don't require semicolons, but allow them optionally
+			// Compound statements don't require semicolons, but
+			// allow them optionally
 			if p.currentTok != nil && p.currentTok.Type == constants.TT_SEMICOLON {
 				res.RegisterAdvancement()
 				p.advance()
@@ -435,7 +438,8 @@ func (p *Parser) call() *ParseResult {
 
 					p.skipWhitespace(res)
 
-					// Allow trailing comma (closing paren after comma)
+					// Allow trailing comma (closing paren
+					// after comma)
 					if p.currentTok.Type == constants.TT_RPAREN {
 						break
 					}
@@ -1033,7 +1037,8 @@ func (p *Parser) ifExprCases(caseKeyword string) *ParseResult {
 }
 
 func (p *Parser) tryParseElseifElse() *ParseResult {
-	// Peek past whitespace so a non-continuation leaves the token stream untouched.
+	// Peek past whitespace so a non-continuation leaves the token stream
+	// untouched.
 	next := p.peekPastWhitespace()
 	if next == nil {
 		return nil
@@ -1468,7 +1473,8 @@ func (p *Parser) binOp(leftFunc func() *ParseResult, ops []string, opValues []in
 func (p *Parser) containsOp(ops []string, opValues []interface{}) bool {
 	for _, op := range ops {
 		if opValues != nil {
-			// Check if current token matches this operator type with any of the values
+			// Check if current token matches this operator type with
+			// any of the values
 			for _, value := range opValues {
 				if p.currentTok.Matches(op, value) {
 					return true
