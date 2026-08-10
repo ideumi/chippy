@@ -24,7 +24,8 @@ type ActorResult struct {
 }
 
 // Instance is an actor's bookkeeping. Every field below ResultCh is guarded by
-// Orchestrator.mu.
+// Orchestrator.mu. Modena is the exception: only the actor's own goroutine
+// writes it, once at startup and again as nil once the actor has finished.
 type Instance struct {
 	ID       int
 	Modena   Modena
@@ -36,7 +37,7 @@ type Instance struct {
 	cancelCh   chan struct{}
 	cancelled  bool
 	waited     bool
-	waitingOn  *Instance
+	wakeable   func() bool
 	loadedOpts []string
 }
 

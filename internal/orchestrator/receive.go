@@ -28,7 +28,8 @@ func (o *Orchestrator) tryDrainAndRun(inst *Instance) []values.Value {
 	inst.Inbox.items = make([]values.Value, 0)
 
 	inst.State = StateRunning
-	inst.cancelCh = nil
+
+	clearBlocking(inst)
 
 	return items
 }
@@ -44,8 +45,7 @@ func (o *Orchestrator) ReceiveBlocking(inst *Instance, globals values.Ctx) ([]va
 		return items, false
 	}
 
-	cancelCh := o.BeginBlocking(inst, StateBlockedReceive)
-	o.CheckDeadlock()
+	cancelCh := o.BeginBlocking(inst, inst.Inbox.HasItems)
 
 	for {
 		select {

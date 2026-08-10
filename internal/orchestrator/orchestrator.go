@@ -27,6 +27,7 @@ func New() *Orchestrator {
 	}
 
 	global = orch
+
 	return orch
 }
 
@@ -47,6 +48,7 @@ func (o *Orchestrator) CreateMain(mod Modena) *Instance {
 		Modena:   mod,
 		Registry: handles.NewHandleRegistry(),
 		Inbox:    NewInbox(),
+		State:    StateRunning,
 	}
 
 	o.instances[0] = inst
@@ -66,6 +68,7 @@ func (o *Orchestrator) CreateActor() *Instance {
 		Registry: handles.NewHandleRegistry(),
 		Inbox:    NewInbox(),
 		ResultCh: make(chan ActorResult, 1),
+		State:    StateRunning,
 	}
 
 	o.instances[id] = inst
@@ -89,6 +92,7 @@ func (o *Orchestrator) GetInstance(id int) *Instance {
 func (o *Orchestrator) RemoveInstance(id int) {
 	o.mu.Lock()
 	defer o.mu.Unlock()
+
 	delete(o.instances, id)
 }
 
