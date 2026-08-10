@@ -9,7 +9,7 @@ package constants
 import "runtime"
 
 const (
-	VERSION_DATE = "2026-07-31"
+	VERSION_DATE = "2026-08-10"
 	HIST_FILE    = ".ChippyHistory"
 
 	CONTEXT_DISPLAY_NAME        = "<ChippyProgram>"
@@ -25,7 +25,7 @@ const (
 
 	CHIPPY_SHEBANG = "#!/usr/bin/chippy"
 
-	STR_LPLVR = "1.1.0"
+	STR_LPLVR = "1.1.1"
 	STR_LPLCN = "rixosa"
 	STR_LPLOS = runtime.GOOS
 	STR_LPLAR = runtime.GOARCH
