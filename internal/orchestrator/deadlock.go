@@ -40,7 +40,6 @@ func (o *Orchestrator) EndBlocking(inst *Instance) {
 	clearBlocking(inst)
 }
 
-// MarkFinished is called by an actor goroutine after it has delivered its result.
 // Must run after SendResult so a wait(handle)er racing the detector still sees
 // the result.
 func (o *Orchestrator) MarkFinished(inst *Instance) {
@@ -75,8 +74,6 @@ func (o *Orchestrator) TransitionIfTrue(inst *Instance, fn func() bool) bool {
 	return false
 }
 
-// Recheck runs the detector after something outside a state transition changed
-// whether a blocked instance can still wake.
 func (o *Orchestrator) Recheck() {
 	o.mu.Lock()
 	defer o.mu.Unlock()

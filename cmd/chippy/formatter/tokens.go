@@ -42,7 +42,6 @@ func isCloser(tok *lexer.Token) bool {
 	return false
 }
 
-// isValueEnd reports whether tok ends an operand.
 func isValueEnd(tok *lexer.Token) bool {
 	if tok == nil {
 		return false
@@ -57,7 +56,6 @@ func isValueEnd(tok *lexer.Token) bool {
 	return false
 }
 
-// wantSpace reports whether a space belongs between prev and cur on one line.
 func wantSpace(prev, cur *lexer.Token, prevUnaryMinus bool) bool {
 	// Empty block stays compact: '{}'.
 	if prev.Type == constants.TT_LBRACE && cur.Type == constants.TT_RBRACE {

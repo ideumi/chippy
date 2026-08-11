@@ -10,9 +10,6 @@ import (
 	"chip-go/internal/values"
 )
 
-// tryDrainAndRun atomically drains the inbox and clears any blocking state on
-// inst. Returns nil if the inbox is empty. Lock order: Orchestrator.mu then
-// Inbox.mu, matching every other caller.
 func (o *Orchestrator) tryDrainAndRun(inst *Instance) []values.Value {
 	o.mu.Lock()
 	defer o.mu.Unlock()

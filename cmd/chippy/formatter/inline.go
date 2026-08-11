@@ -12,8 +12,7 @@ import (
 	"unicode/utf8"
 )
 
-// inlineBlocks returns the set of blocks to keep on one line, keyed by their '{'
-// index. A func body always expands. Any other block collapses when it is a
+// A func body always expands. Any other block collapses when it is a
 // short single statement (see leafInlineable) whose one-line form fits the budget.
 func inlineBlocks(src string, tokens []*lexer.Token) map[int]bool {
 	inline := make(map[int]bool)
@@ -159,10 +158,6 @@ func leafInlineable(tokens []*lexer.Token, open, closeIdx int) bool {
 	return true
 }
 
-// headerStart returns the index of the first code token of the statement whose
-// block opens at 'open'. It walks back to the previous statement boundary and
-// steps over balanced groups, comments, and newlines.
-//
 // A block can open inside a group (an if-expression used as a value, e.g.
 // '(if c {1;} else {2;})[1]'). The walk then exits through the '(' before its
 // ')' and depth goes negative, so the boundary test never fires and it runs back
@@ -195,8 +190,8 @@ func headerStart(tokens []*lexer.Token, open int) int {
 	return first
 }
 
-// hasComment reports whether tokens[start:end) contains a comment. A header
-// comment would consume the inlined '{', so a block with one stays expanded.
+// A header comment would consume the inlined '{', so a block with one stays
+// expanded.
 func hasComment(tokens []*lexer.Token, start, end int) bool {
 	for idx := start; idx < end; idx++ {
 		if isCommentTok(tokens[idx]) {
@@ -237,9 +232,7 @@ func headerWrapped(tokens []*lexer.Token, start, open int) bool {
 	return false
 }
 
-// inlineLineWidth measures the rendered visual width of tokens[start:closeIdx]
-// laid out on one line at the given indent depth. It applies the same spacing
-// rules as the emitter.
+// It applies the same spacing rules as the emitter.
 func inlineLineWidth(src string, tokens []*lexer.Token, start, closeIdx, indent int) int {
 	width := indent * constants.FORMATTER_TAB_WIDTH
 

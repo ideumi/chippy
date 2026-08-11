@@ -111,7 +111,6 @@ func (o *Orchestrator) MarkWaited(inst *Instance) bool {
 	return true
 }
 
-// AddLoadedOpt is idempotent.
 func (o *Orchestrator) AddLoadedOpt(inst *Instance, name string) {
 	o.mu.Lock()
 	defer o.mu.Unlock()
