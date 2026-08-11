@@ -12,8 +12,8 @@ import (
 	"unicode/utf8"
 )
 
-// A func body always expands. Any other block collapses when it is a
-// short single statement (see leafInlineable) whose one-line form fits the budget.
+// A func body always expands. Any other block collapses when it is a short single
+// statement (see leafInlineable) whose one-line form fits the budget.
 func inlineBlocks(src string, tokens []*lexer.Token) map[int]bool {
 	inline := make(map[int]bool)
 

@@ -163,7 +163,8 @@ func formatTokens(src string, tokens []*lexer.Token) string {
 				capN = 1 // none just after an opening brace
 			}
 
-			// None in the middle of a statement, e.g. a wrapped condition.
+			// None in the middle of a statement, e.g. a wrapped
+			// condition.
 			if prevSig != nil && !isTerminator(prevSig) && !commentSincePrevSig {
 				capN = 1
 			}

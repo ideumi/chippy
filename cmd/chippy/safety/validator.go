@@ -168,8 +168,8 @@ func extractSymbols(filename string) ([]SymbolInfo, error) {
 	return symbols, nil
 }
 
-// Walk the AST and extract file scope symbol idfs.
-// See 'chippy doc scoping' to understand the scoping desicions here better
+// Walk the AST and extract file scope symbol idfs. See 'chippy doc scoping' to
+// understand the scoping desicions here better
 func walkAST(node ast.Node, filename string, symbols *[]SymbolInfo) {
 	if node == nil {
 		return
@@ -229,7 +229,8 @@ func walkAST(node ast.Node, filename string, symbols *[]SymbolInfo) {
 		}
 
 	case *ast.BlockNode:
-		// Block bodies and the top-level program are file scope, keep walking
+		// Block bodies and the top-level program are file scope, keep
+		// walking
 		for _, elem := range typed.ElementNodes {
 			walkAST(elem, filename, symbols)
 		}

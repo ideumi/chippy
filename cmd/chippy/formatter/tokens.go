@@ -19,7 +19,8 @@ func isCommentTok(tok *lexer.Token) bool {
 	return tok.Type == constants.TT_COMMENT || tok.Type == constants.TT_DOC_COMMENT
 }
 
-// isTerminator reports whether tok ends a statement. A nil tok (start of file) counts.
+// isTerminator reports whether tok ends a statement. A nil tok (start of file)
+// counts.
 func isTerminator(tok *lexer.Token) bool {
 	if tok == nil {
 		return true
@@ -77,9 +78,9 @@ func wantSpace(prev, cur *lexer.Token, prevUnaryMinus bool) bool {
 		return false
 	}
 
-	// '(' / '[' cuddle as a call/index after a value (b[...] and m[...] literals
-	// included) or a 'func' parameter list. After any other keyword or operator,
-	// space.
+	// '(' / '[' cuddle as a call/index after a value (b[...] and m[...]
+	// literals included) or a 'func' parameter list. After any other keyword
+	// or operator, space.
 	if cur.Type == constants.TT_LPAREN || cur.Type == constants.TT_LSQUARE {
 		switch prev.Type {
 		case constants.TT_IDENTIFIER, constants.TT_RPAREN, constants.TT_RSQUARE,
