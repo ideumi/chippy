@@ -1,0 +1,52 @@
+What's New:
+
+	- corelib:
+		- added libquery.chh
+
+		- libstrings.chh: moved Reverse(value) to libquery.chh and improved it
+		- libstrings.chh: Format and TrimLeft no longer walk the string one character at a time
+
+		- libbytes.chh: BytesToHex no longer builds its result by concatenation
+
+		- libhttp.chh: the plain and TLS servers now share one connection worker and accept loop
+		- libhttp.chh: bug: a Content-Length that is not a number raised RTError
+		- libhttp.chh: HttpServeTLS now returns err on an empty cert or key path
+
+	- values:
+		- strings now store their rune count, so len(value), indexing, slicing and copying are much faster
+
+	- builtins:
+		- indexof(value, search) no longer walks the string when it is all ASCII
+		- charat(value, index) no longer allocates a new string for the character
+		- list(value) on a string no longer allocates a string per character
+		- slice(value, start, end) now shares one bounds check between strings, lists and bytes
+
+	- orchestrator:
+		- deadlock: let blocking primitives supply their own liveness test instead of the detector knowing each one
+		- an actor now releases its engine as soon as it finishes rather than when something waits on it
+
+	- repl:
+		- adjusted the prompt color to match other cli tools
+
+	- bytecode:
+		- compiled files no longer store source positions
+
+	- parser:
+		- rename ifExprC to elseExpr
+
+	- disassembler:
+		- bug: a chunk whose code ended mid instruction printed a bad operand
+
+	- other:
+		- various cleanups in the codebase
+		- go.mod bumped to 1.26.5
+
+FYI Breaking:
+
+	- Reverse(value) has moved from libstrings.chh to libquery.chh, the functions produce the same results, so load("libquery.chh"); should fix it for you
+
+	- the bytecode format is now version 2 due to the source position change. Anything compiled with 1.1.0 no longer runs and should be recompiled.
+
+	- a runtime error from a compiled program no longer names a file or a line. You should run your program from source when you need a position.
+
+	- compiling the same code under a different file name now gives the same binary, see 'chippy doc bytecode'
