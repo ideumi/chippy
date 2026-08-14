@@ -150,6 +150,17 @@ make release
 make release-all
 ```
 
+## Version History
+
+| Code name      | Series        | Stable API    | Timespan              | Version ranges | Status      | CN refers to
+| -------------- | ------------- | ------------- | --------------------- | -------------- | ----------- | ------------ 
+| pardalote      | 1.0.x         | No            | Sep. 2025 - Aug. 2026 | 1.0.0 - 1.0.24 | Finished    | [Pardalotes](https://en.wikipedia.org/wiki/Pardalote)
+| rixosa         | 1.1.x         | No            | Aug. 2026 - TBD       | 1.1.0 - TBD    | **Current** | [Cattle tyrant](https://en.wikipedia.org/wiki/Cattle_tyrant)
+| canaria        | 1.2.x         | TBD           | TBD                   | /              | /           | [Atlantic canary](https://en.wikipedia.org/wiki/Atlantic_canary)
+| TBA            | 1.3.x         | TBD           | TBD                   | /              | /           | TBA
+
+For detailed information on what changed between releases see the [changelogs](changelog/).
+
 ## License
 
 Chippy is licensed under the 2-Clause BSD License. See `LICENCE.txt`.
