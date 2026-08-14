@@ -1,0 +1,460 @@
+#!/usr/bin/chippy
+#
+# corelib - libquery.chh
+#
+
+#@ <Where(source, condition)>
+#@ V-1.0.0 (2026-08-09)
+#@
+#@ Returns a list with every element of ''source'' for which ''condition'' returns
+#@ ''true'', or ''err'' as soon as ''condition'' returns ''err''.
+
+func Where(source, condition)
+{
+	var result = [];
+
+	for index = 1 to len(source)
+	{
+		var match = condition(source[index]);
+
+		if iserr(match) { return err; }
+
+		if match { append(result, source[index]); }
+	}
+
+	return result;
+}
+
+#@ <Select(source, selector)>
+#@ V-1.0.0 (2026-08-09)
+#@
+#@ Returns a list with the result of ''selector'' for every element of ''source'',
+#@ or ''err'' as soon as ''selector'' returns ''err''.
+
+func Select(source, selector)
+{
+	var result = [];
+
+	for index = 1 to len(source)
+	{
+		var value = selector(source[index]);
+
+		if iserr(value) { return err; }
+
+		append(result, value);
+	}
+
+	return result;
+}
+
+#@ <ForEach(source, action)>
+#@ V-1.0.0 (2026-08-10)
+#@
+#@ Runs ''action'' on every element of ''source'' in order. Returns ''ok'', or
+#@ ''err'' as soon as ''action'' returns ''err''.
+
+func ForEach(source, action)
+{
+	for index = 1 to len(source)
+	{
+		var outcome = action(source[index]);
+
+		if iserr(outcome) { return err; }
+	}
+
+	return ok;
+}
+
+#@ <OrderBy(source, keySelector)>
+#@ V-1.0.0 (2026-08-09)
+#@
+#@ Returns a list with the elements of ''source'' in ascending order of the key
+#@ returned by ''keySelector'', or ''err'' as soon as ''keySelector'' returns
+#@ ''err''.
+
+func OrderBy(source, keySelector)
+{
+	var pairs = _QuerySortPairs_(source, keySelector);
+
+	if iserr(pairs) { return err; }
+
+	var result = [];
+
+	for index = 1 to len(pairs) { append(result, source[pairs[index][2]]); }
+
+	return result;
+}
+
+#@ <OrderByDescending(source, keySelector)>
+#@ V-1.0.0 (2026-08-09)
+#@
+#@ Returns a list with the elements of ''source'' in descending order of the key
+#@ returned by ''keySelector'', or ''err'' as soon as ''keySelector'' returns
+#@ ''err''.
+
+func OrderByDescending(source, keySelector)
+{
+	var pairs = _QuerySortPairs_(source, keySelector);
+
+	if iserr(pairs) { return err; }
+
+	var result = [];
+
+	for index = len(pairs) to 1 step -1
+	{
+		append(result, source[pairs[index][2]]);
+	}
+
+	return result;
+}
+
+#@ <Reverse(value)>
+#@ V-1.0.0 (2026-08-09)
+#@
+#@ Returns ''value'' in reverse order. This supports the types: string, list and
+#@ bytes. Returns ''err'' for anything else.
+
+func Reverse(value)
+{
+	var kind = type(value);
+
+	if kind == "string"
+	{
+		var chars = [];
+
+		for index = len(value) to 1 step -1
+		{
+			append(chars, charat(value, index));
+		}
+
+		return join(chars, "");
+	}
+
+	if kind == "list"
+	{
+		var result = [];
+
+		for index = len(value) to 1 step -1 { append(result, value[index]); }
+
+		return result;
+	}
+
+	if kind == "bytes"
+	{
+		var result = b[];
+
+		for index = len(value) to 1 step -1 { append(result, value[index]); }
+
+		return result;
+	}
+
+	return err;
+}
+
+#@ <First(source, condition)>
+#@ V-1.0.0 (2026-08-09)
+#@
+#@ Returns the first element of ''source'' for which ''condition'' returns ''true'',
+#@ or ''err'' if no element matches or ''condition'' returns ''err''.
+
+func First(source, condition)
+{
+	for index = 1 to len(source)
+	{
+		var match = condition(source[index]);
+
+		if iserr(match) { return err; }
+
+		if match { return source[index]; }
+	}
+
+	return err;
+}
+
+#@ <Last(source, condition)>
+#@ V-1.0.0 (2026-08-09)
+#@
+#@ Returns the last element of ''source'' for which ''condition'' returns ''true'',
+#@ or ''err'' if no element matches or ''condition'' returns ''err''.
+
+func Last(source, condition)
+{
+	for index = len(source) to 1 step -1
+	{
+		var match = condition(source[index]);
+
+		if iserr(match) { return err; }
+
+		if match { return source[index]; }
+	}
+
+	return err;
+}
+
+#@ <Any(source, condition)>
+#@ V-1.0.0 (2026-08-09)
+#@
+#@ Returns ''true'' if ''condition'' returns ''true'' for at least one element of
+#@ ''source'', ''false'' otherwise, or ''err'' as soon as ''condition'' returns
+#@ ''err''.
+
+func Any(source, condition)
+{
+	for index = 1 to len(source)
+	{
+		var match = condition(source[index]);
+
+		if iserr(match) { return err; }
+
+		if match { return true; }
+	}
+
+	return false;
+}
+
+#@ <All(source, condition)>
+#@ V-1.0.0 (2026-08-09)
+#@
+#@ Returns ''true'' if ''condition'' returns ''true'' for every element of ''source'',
+#@ ''false'' if it does not, or ''err'' as soon as ''condition'' returns ''err''.
+#@ An empty ''source'' returns ''true''.
+
+func All(source, condition)
+{
+	for index = 1 to len(source)
+	{
+		var match = condition(source[index]);
+
+		if iserr(match) { return err; }
+
+		if not match { return false; }
+	}
+
+	return true;
+}
+
+#@ <Count(source, condition)>
+#@ V-1.0.0 (2026-08-09)
+#@
+#@ Returns how many elements of ''source'' ''condition'' returns ''true'' for, or
+#@ ''err'' as soon as ''condition'' returns ''err''.
+
+func Count(source, condition)
+{
+	var total = 0;
+
+	for index = 1 to len(source)
+	{
+		var match = condition(source[index]);
+
+		if iserr(match) { return err; }
+
+		if match { total = total + 1; }
+	}
+
+	return total;
+}
+
+#@ <Sum(source, selector)>
+#@ V-1.0.0 (2026-08-09)
+#@
+#@ Returns the total of the numbers returned by ''selector'' for every element of
+#@ ''source'', or ''err'' if ''selector'' returns anything but a number.
+
+func Sum(source, selector)
+{
+	var total = 0;
+
+	for index = 1 to len(source)
+	{
+		var value = selector(source[index]);
+
+		if type(value) != "number" { return err; }
+
+		total = total + value;
+	}
+
+	return total;
+}
+
+#@ <MinBy(source, keySelector)>
+#@ V-1.0.0 (2026-08-09)
+#@
+#@ Returns the element of ''source'' whose key is smallest, or ''err'' if ''source''
+#@ is empty or ''keySelector'' returns ''err''. If several elements share the same
+#@ smallest key, the one that is encountered earliest is returned.
+
+func MinBy(source, keySelector)
+{
+	var pairs = _QuerySortPairs_(source, keySelector);
+
+	if iserr(pairs) { return err; }
+
+	if len(pairs) == 0 { return err; }
+
+	return source[pairs[1][2]];
+}
+
+#@ <MaxBy(source, keySelector)>
+#@ V-1.0.0 (2026-08-09)
+#@
+#@ Returns the element of ''source'' whose key is largest, or ''err'' if ''source''
+#@ is empty or ''keySelector'' returns ''err''. If several elements share the same
+#@ largest key, the one that is encountered earliest is returned.
+
+func MaxBy(source, keySelector)
+{
+	var pairs = _QuerySortPairs_(source, keySelector);
+
+	if iserr(pairs) { return err; }
+
+	if len(pairs) == 0 { return err; }
+
+	var index = len(pairs);
+
+	while index > 1
+	{
+		if pairs[index - 1][1] != pairs[index][1] { break; }
+
+		index = index - 1;
+	}
+
+	return source[pairs[index][2]];
+}
+
+#@ <GroupBy(source, keySelector)>
+#@ V-1.0.0 (2026-08-09)
+#@
+#@ Returns a map with the elements of ''source'' collected under the key
+#@ ''keySelector'' returns for each, or ''err'' as soon as ''keySelector''
+#@ returns ''err''.
+
+func GroupBy(source, keySelector)
+{
+	var groups = m[];
+
+	for index = 1 to len(source)
+	{
+		var key = keySelector(source[index]);
+
+		if iserr(key) { return err; }
+
+		key = str(key);
+
+		if not has(groups, key) { groups[key] = []; }
+
+		append(groups[key], source[index]);
+	}
+
+	return groups;
+}
+
+#@ <CountBy(source, keySelector)>
+#@ V-1.0.0 (2026-08-09)
+#@
+#@ Returns a map with a count of the elements of ''source'' under the key
+#@ ''keySelector'' returns for each, or ''err'' as soon as ''keySelector''
+#@ returns ''err''.
+
+func CountBy(source, keySelector)
+{
+	var counts = m[];
+
+	for index = 1 to len(source)
+	{
+		var key = keySelector(source[index]);
+
+		if iserr(key) { return err; }
+
+		key = str(key);
+
+		if not has(counts, key) { counts[key] = 0; }
+
+		counts[key] = counts[key] + 1;
+	}
+
+	return counts;
+}
+
+#@ <Contains(source, value)>
+#@ V-1.0.0 (2026-08-09)
+#@
+#@ Returns ''true'' if ''source'' has an element equal to ''value'', ''false''
+#@ otherwise.
+
+func Contains(source, value)
+{
+	for index = 1 to len(source)
+	{
+		if source[index] == value { return true; }
+	}
+
+	return false;
+}
+
+#@ <Distinct(source)>
+#@ V-1.0.0 (2026-08-09)
+#@
+#@ Returns a list with each value of ''source'' only once.
+
+func Distinct(source)
+{
+	var seen = m[];
+	var result = [];
+
+	for index = 1 to len(source)
+	{
+		var value = source[index];
+		var key = _QueryValueKey_(value);
+
+		if iserr(key)
+		{
+			if not Contains(result, value) { append(result, value); }
+		}
+		elseif not has(seen, key)
+		{
+			seen[key] = true;
+
+			append(result, value);
+		}
+	}
+
+	return result;
+}
+
+# <_QueryValueKey_(value)>
+# V-1.0.0 (2026-08-11)
+#
+# Returns a key that identifies value by type and content, or err if value is
+# not a string or number.
+
+func _QueryValueKey_(value)
+{
+	var kind = type(value);
+
+	if kind == "string" or kind == "number" { return kind + ":" + str(value); }
+
+	return err;
+}
+
+# <_QuerySortPairs_(source, keySelector)>
+# V-1.0.0 (2026-08-11)
+#
+# Returns a list with one [key, position] pair per element of source, sorted by
+# key. Returns err as soon as keySelector returns err.
+
+func _QuerySortPairs_(source, keySelector)
+{
+	var pairs = [];
+
+	for index = 1 to len(source)
+	{
+		var key = keySelector(source[index]);
+
+		if iserr(key) { return err; }
+
+		append(pairs, [key, index]);
+	}
+
+	return sort(pairs);
+}

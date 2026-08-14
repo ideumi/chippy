@@ -90,8 +90,6 @@ func (w *writer) chunk(chunk *bytecode.Chunk) {
 	for _, fn := range chunk.Functions {
 		w.functionTemplate(fn)
 	}
-
-	w.lineTable(chunk)
 }
 
 func (w *writer) constant(value values.Value) {
@@ -115,7 +113,7 @@ func (w *writer) constant(value values.Value) {
 		return
 	}
 
-	panic(errors.ModenaError("cannot serialize constant of tag %d", value.Tag()))
+	errors.ModenaPanic("cannot serialize constant of tag %d", value.Tag())
 }
 
 func (w *writer) functionTemplate(template *bytecode.FunctionTemplate) {
@@ -138,49 +136,4 @@ func (w *writer) functionTemplate(template *bytecode.FunctionTemplate) {
 	}
 
 	w.chunk(template.Chunk)
-}
-
-// lineTable writes the table that connects each instruction back to the source
-// line it originated from. Neighbouring instructions almost always share a line,
-// so only the points where the line or the file changes are written.
-
-// The source text itself is never stored, so an error from a bytecode file can
-// name the line but cannot print it with the ^ arrows / carets under them.
-func (w *writer) lineTable(chunk *bytecode.Chunk) {
-	type entry struct {
-		offset uint32
-		line   uint32
-		file   string
-	}
-
-	var entries []entry
-	prevLine := -1
-	prevFile := ""
-	haveEntry := false
-
-	for i := 0; i < chunk.SpanCount(); i++ {
-		span := chunk.SpanAt(i)
-		line := 0
-		file := ""
-
-		if span.Start != nil {
-			line = span.Start.Line
-			file = span.Start.File
-		}
-
-		if !haveEntry || line != prevLine || file != prevFile {
-			entries = append(entries, entry{offset: uint32(i), line: uint32(line), file: file})
-			prevLine = line
-			prevFile = file
-			haveEntry = true
-		}
-	}
-
-	w.u32(uint32(len(entries)))
-
-	for _, entry := range entries {
-		w.u32(entry.offset)
-		w.u32(entry.line)
-		w.str(entry.file)
-	}
 }

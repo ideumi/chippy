@@ -75,6 +75,12 @@ func disassembleInstruction(chunk *bytecode.Chunk, out *strings.Builder, offset,
 	next := offset + 1
 
 	if info.Operand != bytecode.OperandNone {
+		if next+4 > len(chunk.Code) {
+			fmt.Fprint(out, " <truncated operand>\n")
+
+			return len(chunk.Code)
+		}
+
 		operand := int(bytecode.ReadU32(chunk.Code, next))
 		next += 4
 

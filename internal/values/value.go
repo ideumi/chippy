@@ -327,7 +327,9 @@ func (OperatorDefaults) IsTrue() bool {
 }
 
 func (OperatorDefaults) Copy() Value {
-	panic("Copy not implemented")
+	errors.ModenaPanic("Copy not implemented")
+
+	return Value{}
 }
 
 func (OperatorDefaults) Execute(args []Value, ctx Ctx) RuntimeResult {

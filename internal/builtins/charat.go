@@ -44,5 +44,5 @@ func charatFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 		return res.FailAt(2, "Index out of bounds")
 	}
 
-	return res.Success(values.NewString(char))
+	return res.Success(char)
 }

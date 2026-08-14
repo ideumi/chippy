@@ -63,25 +63,6 @@ func Right(value, count)
 	return slice(value, start, len(value));
 }
 
-#@ <Reverse(value)>
-#@ V-1.0.0 (2025-08-13)
-#@
-#@ Returns ''value'' with characters in reverse order.
-
-func Reverse(value)
-{
-	var result = "";
-	var i = len(value);
-
-	while i >= 1
-	{
-		result = result + charat(value, i);
-		i = i - 1;
-	}
-
-	return result;
-}
-
 #@ <ReplaceCharAt(value, idx, char)>
 #@ V-1.0.0 (2026-06-09)
 #@
@@ -97,15 +78,16 @@ func ReplaceCharAt(value, idx, char)
 }
 
 #@ <TrimLeft(value)>
-#@ V-1.0.0 (2025-08-13)
+#@ V-1.0.1 (2026-08-10)
 #@
 #@ Removes whitespace characters from the beginning of ''value''.
 
 func TrimLeft(value)
 {
 	var i = 1;
+	var total = len(value);
 
-	while i <= len(value)
+	while i <= total
 	{
 		var ch = charat(value, i);
 
@@ -114,7 +96,7 @@ func TrimLeft(value)
 		i = i + 1;
 	}
 
-	return slice(value, i, len(value));
+	return slice(value, i, total);
 }
 
 #@ <TrimRight(value)>
@@ -175,7 +157,7 @@ func SplitCollapse(value, delimiter)
 }
 
 #@ <Format(value, values)>
-#@ V-1.0.0 (2025-10-31)
+#@ V-1.0.1 (2026-08-10)
 #@
 #@ Formats ''value'' by replacing format specifiers with ''values'' in order.
 #@ ''%s'' (string), ''%i'' (integer), ''%n'' (number), ''%%'' (literal %)
@@ -189,67 +171,49 @@ func Format(value, values)
 
 	var parts = [];
 	var valIndex = 1;
-	var i = 1;
+	var rest = value;
 
-	while i <= len(value)
+	while true
 	{
-		var ch = charat(value, i);
+		var marker = indexof(rest, "%");
 
-		if ch == "%"
+		if iserr(marker)
 		{
-			if i + 1 <= len(value)
-			{
-				var next = charat(value, i + 1);
+			append(parts, rest);
 
-				if next == "%"
-				{
-					append(parts, "%");
+			break;
+		}
 
-					i = i + 2;
-				}
-				elseif next == "s"
-				{
-					if valIndex > len(values) { return err; }
+		append(parts, slice(rest, 1, marker - 1));
 
-					append(parts, str(values[valIndex]));
+		var total = len(rest);
 
-					valIndex = valIndex + 1;
-					i = i + 2;
-				}
-				elseif next == "i"
-				{
-					if valIndex > len(values) { return err; }
+		if marker + 1 > total { return err; }
 
-					append(parts, str(int(values[valIndex])));
+		var next = charat(rest, marker + 1);
 
-					valIndex = valIndex + 1;
-					i = i + 2;
-				}
-				elseif next == "n"
-				{
-					if valIndex > len(values) { return err; }
+		if next == "%"
+		{
+			append(parts, "%");
+		}
+		elseif next == "s" or next == "i" or next == "n"
+		{
+			if valIndex > len(values) { return err; }
 
-					append(parts, str(num(values[valIndex])));
+			var item = values[valIndex];
 
-					valIndex = valIndex + 1;
-					i = i + 2;
-				}
-				else
-				{
-					return err;
-				}
-			}
-			else
-			{
-				return err;
-			}
+			if next == "s" { append(parts, str(item)); }
+			elseif next == "i" { append(parts, str(int(item))); }
+			else { append(parts, str(num(item))); }
+
+			valIndex = valIndex + 1;
 		}
 		else
 		{
-			append(parts, ch);
-
-			i = i + 1;
+			return err;
 		}
+
+		rest = slice(rest, marker + 2, total);
 	}
 
 	if valIndex != len(values) + 1 { return err; }

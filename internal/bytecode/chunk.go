@@ -100,12 +100,6 @@ func (c *Chunk) shareSpan(span Span) uint32 {
 	return slot
 }
 
-// AppendSpan records the span of one more byte of code. The decoder uses it to
-// rebuild the span table from a compiled file's line table.
-func (c *Chunk) AppendSpan(span Span) {
-	c.spanIndex = append(c.spanIndex, c.shareSpan(span))
-}
-
 func (c *Chunk) SpanAt(offset int) Span {
 	if offset < 0 || offset >= len(c.spanIndex) {
 		return Span{}
@@ -201,7 +195,9 @@ func constantKeyOf(value values.Value) constantKey {
 		return constantKey{kind: values.TagText, text: text.Value}
 	}
 
-	panic("constantKeyOf: unexpected constant type")
+	errors.ModenaPanic("constantKeyOf: unexpected constant type")
+
+	return constantKey{}
 }
 
 // No dedup here: each function is compiled once, so it is never a duplicate.

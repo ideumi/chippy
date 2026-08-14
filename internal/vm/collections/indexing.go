@@ -78,7 +78,7 @@ func Get(collection, index values.Value) (values.Value, error) {
 
 	if str, ok := values.AsString(collection); ok {
 		if char, inRange := str.RuneAt(idx); inRange {
-			return values.NewString(char), nil
+			return char, nil
 		}
 
 		return values.Value{}, faultAt(PartIndex, "Index out of bounds")

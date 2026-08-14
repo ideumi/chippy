@@ -4,14 +4,14 @@
 #
 
 #@ <BytesToHex(bytes)>
-#@ V-1.0.0 (2026-03-08)
+#@ V-1.0.1 (2026-08-10)
 #@
 #@ Converts ''bytes'' to a lowercase hexadecimal string representation.
 
 func BytesToHex(bytes)
 {
 	var hexDigits = "0123456789abcdef";
-	var result = "";
+	var parts = [];
 	var i = 1;
 	var byteLen = len(bytes);
 
@@ -21,11 +21,13 @@ func BytesToHex(bytes)
 		var high = int(byteVal / 16);
 		var low = byteVal % 16;
 
-		result = result + slice(hexDigits, high + 1, high + 1) + slice(hexDigits, low + 1, low + 1);
+		append(parts, slice(hexDigits, high + 1, high + 1));
+		append(parts, slice(hexDigits, low + 1, low + 1));
+
 		i = i + 1;
 	}
 
-	return result;
+	return join(parts, "");
 }
 
 #@ <GetShort(data, idx)>

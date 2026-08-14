@@ -9,7 +9,6 @@ package builtins
 import (
 	"chip-go/internal/builtins/shared"
 	"chip-go/internal/values"
-	"unicode/utf8"
 )
 
 func sliceFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
@@ -19,155 +18,96 @@ func sliceFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 		return res.Fail(shared.Errors.InvalidArgCountWithHint("slice", 3, "container, start, end"))
 	}
 
-	if container, ok := values.AsString(args[0]); ok {
-		startNum := args[1]
+	str, isText := values.AsString(args[0])
+	list, isList := values.AsList(args[0])
+	data, isBytes := values.AsBytes(args[0])
 
-		if !startNum.IsNumber() {
-			return res.FailAt(2,
-				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionSecond, shared.TypeNumber, "start"))
-		}
+	if !isText && !isList && !isBytes {
+		return res.FailAt(1,
+			shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionFirst, "a string, list, or bytes", "container"))
+	}
 
-		endNum := args[2]
+	start, end, failure, ok := sliceBounds(args)
 
-		if !endNum.IsNumber() {
-			return res.FailAt(3,
-				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionThird, shared.TypeNumber, "end"))
-		}
+	if !ok {
+		return failure
+	}
 
-		start64, err := startNum.AsInt()
+	if isText {
+		last, inRange := clampSliceEnd(start, end, str.RuneCount())
 
-		if err != nil {
-			return res.Failure(err)
-		}
-
-		end64, err := endNum.AsInt()
-
-		if err != nil {
-			return res.Failure(err)
-		}
-
-		start := int(start64)
-		end := int(end64)
-
-		if start < 1 {
-			return res.FailAt(2, "Start must be >= 1")
-		}
-
-		size := utf8.RuneCountInString(container.Value)
-
-		if start > size || end < start {
+		if !inRange {
 			return res.Success(values.NewString(""))
 		}
 
-		if end > size {
-			end = size
-		}
-
-		return res.Success(values.NewString(container.RuneSlice(start, end)))
+		return res.Success(str.RuneSlice(start, last))
 	}
 
-	if container, ok := values.AsList(args[0]); ok {
-		startNum := args[1]
+	if isList {
+		last, inRange := clampSliceEnd(start, end, len(list.Elements))
 
-		if !startNum.IsNumber() {
-			return res.FailAt(2,
-				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionSecond, shared.TypeNumber, "start"))
-		}
-
-		endNum := args[2]
-
-		if !endNum.IsNumber() {
-			return res.FailAt(3,
-				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionThird, shared.TypeNumber, "end"))
-		}
-
-		start64, err := startNum.AsInt()
-
-		if err != nil {
-			return res.Failure(err)
-		}
-
-		end64, err := endNum.AsInt()
-
-		if err != nil {
-			return res.Failure(err)
-		}
-
-		start := int(start64)
-		end := int(end64)
-
-		if start < 1 {
-			return res.FailAt(2, "Start must be >= 1")
-		}
-
-		elements := container.Elements
-		size := len(elements)
-
-		if start > size || end < start {
+		if !inRange {
 			return res.Success(values.NewList([]values.Value{}))
 		}
 
-		if end > size {
-			end = size
-		}
+		elements := make([]values.Value, last-start+1)
+		copy(elements, list.Elements[start-1:last])
 
-		result := make([]values.Value, end-(start-1))
-		copy(result, elements[start-1:end])
-
-		return res.Success(values.NewList(result))
+		return res.Success(values.NewList(elements))
 	}
 
-	if container, ok := values.AsBytes(args[0]); ok {
-		startNum := args[1]
+	last, inRange := clampSliceEnd(start, end, len(data.Data))
 
-		if !startNum.IsNumber() {
-			return res.FailAt(2,
-				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionSecond, shared.TypeNumber, "start"))
-		}
-
-		endNum := args[2]
-
-		if !endNum.IsNumber() {
-			return res.FailAt(3,
-				shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionThird, shared.TypeNumber, "end"))
-		}
-
-		start64, err := startNum.AsInt()
-
-		if err != nil {
-			return res.Failure(err)
-		}
-
-		end64, err := endNum.AsInt()
-
-		if err != nil {
-			return res.Failure(err)
-		}
-
-		start := int(start64)
-		end := int(end64)
-
-		if start < 1 {
-			return res.FailAt(2, "Start must be >= 1")
-		}
-
-		data := container.Data
-		size := len(data)
-
-		if start > size || end < start {
-			return res.Success(values.NewBytes([]byte{}))
-		}
-
-		if end > size {
-			end = size
-		}
-
-		result := make([]byte, end-(start-1))
-		copy(result, data[start-1:end])
-
-		return res.Success(values.NewBytes(result))
+	if !inRange {
+		return res.Success(values.NewBytes([]byte{}))
 	}
 
-	return res.FailAt(1,
-		shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionFirst, "a string, list, or bytes", "container"))
+	result := make([]byte, last-start+1)
+	copy(result, data.Data[start-1:last])
+
+	return res.Success(values.NewBytes(result))
+}
+
+func sliceBounds(args []values.Value) (start, end int, failure values.RuntimeResult, ok bool) {
+	res := values.NewRuntimeResult()
+
+	if !args[1].IsNumber() {
+		return 0, 0, res.FailAt(2,
+			shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionSecond, shared.TypeNumber, "start")), false
+	}
+
+	if !args[2].IsNumber() {
+		return 0, 0, res.FailAt(3,
+			shared.Errors.InvalidArgTypePositionalWithHint("slice", shared.PositionThird, shared.TypeNumber, "end")), false
+	}
+
+	start64, err := args[1].AsInt()
+
+	if err != nil {
+		return 0, 0, res.Failure(err), false
+	}
+
+	end64, err := args[2].AsInt()
+
+	if err != nil {
+		return 0, 0, res.Failure(err), false
+	}
+
+	if start64 < 1 {
+		return 0, 0, res.FailAt(2, "Start must be >= 1"), false
+	}
+
+	return int(start64), int(end64), res, true
+}
+
+func clampSliceEnd(start, end, size int) (int, bool) {
+	if start > size || end < start {
+		return 0, false
+	}
+
+	if end > size {
+		return size, true
+	}
+
+	return end, true
 }

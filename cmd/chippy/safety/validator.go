@@ -34,7 +34,6 @@ type SymbolCollision struct {
 	Locations []SymbolInfo
 }
 
-// Determine all collisions are in the same file
 func (c *SymbolCollision) IsSameFile() bool {
 	if len(c.Locations) == 0 {
 		return false
@@ -59,7 +58,6 @@ func (c *SymbolCollision) GetFirstFile() string {
 	return ""
 }
 
-// Parse error
 type ValidationError struct {
 	File  string
 	Error error
@@ -70,12 +68,10 @@ var builtinNames = initBuiltinNames()
 func initBuiltinNames() map[string]string {
 	names := make(map[string]string)
 
-	// Get all builtin functions
 	for name := range builtins.GetBuiltins() {
 		names[name] = "builtin function"
 	}
 
-	// Get all builtin constants
 	for name := range builtins.GetConstants() {
 		names[name] = "builtin constant"
 	}
@@ -93,7 +89,6 @@ func ValidateFiles(files []string) (*ValidationResult, error) {
 		Errors:     []ValidationError{},
 	}
 
-	// Track all symbols across all files
 	symbolRegistry := make(map[string][]SymbolInfo)
 
 	for _, file := range files {
@@ -108,15 +103,12 @@ func ValidateFiles(files []string) (*ValidationResult, error) {
 			continue
 		}
 
-		// Register symbols
 		for _, sym := range symbols {
 			symbolRegistry[sym.Name] = append(symbolRegistry[sym.Name], sym)
 		}
 	}
 
-	// Detect collisions
 	for name, locations := range symbolRegistry {
-		// Check for builtin collisions first
 		if builtinType, isBuiltin := builtinNames[name]; isBuiltin {
 			result.Collisions = append(result.Collisions, SymbolCollision{
 				Name:      name,
@@ -126,14 +118,12 @@ func ValidateFiles(files []string) (*ValidationResult, error) {
 			continue
 		}
 
-		// Check for multi-definition collisions
 		if len(locations) > 1 {
-			// Determine collision type
 			symType := locations[0].SymType
 
 			for _, loc := range locations[1:] {
 				if loc.SymType != symType {
-					symType = "symbol" // Mixed types
+					symType = "symbol"
 
 					break
 				}
@@ -170,7 +160,6 @@ func extractSymbols(filename string) ([]SymbolInfo, error) {
 		return nil, parseResult.GetError()
 	}
 
-	// Extract symbols
 	node := parseResult.GetNode()
 	symbols := []SymbolInfo{}
 
@@ -179,8 +168,8 @@ func extractSymbols(filename string) ([]SymbolInfo, error) {
 	return symbols, nil
 }
 
-// Walk the AST and extract file scope symbol idfs.
-// See 'chippy doc scoping' to understand the scoping desicions here better
+// Walk the AST and extract file scope symbol idfs. See 'chippy doc scoping' to
+// understand the scoping desicions here better
 func walkAST(node ast.Node, filename string, symbols *[]SymbolInfo) {
 	if node == nil {
 		return
@@ -188,7 +177,6 @@ func walkAST(node ast.Node, filename string, symbols *[]SymbolInfo) {
 
 	switch typed := node.(type) {
 	case *ast.FuncDefNode:
-		// Named functions
 		if typed.VarNameToken != nil {
 			name, ok := typed.VarNameToken.Value.(string)
 
@@ -206,7 +194,6 @@ func walkAST(node ast.Node, filename string, symbols *[]SymbolInfo) {
 		// Function body has isolated scope, stop
 
 	case *ast.VarAssignNode:
-		// Variable idfs
 		name, ok := typed.VarNameToken.Value.(string)
 
 		if !ok {
@@ -242,7 +229,8 @@ func walkAST(node ast.Node, filename string, symbols *[]SymbolInfo) {
 		}
 
 	case *ast.BlockNode:
-		// Block bodies and the top-level program are file scope, keep walking
+		// Block bodies and the top-level program are file scope, keep
+		// walking
 		for _, elem := range typed.ElementNodes {
 			walkAST(elem, filename, symbols)
 		}

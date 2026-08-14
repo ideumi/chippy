@@ -10,9 +10,6 @@ import (
 	"chip-go/internal/values"
 )
 
-// tryDrainAndRun atomically drains the inbox and clears any blocking state on
-// inst. Returns nil if the inbox is empty. Lock order: Orchestrator.mu then
-// Inbox.mu, matching every other caller.
 func (o *Orchestrator) tryDrainAndRun(inst *Instance) []values.Value {
 	o.mu.Lock()
 	defer o.mu.Unlock()
@@ -28,7 +25,8 @@ func (o *Orchestrator) tryDrainAndRun(inst *Instance) []values.Value {
 	inst.Inbox.items = make([]values.Value, 0)
 
 	inst.State = StateRunning
-	inst.cancelCh = nil
+
+	clearBlocking(inst)
 
 	return items
 }
@@ -44,8 +42,7 @@ func (o *Orchestrator) ReceiveBlocking(inst *Instance, globals values.Ctx) ([]va
 		return items, false
 	}
 
-	cancelCh := o.BeginBlocking(inst, StateBlockedReceive)
-	o.CheckDeadlock()
+	cancelCh := o.BeginBlocking(inst, inst.Inbox.HasItems)
 
 	for {
 		select {

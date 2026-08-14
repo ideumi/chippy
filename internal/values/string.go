@@ -10,34 +10,79 @@ import (
 	"chip-go/internal/errors"
 	"fmt"
 	"strings"
+	"unicode/utf8"
 )
 
 type String struct {
 	OperatorDefaults
 	Value string
+	runes int
+}
+
+var (
+	emptyString = newCountedString("", 0)
+	singleASCII = buildSingleASCII()
+)
+
+func buildSingleASCII() [utf8.RuneSelf]Value {
+	var table [utf8.RuneSelf]Value
+
+	for code := range table {
+		table[code] = newCountedString(string(rune(code)), 1)
+	}
+
+	return table
 }
 
 func NewString(value string) Value {
-	return fromHeap(TagText, &String{Value: value})
+	return newCountedString(value, utf8.RuneCountInString(value))
 }
 
-func (s *String) RuneAt(index int) (string, bool) {
-	if index < 1 {
-		return "", false
+func newCountedString(value string, runes int) Value {
+	return fromHeap(TagText, &String{Value: value, runes: runes})
+}
+
+func (s *String) RuneCount() int {
+	return s.runes
+}
+
+func (s *String) IsASCII() bool {
+	return s.runes == len(s.Value)
+}
+
+func (s *String) RuneAt(index int) (Value, bool) {
+	if index < 1 || index > s.runes {
+		return Value{}, false
 	}
 
-	for _, char := range s.Value {
-		index--
+	if s.IsASCII() {
+		return singleASCII[s.Value[index-1]], true
+	}
 
-		if index == 0 {
-			return string(char), true
+	remaining := index
+
+	for _, char := range s.Value {
+		remaining--
+
+		if remaining == 0 {
+			return newCountedString(string(char), 1), true
 		}
 	}
 
-	return "", false
+	return Value{}, false
 }
 
-func (s *String) RuneSlice(start, end int) string {
+func (s *String) RuneSlice(start, end int) Value {
+	if start < 1 || end > s.runes || end < start {
+		return emptyString
+	}
+
+	count := end - start + 1
+
+	if s.IsASCII() {
+		return newCountedString(s.Value[start-1:end], count)
+	}
+
 	from, to := -1, len(s.Value)
 	index := 0
 
@@ -56,18 +101,37 @@ func (s *String) RuneSlice(start, end int) string {
 	}
 
 	if from < 0 {
-		return ""
+		return emptyString
 	}
 
-	return s.Value[from:to]
+	return newCountedString(s.Value[from:to], count)
+}
+
+func (s *String) Runes() []Value {
+	elements := make([]Value, 0, s.runes)
+
+	if s.IsASCII() {
+		for index := 0; index < len(s.Value); index++ {
+			elements = append(elements, singleASCII[s.Value[index]])
+		}
+
+		return elements
+	}
+
+	for _, char := range s.Value {
+		elements = append(elements, newCountedString(string(char), 1))
+	}
+
+	return elements
 }
 
 func (s *String) String() string {
 	return fmt.Sprintf("\"%s\"", s.Value)
 }
 
+// Shares the backing object. Nothing may mutate a String after construction.
 func (s *String) Copy() Value {
-	return NewString(s.Value)
+	return fromHeap(TagText, s)
 }
 
 func (s *String) IsTrue() bool {
@@ -75,11 +139,21 @@ func (s *String) IsTrue() bool {
 }
 
 func (s *String) AddedTo(other Value) (Value, error) {
-	if otherStr, ok := AsString(other); ok {
-		return NewString(s.Value + otherStr.Value), nil
+	otherStr, ok := AsString(other)
+
+	if !ok {
+		return Value{}, IllegalOperation()
 	}
 
-	return Value{}, IllegalOperation()
+	if len(s.Value) == 0 {
+		return other, nil
+	}
+
+	if len(otherStr.Value) == 0 {
+		return fromHeap(TagText, s), nil
+	}
+
+	return newCountedString(s.Value+otherStr.Value, s.runes+otherStr.runes), nil
 }
 
 func (s *String) MultedBy(other Value) (Value, error) {
@@ -97,7 +171,7 @@ func (s *String) MultedBy(other Value) (Value, error) {
 		return Value{}, errors.NewCallError("Cannot repeat string negative times")
 	}
 
-	return NewString(strings.Repeat(s.Value, int(count))), nil
+	return newCountedString(strings.Repeat(s.Value, int(count)), s.runes*int(count)), nil
 }
 
 func (s *String) GetComparisonEe(other Value) (Value, error) {

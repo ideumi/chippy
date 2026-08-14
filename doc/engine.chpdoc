@@ -54,7 +54,7 @@ A program can be given to the engine as source code or as compiled bytecode. The
 
 *Disassembling*
 
-''chippy disasm <file>'' outputs the instructions the compiler produced, with the constants and the source line each instruction came from. It accepts source files and compiled files, and prints the same thing for both.
+''chippy disasm <file>'' outputs the instructions the compiler produced, along with the constants. It accepts source files and compiled files. A source file is compiled in memory first, so its listing also shows the source line that each instruction came from. A compiled file carries no positions at all, therefore it is not showing any line numbers.
 
 For example, see this simple ''"Hello World!"'' program:
 

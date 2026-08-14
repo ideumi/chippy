@@ -9,9 +9,7 @@ package orchestrator
 type ActorState int
 
 const (
-	StateRunning        ActorState = 0
-	StateBlockedReceive ActorState = 1
-	StateBlockedWait    ActorState = 2
-	StateBlockedSignal  ActorState = 3
-	StateFinished       ActorState = 4
+	StateRunning  ActorState = 0
+	StateBlocked  ActorState = 1
+	StateFinished ActorState = 2
 )

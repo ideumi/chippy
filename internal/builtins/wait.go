@@ -53,8 +53,9 @@ func waitFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	selfID := ctx.InstanceID
 	selfInst := orch.GetInstance(selfID)
 
-	cancelCh := orch.BeginWaitOn(selfInst, inst)
-	orch.CheckDeadlock()
+	cancelCh := orch.BeginBlocking(selfInst, func() bool {
+		return inst.State == orchestrator.StateFinished
+	})
 
 	var result orchestrator.ActorResult
 	gotResult := false
@@ -82,9 +83,10 @@ func waitFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	orch.RemoveInstance(instanceID)
 
 	if result.Err != nil {
-		// Actor-body RTErrors carry their own internal position. Pass through.
-		// Panics surface as plain errors (see actor.go) and have none, so wrap
-		// them with the wait call site so reporting isn't blind.
+		// Actor-body RTErrors carry their own internal position. Pass
+		// through. Panics surface as plain errors (see actor.go) and
+		// have none, so wrap them with the wait call site so reporting
+		// isn't blind.
 		if _, ok := result.Err.(*errors.RTError); ok {
 			return res.Failure(result.Err)
 		}
@@ -94,11 +96,11 @@ func waitFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 
 	if result.Value.IsSet() {
 		// The actor already isolated returned closures from its own scope
-		// (actor.go calls IsolateForTransfer on returnValue before delivering).
-		// Rebind them onto the waiter's globals so the caller can actually use
-		// them. Do not SetContext on the outer value: for a Function, ctx IS
-		// the captured scope, so SetContext would overwrite the isolation we
-		// just relied on.
+		// (actor.go calls IsolateForTransfer on returnValue before
+		// delivering). Rebind them onto the waiter's globals so the caller
+		// can actually use them. Do not SetContext on the outer value:
+		// for a Function, ctx IS the captured scope, so SetContext would
+		// overwrite the isolation we just relied on.
 		orchestrator.BindValuesToGlobals(
 			[]values.Value{result.Value},
 			selfInst.Modena.GetGlobalContext(),

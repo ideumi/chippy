@@ -109,8 +109,7 @@ or by using the...
 2. Extract: `tar -xf chippy-<version>-linux-<arch>.tar.xz`.
 3. Run `sudo ./install.sh` (or `./install.sh` on Termux) from inside the extracted directory.
 
-> I will only provide compiled artifacts for the most recent release, if a new release replaces it, the old artifacts will be erased on release and i will archive them privately. 
-> This is to not burden Codeberg with hosting files no one is likely to download, the hosting is free after all. If you need an old release, download the source code and [build it yourself](#building-from-source).
+> If you need an older release, you can download those over at the [GitHub releases page](https://github.com/ideumi/chippy/releases).
 
 ## Getting Started
 
@@ -131,7 +130,7 @@ Run `sudo ./uninstall.sh` from the extracted tarball directory (or `./uninstall.
 ## Building from Source
 
 Requirements:
-- Go 1.26.4 or later
+- Go 1.26.5 or later
 - git
 - make
 
@@ -150,6 +149,17 @@ make release
 # Build releases for x86_64 and aarch64
 make release-all
 ```
+
+## Version History
+
+| Code name      | Series        | Stable API    | Timespan              | Version ranges | Status      | CN refers to
+| -------------- | ------------- | ------------- | --------------------- | -------------- | ----------- | ------------ 
+| pardalote      | 1.0.x         | No            | Sep. 2025 - Aug. 2026 | 1.0.0 - 1.0.24 | Finished    | [Pardalotes](https://en.wikipedia.org/wiki/Pardalote)
+| rixosa         | 1.1.x         | No            | Aug. 2026 - TBD       | 1.1.0 - TBD    | **Current** | [Cattle tyrant](https://en.wikipedia.org/wiki/Cattle_tyrant)
+| canaria        | 1.2.x         | TBD           | TBD                   | /              | /           | [Atlantic canary](https://en.wikipedia.org/wiki/Atlantic_canary)
+| TBA            | 1.3.x         | TBD           | TBD                   | /              | /           | TBA
+
+For detailed information on what changed between releases see the [changelogs](changelog/).
 
 ## License
 

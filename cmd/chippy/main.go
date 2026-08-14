@@ -114,7 +114,7 @@ func runREPL(mod *modena.Modena) {
 
 	cwd, _ := os.Getwd()
 
-	prompt := fmt.Sprintf("\033[93m%s\033[0m %s \033[93m➜\033[0m ",
+	prompt := fmt.Sprintf("\033[36m%s\033[0m %s \033[36m➜\033[0m ",
 		constants.CLI_CONTEXT_DISPLAY_NAME_FN, cwd)
 
 	rl, err := readline.NewEx(&readline.Config{
@@ -135,7 +135,7 @@ func runREPL(mod *modena.Modena) {
 	for {
 		cwd, _ := os.Getwd()
 
-		newPrompt := fmt.Sprintf("\033[93m%s\033[0m %s \033[93m➜\033[0m ",
+		newPrompt := fmt.Sprintf("\033[36m%s\033[0m %s \033[36m➜\033[0m ",
 			constants.CLI_CONTEXT_DISPLAY_NAME_FN, cwd)
 
 		rl.SetPrompt(newPrompt)

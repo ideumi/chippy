@@ -8,5 +8,5 @@ package constants
 
 const (
 	MODENA_MAGIC                 = "\xF8CHIPPY\xFF"
-	MODENA_FORMAT_VERSION uint32 = 1
+	MODENA_FORMAT_VERSION uint32 = 2
 )

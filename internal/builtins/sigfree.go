@@ -65,7 +65,7 @@ func sigfreeFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	// can no longer wake. Re-check deadlock so it cancels cleanly. Must run
 	// after signalMu.Unlock() to preserve lock order.
 	if becameEmpty {
-		orchestrator.Get().CheckDeadlock()
+		orchestrator.Get().Recheck()
 	}
 
 	return res.Success(values.NewString(constants.STR_OK))

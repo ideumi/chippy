@@ -81,7 +81,6 @@ func actorFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 		// it's all backwards here.
 		defer func() {
 			orch.MarkFinished(inst)
-			orch.CheckDeadlock()
 		}()
 
 		defer func() {

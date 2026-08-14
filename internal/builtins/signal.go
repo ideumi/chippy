@@ -17,8 +17,8 @@ import (
 
 // Signal handling runs a forwarder goroutine that drains the raw os/signal channel
 // into a managed queue, then broadcasts a wakeup to every actor blocked in
-// signal(). Consumers pop from the queue atomically with their state transition,
-// closing the race with CheckDeadlock.
+// signal(). Consumers discard from the queue atomically with their state
+// transition, closing the race with the deadlock detector.
 //
 // Lock order: orchestrator.mu before signalMu.
 
@@ -32,12 +32,11 @@ var (
 	caught        map[syscall.Signal]bool
 )
 
-func init() {
-	orchestrator.SetSignalProbe(func() bool {
-		signalMu.Lock()
-		defer signalMu.Unlock()
-		return len(caught) > 0 || len(signalQueue) > 0
-	})
+func signalPending() bool {
+	signalMu.Lock()
+	defer signalMu.Unlock()
+
+	return len(caught) > 0 || len(signalQueue) > 0
 }
 
 // Caller holds signalMu.
@@ -78,8 +77,8 @@ func signalForwarder() {
 	}
 }
 
-// Pops the oldest queued signal atomically with the transition to StateRunning,
-// so CheckDeadlock cannot observe a stale blocked state.
+// Discards the oldest queued signal atomically with the transition to StateRunning,
+// so the deadlock detector cannot observe a stale blocked state.
 func tryConsumeSignal(inst *orchestrator.Instance) (os.Signal, bool) {
 	var sig os.Signal
 	got := false
@@ -146,13 +145,12 @@ func signalFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 
 	// Re-check after registering: a signal may have been enqueued and broadcast
 	// before signalWaiters saw us, leaving no wakeup queued for us while
-	// signalProbe still reports liveness.
+	// signalPending still reports liveness.
 	if sig, ok := tryConsumeSignal(inst); ok {
 		return res.Success(values.NewNumber(signalToInt(sig)))
 	}
 
-	cancelCh := orch.BeginBlocking(inst, orchestrator.StateBlockedSignal)
-	orch.CheckDeadlock()
+	cancelCh := orch.BeginBlocking(inst, signalPending)
 
 	for {
 		select {

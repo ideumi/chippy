@@ -6,40 +6,29 @@
 
 package orchestrator
 
-// signalProbe reports whether any OS signals are being caught or queued.
-// internal/builtins/signal.go installs this via SetSignalProbe to avoid an
-// import cycle. When it returns true, actors blocked in signal() are treated
-// as potentially runnable.
-var signalProbe func() bool
-
-func SetSignalProbe(fn func() bool) {
-	signalProbe = fn
-}
-
 // BeginBlocking marks inst as entering a blocking primitive and returns a fresh
 // cancel channel. Callers must select on it so the deadlock detector can wake
 // them. Always pair with EndBlocking.
-func (o *Orchestrator) BeginBlocking(inst *Instance, state ActorState) chan struct{} {
+//
+// wakeable reports whether something outside inst can still make it runnable.
+// It runs with Orchestrator.mu held, so any lock it takes is acquired after it.
+func (o *Orchestrator) BeginBlocking(inst *Instance, wakeable func() bool) chan struct{} {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 
-	inst.State = state
+	inst.State = StateBlocked
 	inst.cancelCh = make(chan struct{})
 	inst.cancelled = false
+	inst.wakeable = wakeable
+
+	o.checkDeadlock()
 
 	return inst.cancelCh
 }
 
-func (o *Orchestrator) BeginWaitOn(inst, target *Instance) chan struct{} {
-	o.mu.Lock()
-	defer o.mu.Unlock()
-
-	inst.State = StateBlockedWait
-	inst.cancelCh = make(chan struct{})
-	inst.cancelled = false
-	inst.waitingOn = target
-
-	return inst.cancelCh
+func clearBlocking(inst *Instance) {
+	inst.cancelCh = nil
+	inst.wakeable = nil
 }
 
 func (o *Orchestrator) EndBlocking(inst *Instance) {
@@ -47,11 +36,10 @@ func (o *Orchestrator) EndBlocking(inst *Instance) {
 	defer o.mu.Unlock()
 
 	inst.State = StateRunning
-	inst.cancelCh = nil
-	inst.waitingOn = nil
+
+	clearBlocking(inst)
 }
 
-// MarkFinished is called by an actor goroutine after it has delivered its result.
 // Must run after SendResult so a wait(handle)er racing the detector still sees
 // the result.
 func (o *Orchestrator) MarkFinished(inst *Instance) {
@@ -59,13 +47,17 @@ func (o *Orchestrator) MarkFinished(inst *Instance) {
 	defer o.mu.Unlock()
 
 	inst.State = StateFinished
-	inst.cancelCh = nil
+	inst.Modena = nil
+
+	clearBlocking(inst)
+
+	o.checkDeadlock()
 }
 
 // TransitionIfTrue runs fn under Orchestrator.mu. If fn returns true, inst is
 // moved to StateRunning atomically with fn's work. Lets a builtin couple a
 // wakeup-consumption step (which uses its own lock) with the state change,
-// closing the window where CheckDeadlock could see a stale blocked state. Any
+// closing the window where the detector could see a stale blocked state. Any
 // lock taken inside fn is acquired after Orchestrator.mu.
 func (o *Orchestrator) TransitionIfTrue(inst *Instance, fn func() bool) bool {
 	o.mu.Lock()
@@ -73,7 +65,8 @@ func (o *Orchestrator) TransitionIfTrue(inst *Instance, fn func() bool) bool {
 
 	if fn() {
 		inst.State = StateRunning
-		inst.cancelCh = nil
+
+		clearBlocking(inst)
 
 		return true
 	}
@@ -81,51 +74,35 @@ func (o *Orchestrator) TransitionIfTrue(inst *Instance, fn func() bool) bool {
 	return false
 }
 
-// CheckDeadlock cancels every blocked instance when no instance is running and
-// nothing outside the program can wake one up. Cancelled actors wake from their
-// blocking primitive and return a deadlock runtime error.
-//
-// Must be called after every state transition that could leave the program with
-// no runnable instance.
-func (o *Orchestrator) CheckDeadlock() {
+func (o *Orchestrator) Recheck() {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 
-	signalsCaught := false
+	o.checkDeadlock()
+}
 
-	if signalProbe != nil {
-		signalsCaught = signalProbe()
-	}
-
+// checkDeadlock cancels every blocked instance when no instance is running and
+// nothing can wake one up. Cancelled actors wake from their blocking primitive
+// and return a deadlock runtime error.
+//
+// Caller holds Orchestrator.mu.
+func (o *Orchestrator) checkDeadlock() {
 	var stuck []*Instance
 
 	for _, inst := range o.instances {
-		switch inst.State {
-		case StateRunning:
+		if inst.State == StateRunning {
 			return
-		case StateBlockedSignal:
-			if signalsCaught {
-				return
-			}
-
-			stuck = append(stuck, inst)
-		case StateBlockedReceive:
-			// Pending items mean the actor is about to wake. Treat
-			// as runnable so a wait(handle)er racing the drain isnt
-			// falsely cancelled.
-			if inst.Inbox != nil && inst.Inbox.HasItems() {
-				return
-			}
-
-			stuck = append(stuck, inst)
-		case StateBlockedWait:
-			if inst.waitingOn != nil && inst.waitingOn.State == StateFinished {
-				return
-			}
-
-			stuck = append(stuck, inst)
-		case StateFinished:
 		}
+
+		if inst.State == StateFinished {
+			continue
+		}
+
+		if inst.wakeable != nil && inst.wakeable() {
+			return
+		}
+
+		stuck = append(stuck, inst)
 	}
 
 	for _, inst := range stuck {

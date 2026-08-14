@@ -73,10 +73,8 @@ func isolateValue(val values.Value, state *transferState) {
 	}
 }
 
-// Every captured variable is replaced by a new one holding a copy, so the receiver
-// shares nothing with the variables the sender is still using. Globals are not
-// copied here. They are found by name and attached to the receiver's own globals
-// on delivery.
+// Globals are not copied here. They are found by name and attached to the
+// receiver's own globals on delivery.
 func isolateBoundaryClosure(fn values.BoundaryClosure, state *transferState) {
 	old := fn.TransferCells()
 	fresh := make([]*values.Value, len(old))
@@ -132,9 +130,6 @@ func SnapshotUserGlobals(ctx values.Ctx) ([]string, []values.Value) {
 	return names, snapshot
 }
 
-// bindState remembers the captured variables already dealt with, so one shared
-// by several functions, or one that leads back to itself, is handled only once.
-// It remembers lists and maps for the same reason.
 type bindState struct {
 	cells      map[*values.Value]bool
 	containers map[values.Value]bool
