@@ -20,7 +20,7 @@ import (
 // Much fast
 var (
 	inlineCodeRegex = regexp.MustCompile(regexp.QuoteMeta(constants.INLINE_CODE_MARKER) + `([^']+)` + regexp.QuoteMeta(constants.INLINE_CODE_MARKER))
-	boldTextRegex   = regexp.MustCompile(regexp.QuoteMeta(constants.BOLD_MARKER) + `([^*]+)` + regexp.QuoteMeta(constants.BOLD_MARKER))
+	inlineAnyRegex  = regexp.MustCompile(regexp.QuoteMeta(constants.BOLD_MARKER) + `([^*]+)` + regexp.QuoteMeta(constants.BOLD_MARKER) + `|` + regexp.QuoteMeta(constants.INLINE_CODE_MARKER) + `([^']+)` + regexp.QuoteMeta(constants.INLINE_CODE_MARKER))
 	variableRegex   = regexp.MustCompile(`\$CHIP(VR|CN)`)
 )
 
@@ -52,7 +52,7 @@ func renderChpDoc(content string) string {
 		tempLineNum := constants.CODE_LINE_START
 
 		for _, line := range lines {
-			if strings.HasPrefix(line, constants.CODE_BLOCK_DELIMITER) {
+			if line == constants.CODE_BLOCK_DELIMITER {
 				tempInCodeBlock = !tempInCodeBlock
 
 				if tempInCodeBlock {
@@ -76,7 +76,7 @@ func renderChpDoc(content string) string {
 
 	for _, line := range lines {
 		// Code blocks
-		if strings.HasPrefix(line, constants.CODE_BLOCK_DELIMITER) {
+		if line == constants.CODE_BLOCK_DELIMITER {
 			inCodeBlock = !inCodeBlock
 
 			if inCodeBlock {
@@ -123,13 +123,35 @@ func processInlineFormatting(line string) string {
 		}
 	})
 
-	// Cyan text for code
-	line = inlineCodeRegex.ReplaceAllString(line, "\033[36m$1\033[0m")
+	// Bold and code spans in a single pass so nested spans render correctly
+	var out strings.Builder
+	end := 0
 
-	// Bold text
-	line = boldTextRegex.ReplaceAllString(line, "\033[1m$1\033[0m")
+	for _, loc := range inlineAnyRegex.FindAllStringSubmatchIndex(line, -1) {
+		out.WriteString(line[end:loc[0]])
+		end = loc[1]
 
-	return line
+		if loc[2] != -1 {
+			inner := line[loc[2]:loc[3]]
+			out.WriteString("\033[1m")
+			start := 0
+
+			for _, code := range inlineCodeRegex.FindAllStringSubmatchIndex(inner, -1) {
+				out.WriteString(inner[start:code[0]])
+				out.WriteString("\033[36m" + inner[code[2]:code[3]] + "\033[0m\033[1m")
+				start = code[1]
+			}
+
+			out.WriteString(inner[start:])
+			out.WriteString("\033[0m")
+		} else {
+			out.WriteString("\033[36m" + line[loc[4]:loc[5]] + "\033[0m")
+		}
+	}
+
+	out.WriteString(line[end:])
+
+	return out.String()
 }
 
 func getDocPaths() []string {
@@ -258,6 +280,7 @@ func listFunctions(docPaths []string) {
 	}
 
 	fmt.Println()
+
 	fmt.Println("Use 'chippy doc <document>' for detailed help.")
 }
 
@@ -359,6 +382,7 @@ func listFileSymbols(symbols []SymbolDoc) {
 	}
 
 	fmt.Println()
+
 	fmt.Println("Use 'chippy doc <file> <symbol>' for detailed help.")
 }
 
