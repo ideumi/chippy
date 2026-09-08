@@ -1,0 +1,48 @@
+*Error Handling Doctrine* | V-$CHIPVR ($CHIPCN)
+
+Chippy is designed to categorize and deal with failures in two distinct ways:
+
+- *The ''err'' constant* for a failure that is judged minor and recoverable
+- *Runtime error (RTError)* for a bug (programmer error) that is judged irrecoverable
+
+*The ''err'' constant*
+
+''err'' is the constant that indicates a failed operation. It is widely returned by builtins and corelib functions when an operation fails internally. You check for it with ''iserr(value)'' and handle the fault:
+
+'''
+var name = getenv("NONSENSE");
+
+if iserr(name)
+{
+    # env var doesn't exist, handle the fault
+}
+'''
+
+Its counterpart ''ok'' is the constant that indicates a successful operation.
+
+See ''chippy doc constants'' for more info on what ''err'' and ''ok'' are.
+
+*Runtime Error*
+
+A runtime error (RTError) means your program has a bug and that you've probably made a mistake when writing it. Chippy, its builtins and the corelib are designed such that a runtime error can never appear in properly written code that follows general software engineering best practices. Runtime errors stop the program or actor in which they occur. They are a mechanism designed to detect obvious bugs and "misuse" errors quickly. You can throw your own runtime errors by using ''error(message)'', see ''chippy doc error''.
+
+For example, accessing a map key without first checking that the key exists will cause such an error:
+
+'''
+var person = m["firstName": "John", "lastName": "Doe"];
+
+# Runtime Error: Map key not found
+var personAge = person["age"];
+'''
+
+*Runtime Errors and Concurrency*
+
+A runtime error inside an actor terminates that actor. The error is stored until it can be propagated to the spawner, which itself keeps running until it calls ''wait(handle)'' on the actor's handle. That call raises the stored error from the actor in the spawner, which terminates the spawner as well.
+
+*Recommended Reading*
+
+''chippy doc iserr''
+''chippy doc isok''
+''chippy doc error''
+''chippy doc constants''
+''chippy doc concurrency''
