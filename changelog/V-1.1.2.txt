@@ -1,0 +1,8 @@
+What's New:
+
+	- doc:
+		- bug: fix inline nesting of formatting in the chpdoc renderer
+		- added errors.chpdoc to explain Chippy's error handling doctrine / design
+
+	- misc:
+		- removed misc/doc2html
