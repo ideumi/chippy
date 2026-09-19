@@ -8,8 +8,8 @@ These constants are available at runtime with a clean chippy session:
 ''false'' - The number 0, standard falsy value.
 ''true'' - The number 1, standard truthy value.
 
-''err'' - Error marker string "__~err~__". Used and recommended to indicate operation failure.
-''ok'' - Success marker string "__~ok~__". Used and recommended to indicate operation success.
+''err'' - Error marker string ''"__~err~__"''. Used and recommended to indicate operation failure.
+''ok'' - Success marker string ''"__~ok~__"''. Used and recommended to indicate operation success.
 
 *Core Constants*
 
