@@ -5,8 +5,8 @@
 Opens a socket connection.
 
 *Parameters:*
-- ''address'': String IP address, hostname, or socket path for ''"unix"'' mode
-- ''port'': Number port number (1-65535), ignored for ''"unix"'' mode
+- ''address'': String IP address, hostname, or socket path for ''"unix"'' and ''"unixlisten"'' modes
+- ''port'': Number port number (1-65535), or ''null'' for ''"unix"'' and ''"unixlisten"'' modes
 - ''mode'': String connection mode
 
 *Returns:*
@@ -16,8 +16,12 @@ Opens a socket connection.
 *Modes:*
 - ''"tcp"'': TCP client connection
 - ''"udp"'': UDP connection
-- ''"listen"'': TCP server (bind and listen)
+- ''"tcplisten"'': TCP server (bind and listen)
 - ''"unix"'': Unix domain socket connection
+  - ''address'' is the socket path
+  - A path starting with ''"/"'' is a filesystem socket
+  - A name starting with ''"@"'' is an abstract socket
+- ''"unixlisten"'': Unix domain socket server (bind and listen)
   - ''address'' is the socket path
   - A path starting with ''"/"'' is a filesystem socket
   - A name starting with ''"@"'' is an abstract socket
@@ -26,5 +30,7 @@ Opens a socket connection.
 - Runtime error if address is not a string
 - Runtime error if port is not a number
 - Runtime error if mode is not a string
-- Runtime error if mode is not ''"tcp"'', ''"udp"'', ''"listen"'', or ''"unix"''
-- Runtime error if port is not between 1 and 65535, and mode is not ''"unix"''
+- Runtime error if mode is not ''"tcp"'', ''"udp"'', ''"tcplisten"'', ''"unixlisten"'', or ''"unix"''
+- Runtime error if port is not between 1 and 65535, and mode is not ''"unix"'' or ''"unixlisten"''
+- Runtime error if address is not a socket path, for ''"unix"'' and ''"unixlisten"'' modes
+- Runtime error if port is not ''null'', for ''"unix"'' and ''"unixlisten"'' modes

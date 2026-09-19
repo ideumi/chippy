@@ -86,7 +86,7 @@ func sreadFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 
 		bytesRead, err = socket.UdpConn.Read(buffer)
 
-	case "listen":
+	case "tcplisten", "unixlisten":
 		return res.FailAt(1,
 			shared.Errors.InvalidValue("Cannot read from listening socket. Use saccept() first"))
 

@@ -57,7 +57,7 @@ func scloseFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 			socket.UdpConn = nil
 		}
 
-	case "listen":
+	case "tcplisten", "unixlisten":
 		if socket.Listener != nil {
 			err = socket.Listener.Close()
 			socket.Listener = nil

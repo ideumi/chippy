@@ -15,14 +15,20 @@ var SOCKTCP = "tcp";
 
 var SOCKUDP = "udp";
 
-#@ <SOCKLISTEN>
+#@ <SOCKTCPLISTEN>
 #@ (2025-08-13)
 #@ TCP server socket type (bind + listen)
 
-var SOCKLISTEN = "listen";
+var SOCKTCPLISTEN = "tcplisten";
 
 #@ <SOCKUNIX>
 #@ (2026-09-18)
 #@ Unix domain socket connection type
 
 var SOCKUNIX = "unix";
+
+#@ <SOCKUNIXLISTEN>
+#@ (2026-09-19)
+#@ Unix domain socket server type (bind + listen)
+
+var SOCKUNIXLISTEN = "unixlisten";

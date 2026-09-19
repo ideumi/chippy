@@ -59,7 +59,7 @@ func sinfoFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 			remoteIp, remotePort = addrToIPPort(socket.UdpConn.RemoteAddr())
 		}
 
-	case "listen":
+	case "tcplisten", "unixlisten":
 		if socket.Listener != nil {
 			localIp, localPort = addrToIPPort(socket.Listener.Addr())
 		}

@@ -12,6 +12,7 @@ import (
 	"chip-go/internal/handles"
 	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
+	"net"
 )
 
 func sacceptFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
@@ -46,9 +47,9 @@ func sacceptFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	}
 
 	// Verify this is a listening socket
-	if serverSocket.Mode != "listen" {
+	if serverSocket.Mode != "tcplisten" && serverSocket.Mode != "unixlisten" {
 		return res.FailAt(1,
-			shared.Errors.InvalidValue("Socket is not in listening mode. Use sopen() with 'listen' mode first"))
+			shared.Errors.InvalidValue("Socket is not in listening mode. Use sopen() with 'tcplisten' or 'unixlisten' mode first"))
 	}
 
 	if serverSocket.Listener == nil {
@@ -62,12 +63,27 @@ func sacceptFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
+	// Accepted connections take the family of the listener
+	var mode string
+
+	switch serverSocket.Listener.(type) {
+
+	case *net.TCPListener:
+		mode = "tcp"
+
+	case *net.UnixListener:
+		mode = "unix"
+
+	default:
+		return res.FailAt(1, shared.Errors.InvalidValue("Invalid listener type"))
+	}
+
 	// Create new socket handle for the accepted connection
 	clientHandle := registry.Alloc.Alloc()
 
 	clientSocket := &handles.SocketHandle{
 		Conn: conn,
-		Mode: "tcp", // Accepted connections are always TCP
+		Mode: mode,
 	}
 
 	registry.Sockets.Store(clientHandle, clientSocket)

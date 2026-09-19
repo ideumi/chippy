@@ -82,7 +82,7 @@ func closeSocket(socket *SocketHandle) {
 		if socket.UdpConn != nil {
 			socket.UdpConn.Close()
 		}
-	case "listen":
+	case "tcplisten", "unixlisten":
 		if socket.Listener != nil {
 			socket.Listener.Close()
 		}

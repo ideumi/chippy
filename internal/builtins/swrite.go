@@ -72,7 +72,7 @@ func swriteFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 		}
 		written, err = socket.UdpConn.Write(bytesVal.Data)
 
-	case "listen":
+	case "tcplisten", "unixlisten":
 		return res.FailAt(2,
 			shared.Errors.InvalidValue("Cannot write to listening socket. Use saccept() first"))
 
