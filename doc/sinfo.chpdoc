@@ -12,9 +12,9 @@ Returns connection information for an open socket handle.
 
 *Map fields:*
 - ''"mode"'' (String): socket mode, one of ''"tcp"'', ''"udp"'', ''"tcplisten"'', ''"unixlisten"'', or ''"unix"''
-- ''"localIp"'' (String): local IP address, or socket path for ''"unix"'' and ''"unixlisten"'' sockets (the ''@'' prefix indicates an abstract socket)
+- ''"localIp"'' (String): local IP address, or socket path for ''"unix"'' and ''"unixlisten"'' sockets
 - ''"localPort"'' (Number): local port, or ''0'' for ''"unix"'' and ''"unixlisten"'' sockets
-- ''"remoteIp"'' (String): peer IP address (or socket path for ''"unix"'' sockets, the ''@'' prefix indicates an abstract socket), or ''""'' for ''"tcplisten"'' and ''"unixlisten"'' sockets
+- ''"remoteIp"'' (String): peer IP address, socket path for ''"unix"'' sockets, or ''""'' for ''"tcplisten"'' and ''"unixlisten"'' sockets
 - ''"remotePort"'' (Number): peer port, or ''0'' for ''"tcplisten"'', ''"unixlisten"'' and ''"unix"'' sockets
 
 *Errors:*
