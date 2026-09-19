@@ -40,7 +40,7 @@ var UINT32MASK = UINT32MOD - 1;
 var INT32SIGN = UINT32MOD / 2;
 
 #@ <BytesToHex(bytes)>
-#@ V-1.0.1 (2026-08-10)
+#@ V-1.0.2 (2026-09-19)
 #@
 #@ Converts ''bytes'' to a lowercase hexadecimal string representation.
 
@@ -67,7 +67,7 @@ func BytesToHex(bytes)
 }
 
 #@ <GetShort(data, idx)>
-#@ V-1.0.0 (2026-04-02)
+#@ V-1.0.1 (2026-09-19)
 #@
 #@ Reads a little-endian uint16 from ''data'' at byte offset ''idx''.
 
@@ -107,7 +107,7 @@ func GetSignedShort(data, idx)
 }
 
 #@ <GetInt(data, idx)>
-#@ V-1.0.0 (2026-04-02)
+#@ V-1.0.1 (2026-09-19)
 #@
 #@ Reads a little-endian uint32 from ''data'' at byte offset ''idx''.
 
@@ -152,7 +152,7 @@ func GetSignedInt(data, idx)
 }
 
 #@ <GetShortBE(data, idx)>
-#@ V-1.0.0 (2026-04-02)
+#@ V-1.0.1 (2026-09-19)
 #@
 #@ Reads a big-endian uint16 from ''data'' at byte offset ''idx''.
 
@@ -192,7 +192,7 @@ func GetSignedShortBE(data, idx)
 }
 
 #@ <GetIntBE(data, idx)>
-#@ V-1.0.0 (2026-04-02)
+#@ V-1.0.1 (2026-09-19)
 #@
 #@ Reads a big-endian uint32 from ''data'' at byte offset ''idx''.
 
