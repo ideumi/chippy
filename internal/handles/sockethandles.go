@@ -74,7 +74,7 @@ func (sh *SocketHandles) CloseAll() {
 
 func closeSocket(socket *SocketHandle) {
 	switch socket.Mode {
-	case "tcp":
+	case "tcp", "unix":
 		if socket.Conn != nil {
 			socket.Conn.Close()
 		}

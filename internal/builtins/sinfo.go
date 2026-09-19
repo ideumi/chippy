@@ -47,7 +47,7 @@ func sinfoFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 
 	switch socket.Mode {
 
-	case "tcp":
+	case "tcp", "unix":
 		if socket.Conn != nil {
 			localIp, localPort = addrToIPPort(socket.Conn.LocalAddr())
 			remoteIp, remotePort = addrToIPPort(socket.Conn.RemoteAddr())

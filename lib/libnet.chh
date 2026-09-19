@@ -20,3 +20,9 @@ var SOCKUDP = "udp";
 #@ TCP server socket type (bind + listen)
 
 var SOCKLISTEN = "listen";
+
+#@ <SOCKUNIX>
+#@ (2026-09-18)
+#@ Unix domain socket connection type
+
+var SOCKUNIX = "unix";

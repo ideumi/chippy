@@ -45,7 +45,7 @@ func scloseFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	registry.Alloc.Free(handle)
 
 	switch socket.Mode {
-	case "tcp":
+	case "tcp", "unix":
 		if socket.Conn != nil {
 			err = socket.Conn.Close()
 			socket.Conn = nil

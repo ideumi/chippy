@@ -58,12 +58,12 @@ func sopenFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	mode := modeStr.Value
 
 	// Validate mode
-	if mode != "tcp" && mode != "udp" && mode != "listen" {
-		return res.FailAt(3, shared.Errors.InvalidValue("Invalid mode. Use 'tcp', 'udp', or 'listen'"))
+	if mode != "tcp" && mode != "udp" && mode != "listen" && mode != "unix" {
+		return res.FailAt(3, shared.Errors.InvalidValue("Invalid mode. Use 'tcp', 'udp', 'listen', or 'unix'"))
 	}
 
 	// Validate port range
-	if port < 1 || port > 65535 {
+	if mode != "unix" && (port < 1 || port > 65535) {
 		return res.FailAt(2, shared.Errors.InvalidValue("Port must be between 1 and 65535"))
 	}
 
@@ -108,6 +108,16 @@ func sopenFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 		}
 
 		socket.Listener = listener
+
+	case "unix":
+		// Unix domain socket connection
+		conn, err := net.Dial("unix", address)
+
+		if err != nil {
+			return res.Success(values.NewString(constants.STR_ERR))
+		}
+
+		socket.Conn = conn
 	}
 
 	handle := registry.Alloc.Alloc()

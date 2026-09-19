@@ -60,7 +60,7 @@ func swriteFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	var written int
 
 	switch socket.Mode {
-	case "tcp":
+	case "tcp", "unix":
 		if socket.Conn == nil {
 			return res.FailAt(2, shared.Errors.InvalidValue("Socket connection is closed"))
 		}

@@ -2,25 +2,29 @@
 
 ''sopen(address, port, mode)''
 
-Opens a network socket connection.
+Opens a socket connection.
 
 *Parameters:*
-- ''address'': String IP address or hostname
-- ''port'': Number port number (1-65535)
+- ''address'': String IP address, hostname, or socket path for ''"unix"'' mode
+- ''port'': Number port number (1-65535), ignored for ''"unix"'' mode
 - ''mode'': String connection mode
-
-*Modes:*
-- "tcp": TCP client connection
-- "udp": UDP connection
-- "listen": TCP server (bind and listen)
 
 *Returns:*
 - Number: Socket handle
 - ''err'' on failure
 
+*Modes:*
+- ''"tcp"'': TCP client connection
+- ''"udp"'': UDP connection
+- ''"listen"'': TCP server (bind and listen)
+- ''"unix"'': Unix domain socket connection
+  - ''address'' is the socket path
+  - A path starting with ''"/"'' is a filesystem socket
+  - A name starting with ''"@"'' is an abstract socket
+
 *Errors:*
 - Runtime error if address is not a string
 - Runtime error if port is not a number
 - Runtime error if mode is not a string
-- Runtime error if mode is not "tcp", "udp", or "listen"
-- Runtime error if port is not between 1 and 65535
+- Runtime error if mode is not ''"tcp"'', ''"udp"'', ''"listen"'', or ''"unix"''
+- Runtime error if port is not between 1 and 65535, and mode is not ''"unix"''

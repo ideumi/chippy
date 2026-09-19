@@ -72,7 +72,7 @@ func sreadFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	// Read based on socket type
 	switch socket.Mode {
 
-	case "tcp":
+	case "tcp", "unix":
 		if socket.Conn == nil {
 			return res.FailAt(1, shared.Errors.InvalidValue("Socket connection is closed"))
 		}
