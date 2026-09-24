@@ -1,0 +1,49 @@
+What's New:
+
+	- corelib:
+		- libbytes.chh:
+			- bug: SetInt(data, idx, value), SetIntBE(data, idx, value), SetShort(data, idx, value) and SetShortBE(data, idx, value) wrote negative values with the upper bytes zeroed instead of as two's complement
+			- moved the Get/Set functions and BytesToHex(bytes) from float division and multiplication to bit shifts
+			- added GetSignedInt(data, idx)
+			- added GetSignedShort(data, idx)
+			- added GetSignedIntBE(data, idx)
+			- added GetSignedShortBE(data, idx)
+			- added UINT32MOD, UINT32MASK, INT32SIGN, UINT16MOD, UINT16MASK and INT16SIGN
+
+		- libnet.chh:
+			- added SOCKUNIX
+			- added SOCKUNIXLISTEN
+			- renamed SOCKLISTEN to SOCKTCPLISTEN
+
+		- libhttp.chh: updated the sopen(address, port, mode) call to SOCKTCPLISTEN
+
+	- builtins:
+		- updated sopen(address, port, mode):
+			- added "unix" mode for Unix stream sockets
+			- added "unixlisten" mode for Unix stream socket servers
+			- renamed "listen" mode to "tcplisten"
+
+		- saccept(serverHandle):
+			- now accepts "unixlisten" sockets
+			- bug: fixed a theoretical connection leak case
+
+		- sread(handle, maxBytes): support "unix" sockets
+		- swrite(data, handle): support "unix" sockets
+		- sclose(handle): support "unix" and "unixlisten" sockets
+
+		- sinfo(handle): report the socket path for all Unix stream socket modes
+			- bug: socket paths containing a colon were corrupted
+
+	- handles:
+		- sockethandles:
+			- support "unix" and "unixlisten" sockets
+			- removed the unused Address field
+
+FYI Breaking:
+
+	- sopen(address, port, mode)'s "listen" mode was renamed to "tcplisten", you will either need to pass "tcplisten" or SOCKTCPLISTEN from libnet.chh, your code will need to be updated
+
+	- libnet.chh's SOCKLISTEN has been renamed to SOCKTCPLISTEN, your code will need to be updated
+
+	- sinfo(handle)'s "mode" field now reports "tcplisten" instead of "listen" for a tcp listening socket
+		- If your code compares against that string explicitly it will need to be updated
