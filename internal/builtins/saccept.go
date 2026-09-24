@@ -12,7 +12,6 @@ import (
 	"chip-go/internal/handles"
 	"chip-go/internal/orchestrator"
 	"chip-go/internal/values"
-	"net"
 )
 
 func sacceptFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
@@ -66,16 +65,17 @@ func sacceptFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 	// Accepted connections take the family of the listener
 	var mode string
 
-	switch serverSocket.Listener.(type) {
+	switch serverSocket.Mode {
 
-	case *net.TCPListener:
+	case "tcplisten":
 		mode = "tcp"
 
-	case *net.UnixListener:
+	case "unixlisten":
 		mode = "unix"
 
 	default:
-		return res.FailAt(1, shared.Errors.InvalidValue("Invalid listener type"))
+		conn.Close()
+		return res.FailAt(1, shared.Errors.InvalidValue("Invalid listener mode"))
 	}
 
 	// Create new socket handle for the accepted connection

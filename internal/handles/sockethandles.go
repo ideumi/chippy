@@ -16,7 +16,6 @@ type SocketHandle struct {
 	Listener net.Listener
 	UdpConn  *net.UDPConn
 	Mode     string
-	Address  string
 }
 
 type SocketHandles struct {

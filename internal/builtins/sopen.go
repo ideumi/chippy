@@ -59,17 +59,18 @@ func sopenFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 
 	// Validate mode
 	if mode != "tcp" && mode != "udp" && mode != "tcplisten" && mode != "unixlisten" && mode != "unix" {
-		return res.FailAt(3, shared.Errors.InvalidValue("Invalid mode. Use 'tcp', 'udp', 'tcplisten', 'unixlisten' or 'unix'"))
+		return res.FailAt(3, shared.Errors.InvalidValue(
+			"Invalid mode. Use 'tcp', 'udp', 'tcplisten', 'unix', or 'unixlisten'"))
 	}
 
-	// Validate address and port for the unix modes
+	// Validate address and port for the Unix socket modes
 	if mode == "unix" || mode == "unixlisten" {
 		if address == "" {
-			return res.FailAt(1, shared.Errors.InvalidValue("Address must be a socket path for 'unix' and 'unixlisten' modes"))
+			return res.FailAt(1, shared.Errors.InvalidValue("Address must be a socket path for the Unix socket modes"))
 		}
 
-		if port != 0 {
-			return res.FailAt(2, shared.Errors.InvalidValue("Port must be null for 'unix' and 'unixlisten' modes"))
+		if portNum.AsFloat() != 0 {
+			return res.FailAt(2, shared.Errors.InvalidValue("Port must be null for the Unix socket modes"))
 		}
 	} else if port < 1 || port > 65535 {
 		return res.FailAt(2, shared.Errors.InvalidValue("Port must be between 1 and 65535"))
@@ -105,10 +106,9 @@ func sopenFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 		}
 
 		socket.UdpConn = conn
-		socket.Address = net.JoinHostPort(address, strconv.Itoa(port))
 
 	case "tcplisten":
-		// TCP server (bind & listen)
+		// TCP server (bind and listen)
 		listener, err := net.Listen("tcp", net.JoinHostPort(address, strconv.Itoa(port)))
 
 		if err != nil {
@@ -118,7 +118,7 @@ func sopenFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 		socket.Listener = listener
 
 	case "unixlisten":
-		// Unix domain socket server (bind & listen)
+		// Unix stream socket server (bind and listen)
 		listener, err := net.Listen("unix", address)
 
 		if err != nil {
@@ -128,7 +128,7 @@ func sopenFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 		socket.Listener = listener
 
 	case "unix":
-		// Unix domain socket connection
+		// Unix stream socket connection
 		conn, err := net.Dial("unix", address)
 
 		if err != nil {

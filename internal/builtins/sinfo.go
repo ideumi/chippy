@@ -98,6 +98,9 @@ func addrToIPPort(addr net.Addr) (string, int) {
 
 	case *net.UDPAddr:
 		return typed.IP.String(), typed.Port
+
+	case *net.UnixAddr:
+		return typed.Name, 0
 	}
 
 	host, portStr, err := net.SplitHostPort(addr.String())
