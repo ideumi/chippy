@@ -3,8 +3,44 @@
 # corelib - libbytes.chh
 #
 
+#@ <UINT16MOD>
+#@ (2026-09-18)
+#@ Number of values in the 16-bit range
+
+var UINT16MOD = 256 ^ 2;
+
+#@ <UINT16MASK>
+#@ (2026-09-18)
+#@ Bit mask that keeps only the lower 16 bits of a value
+
+var UINT16MASK = UINT16MOD - 1;
+
+#@ <INT16SIGN>
+#@ (2026-09-18)
+#@ Smallest unsigned value that is negative in 16-bit two's complement
+
+var INT16SIGN = UINT16MOD / 2;
+
+#@ <UINT32MOD>
+#@ (2026-09-18)
+#@ Number of values in the 32-bit range
+
+var UINT32MOD = 256 ^ 4;
+
+#@ <UINT32MASK>
+#@ (2026-09-18)
+#@ Bit mask that keeps only the lower 32 bits of a value
+
+var UINT32MASK = UINT32MOD - 1;
+
+#@ <INT32SIGN>
+#@ (2026-09-18)
+#@ Smallest unsigned value that is negative in 32-bit two's complement
+
+var INT32SIGN = UINT32MOD / 2;
+
 #@ <BytesToHex(bytes)>
-#@ V-1.0.1 (2026-08-10)
+#@ V-1.0.2 (2026-09-19)
 #@
 #@ Converts ''bytes'' to a lowercase hexadecimal string representation.
 
@@ -18,8 +54,8 @@ func BytesToHex(bytes)
 	while i <= byteLen
 	{
 		var byteVal = bytes[i];
-		var high = int(byteVal / 16);
-		var low = byteVal % 16;
+		var high = byteVal >> 4;
+		var low = byteVal band 15;
 
 		append(parts, slice(hexDigits, high + 1, high + 1));
 		append(parts, slice(hexDigits, low + 1, low + 1));
@@ -31,103 +67,171 @@ func BytesToHex(bytes)
 }
 
 #@ <GetShort(data, idx)>
-#@ V-1.0.0 (2026-04-02)
+#@ V-1.0.1 (2026-09-19)
 #@
 #@ Reads a little-endian uint16 from ''data'' at byte offset ''idx''.
 
 func GetShort(data, idx)
 {
-	return data[idx] bor (data[idx + 1] * 256);
+	return data[idx] bor (data[idx + 1] << 8);
 }
 
 #@ <SetShort(data, idx, value)>
-#@ V-1.0.0 (2026-04-02)
+#@ V-1.0.1 (2026-09-18)
 #@
 #@ Writes ''value'' as a little-endian uint16 into ''data'' at byte offset ''idx''.
+#@ Negative values are written in 16-bit two's complement form.
 
 func SetShort(data, idx, value)
 {
-	data[idx] = int(value) band 255;
-	data[idx + 1] = int(value / 256) band 255;
+	var word = int(value) band UINT16MASK;
+
+	data[idx] = word band 255;
+	data[idx + 1] = (word >> 8) band 255;
 
 	return data;
 }
 
+#@ <GetSignedShort(data, idx)>
+#@ V-1.0.0 (2026-09-18)
+#@
+#@ Reads a little-endian signed int16 from ''data'' at byte offset ''idx''.
+
+func GetSignedShort(data, idx)
+{
+	var value = GetShort(data, idx);
+
+	if value >= INT16SIGN { return value - UINT16MOD; }
+
+	return value;
+}
+
 #@ <GetInt(data, idx)>
-#@ V-1.0.0 (2026-04-02)
+#@ V-1.0.1 (2026-09-19)
 #@
 #@ Reads a little-endian uint32 from ''data'' at byte offset ''idx''.
 
 func GetInt(data, idx)
 {
 	return data[idx]
-		bor (data[idx + 1] * 256)
-		bor (data[idx + 2] * 256 ^ 2)
-		bor (data[idx + 3] * 256 ^ 3);
+		bor (data[idx + 1] << 8)
+		bor (data[idx + 2] << 16)
+		bor (data[idx + 3] << 24);
 }
 
 #@ <SetInt(data, idx, value)>
-#@ V-1.0.0 (2026-04-02)
+#@ V-1.0.1 (2026-09-18)
 #@
 #@ Writes ''value'' as a little-endian uint32 into ''data'' at byte offset ''idx''.
+#@ Negative values are written in 32-bit two's complement form.
 
 func SetInt(data, idx, value)
 {
-	data[idx] = int(value) band 255;
-	data[idx + 1] = int(value / 256) band 255;
-	data[idx + 2] = int(value / 256 ^ 2) band 255;
-	data[idx + 3] = int(value / 256 ^ 3) band 255;
+	var word = int(value) band UINT32MASK;
+
+	data[idx] = word band 255;
+	data[idx + 1] = (word >> 8) band 255;
+	data[idx + 2] = (word >> 16) band 255;
+	data[idx + 3] = (word >> 24) band 255;
 
 	return data;
 }
 
+#@ <GetSignedInt(data, idx)>
+#@ V-1.0.0 (2026-09-18)
+#@
+#@ Reads a little-endian signed int32 from ''data'' at byte offset ''idx''.
+
+func GetSignedInt(data, idx)
+{
+	var value = GetInt(data, idx);
+
+	if value >= INT32SIGN { return value - UINT32MOD; }
+
+	return value;
+}
+
 #@ <GetShortBE(data, idx)>
-#@ V-1.0.0 (2026-04-02)
+#@ V-1.0.1 (2026-09-19)
 #@
 #@ Reads a big-endian uint16 from ''data'' at byte offset ''idx''.
 
 func GetShortBE(data, idx)
 {
-	return (data[idx] * 256) bor data[idx + 1];
+	return (data[idx] << 8) bor data[idx + 1];
 }
 
 #@ <SetShortBE(data, idx, value)>
-#@ V-1.0.0 (2026-04-02)
+#@ V-1.0.1 (2026-09-18)
 #@
 #@ Writes ''value'' as a big-endian uint16 into ''data'' at byte offset ''idx''.
+#@ Negative values are written in 16-bit two's complement form.
 
 func SetShortBE(data, idx, value)
 {
-	data[idx] = int(value / 256) band 255;
-	data[idx + 1] = int(value) band 255;
+	var word = int(value) band UINT16MASK;
+
+	data[idx] = (word >> 8) band 255;
+	data[idx + 1] = word band 255;
 
 	return data;
 }
 
+#@ <GetSignedShortBE(data, idx)>
+#@ V-1.0.0 (2026-09-19)
+#@
+#@ Reads a big-endian signed int16 from ''data'' at byte offset ''idx''.
+
+func GetSignedShortBE(data, idx)
+{
+	var value = GetShortBE(data, idx);
+
+	if value >= INT16SIGN { return value - UINT16MOD; }
+
+	return value;
+}
+
 #@ <GetIntBE(data, idx)>
-#@ V-1.0.0 (2026-04-02)
+#@ V-1.0.1 (2026-09-19)
 #@
 #@ Reads a big-endian uint32 from ''data'' at byte offset ''idx''.
 
 func GetIntBE(data, idx)
 {
-	return (data[idx] * 256 ^ 3)
-		bor (data[idx + 1] * 256 ^ 2)
-		bor (data[idx + 2] * 256)
+	return (data[idx] << 24)
+		bor (data[idx + 1] << 16)
+		bor (data[idx + 2] << 8)
 		bor data[idx + 3];
 }
 
 #@ <SetIntBE(data, idx, value)>
-#@ V-1.0.0 (2026-04-02)
+#@ V-1.0.1 (2026-09-18)
 #@
 #@ Writes ''value'' as a big-endian uint32 into ''data'' at byte offset ''idx''.
+#@ Negative values are written in 32-bit two's complement form.
 
 func SetIntBE(data, idx, value)
 {
-	data[idx] = int(value / 256 ^ 3) band 255;
-	data[idx + 1] = int(value / 256 ^ 2) band 255;
-	data[idx + 2] = int(value / 256) band 255;
-	data[idx + 3] = int(value) band 255;
+	var word = int(value) band UINT32MASK;
+
+	data[idx] = (word >> 24) band 255;
+	data[idx + 1] = (word >> 16) band 255;
+	data[idx + 2] = (word >> 8) band 255;
+	data[idx + 3] = word band 255;
 
 	return data;
+}
+
+#@ <GetSignedIntBE(data, idx)>
+#@ V-1.0.0 (2026-09-18)
+#@
+#@ Reads a big-endian signed int32 from ''data'' at byte offset ''idx''.
+
+func GetSignedIntBE(data, idx)
+{
+	var value = GetIntBE(data, idx);
+
+	if value >= INT32SIGN { return value - UINT32MOD; }
+
+	return value;
 }

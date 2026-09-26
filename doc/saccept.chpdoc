@@ -13,6 +13,6 @@ Accepts an incoming connection on a listening socket.
 
 *Errors:*
 - Runtime error if serverHandle is not a number
-- Runtime error if serverHandle is invalid
-- Runtime error if socket is not in listening mode
+- Runtime error if serverHandle is invalid socket handle
+- Runtime error if socket is not a ''"tcplisten"'' or ''"unixlisten"'' socket
 - Runtime error if listening socket is closed

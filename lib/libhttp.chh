@@ -974,7 +974,7 @@ func _HttpServeAny_(port, certPath, keyPath, handler, state)
 		return error("Will NOT run HTTP server as root, are you insane?");
 	}
 
-	var server = sopen("0.0.0.0", port, SOCKLISTEN);
+	var server = sopen("0.0.0.0", port, SOCKTCPLISTEN);
 
 	if iserr(server) { return err; }
 

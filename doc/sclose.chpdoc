@@ -11,6 +11,9 @@ Closes a socket connection.
 - ''ok'' on success
 - ''err'' on failure
 
+*Unix sockets:*
+- Closing a filesystem socket created with a listening mode removes the socket file
+
 *Errors:*
 - Runtime error if handle is not a number
 - Runtime error if handle is invalid socket handle

@@ -11,11 +11,22 @@ Returns connection information for an open socket handle.
 - Map: connection information
 
 *Map fields:*
-- ''"mode"'' (String): socket mode, one of ''"tcp"'', ''"udp"'', or ''"listen"''
+- ''"mode"'' (String): socket mode, one of ''"tcp"'', ''"udp"'', ''"tcplisten"'', ''"unix"'', or ''"unixlisten"''
+
 - ''"localIp"'' (String): local IP address
-- ''"localPort"'' (Number): local port
-- ''"remoteIp"'' (String): peer IP address, or ''""'' for listening sockets
-- ''"remotePort"'' (Number): peer port, or ''0'' for listening sockets
+  or, in case ''"mode"'' is:
+  - ''"tcplisten"'': the bound IP address
+  - ''"unixlisten"'': the socket path (abstract sockets start with ''"@"'')
+  - ''"unix"'': the socket path of a connection accepted by a server (abstract sockets start with ''"@"''), or a bare ''"@"'' for an unbound endpoint
+
+- ''"localPort"'' (Number): local port, or ''0'' for the Unix socket modes
+
+- ''"remoteIp"'' (String): peer IP address
+  or, in case ''"mode"'' is:
+  - ''"unix"'': the peer's socket path (abstract sockets start with ''"@"''), or a bare ''"@"'' for an unbound peer
+  - ''"tcplisten"'' and ''"unixlisten"'': ''""''
+
+- ''"remotePort"'' (Number): peer port, or ''0'' for the Unix socket modes
 
 *Errors:*
 - Runtime error if handle is not a number

@@ -2,25 +2,33 @@
 
 ''sopen(address, port, mode)''
 
-Opens a network socket connection.
+Opens a socket connection or listening socket.
 
 *Parameters:*
-- ''address'': String IP address or hostname
-- ''port'': Number port number (1-65535)
+- ''address'': String IP address, hostname, or socket path for the Unix socket modes
+- ''port'': Number port number (1-65535), or ''null'' for the Unix socket modes
 - ''mode'': String connection mode
-
-*Modes:*
-- "tcp": TCP client connection
-- "udp": UDP connection
-- "listen": TCP server (bind and listen)
 
 *Returns:*
 - Number: Socket handle
 - ''err'' on failure
 
+*Modes:*
+- ''"tcp"'': TCP client connection
+- ''"udp"'': UDP connection
+- ''"tcplisten"'': TCP server (bind and listen)
+- ''"unix"'': Unix stream socket connection
+- ''"unixlisten"'': Unix stream socket server (bind and listen)
+
+*Unix sockets:*
+- For the Unix socket modes, ''address'' is a socket path: a filesystem path or an abstract socket name starting with ''"@"''
+- A socket file left behind by a crashed or killed server must be removed first with ''unlink(path)'', otherwise binding it again will fail with ''err''
+
 *Errors:*
 - Runtime error if address is not a string
 - Runtime error if port is not a number
 - Runtime error if mode is not a string
-- Runtime error if mode is not "tcp", "udp", or "listen"
-- Runtime error if port is not between 1 and 65535
+- Runtime error if mode is not one of ''"tcp"'', ''"udp"'', ''"tcplisten"'', ''"unix"'', or ''"unixlisten"''
+- Runtime error if port is not between 1 and 65535, unless the mode is a Unix socket mode
+- Runtime error if address is empty, for the Unix socket modes
+- Runtime error if port is not ''null'', for the Unix socket modes

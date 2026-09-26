@@ -6,15 +6,15 @@ Opens a process with pipes for communication.
 
 *Parameters:*
 - ''command'': String shell command to execute
-- ''mode'': String pipe mode ("r", "w", or "rw")
+- ''mode'': String pipe mode (''"r"'', ''"w"'', or ''"rw"'')
 
 *Returns:*
 - Number: Process handle
 
 *Modes:*
-- "r": Read from process stdout
-- "w": Write to process stdin  
-- "rw": Both read and write pipes
+- ''"r"'': Read from process stdout
+- ''"w"'': Write to process stdin
+- ''"rw"'': Both read and write pipes
 
 *Errors:*
 - Runtime error if command is not a string

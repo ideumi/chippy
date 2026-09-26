@@ -16,7 +16,6 @@ type SocketHandle struct {
 	Listener net.Listener
 	UdpConn  *net.UDPConn
 	Mode     string
-	Address  string
 }
 
 type SocketHandles struct {
@@ -74,7 +73,7 @@ func (sh *SocketHandles) CloseAll() {
 
 func closeSocket(socket *SocketHandle) {
 	switch socket.Mode {
-	case "tcp":
+	case "tcp", "unix":
 		if socket.Conn != nil {
 			socket.Conn.Close()
 		}
@@ -82,7 +81,7 @@ func closeSocket(socket *SocketHandle) {
 		if socket.UdpConn != nil {
 			socket.UdpConn.Close()
 		}
-	case "listen":
+	case "tcplisten", "unixlisten":
 		if socket.Listener != nil {
 			socket.Listener.Close()
 		}

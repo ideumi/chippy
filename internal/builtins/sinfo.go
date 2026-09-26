@@ -47,7 +47,7 @@ func sinfoFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 
 	switch socket.Mode {
 
-	case "tcp":
+	case "tcp", "unix":
 		if socket.Conn != nil {
 			localIp, localPort = addrToIPPort(socket.Conn.LocalAddr())
 			remoteIp, remotePort = addrToIPPort(socket.Conn.RemoteAddr())
@@ -59,7 +59,7 @@ func sinfoFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 			remoteIp, remotePort = addrToIPPort(socket.UdpConn.RemoteAddr())
 		}
 
-	case "listen":
+	case "tcplisten", "unixlisten":
 		if socket.Listener != nil {
 			localIp, localPort = addrToIPPort(socket.Listener.Addr())
 		}
@@ -98,6 +98,9 @@ func addrToIPPort(addr net.Addr) (string, int) {
 
 	case *net.UDPAddr:
 		return typed.IP.String(), typed.Port
+
+	case *net.UnixAddr:
+		return typed.Name, 0
 	}
 
 	host, portStr, err := net.SplitHostPort(addr.String())
