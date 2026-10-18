@@ -38,36 +38,20 @@ const noLocalsMark = -1
 // would take the counter past the largest whole number that fits, so the loop
 // must stop.
 type forState struct {
-	isInt bool
-	done  bool
+	done bool
 
-	intCounter, intEnd, intStep       int64
-	floatCounter, floatEnd, floatStep float64
+	intCounter, intEnd, intStep int64
 }
 
 func (s *forState) inRange() bool {
-	if s.isInt {
-		return !s.done && ((s.intStep >= 0 && s.intCounter <= s.intEnd) || (s.intStep < 0 && s.intCounter >= s.intEnd))
-	}
-
-	return (s.floatStep >= 0 && s.floatCounter <= s.floatEnd) || (s.floatStep < 0 && s.floatCounter >= s.floatEnd)
+	return !s.done && ((s.intStep >= 0 && s.intCounter <= s.intEnd) || (s.intStep < 0 && s.intCounter >= s.intEnd))
 }
 
-func (s *forState) counter() (values.Value, error) {
-	if s.isInt {
-		return values.NewNumber(s.intCounter), nil
-	}
-
-	return values.NewNumberFromFloat(s.floatCounter)
+func (s *forState) counter() values.Value {
+	return values.NewNumber(s.intCounter)
 }
 
 func (s *forState) advance() {
-	if !s.isInt {
-		s.floatCounter += s.floatStep
-
-		return
-	}
-
 	if (s.intStep > 0 && s.intCounter > math.MaxInt64-s.intStep) || (s.intStep < 0 && s.intCounter < math.MinInt64-s.intStep) {
 		s.done = true
 
@@ -316,15 +300,7 @@ func (vm *VM) Run() (values.Value, error) {
 				break
 			}
 
-			counter, convErr := state.counter()
-
-			if convErr != nil {
-				span := chunk.SpanAt(opStart)
-
-				return values.Value{}, errors.NewRTError(span.Start, span.End, convErr.Error())
-			}
-
-			vm.push(counter)
+			vm.push(state.counter())
 
 		case bytecode.OpForNext:
 			target := bytecode.ReadU32(code, ip)
@@ -469,7 +445,7 @@ func (vm *VM) Run() (values.Value, error) {
 
 		case bytecode.OpLShift:
 			if left, right, whole := values.AsInts(vm.left(), vm.right()); whole && right >= 0 {
-				err = vm.binary(values.Int(left<<uint64(right)), nil)
+				err = vm.binary(values.ShlPromoted(left, right))
 
 				break
 			}
@@ -695,52 +671,45 @@ func (vm *VM) takeLocals(chunk *bytecode.Chunk) ([]values.Value, int) {
 	return locals, mark
 }
 
-// A loop whose start, end and step are all whole numbers counts in whole numbers,
-// so even a very large range stays exact. Any other loop counts in floating
-// point.
+// A for loop counts in whole numbers, so the start, end and step must all be
+// integers. The counter stays exact even over a very large range, and the loop
+// stops once it reaches the largest whole number that fits.
 func newForState(start, end, step values.Value) (forState, error) {
-	startNum, err := forBound(start, "Start")
+	startBound, err := forBound(start, "Start")
 
 	if err != nil {
 		return forState{}, err
 	}
 
-	endNum, err := forBound(end, "End")
+	endBound, err := forBound(end, "End")
 
 	if err != nil {
 		return forState{}, err
 	}
 
-	stepNum, err := forBound(step, "Step")
+	stepValue, err := forBound(step, "Step")
 
 	if err != nil {
 		return forState{}, err
 	}
 
-	state := forState{}
-
-	if startNum.IsInt() && endNum.IsInt() && stepNum.IsInt() {
-		state.isInt = true
-		state.intCounter, _ = startNum.AsInt()
-		state.intEnd, _ = endNum.AsInt()
-		state.intStep, _ = stepNum.AsInt()
-
-		return state, nil
+	if stepValue == 0 {
+		return forState{}, errors.NewCallError("Step value must not be zero")
 	}
 
-	state.floatCounter = startNum.AsFloat()
-	state.floatEnd = endNum.AsFloat()
-	state.floatStep = stepNum.AsFloat()
-
-	return state, nil
+	return forState{
+		intCounter: startBound,
+		intEnd:     endBound,
+		intStep:    stepValue,
+	}, nil
 }
 
-func forBound(value values.Value, which string) (values.Value, error) {
-	if !value.IsNumber() {
-		return values.Value{}, errors.NewCallError(which + " value must be a number")
+func forBound(value values.Value, which string) (int64, error) {
+	if !value.IsInt() {
+		return 0, errors.NewCallError(which + " value must be an integer")
 	}
 
-	return value, nil
+	return value.AsInt()
 }
 
 func locate(err error, start, end *errors.Position) error {
