@@ -1,0 +1,24 @@
+What's New:
+
+	- modena:
+		- for loop numbers must now be integers
+		- for loop step values can no longer be zero
+		- a left shift (x << y) whose result exceeds the largest whole number that fits now promotes to float instead of wrapping
+
+	- builtins:
+		- fopen(path, mode): bug: a directory could be opened in read mode
+		- chmod(path, mode): bug: a negative mode silently wrapped to a garbage permission
+		- mkdir(path, mode): bug: a negative mode silently wrapped to a garbage permission
+
+	- other:
+		- go.mod bumped to 1.27.3
+			- mitigation for security concerns with a specific Certificate Authority
+		- upgraded and tidied modules
+
+FYI Breaking:
+
+	- for loops with a floating point start, end or step number no longer work, your code will need to be updated
+	- for loops that utilize the number zero as the step size will no longer work, update your code to use a while loop
+	- left shifts (x << y) whose result exceeds the largest whole number that fits now promote to float instead of wrapping, code that relied on this wrap will need to be updated
+	- Several private keys of intermediate CA certificates belonging to a specific Certificate Authority have been compromised
+		- This renders older Chippy versions vulnerable to potential MITM attacks, it is recommended to immediately upgrade to V-1.1.4

@@ -59,6 +59,15 @@ func fopenFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 		return res.Success(values.NewString(constants.STR_ERR))
 	}
 
+	// Verify its actually a file
+	stat, err := file.Stat()
+
+	if err != nil || stat.IsDir() {
+		file.Close()
+
+		return res.Success(values.NewString(constants.STR_ERR))
+	}
+
 	registry := orchestrator.Get().GetRegistry(ctx.InstanceID)
 	handle := registry.Alloc.Alloc()
 	registry.Files.Store(handle, file)

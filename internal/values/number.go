@@ -186,6 +186,33 @@ func MulInt64(left, right int64) (int64, bool) {
 	return product, false
 }
 
+func ShlInt64(left, right int64) (int64, bool) {
+	if right < 0 || right >= 64 {
+		if left == 0 {
+			return 0, false
+		}
+
+		return 0, true
+	}
+
+	if left > math.MaxInt64>>right || left < math.MinInt64>>right {
+		return 0, true
+	}
+
+	return left << uint(right), false
+}
+
+// right must be >= 0
+func ShlPromoted(left, right int64) (Value, error) {
+	result, overflow := ShlInt64(left, right)
+
+	if !overflow {
+		return Int(result), nil
+	}
+
+	return numberFromFloatChecked(math.Ldexp(float64(left), int(right)))
+}
+
 func powInt64(base, exp int64) (int64, bool) {
 	if exp < 0 {
 		return 0, true
@@ -574,7 +601,7 @@ func (v Value) numberShift(other Value, kind shiftKind) (Value, error) {
 	}
 
 	if kind == shiftLeft {
-		return Int(left << uint64(right)), nil
+		return ShlPromoted(left, right)
 	}
 
 	return Int(left >> uint64(right)), nil

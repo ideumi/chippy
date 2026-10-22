@@ -43,6 +43,11 @@ func mkdirFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 
 	// Convert octal notation to proper file mode
 	modeStr := strconv.FormatInt(mode64, 10)
+
+	if mode64 < 0 {
+		return res.FailAt(2, "Invalid octal mode: "+modeStr)
+	}
+
 	octalMode, err := strconv.ParseInt(modeStr, 8, 32)
 
 	if err != nil {
