@@ -7,6 +7,7 @@
 package values
 
 import (
+	"chip-go/internal/constants"
 	"chip-go/internal/errors"
 	"fmt"
 	"strings"
@@ -119,8 +120,18 @@ func (b *Bytes) MultedBy(other Value) (Value, error) {
 		return Value{}, errors.NewCallError("Cannot repeat bytes negative times")
 	}
 
+	total, err := repeatSize(int64(len(b.Data)), count, constants.LIMIT_REPEAT_SIZE)
+
+	if err != nil {
+		return Value{}, err
+	}
+
+	if len(b.Data) == 0 {
+		return NewBytes([]byte{}), nil
+	}
+
 	repeatCount := int(count)
-	newData := make([]byte, len(b.Data)*repeatCount)
+	newData := make([]byte, int(total))
 
 	for i := 0; i < repeatCount; i++ {
 		copy(newData[i*len(b.Data):], b.Data)

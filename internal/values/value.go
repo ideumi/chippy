@@ -106,6 +106,22 @@ func IllegalOperation() error {
 	return errors.NewCallError("Illegal operation")
 }
 
+/*
+ * This is mostly inspired by how V8 already does .repeat(count) repetition
+ * limiting, see:
+ * https://github.com/v8/v8/blob/main/src/builtins/string-repeat.tq
+ * https://github.com/v8/v8/blob/main/include/v8-primitive.h#L129
+ */
+func repeatSize(unitLen, count, limit int64) (int64, error) {
+	total, overflow := MulInt64(unitLen, count)
+
+	if overflow || total > limit {
+		return 0, errors.NewCallError("Repeat result is too large")
+	}
+
+	return total, nil
+}
+
 func (v Value) String() string {
 	switch v.tag {
 	case TagUnset:

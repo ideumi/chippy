@@ -128,10 +128,20 @@ func (l *List) MultedBy(other Value) (Value, error) {
 		return Value{}, errors.NewCallError("Cannot repeat list negative times")
 	}
 
-	newElements := []Value{}
+	total, err := repeatSize(int64(len(l.Elements)), count, constants.LIMIT_REPEAT_ELEMENTS)
+
+	if err != nil {
+		return Value{}, err
+	}
+
+	if len(l.Elements) == 0 {
+		return NewList([]Value{}), nil
+	}
+
+	newElements := make([]Value, int(total))
 
 	for i := int64(0); i < count; i++ {
-		newElements = append(newElements, l.Elements...)
+		copy(newElements[i*int64(len(l.Elements)):], l.Elements)
 	}
 
 	return NewList(newElements), nil

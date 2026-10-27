@@ -7,9 +7,9 @@
 package values
 
 import (
+	"chip-go/internal/constants"
 	"chip-go/internal/errors"
 	"fmt"
-	"strings"
 	"unicode/utf8"
 )
 
@@ -171,7 +171,23 @@ func (s *String) MultedBy(other Value) (Value, error) {
 		return Value{}, errors.NewCallError("Cannot repeat string negative times")
 	}
 
-	return newCountedString(strings.Repeat(s.Value, int(count)), s.runes*int(count)), nil
+	total, err := repeatSize(int64(len(s.Value)), count, constants.LIMIT_REPEAT_SIZE)
+
+	if err != nil {
+		return Value{}, err
+	}
+
+	if len(s.Value) == 0 {
+		return emptyString, nil
+	}
+
+	data := make([]byte, int(total))
+
+	for i := int64(0); i < count; i++ {
+		copy(data[i*int64(len(s.Value)):], s.Value)
+	}
+
+	return newCountedString(string(data), s.runes*int(count)), nil
 }
 
 func (s *String) GetComparisonEe(other Value) (Value, error) {
