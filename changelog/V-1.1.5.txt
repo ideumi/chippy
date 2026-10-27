@@ -1,0 +1,23 @@
+What's New:
+
+	- modena:
+		- bug: the "*" repeat operator on strings, bytes and lists could cause a hang or crash with a large repeat count
+			- counts too large for the size calculation now raise an RTError
+			- results larger than 512 MiB (for strings and bytes) or 16,777,216 elements (for lists) now raise an RTError
+			- repeating an empty string, bytes or list now returns the empty value instantly instead of hanging
+
+	- corelib:
+		- added libregex.chh to corelib
+			- configurable max. expression length
+			- configurable cache for compiled expressions
+
+			- RegexMatch, RegexFind, RegexFindIndex, RegexFindAll, RegexFindAllIndexes,
+			- RegexFindAllGroups, RegexGroups, RegexGroupNames, RegexGroupIndex, RegexReplace,
+			- RegexReplaceFirst, RegexReplaceLiteral, RegexEscape, RegexSplit, RegexValid
+
+	- optionals:
+		- added regex optional
+
+FYI Breaking:
+
+	- repeating a string, bytes or list beyond 512 MiB (16,777,216 elements for lists) now raises an RTError
