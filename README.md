@@ -44,6 +44,7 @@ curl -fsSL https://codeberg.org/ideumi/chippy/raw/branch/main/scripts/net-instal
 - HTTP client
 - TLS sockets
 - Hashing (SHA-2, SHA-3 etc.)
+- Regular expressions
 - ....
 
 **Built-in Primitives**

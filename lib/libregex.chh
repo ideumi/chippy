@@ -1,0 +1,275 @@
+#!/usr/bin/chippy
+#
+# corelib - libregex.chh
+#
+
+loadopt("regex");
+
+#@ <DIALECT>
+#@ Expressions use the Go variant of the RE2 dialect, so ''\C'' is not supported.
+#@ An overview of the syntax can be found here: ''https://github.com/google/re2/wiki/Syntax''
+#@
+#@ Expressions are strings, so a backslash in an expression must be written as
+#@ ''"\\"'' in source. Matching is leftmost-first: the leftmost match wins, and
+#@ at that position the first alternative in the expression that can match wins.
+
+#@ <CACHE>
+#@ Compiled patterns are cached. An expression whose length in bytes is greater
+#@ than ''MAXPATTERNLENGTH'' is rejected. An expression whose length in bytes is
+#@ greater than ''CACHEADMITTANCELENGTH'' is compiled on each call and is never
+#@ cached.
+
+#@ <MAXPATTERNLENGTH>
+#@ (2026-10-22)
+#@ Maximum expression length in bytes permitted to be executed.
+
+var MAXPATTERNLENGTH = 4096;
+
+#@ <CACHEADMITTANCELENGTH>
+#@ (2026-10-22)
+#@ Maximum expression length in bytes admitted into the pattern cache.
+
+var CACHEADMITTANCELENGTH = 1024;
+
+#@ <RegexMatch(expression, text)>
+#@ V-1.0.0 (2026-10-20)
+#@
+#@ Returns ''true'' when ''text'' contains a match of ''expression'', ''false''
+#@ when it does not, or ''err'' on an invalid or too long ''expression''. See
+#@ ''CACHE''.
+
+func RegexMatch(expression, text)
+{
+	return _regex_match_(expression, text, MAXPATTERNLENGTH, CACHEADMITTANCELENGTH);
+}
+
+#@ <RegexFind(expression, text)>
+#@ V-1.0.0 (2026-10-20)
+#@
+#@ Returns the text of the leftmost match of ''expression'' in ''text'', or ''err''
+#@ if there is no match or ''expression'' is invalid or too long. See ''CACHE''.
+
+func RegexFind(expression, text)
+{
+	return _regex_find_(expression, text, MAXPATTERNLENGTH, CACHEADMITTANCELENGTH);
+}
+
+#@ <RegexFindIndex(expression, text)>
+#@ V-1.0.0 (2026-10-22)
+#@
+#@ Returns a map with the positions of the leftmost match of ''expression'' in
+#@ ''text'', or ''err'' if there is no match or ''expression'' is invalid or too
+#@ long. See ''CACHE''. A match of no text has no character of its own, so its
+#@ ''"start"'' is one past its ''"end"''.
+#@
+#@ *Map fields:*
+#@ - ''"start"'' (Number): first character of the match
+#@ - ''"end"'' (Number): last character of the match
+
+func RegexFindIndex(expression, text)
+{
+	return _regex_findindex_(expression, text, MAXPATTERNLENGTH, CACHEADMITTANCELENGTH);
+}
+
+#@ <RegexFindAll(expression, text)>
+#@ V-1.0.0 (2026-10-20)
+#@
+#@ Returns a list with the text of every non-overlapping match of ''expression''
+#@ in ''text'', in order, ''[]'' when there is no match, or ''err'' on an invalid
+#@ or too long ''expression''. See ''CACHE''. A match of no text right after the
+#@ end of the previous match is skipped.
+
+func RegexFindAll(expression, text)
+{
+	return _regex_findall_(expression, text, MAXPATTERNLENGTH, CACHEADMITTANCELENGTH);
+}
+
+#@ <RegexFindAllIndexes(expression, text)>
+#@ V-1.0.0 (2026-10-22)
+#@
+#@ Returns a list with the positions of every non-overlapping match of
+#@ ''expression'' in ''text'', in order, ''[]'' when there is no match, or ''err''
+#@ on an invalid or too long ''expression''. See ''CACHE''. Positions work as in
+#@ ''RegexFindIndex(expression, text)''. A match of no text right after the end
+#@ of the previous match is skipped.
+
+func RegexFindAllIndexes(expression, text)
+{
+	return _regex_findallindexes_(expression, text, MAXPATTERNLENGTH, CACHEADMITTANCELENGTH);
+}
+
+#@ <RegexFindAllGroups(expression, text)>
+#@ V-1.0.0 (2026-10-20)
+#@
+#@ Returns a list with the groups of every non-overlapping match of ''expression''
+#@ in ''text'', in order, ''[]'' when there is no match, or ''err'' on an invalid
+#@ or too long ''expression''. See ''CACHE''. Each entry is the pair list that
+#@ ''RegexGroups(expression, text)'' returns for that match. A match of no text
+#@ right after the end of the previous match is skipped.
+
+func RegexFindAllGroups(expression, text)
+{
+	return _regex_findallgroups_(expression, text, MAXPATTERNLENGTH, CACHEADMITTANCELENGTH);
+}
+
+#@ <RegexGroups(expression, text)>
+#@ V-1.0.0 (2026-10-20)
+#@
+#@ Returns a list of pairs with the groups of the leftmost match of ''expression''
+#@ in ''text'', or ''err'' if there is no match or ''expression'' is invalid or
+#@ too long. See ''CACHE''.
+#@
+#@ A group is a part of the expression in parentheses that captures, so a
+#@ non-capturing group like ''(?:a)'' has no pair of its own. The first pair is
+#@ the full match, then one pair per group, in the order the groups appear in the
+#@ expression. The pair at position ''n'' has the name at position ''n'' in the
+#@ list returned by ''RegexGroupNames(expression)''. A name may appear more than
+#@ once, and every group keeps its own pair, so no group is lost.
+#@
+#@ The name ''"match"'' labels the full match. A group you named ''"match"'' is
+#@ indistinguishable from that label: the name list carries a second ''"match"''
+#@ entry, and ''RegexGroupIndex(expression, "match")'' returns the position of
+#@ the full match, so such a group is reachable only by its position in the pair
+#@ list.
+#@
+#@ *Pair entries:*
+#@ - ''1'' (String): the name of the group: ''"match"'' for the full match, the name you gave the group, or the position of the group in the expression, written as a string, when the group has no name
+#@ - ''2'' (String): the text that group matched, ''""'' when the group did not take part in the match
+
+func RegexGroups(expression, text)
+{
+	return _regex_groups_(expression, text, MAXPATTERNLENGTH, CACHEADMITTANCELENGTH);
+}
+
+#@ <RegexGroupNames(expression)>
+#@ V-1.0.0 (2026-10-22)
+#@
+#@ Returns a list with one name for the full match of ''expression'' and one name
+#@ per group: ''"match"'' first, then one name per group in the order the groups
+#@ appear in the expression, or ''err'' on an invalid or too long ''expression''.
+#@ See ''CACHE''.
+
+func RegexGroupNames(expression)
+{
+	return _regex_groupnames_(expression, MAXPATTERNLENGTH, CACHEADMITTANCELENGTH);
+}
+
+#@ <RegexGroupIndex(expression, name)>
+#@ V-1.0.0 (2026-10-22)
+#@
+#@ Returns the position of ''name'' in the list returned by
+#@ ''RegexGroupNames(expression)'' for ''expression'', or ''err'' on an invalid or
+#@ too long ''expression'', or when no entry has that name. When a name appears
+#@ more than once in that list, the position of the first entry is returned. See
+#@ ''CACHE''.
+
+func RegexGroupIndex(expression, name)
+{
+	return _regex_groupindex_(expression, name, MAXPATTERNLENGTH, CACHEADMITTANCELENGTH);
+}
+
+#@ <RegexReplace(expression, text, replacement)>
+#@ V-1.0.0 (2026-10-20)
+#@
+#@ Returns a copy of ''text'' with every non-overlapping match of ''expression''
+#@ replaced by ''replacement'', or ''err'' on an invalid or too long
+#@ ''expression''. See ''CACHE''. A match of no text right after the end of the
+#@ previous match is skipped.
+#@
+#@ In ''replacement'', ''$'' references expand as follows:
+#@
+#@ - ''$0'' is the whole match
+#@ - ''$name'' or ''${name}'' is that group. A name that is not a group, or a group that did not take part in the match, expands to ''""''
+#@ - In ''$name'', the name is as long as possible: ''$1x'' is the group named ''1x'', not group ''1'' followed by ''x''
+#@ - A name of plain digits, like ''$1'', is the position of the group, not a name: a group named ''2'' cannot be referenced, but ''$01'' is a name, like any other
+#@ - ''$match'' is a group reference like any other, never the whole match
+#@ - ''$$'' is a literal dollar sign. A ''$'' not followed by a name is left as is
+
+func RegexReplace(expression, text, replacement)
+{
+	return _regex_replace_(expression, text, replacement, MAXPATTERNLENGTH, CACHEADMITTANCELENGTH);
+}
+
+#@ <RegexReplaceFirst(expression, text, replacement)>
+#@ V-1.0.0 (2026-10-22)
+#@
+#@ Returns a copy of ''text'' with only the leftmost match of ''expression''
+#@ replaced by ''replacement'', or ''err'' on an invalid or too long
+#@ ''expression''. See ''CACHE''. ''replacement'' works as in
+#@ ''RegexReplace(expression, text, replacement)''.
+
+func RegexReplaceFirst(expression, text, replacement)
+{
+	return _regex_replacefirst_(expression, text, replacement, MAXPATTERNLENGTH, CACHEADMITTANCELENGTH);
+}
+
+#@ <RegexReplaceLiteral(expression, text, replacement)>
+#@ V-1.0.0 (2026-10-22)
+#@
+#@ Returns a copy of ''text'' with every non-overlapping match of ''expression''
+#@ replaced by ''replacement'' exactly as written, with no ''$'' references
+#@ expanded, or ''err'' on an invalid or too long ''expression''. See ''CACHE''.
+#@ A match of no text right after the end of the previous match is skipped.
+
+func RegexReplaceLiteral(expression, text, replacement)
+{
+	return _regex_replaceliteral_(expression, text, replacement, MAXPATTERNLENGTH, CACHEADMITTANCELENGTH);
+}
+
+#@ <RegexEscape(text)>
+#@ V-1.0.0 (2026-10-21)
+#@
+#@ Returns ''text'' with every regular expression metacharacter escaped, so that
+#@ the result matches the literal ''text'' when it is used as an expression. The
+#@ result is subject to ''MAXPATTERNLENGTH'' when it is used as an expression.
+#@ See ''CACHE''.
+
+func RegexEscape(text)
+{
+	return _regex_escape_(text);
+}
+
+#@ <RegexSplit(expression, text)>
+#@ V-1.0.0 (2026-10-20)
+#@
+#@ Splits ''text'' at every non-overlapping match of ''expression'' and returns
+#@ the pieces of ''text'' in order: the text before the first match, the text
+#@ between the matches, and the text after the last match, ''[text]'' when there
+#@ is no match, or ''err'' when ''expression'' is not a valid regular expression
+#@ or is too long. See ''CACHE''. A match of no text at the start of ''text''
+#@ contributes no piece, and a match of no text at the end of ''text'' leaves no
+#@ piece after it. When ''text'' is empty the result is ''[""]'', unless
+#@ ''expression'' is also empty, in which case it is ''[]''.
+
+func RegexSplit(expression, text)
+{
+	return _regex_split_(expression, text, MAXPATTERNLENGTH, CACHEADMITTANCELENGTH);
+}
+
+#@ <RegexValid(expression)>
+#@ V-1.0.0 (2026-10-20)
+#@
+#@ Returns a map with information about the regular ''expression''.
+#@
+#@ *Map fields:*
+#@ - ''"valid"'' (Number): ''true'' when ''expression'' is a valid regular expression within ''MAXPATTERNLENGTH'', ''false'' otherwise
+#@ - ''"size"'' (Number): length of ''expression'' in bytes
+#@ - ''"cache"'' (Number): ''true'' when ''expression'' is within both ''MAXPATTERNLENGTH'' and ''CACHEADMITTANCELENGTH'', so it may enter the cache, ''false'' otherwise. Does not depend on ''"valid"''. See ''CACHE''.
+
+func RegexValid(expression)
+{
+	var size = len(pack(expression));
+
+	if size > MAXPATTERNLENGTH
+	{
+		return m["valid": false, "size": size, "cache": false];
+	}
+
+	var regexOk = _regex_valid_(expression);
+
+	var cache = false;
+
+	if size <= CACHEADMITTANCELENGTH { cache = true; }
+
+	return m["valid": regexOk, "size": size, "cache": cache];
+}

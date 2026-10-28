@@ -19,3 +19,5 @@ See ''chippy doc loadopt'', ''chippy doc builtins'' and ''chippy doc corelib''.
 ''tls'' - Abstracted by ''libtls.chh''
 
 ''hash'' - Abstracted by ''libhash.chh''
+
+''regex'' - Abstracted by ''libregex.chh''
