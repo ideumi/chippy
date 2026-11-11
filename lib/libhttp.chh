@@ -846,13 +846,32 @@ func _HttpReadRequest_(conn, isTLS)
 }
 
 # <_HttpFormatServerResponse_(statusCode, headers, body, label)>
-# V-1.0.1 (2026-08-11)
+# V-1.0.2 (2026-11-11)
 #
 # Formats an HTTP/1.1 response with ''statusCode'', ''headers'', ''body'', and
-# server ''label''. Returns the complete response as bytes.
+# server ''label''. Returns the complete response as bytes, or ''err'' on failure.
 
 func _HttpFormatServerResponse_(statusCode, headers, body, label)
 {
+	if type(statusCode) != "number" { return err; }
+
+	statusCode = int(statusCode);
+
+	if iserr(statusCode) { return err; }
+
+	var nulByte = unpack(b[0]);
+
+	for index = 1 to len(headers)
+	{
+		var pair = headers[index];
+
+		if has(pair[1], "\r") or has(pair[1], "\n") or has(pair[1], nulByte)
+			or has(pair[2], "\r") or has(pair[2], "\n") or has(pair[2], nulByte)
+		{
+			return err;
+		}
+	}
+
 	var statusText = HttpStatusText(statusCode);
 	var responseStr = "HTTP/1.1 " + str(statusCode) + " " + statusText + "\r\n";
 	responseStr = responseStr + "Server: libhttp.chh (" + label + ") on chippy V-" + CHIPVR + "\r\n";
@@ -890,7 +909,7 @@ func _HttpConnectionReaper_()
 }
 
 # <_HttpConnectionWorker_(handler, state, certPath, keyPath)>
-# V-1.1.0 (2026-08-11)
+# V-1.0.2 (2026-11-11)
 #
 # Per-connection actor. An empty ''certPath'' serves plain HTTP, otherwise the
 # socket upgrades to TLS and a failed handshake drops the connection. The
@@ -954,7 +973,17 @@ func _HttpConnectionWorker_(handler, state, certPath, keyPath)
 		return ok;
 	}
 
-	_HttpWrite_(_HttpFormatServerResponse_(response["statusCode"], response["headers"], response["body"], label), conn, isTLS);
+	var responseBytes = _HttpFormatServerResponse_(response["statusCode"], response["headers"], response["body"], label);
+
+	if iserr(responseBytes)
+	{
+		_HttpWrite_(_HttpFormatServerResponse_(500, [], pack("Bad response headers."), label), conn, isTLS);
+		_HttpClose_(conn, isTLS);
+
+		return ok;
+	}
+
+	_HttpWrite_(responseBytes, conn, isTLS);
 	_HttpClose_(conn, isTLS);
 
 	return ok;
@@ -1013,7 +1042,7 @@ func HttpServe(port, handler, state)
 }
 
 #@ <HttpServeTLS(port, certPath, keyPath, handler, state)>
-#@ V-1.1.0 (2026-08-11)
+#@ V-1.0.3 (2026-08-11)
 #@
 #@ *!!WARNING!!: This server is intended for LOCAL USAGE IN TRUSTED NETWORKS,*
 #@ *DEVELOPMENT AND TESTING ONLY. DO NOT expose this to the public internet*
@@ -1112,7 +1141,7 @@ func HttpParseUrl(url)
 }
 
 #@ <HttpFormatRequest(method, path, headers, body)>
-#@ V-1.0.0 (2026-01-08)
+#@ V-1.0.1 (2026-11-11)
 #@
 #@ Formats an HTTP request with ''method'', ''path'', ''headers'', and ''body''
 #@ into raw bytes. Returns HTTP/1.1 request bytes ready to send over a socket.
