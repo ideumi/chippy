@@ -131,7 +131,7 @@ Run `sudo ./uninstall.sh` from the extracted tarball directory (or `./uninstall.
 ## Building from Source
 
 Requirements:
-- Go 1.26.5 or later
+- Go 1.27.3 or later
 - git
 - make
 
