@@ -21,3 +21,5 @@ See ''chippy doc loadopt'', ''chippy doc builtins'' and ''chippy doc corelib''.
 ''hash'' - Abstracted by ''libhash.chh''
 
 ''regex'' - Abstracted by ''libregex.chh''
+
+''base64'' - Abstracted by ''libbase64.chh''

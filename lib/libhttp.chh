@@ -1236,24 +1236,3 @@ func HttpUrlDecode(text)
 {
 	return _http_urldecode_(text);
 }
-
-#@ <HttpBase64Encode(bytes)>
-#@ V-1.0.0 (2026-01-08)
-#@
-#@ Base64-encodes ''bytes''. Returns the encoded string.
-
-func HttpBase64Encode(bytes)
-{
-	return _http_base64encode_(bytes);
-}
-
-#@ <HttpBase64Decode(text)>
-#@ V-1.0.0 (2026-01-08)
-#@
-#@ Base64-decodes ''text''. Returns the decoded bytes on success or ''err'' if
-#@ the encoding is malformed.
-
-func HttpBase64Decode(text)
-{
-	return _http_base64decode_(text);
-}
