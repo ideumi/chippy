@@ -5,6 +5,18 @@
 
 loadopt("tls");
 
+#@ <TLSSERVER>
+#@ (2026-11-13)
+#@ Mode for a server-side TLS connection
+
+var TLSSERVER = "tls-server";
+
+#@ <TLSCLIENT>
+#@ (2026-11-13)
+#@ Mode for a client-side TLS connection
+
+var TLSCLIENT = "tls-client";
+
 #@ <TlsOpen(host, port, verify)>
 #@ V-1.0.0 (2026-01-08)
 #@
@@ -70,7 +82,7 @@ func TlsAccept(socketHandle, certPath, keyPath)
 #@ V-1.0.0 (2026-05-19)
 #@
 #@ Upgrades an already-accepted TCP ''socketHandle'' to TLS using certificates
-#@ at ''certPath'' and ''keyPath''. Performs only the TLS handshake; the caller
+#@ at ''certPath'' and ''keyPath''. Performs only the TLS handshake. The caller
 #@ is responsible for the TCP accept via ''saccept(serverHandle)''. The plain
 #@ socket handle is consumed and no longer valid after this call. Returns a TLS
 #@ handle on success, ''err'' on failure.
@@ -83,9 +95,15 @@ func TlsUpgrade(socketHandle, certPath, keyPath)
 #@ <TlsInfo(handle)>
 #@ V-1.0.0 (2026-05-19)
 #@
-#@ Returns connection information for the open TLS ''handle'' as a map with
-#@ ''"mode"'' (''"tls-server"'' or ''"tls-client"''), ''"localIp"'',
-#@ ''"localPort"'', ''"remoteIp"'', ''"remotePort"'', and ''"serverName"''.
+#@ Returns connection information for the open TLS ''handle'' as a map.
+#@
+#@ *Map fields:*
+#@ - ''"mode"'' (String): ''TLSSERVER'' or ''TLSCLIENT''
+#@ - ''"localIp"'' (String): the local IP address
+#@ - ''"localPort"'' (Number): the local port
+#@ - ''"remoteIp"'' (String): the peer IP address
+#@ - ''"remotePort"'' (Number): the peer port
+#@ - ''"serverName"'' (String): the server name or ''""'' when not set
 
 func TlsInfo(handle)
 {
