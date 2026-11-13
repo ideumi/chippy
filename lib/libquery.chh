@@ -325,9 +325,12 @@ func MaxBy(source, keySelector)
 #@ <GroupBy(source, keySelector)>
 #@ V-1.0.0 (2026-08-09)
 #@
-#@ Returns a map with the elements of ''source'' collected under the key
-#@ ''keySelector'' returns for each, or ''err'' as soon as ''keySelector''
-#@ returns ''err''.
+#@ Groups the elements of ''source'' under the string form of the key that
+#@ ''keySelector'' returns for each. Returns a map, or ''err'' as soon as
+#@ ''keySelector'' returns ''err''.
+#@
+#@ *Map fields:*
+#@ - ''"key"'' (List): the elements of ''source'' that share the string form of the ''keySelector'' result ''"key"''
 
 func GroupBy(source, keySelector)
 {
@@ -352,9 +355,12 @@ func GroupBy(source, keySelector)
 #@ <CountBy(source, keySelector)>
 #@ V-1.0.0 (2026-08-09)
 #@
-#@ Returns a map with a count of the elements of ''source'' under the key
-#@ ''keySelector'' returns for each, or ''err'' as soon as ''keySelector''
-#@ returns ''err''.
+#@ Counts the elements of ''source'' under the string form of the key that
+#@ ''keySelector'' returns for each. Returns a map, or ''err'' as soon as
+#@ ''keySelector'' returns ''err''.
+#@
+#@ *Map fields:*
+#@ - ''"key"'' (Number): the count of elements of ''source'' that share the string form of the ''keySelector'' result ''"key"''
 
 func CountBy(source, keySelector)
 {

@@ -66,7 +66,7 @@ func TlsClose(handle)
 #@ V-1.0.1 (2026-05-19)
 #@
 #@ Accepts a TLS connection on server ''socketHandle'' using certificates at
-#@ ''certPath'' and ''keyPath''. Returns a TLS client handle on success, ''err''
+#@ ''certPath'' and ''keyPath''. Returns a TLS handle on success, ''err''
 #@ on failure.
 
 func TlsAccept(socketHandle, certPath, keyPath)

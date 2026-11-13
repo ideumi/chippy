@@ -26,8 +26,14 @@ var HTTPMAXHEADERS = 65536;
 #@
 #@ Performs an HTTP GET request to ''url'' with ''headers''. Supports HTTP/1.0
 #@ and HTTP/1.1 only. Automatically follows redirects up to 10 times. Returns a
-#@ response map with ''"statusCode"'', ''"statusText"'', ''"headers"'', and
-#@ ''"body"''. Returns ''err'' on failure.
+#@ response map, or ''err'' on failure.
+#@
+#@ *Map fields:*
+#@ - ''"statusCode"'' (Number): the HTTP status code
+#@ - ''"statusText"'' (String): the reason phrase or ''""'' if absent
+#@ - ''"headers"'' (List): the response headers as ''[name, value]'' pairs
+#@ - ''"body"'' (Bytes): the response body, dechunked when chunked
+#@ - ''"chunked"'' (Number): ''true'' when Transfer-Encoding includes ''"chunked"''
 
 func HttpGet(url, headers)
 {
@@ -40,8 +46,14 @@ func HttpGet(url, headers)
 #@ Performs an HTTP POST request to ''url'' with ''headers'' and ''body''. The
 #@ ''body'' can be a string or bytes. Supports HTTP/1.0 and HTTP/1.1 only.
 #@ Automatically follows redirects up to 10 times (NOTE: 303 redirects convert
-#@ to GET). Returns a response map with ''"statusCode"'', ''"statusText"'',
-#@ ''"headers"'', and ''"body"''. Returns ''err'' on failure.
+#@ to GET). Returns a response map, or ''err'' on failure.
+#@
+#@ *Map fields:*
+#@ - ''"statusCode"'' (Number): the HTTP status code
+#@ - ''"statusText"'' (String): the reason phrase or ''""'' if absent
+#@ - ''"headers"'' (List): the response headers as ''[name, value]'' pairs
+#@ - ''"body"'' (Bytes): the response body, dechunked when chunked
+#@ - ''"chunked"'' (Number): ''true'' when Transfer-Encoding includes ''"chunked"''
 
 func HttpPost(url, headers, body)
 {
@@ -53,8 +65,14 @@ func HttpPost(url, headers, body)
 #@
 #@ Performs an HTTP GET request without following redirects. Returns the response
 #@ as-is, including 3xx redirect responses with Location header. Returns a
-#@ response map with ''"statusCode"'', ''"statusText"'', ''"headers"'', and
-#@ ''"body"''. Returns ''err'' on failure.
+#@ response map, or ''err'' on failure.
+#@
+#@ *Map fields:*
+#@ - ''"statusCode"'' (Number): the HTTP status code
+#@ - ''"statusText"'' (String): the reason phrase or ''""'' if absent
+#@ - ''"headers"'' (List): the response headers as ''[name, value]'' pairs
+#@ - ''"body"'' (Bytes): the response body, dechunked when chunked
+#@ - ''"chunked"'' (Number): ''true'' when Transfer-Encoding includes ''"chunked"''
 #@
 #@ See: https://datatracker.ietf.org/doc/html/rfc9110 (15.4.).
 
@@ -68,8 +86,14 @@ func HttpGetNoRedirect(url, headers)
 #@
 #@ Performs an HTTP POST request without following redirects. Returns the response
 #@ as-is, including 3xx redirect responses with Location header. The ''body'' can
-#@ be a string or bytes. Returns a response map with ''"statusCode"'',
-#@ ''"statusText"'', ''"headers"'', and ''"body"''. Returns ''err'' on failure.
+#@ be a string or bytes. Returns a response map, or ''err'' on failure.
+#@
+#@ *Map fields:*
+#@ - ''"statusCode"'' (Number): the HTTP status code
+#@ - ''"statusText"'' (String): the reason phrase or ''""'' if absent
+#@ - ''"headers"'' (List): the response headers as ''[name, value]'' pairs
+#@ - ''"body"'' (Bytes): the response body, dechunked when chunked
+#@ - ''"chunked"'' (Number): ''true'' when Transfer-Encoding includes ''"chunked"''
 #@
 #@ See: https://datatracker.ietf.org/doc/html/rfc9110 (15.4.).
 
@@ -84,8 +108,14 @@ func HttpPostNoRedirect(url, headers, body)
 #@ Performs an HTTP request with specified ''method'', ''url'', ''headers'', and
 #@ ''body''. Supports both HTTP and HTTPS. Supports HTTP/1.0 and HTTP/1.1 only.
 #@ Automatically follows redirects (301, 302, 303, 307, 308) up to 10 times.
-#@ Returns a response map with ''"statusCode"'', ''"statusText"'', ''"headers"'',
-#@ and ''"body"''. Returns ''err'' on failure.
+#@ Returns a response map, or ''err'' on failure.
+#@
+#@ *Map fields:*
+#@ - ''"statusCode"'' (Number): the HTTP status code
+#@ - ''"statusText"'' (String): the reason phrase or ''""'' if absent
+#@ - ''"headers"'' (List): the response headers as ''[name, value]'' pairs
+#@ - ''"body"'' (Bytes): the response body, dechunked when chunked
+#@ - ''"chunked"'' (Number): ''true'' when Transfer-Encoding includes ''"chunked"''
 #@
 #@ See: https://datatracker.ietf.org/doc/html/rfc9110 (15.4.).
 
@@ -382,8 +412,13 @@ func _HttpReadHeaders_(conn, isTLS, bufSize)
 # V-1.0.0 (2026-08-11)
 #
 # Parses ''url'', adds a Host header if not already present, and formats the
-# request. Returns a map with ''"bytes"'', ''"host"'', ''"port"'', and
-# ''"isTLS"'', or ''err'' on failure.
+# request. Returns a map, or ''err'' on failure.
+#
+# *Map fields:*
+# - ''"bytes"'' (Bytes): the complete request
+# - ''"host"'' (String): the host without brackets or port
+# - ''"port"'' (Number): the port
+# - ''"isTLS"'' (Number): ''true'' for the https scheme, ''false'' otherwise
 
 func _HttpPrepareRequest_(method, url, headers, body)
 {
@@ -438,8 +473,12 @@ func _HttpPrepareRequest_(method, url, headers, body)
 # V-1.0.0 (2026-08-11)
 #
 # Reads Content-Length and Transfer-Encoding out of ''respHeaders''. Returns a
-# map with ''"contentLength"'' and ''"isChunked"''. Returns ''err'' in
-# ''"contentLength"'' if the header is absent, malformed or negative.
+# map. ''"contentLength"'' is ''err'' if the header is absent, malformed or
+# negative.
+#
+# *Map fields:*
+# - ''"contentLength"'' (Number): the declared body length, or ''err''
+# - ''"isChunked"'' (Number): ''true'' when Transfer-Encoding includes ''"chunked"''
 
 func _HttpBodyLength_(respHeaders)
 {
@@ -682,8 +721,14 @@ func _HttpFollowRedirect_(response, method, url, headers, body, maxRedirects)
 #@ Performs an HTTP request with redirect control. ''maxRedirects'' specifies
 #@ the maximum number of redirects to follow (0 to disable). When the limit is
 #@ reached, returns the redirect response (3xx status) instead of following.
-#@ Returns a response map with ''"statusCode"'', ''"statusText"'', ''"headers"'',
-#@ and ''"body"''. Returns ''err'' on failure.
+#@ Returns a response map, or ''err'' on failure.
+#@
+#@ *Map fields:*
+#@ - ''"statusCode"'' (Number): the HTTP status code
+#@ - ''"statusText"'' (String): the reason phrase or ''""'' if absent
+#@ - ''"headers"'' (List): the response headers as ''[name, value]'' pairs
+#@ - ''"body"'' (Bytes): the response body, dechunked when chunked
+#@ - ''"chunked"'' (Number): ''true'' when Transfer-Encoding includes ''"chunked"''
 #@
 #@ See: https://datatracker.ietf.org/doc/html/rfc9110 (15.4.).
 
@@ -1075,9 +1120,16 @@ func _HttpServeAny_(port, certPath, keyPath, handler, state)
 #@
 #@ Starts an HTTP server on ''port'' with the specified ''handler'' function.
 #@ The ''handler'' is called as ''handler(state, request)'' and must return a
-#@ response map. The ''request'' map includes ''"remoteIp"'' and ''"remotePort"''.
-#@ Returns ''err'' when the socket will not open, and otherwise never returns.
-#@ See ''HttpResponse(statusCode, body)''.
+#@ response map. Returns ''err'' when the socket will not open, and otherwise
+#@ never returns. See ''HttpResponse(statusCode, body)''.
+#@
+#@ *Request map fields:*
+#@ - ''"method"'' (String): the request method
+#@ - ''"path"'' (String): the request target
+#@ - ''"headers"'' (List): the request headers as ''[name, value]'' pairs
+#@ - ''"body"'' (Bytes): the request body
+#@ - ''"remoteIp"'' (String): the peer IP address
+#@ - ''"remotePort"'' (Number): the peer port
 
 func HttpServe(port, handler, state)
 {
@@ -1093,10 +1145,18 @@ func HttpServe(port, handler, state)
 #@
 #@ Starts an HTTPS server on ''port'' using TLS certificates at ''certPath'' and
 #@ ''keyPath''. The ''handler'' function is called as ''handler(state, request)''
-#@ and must return a response map. The ''request'' map includes ''"remoteIp"'',
-#@ ''"remotePort"'', and ''"serverName"''. Returns ''err'' when ''certPath'' or
+#@ and must return a response map. Returns ''err'' when ''certPath'' or
 #@ ''keyPath'' is empty, or the socket will not open, and otherwise never
 #@ returns. See ''HttpResponse(statusCode, body)''.
+#@
+#@ *Request map fields:*
+#@ - ''"method"'' (String): the request method
+#@ - ''"path"'' (String): the request target
+#@ - ''"headers"'' (List): the request headers as ''[name, value]'' pairs
+#@ - ''"body"'' (Bytes): the request body
+#@ - ''"remoteIp"'' (String): the peer IP address
+#@ - ''"remotePort"'' (Number): the peer port
+#@ - ''"serverName"'' (String): the server name or ''""'' when not set
 
 func HttpServeTLS(port, certPath, keyPath, handler, state)
 {
@@ -1140,8 +1200,12 @@ func HttpStatusText(statusCode)
 #@ V-1.0.1 (2026-03-13)
 #@
 #@ Creates an HTTP response map with ''statusCode'' and ''body''. The ''body''
-#@ can be a string or bytes. Returns a map with ''"statusCode"'', ''"headers"''
-#@ (empty list), and ''"body"'' (as bytes).
+#@ can be a string or bytes. Returns a response map.
+#@
+#@ *Map fields:*
+#@ - ''"statusCode"'' (Number): the ''statusCode'' given
+#@ - ''"headers"'' (List): ''[]'', empty
+#@ - ''"body"'' (Bytes): the ''body'' given
 
 func HttpResponse(statusCode, body)
 {
@@ -1158,8 +1222,12 @@ func HttpResponse(statusCode, body)
 #@ V-1.0.1 (2026-03-13)
 #@
 #@ Creates an HTTP response map with ''statusCode'', ''headers'', and ''body''.
-#@ The ''body'' can be a string or bytes. Returns a map with ''"statusCode"'',
-#@ ''"headers"'', and ''"body"'' (as bytes).
+#@ The ''body'' can be a string or bytes. Returns a response map.
+#@
+#@ *Map fields:*
+#@ - ''"statusCode"'' (Number): the ''statusCode'' given
+#@ - ''"headers"'' (List): the ''headers'' given, as ''[name, value]'' pairs
+#@ - ''"body"'' (Bytes): the ''body'' given
 
 func HttpResponseWithHeaders(statusCode, headers, body)
 {
@@ -1175,8 +1243,15 @@ func HttpResponseWithHeaders(statusCode, headers, body)
 #@ <HttpParseUrl(url)>
 #@ V-1.0.0 (2026-01-08)
 #@
-#@ Parses ''url'' into components. Returns a map with ''"scheme"'', ''"host"'',
-#@ ''"port"'', ''"path"'', and ''"query"''. Returns ''err'' if the URL is invalid.
+#@ Parses ''url'' into components. Returns a map, or ''err'' if the URL is
+#@ invalid.
+#@
+#@ *Map fields:*
+#@ - ''"scheme"'' (String): the URL scheme
+#@ - ''"host"'' (String): the host, without brackets or port
+#@ - ''"port"'' (Number): the port, or the scheme default (80 for http, 443 for https), or 0 otherwise
+#@ - ''"path"'' (String): the path, ''/'' when absent
+#@ - ''"query"'' (String): the raw query or ''""'' when absent
 
 func HttpParseUrl(url)
 {
@@ -1198,9 +1273,14 @@ func HttpFormatRequest(method, path, headers, body)
 #@ <HttpParseRequest(requestBytes)>
 #@ V-1.0.1 (2026-08-11)
 #@
-#@ Parses a complete HTTP request from ''requestBytes''. Returns a request map
-#@ with ''"method"'', ''"path"'', ''"headers"'', and ''"body"'' (bytes). Returns
-#@ ''err'' if the request is malformed.
+#@ Parses a complete HTTP request from ''requestBytes''. Returns a request
+#@ map, or ''err'' if the request is malformed.
+#@
+#@ *Map fields:*
+#@ - ''"method"'' (String): the request method
+#@ - ''"path"'' (String): the request target
+#@ - ''"headers"'' (List): the request headers as ''[name, value]'' pairs
+#@ - ''"body"'' (Bytes): the request body
 
 func HttpParseRequest(requestBytes)
 {
@@ -1264,10 +1344,15 @@ func HttpParseRequest(requestBytes)
 #@ <HttpParseResponse(responseBytes)>
 #@ V-1.0.0 (2026-01-08)
 #@
-#@ Parses a complete HTTP response from ''responseBytes''. Returns a map with
-#@ ''"statusCode"'', ''"statusText"'', ''"headers"'', ''"body"'', and ''"chunked"''.
-#@ The ''"chunked"'' field is ''true'' if Transfer-Encoding: chunked, ''false''
-#@ otherwise. Returns ''err'' if the response is malformed.
+#@ Parses a complete HTTP response from ''responseBytes''. Returns a response
+#@ map, or ''err'' if the response is malformed.
+#@
+#@ *Map fields:*
+#@ - ''"statusCode"'' (Number): the HTTP status code
+#@ - ''"statusText"'' (String): the reason phrase or ''""'' if absent
+#@ - ''"headers"'' (List): the response headers as ''[name, value]'' pairs
+#@ - ''"body"'' (Bytes): the response body as received, chunked if chunked
+#@ - ''"chunked"'' (Number): ''true'' when Transfer-Encoding includes ''"chunked"''
 #@
 #@ See: https://datatracker.ietf.org/doc/html/rfc9110 (15.).
 #@ See: https://datatracker.ietf.org/doc/html/rfc9112 (4.).
