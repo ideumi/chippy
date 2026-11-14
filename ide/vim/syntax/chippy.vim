@@ -29,7 +29,6 @@ syn keyword chipBuiltin keys kill
 syn keyword chipBuiltin len lenv list load loadopt lower lstat lutime
 syn keyword chipBuiltin mkdir
 syn keyword chipBuiltin num
-syn keyword chipBuiltin off
 syn keyword chipBuiltin pack pclose popen
 syn keyword chipBuiltin rand readlink receive rename replace
 syn keyword chipBuiltin saccept sclose seek send setenv setterm sigcatch sigfree signal sin sinfo sleep slice sopen sort spawn split sread stat str swrite symlink
