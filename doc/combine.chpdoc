@@ -29,7 +29,7 @@ Programs, properly built using combine have no dependencies outside of the ''chi
 - Licence header insertion (when configured)
 - Comment/whitespace stripping (when configured)
 - Safety checks:
-	- Symbol collision detection in file scope (see ''chippy doc scoping'')
+	- Symbol collision detection in global scope (see ''chippy doc scoping'')
 	- Syntax error detection
 
 *Source bundles and compiled bundles:*

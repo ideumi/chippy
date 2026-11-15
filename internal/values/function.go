@@ -54,11 +54,12 @@ func (bf *BuiltInFunction) Execute(args []Value, ctx Ctx) RuntimeResult {
 }
 
 // FailArg is which argument a builtin blames, counted from one, or zero when it
-// blames the call as a whole.
+// blames the call as a whole. Halted marks a run-ending result.
 type RuntimeResult struct {
 	Value   Value
 	Error   error
 	FailArg int
+	Halted  bool
 }
 
 func NewRuntimeResult() RuntimeResult {
@@ -79,4 +80,8 @@ func (rr RuntimeResult) Fail(details string) RuntimeResult {
 
 func (rr RuntimeResult) FailAt(arg int, details string) RuntimeResult {
 	return RuntimeResult{Error: errors.NewCallError(details), FailArg: arg}
+}
+
+func (rr RuntimeResult) Halt(value Value) RuntimeResult {
+	return RuntimeResult{Value: value, Halted: true}
 }

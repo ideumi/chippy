@@ -1,0 +1,28 @@
+*Exit* | V-$CHIPVR ($CHIPCN)
+
+A program may exit in one of two ways:
+
+- it *falls off the end* of the code, which exits the program with exit code ''0'',
+- or a *global-scope ''return''* halts it, the ''return''ed value in this case, being the exit code
+
+*Exit Code*
+
+A ''return'' is global-scope whenever it sits outside any function, including inside a top-level block. Inside a function, a ''return'' hands the ''return''ed value back to the caller. It does not exit the program.
+
+A global-scope ''return'' ends the process with its value as the exit code. A file pulled in with ''load(filename)'' runs inside the same program, so a global-scope ''return'' in it ends the program.
+
+The value must be an integer between 0 and 255, any other value will cause a runtime error at the ''return'' statement. A bare ''return'' without a value exits with ''0''.
+
+*Actors*
+
+A ''return'' inside an actor is a function-scope ''return'': it ends the actor with the ''return''ed value. The process is not ended.
+
+The same is true for a global-scope ''return'' in a file pulled in with ''load(filename)'' from inside an actor. The actor ends with that value and ''wait(handle)'' ''return''s it to the spawner.
+
+Value limitations do not apply in the case of function-scope ''return''s, the ''return'' value can be anything.
+
+*Recommended Reading*
+
+''chippy doc concurrency''
+''chippy doc wait''
+''chippy doc load''

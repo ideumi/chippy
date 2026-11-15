@@ -711,13 +711,6 @@ func (c *Compiler) compileCall(node *ast.CallNode) error {
 }
 
 func (c *Compiler) compileReturn(node *ast.ReturnNode) error {
-	// Only a function body adds a scope on top of the program's own, so with
-	// just the one this return is outside any function, block or no block.
-
-	if len(c.scopes) <= 1 {
-		return errors.NewRTError(node.GetPosStart(), node.GetPosEnd(), "'return' outside a function")
-	}
-
 	depth := c.stackDepth
 
 	if node.NodeToReturn != nil {

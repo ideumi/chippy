@@ -11,4 +11,8 @@ Loads and executes a Chippy program.
 - ''ok'' on success
 
 *Errors:*
-- Runtime error if program cannot be loaded or executed
+- Runtime error if the file cannot be read, or if it fails to compile or execute
+
+*Recommended Reading*
+
+''chippy doc exit''

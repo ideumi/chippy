@@ -155,7 +155,7 @@ func runREPL(mod *modena.Modena) {
 			continue
 		}
 
-		if text == "off" || text == "exit" {
+		if text == "exit" {
 			break
 		}
 
@@ -164,17 +164,27 @@ func runREPL(mod *modena.Modena) {
 			continue
 		}
 
-		result, err := mod.Run(constants.CLI_CONTEXT_DISPLAY_NAME_FN, text)
+		result, halted, err := mod.Run(constants.CLI_CONTEXT_DISPLAY_NAME_FN, text)
 
 		if err != nil {
 			fmt.Println(err.Error())
-		} else if result.IsSet() {
+
+			continue
+		}
+
+		if result.IsSet() {
 			// Print result immediately and clear reference for GC
 			fmt.Println(result.String())
+		}
 
+		if !halted {
 			// Clear the result reference immediately after printing
 			result = values.Value{}
+
+			continue
 		}
+
+		exitWithResult(result)
 	}
 }
 
@@ -201,7 +211,7 @@ func showHistory(historyFile string) {
 }
 
 func runCommand(mod *modena.Modena, command string) {
-	result, err := mod.Run("<command>", command)
+	result, halted, err := mod.Run("<command>", command)
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -211,10 +221,14 @@ func runCommand(mod *modena.Modena, command string) {
 	// Print result if not null and not empty
 	if result.IsSet() {
 		fmt.Println(result.String())
-
-		// Clear the result reference immediately after printing
-		result = values.Value{}
 	}
+
+	if !halted {
+		// Falling off the end of the command is exit code 0
+		return
+	}
+
+	exitWithResult(result)
 }
 
 func runScript(mod *modena.Modena, filename string) {
@@ -225,8 +239,23 @@ func runScript(mod *modena.Modena, filename string) {
 		os.Exit(1)
 	}
 
-	if _, err := mod.Run(filename, string(data)); err != nil {
+	result, halted, err := mod.Run(filename, string(data))
+
+	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
+
+	if !halted {
+		// Falling off the end of the program is exit code 0
+		return
+	}
+
+	exitWithResult(result)
+}
+
+func exitWithResult(value values.Value) {
+	code, _ := value.AsInt()
+
+	os.Exit(int(code))
 }
