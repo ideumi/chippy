@@ -15,7 +15,7 @@ The value must be an integer between 0 and 255, any other value will cause a run
 
 *Actors*
 
-A ''return'' inside an actor is a function-scope ''return'': it ends the actor with the ''return''ed value. The process is not ended.
+A ''return'' inside an actor is a function-scope ''return'': it ends the actor with the ''return''ed value. It does not exit the program.
 
 The same is true for a global-scope ''return'' in a file pulled in with ''load(filename)'' from inside an actor. The actor ends with that value and ''wait(handle)'' ''return''s it to the spawner.
 
