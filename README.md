@@ -162,6 +162,12 @@ make release-all
 
 For detailed information on what changed between releases see the [changelogs](changelog/).
 
+## Security
+
+If you find a security issue, please report it using GitHub's private vulnerability reporting:
+
+[Report a vulnerability](https://github.com/ideumi/chippy/security/advisories/new)
+
 ## License
 
 Chippy is licensed under the 2-Clause BSD License. See `LICENCE.txt`.
