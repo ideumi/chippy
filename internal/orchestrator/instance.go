@@ -12,7 +12,7 @@ import (
 )
 
 type Modena interface {
-	Run(filename, text string) (values.Value, error)
+	Run(filename, text string) (values.Value, bool, error)
 	GetGlobalContext() values.Ctx
 }
 

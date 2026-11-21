@@ -68,23 +68,49 @@ type VM struct {
 	ctx      values.Ctx
 	globals  *context.Globals[values.Value]
 
+	kind context.RunKind
+
 	locals    []values.Value
 	localsTop int
 }
 
-func NewVM(chunk *bytecode.Chunk, ctx values.Ctx) *VM {
+func NewVM(chunk *bytecode.Chunk, ctx values.Ctx, kind context.RunKind) *VM {
 	if ctx.Globals == nil {
 		errors.ModenaPanic("context has no globals")
 	}
 
-	vm := &VM{ctx: ctx, globals: ctx.Globals}
+	vm := &VM{ctx: ctx, globals: ctx.Globals, kind: kind}
 	vm.stack = make([]values.Value, 0, constants.SIZE_STACK_INITIAL)
 	vm.frames = append(vm.frames, callFrame{chunk: chunk, locals: make([]values.Value, chunk.NumSlots)})
 
 	return vm
 }
 
-func (vm *VM) Run() (values.Value, error) {
+// The process boundary only accepts an integer between 0 and 255
+func (vm *VM) checkGlobalScopeReturn(value values.Value, chunk *bytecode.Chunk, opStart int) error {
+	if vm.kind == context.FunctionRun {
+		return nil
+	}
+
+	if !value.IsInt() {
+		span := chunk.SpanAt(opStart)
+
+		return errors.NewRTError(span.Start, span.End, "Exit code must be an integer between 0 and 255")
+	}
+
+	number, _ := value.AsInt()
+
+	if number < 0 || number > 255 {
+		span := chunk.SpanAt(opStart)
+
+		return errors.NewRTError(span.Start, span.End, "Exit code must be an integer between 0 and 255")
+	}
+
+	return nil
+}
+
+// Run executes the chunk. The bool reports a stop at a global-scope return.
+func (vm *VM) Run() (values.Value, bool, error) {
 	frame := &vm.frames[len(vm.frames)-1]
 	chunk := frame.chunk
 	code := chunk.Code
@@ -116,7 +142,7 @@ func (vm *VM) Run() (values.Value, error) {
 			if value.IsUnset() {
 				span := chunk.SpanAt(opStart)
 
-				return values.Value{}, errors.NewRTError(span.Start, span.End, fmt.Sprintf("'%s' is not defined", chunk.Names[nameIndex]))
+				return values.Value{}, false, errors.NewRTError(span.Start, span.End, fmt.Sprintf("'%s' is not defined", chunk.Names[nameIndex]))
 			}
 
 			vm.push(value)
@@ -136,7 +162,7 @@ func (vm *VM) Run() (values.Value, error) {
 			if vm.globals.SlotValue(slot).IsUnset() {
 				span := chunk.SpanAt(opStart)
 
-				return values.Value{}, errors.NewRTError(span.Start, span.End, fmt.Sprintf("'%s' is not defined", chunk.Names[nameIndex]))
+				return values.Value{}, false, errors.NewRTError(span.Start, span.End, fmt.Sprintf("'%s' is not defined", chunk.Names[nameIndex]))
 			}
 
 			vm.globals.SetSlot(slot, vm.peek())
@@ -164,7 +190,7 @@ func (vm *VM) Run() (values.Value, error) {
 			if value.IsUnset() {
 				span := chunk.SpanAt(opStart)
 
-				return values.Value{}, errors.NewRTError(span.Start, span.End, fmt.Sprintf("'%s' is not defined", chunk.LocalNames[slot]))
+				return values.Value{}, false, errors.NewRTError(span.Start, span.End, fmt.Sprintf("'%s' is not defined", chunk.LocalNames[slot]))
 			}
 
 			vm.push(value)
@@ -184,7 +210,7 @@ func (vm *VM) Run() (values.Value, error) {
 			if value.IsUnset() {
 				span := chunk.SpanAt(opStart)
 
-				return values.Value{}, errors.NewRTError(span.Start, span.End, fmt.Sprintf("'%s' is not defined", frame.closure.template.Upvalues[index].Name))
+				return values.Value{}, false, errors.NewRTError(span.Start, span.End, fmt.Sprintf("'%s' is not defined", frame.closure.template.Upvalues[index].Name))
 			}
 
 			vm.push(value)
@@ -224,21 +250,29 @@ func (vm *VM) Run() (values.Value, error) {
 			fn, isChippyFunc := vm.stack[calleeIdx].FunctionObject().(*Function)
 
 			if !isChippyFunc {
-				if err := vm.callBuiltin(calleeIdx, argCount, chunk, opStart); err != nil {
-					return values.Value{}, err
+				haltValue, halted, err := vm.callBuiltin(calleeIdx, argCount, chunk, opStart)
+
+				if err != nil {
+					return values.Value{}, false, err
+				}
+
+				// A builtin can end the whole run, as a global-scope return in
+				// a load(filename) does, so unwind with its value
+				if halted {
+					return haltValue, true, nil
 				}
 
 				break
 			}
 
 			if err := vm.checkCallDepth(chunk, opStart); err != nil {
-				return values.Value{}, err
+				return values.Value{}, false, err
 			}
 
 			if err := fn.checkArity(argCount); err != nil {
 				span := chunk.SpanAt(opStart)
 
-				return values.Value{}, locate(err, span.Start, span.End)
+				return values.Value{}, false, locate(err, span.Start, span.End)
 			}
 
 			frame.ip = ip
@@ -262,8 +296,14 @@ func (vm *VM) Run() (values.Value, error) {
 			// otherwise leave that expressions operands behind.
 			vm.stack = vm.stack[:returning.stackBase]
 
+			// An empty frame stack means this return has nowhere to go. It came
+			// from the top of a program or an actor, so the run ends here.
 			if len(vm.frames) == 0 {
-				return retval, nil
+				if err := vm.checkGlobalScopeReturn(retval, chunk, opStart); err != nil {
+					return values.Value{}, false, err
+				}
+
+				return retval, true, nil
 			}
 
 			vm.push(retval)
@@ -283,7 +323,7 @@ func (vm *VM) Run() (values.Value, error) {
 			if err != nil {
 				span := chunk.SpanAt(opStart)
 
-				return values.Value{}, locate(err, span.Start, span.End)
+				return values.Value{}, false, locate(err, span.Start, span.End)
 			}
 
 			vm.forStack = append(vm.forStack, state)
@@ -332,7 +372,7 @@ func (vm *VM) Run() (values.Value, error) {
 			if err != nil {
 				span := chunk.SpanAt(opStart)
 
-				return values.Value{}, locate(err, span.Start, span.End)
+				return values.Value{}, false, locate(err, span.Start, span.End)
 			}
 
 			vm.stack = vm.stack[:len(vm.stack)-count]
@@ -347,7 +387,7 @@ func (vm *VM) Run() (values.Value, error) {
 			if err != nil {
 				span := chunk.SpanAt(opStart)
 
-				return values.Value{}, locate(err, span.Start, span.End)
+				return values.Value{}, false, locate(err, span.Start, span.End)
 			}
 
 			vm.stack = vm.stack[:len(vm.stack)-2*pairs]
@@ -360,7 +400,7 @@ func (vm *VM) Run() (values.Value, error) {
 			result, err := collections.Get(collection, index)
 
 			if err != nil {
-				return values.Value{}, locateIndexFault(err, chunk, opStart)
+				return values.Value{}, false, locateIndexFault(err, chunk, opStart)
 			}
 
 			vm.push(result)
@@ -373,7 +413,7 @@ func (vm *VM) Run() (values.Value, error) {
 			result, err := collections.Set(collection, index, value)
 
 			if err != nil {
-				return values.Value{}, locateIndexFault(err, chunk, opStart)
+				return values.Value{}, false, locateIndexFault(err, chunk, opStart)
 			}
 
 			vm.push(result)
@@ -552,7 +592,7 @@ func (vm *VM) Run() (values.Value, error) {
 		if err != nil {
 			span := chunk.SpanAt(opStart)
 
-			return values.Value{}, locate(err, span.Start, span.End)
+			return values.Value{}, false, locate(err, span.Start, span.End)
 		}
 	}
 
@@ -560,10 +600,10 @@ func (vm *VM) Run() (values.Value, error) {
 		errors.ModenaPanic("stack imbalance, %d values left at halt", len(vm.stack))
 	}
 
-	return vm.stack[0], nil
+	return vm.stack[0], false, nil
 }
 
-func (vm *VM) callBuiltin(calleeIdx, argCount int, chunk *bytecode.Chunk, opStart int) error {
+func (vm *VM) callBuiltin(calleeIdx, argCount int, chunk *bytecode.Chunk, opStart int) (values.Value, bool, error) {
 	args := make([]values.Value, argCount)
 	copy(args, vm.stack[calleeIdx+1:])
 
@@ -578,19 +618,23 @@ func (vm *VM) callBuiltin(calleeIdx, argCount int, chunk *bytecode.Chunk, opStar
 			if argPos <= len(argSpans) && argSpans[argPos-1].Start != nil {
 				argSpan := argSpans[argPos-1]
 
-				return locate(result.Error, argSpan.Start, argSpan.End)
+				return values.Value{}, false, locate(result.Error, argSpan.Start, argSpan.End)
 			}
 		}
 
 		span := chunk.SpanAt(opStart)
 
-		return locate(result.Error, span.Start, span.End)
+		return values.Value{}, false, locate(result.Error, span.Start, span.End)
+	}
+
+	if result.Halted {
+		return result.Value, true, nil
 	}
 
 	vm.stack = vm.stack[:calleeIdx]
 	vm.push(result.Value)
 
-	return nil
+	return values.Value{}, false, nil
 }
 
 func (vm *VM) checkCallDepth(chunk *bytecode.Chunk, opStart int) error {

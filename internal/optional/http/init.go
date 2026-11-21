@@ -28,10 +28,8 @@ func getFunctions() map[string]values.Value {
 		optional.Prefixed(OptionalName, "parseresponse"): values.NewBuiltInFunction(optional.Prefixed(OptionalName, "parseresponse"), parseresponseFunction),
 		optional.Prefixed(OptionalName, "dechunk"):       values.NewBuiltInFunction(optional.Prefixed(OptionalName, "dechunk"), dechunkFunction),
 
-		optional.Prefixed(OptionalName, "urlencode"):    values.NewBuiltInFunction(optional.Prefixed(OptionalName, "urlencode"), urlencodeFunction),
-		optional.Prefixed(OptionalName, "urldecode"):    values.NewBuiltInFunction(optional.Prefixed(OptionalName, "urldecode"), urldecodeFunction),
-		optional.Prefixed(OptionalName, "base64encode"): values.NewBuiltInFunction(optional.Prefixed(OptionalName, "base64encode"), base64encodeFunction),
-		optional.Prefixed(OptionalName, "base64decode"): values.NewBuiltInFunction(optional.Prefixed(OptionalName, "base64decode"), base64decodeFunction),
+		optional.Prefixed(OptionalName, "urlencode"): values.NewBuiltInFunction(optional.Prefixed(OptionalName, "urlencode"), urlencodeFunction),
+		optional.Prefixed(OptionalName, "urldecode"): values.NewBuiltInFunction(optional.Prefixed(OptionalName, "urldecode"), urldecodeFunction),
 	}
 }
 

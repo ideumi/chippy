@@ -26,23 +26,24 @@ type Modena struct {
 }
 
 func New() *Modena {
-	mod := newInstance(0, constants.CONTEXT_DISPLAY_NAME)
+	mod := newInstance(0, constants.CONTEXT_DISPLAY_NAME, context.ProgramRun)
 
 	orch := orchestrator.New()
 	orch.CreateMain(mod)
 
 	orch.SetFactory(func(instanceID int) orchestrator.Modena {
-		return newInstance(instanceID, fmt.Sprintf("<Actor %d>", instanceID))
+		return newInstance(instanceID, fmt.Sprintf("<Actor %d>", instanceID), context.FunctionRun)
 	})
 
 	return mod
 }
 
-func newInstance(instanceID int, displayName string) *Modena {
+func newInstance(instanceID int, displayName string, kind context.RunKind) *Modena {
 	schema := context.NewSchema()
 
 	globalCtx := context.NewContext[values.Value](displayName, nil, nil)
 	globalCtx.InstanceID = instanceID
+	globalCtx.Kind = kind
 	globalCtx.Globals = context.NewGlobals[values.Value](schema)
 
 	for name, fn := range builtins.GetBuiltins() {
@@ -59,18 +60,18 @@ func newInstance(instanceID int, displayName string) *Modena {
 	return &Modena{globalContext: globalCtx, schema: schema}
 }
 
-func (e *Modena) Run(filename, text string) (retVal values.Value, retErr error) {
+func (e *Modena) Run(filename, text string) (retVal values.Value, halted bool, retErr error) {
 	defer recoverPanic(e.globalContext, &retErr, serializer.LooksLikeBytecode([]byte(text)))
 
 	chunk, err := compiler.DecodeOrCompile(filename, []byte(text))
 
 	if err != nil {
-		return values.Value{}, err
+		return values.Value{}, false, err
 	}
 
 	chunk.LinkGlobals(e.schema)
 
-	return vm.NewVM(chunk, e.globalContext).Run()
+	return vm.NewVM(chunk, e.globalContext, e.globalContext.Kind).Run()
 }
 
 func (e *Modena) GetGlobalContext() values.Ctx {

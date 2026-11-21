@@ -12,6 +12,15 @@ type Trace struct {
 	Pos *errors.Position
 }
 
+// A program run's return becomes the exit code, so it must be an integer between
+// 0 and 255. A function run's return goes back to the caller and can be anything.
+type RunKind int
+
+const (
+	ProgramRun  RunKind = 0
+	FunctionRun RunKind = 1
+)
+
 type Storable interface {
 	IsSet() bool
 }
@@ -22,6 +31,7 @@ type Context[T Storable] struct {
 	ParentEntryPos *errors.Position
 	Globals        *Globals[T]
 	InstanceID     int
+	Kind           RunKind
 	Trace          *Trace
 }
 

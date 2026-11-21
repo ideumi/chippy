@@ -1,0 +1,27 @@
+#!/usr/bin/chippy
+#
+# corelib - libbase64.chh
+#
+
+loadopt("base64");
+
+#@ <Base64Encode(bytes)>
+#@ V-1.0.0 (2026-11-10)
+#@
+#@ Base64-encodes ''bytes''. Returns the encoded string.
+
+func Base64Encode(bytes)
+{
+	return _base64_encode_(bytes);
+}
+
+#@ <Base64Decode(text)>
+#@ V-1.0.0 (2026-11-10)
+#@
+#@ Base64-decodes ''text''. Returns the decoded bytes on success or ''err'' if
+#@ the encoding is malformed.
+
+func Base64Decode(text)
+{
+	return _base64_decode_(text);
+}

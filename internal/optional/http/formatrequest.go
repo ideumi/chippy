@@ -9,6 +9,7 @@ package http
 import (
 	"bytes"
 	"chip-go/internal/builtins/shared"
+	"chip-go/internal/constants"
 	"chip-go/internal/optional"
 	"chip-go/internal/values"
 	"strconv"
@@ -66,6 +67,10 @@ func formatrequestFunction(args []values.Value, ctx values.Ctx) values.RuntimeRe
 		path = "/"
 	}
 
+	if containsLineSplitByte(method) || containsLineSplitByte(path) {
+		return res.Success(values.NewString(constants.STR_ERR))
+	}
+
 	buf.WriteString(method)
 	buf.WriteString(" ")
 	buf.WriteString(path)
@@ -88,6 +93,10 @@ func formatrequestFunction(args []values.Value, ctx values.Ctx) values.RuntimeRe
 
 		if !ok1 || !ok2 {
 			return res.FailAt(3, shared.Errors.InvalidValue("Header keys and values must be strings"))
+		}
+
+		if containsLineSplitByte(key.Value) || containsLineSplitByte(val.Value) {
+			return res.Success(values.NewString(constants.STR_ERR))
 		}
 
 		keyLower := strings.ToLower(key.Value)
@@ -127,4 +136,8 @@ func formatrequestFunction(args []values.Value, ctx values.Ctx) values.RuntimeRe
 	}
 
 	return res.Success(values.NewBytes(buf.Bytes()))
+}
+
+func containsLineSplitByte(text string) bool {
+	return strings.ContainsAny(text, "\r\n\x00")
 }

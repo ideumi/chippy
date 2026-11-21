@@ -9,6 +9,7 @@ package vm
 import (
 	"chip-go/internal/bytecode"
 	"chip-go/internal/constants"
+	"chip-go/internal/context"
 	"chip-go/internal/errors"
 	"chip-go/internal/values"
 	"fmt"
@@ -74,12 +75,12 @@ func (f *Function) Execute(args []values.Value, ctx values.Ctx) values.RuntimeRe
 		return res.Failure(err)
 	}
 
-	vm := NewVM(f.template.Chunk, f.globals)
+	vm := NewVM(f.template.Chunk, f.globals, context.FunctionRun)
 	frame := &vm.frames[0]
 	frame.closure = f
 	copy(frame.locals, args)
 
-	value, err := vm.Run()
+	value, _, err := vm.Run()
 
 	if err != nil {
 		return res.Failure(err)

@@ -39,10 +39,14 @@ func loadFunction(args []values.Value, ctx values.Ctx) values.RuntimeResult {
 		return res.FailAt(1, "Modena not available")
 	}
 
-	_, err = mod.Run(filename.Value, string(content))
+	value, halted, err := mod.Run(filename.Value, string(content))
 
 	if err != nil {
 		return res.FailAt(1, "Failed to execute file \""+filename.Value+"\":\n"+err.Error())
+	}
+
+	if halted {
+		return res.Halt(value)
 	}
 
 	return res.Success(values.NewString(constants.STR_OK))

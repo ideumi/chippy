@@ -1,10 +1,10 @@
 /*
  *
- * Chippy - internal/optional/http/base64encode.go
+ * Chippy - internal/optional/base64/encode.go
  *
  */
 
-package http
+package base64
 
 import (
 	"chip-go/internal/builtins/shared"
@@ -18,14 +18,14 @@ func base64encodeFunction(args []values.Value, ctx values.Ctx) values.RuntimeRes
 
 	if len(args) != 1 {
 		return res.Fail(
-			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "base64encode"), 1, "bytes"))
+			shared.Errors.InvalidArgCountWithHint(optional.Prefixed(OptionalName, "encode"), 1, "bytes"))
 	}
 
 	dataBytes, ok := values.AsBytes(args[0])
 
 	if !ok {
 		return res.FailAt(1,
-			shared.Errors.InvalidArgTypeWithHint(optional.Prefixed(OptionalName, "base64encode"), shared.TypeBytes, "bytes"))
+			shared.Errors.InvalidArgTypeWithHint(optional.Prefixed(OptionalName, "encode"), shared.TypeBytes, "bytes"))
 	}
 
 	encoded := base64.StdEncoding.EncodeToString(dataBytes.Data)

@@ -159,10 +159,14 @@ func executeCombine(combineFile string) error {
 	mod := modena.New()
 
 	// Run combine.chp
-	_, err = mod.Run(combineFile, string(content))
+	value, halted, err := mod.Run(combineFile, string(content))
 
 	if err != nil {
 		return fmt.Errorf("executing combine file '%s': %w", combineFile, err)
+	}
+
+	if halted {
+		exitWithResult(value)
 	}
 
 	// Extract configuration from context

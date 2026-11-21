@@ -163,13 +163,22 @@ func extractSymbols(filename string) ([]SymbolInfo, error) {
 	node := parseResult.GetNode()
 	symbols := []SymbolInfo{}
 
-	walkAST(node, filename, &symbols)
+	program, ok := node.(*ast.BlockNode)
+
+	if !ok {
+		walkAST(node, filename, &symbols)
+	} else {
+		for _, stmt := range program.ElementNodes {
+			walkAST(stmt, filename, &symbols)
+		}
+	}
 
 	return symbols, nil
 }
 
-// Walk the AST and extract file scope symbol idfs. See 'chippy doc scoping' to
-// understand the scoping desicions here better
+// Record the global a top level statement declares, if any. The walk stops at
+// every scope boundary, since bodies are function or block scope. See
+// 'chippy doc scoping'
 func walkAST(node ast.Node, filename string, symbols *[]SymbolInfo) {
 	if node == nil {
 		return
@@ -191,7 +200,6 @@ func walkAST(node ast.Node, filename string, symbols *[]SymbolInfo) {
 				SymType: "function",
 			})
 		}
-		// Function body has isolated scope, stop
 
 	case *ast.VarAssignNode:
 		name, ok := typed.VarNameToken.Value.(string)
@@ -206,33 +214,5 @@ func walkAST(node ast.Node, filename string, symbols *[]SymbolInfo) {
 			Line:    typed.VarNameToken.PosStart.DisplayLine(),
 			SymType: "variable",
 		})
-
-	// Jump in since we are still in file scope:
-	case *ast.IfNode:
-		for _, caseClause := range typed.Cases {
-			walkAST(caseClause.Body, filename, symbols)
-		}
-
-		if typed.ElseCase != nil {
-			walkAST(typed.ElseCase, filename, symbols)
-		}
-
-	case *ast.ForNode:
-		walkAST(typed.BodyNode, filename, symbols)
-
-	case *ast.WhileNode:
-		walkAST(typed.BodyNode, filename, symbols)
-
-	case *ast.ListNode:
-		for _, elem := range typed.ElementNodes {
-			walkAST(elem, filename, symbols)
-		}
-
-	case *ast.BlockNode:
-		// Block bodies and the top-level program are file scope, keep
-		// walking
-		for _, elem := range typed.ElementNodes {
-			walkAST(elem, filename, symbols)
-		}
 	}
 }

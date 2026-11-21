@@ -16,7 +16,6 @@ func GetBuiltins() map[string]values.Value {
 	return map[string]values.Value{
 
 		// System functions
-		"off":     values.NewBuiltInFunction("off", offFunction),
 		"error":   values.NewBuiltInFunction("error", errorFunction),
 		"args":    values.NewBuiltInFunction("args", argsFunction),
 		"load":    values.NewBuiltInFunction("load", loadFunction),

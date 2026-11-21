@@ -131,7 +131,7 @@ Run `sudo ./uninstall.sh` from the extracted tarball directory (or `./uninstall.
 ## Building from Source
 
 Requirements:
-- Go 1.26.5 or later
+- Go 1.27.4 or later
 - git
 - make
 
@@ -161,6 +161,12 @@ make release-all
 | TBA            | 1.3.x         | TBD           | TBD                   | /              | /           | TBA
 
 For detailed information on what changed between releases see the [changelogs](changelog/).
+
+## Security
+
+If you find a security issue, please report it using GitHub's private vulnerability reporting:
+
+[Report a vulnerability](https://github.com/ideumi/chippy/security/advisories/new)
 
 ## License
 

@@ -1,0 +1,54 @@
+What's New:
+
+	- cmd:
+		- repl: "off" can no longer be used as a keyword to exit the repl
+		- updated for new return and exiting mechanisms
+
+	- combine:
+		- updated for new return and exiting mechanisms
+		- bug: validator: combine's collision detector counted block scope vars as globals
+
+	- modena:
+		- a return outside any function now ends the process with its value as the exit code
+		- a more gentle and cleaner exiting mechanism has been added
+
+	- builtins:
+		- off(exitCode) has been removed
+		- load(filename): updated for new return and exiting mechanisms
+
+	- corelib:
+		- added libbase64.chh
+		- libtls.chh: added TLSSERVER and TLSCLIENT constants
+
+		- libhttp.chh:
+			- removed HttpBase64Encode(bytes) and HttpBase64Decode(text)
+
+			- bug: fixed a CRLF injection / HTTP response splitting vulnerability
+				- a handler response with a CR, LF or NUL in a header key or value, or with a non-number statusCode, now becomes 500
+
+			- bug: fixed an unbounded memory issue
+				- headers as well as body sizes are now capped by default, see HTTPMAXHEADERS and HTTPMAXBODY
+				- if the header or body cap is exceeded, err will be returned and the connection will be closed
+
+	- optionals:
+		- added base64 optional
+		- moved base64 encoding / decoding out of the http optional into the new base64 optional
+
+		- http: formatrequest: bug: fixed a CRLF injection / HTTP response splitting vulnerability
+			- a method, path, header key or value containing a CR, LF or NUL is now rejected
+
+	- other:
+		- go.mod bumped to 1.27.4
+		- minor cleanups
+
+FYI Breaking:
+
+	- the off(exitCode) builtin was removed
+		- there is no direct 1:1 replacement, your code will have to be updated, see 'chippy doc exit'
+
+	- HttpBase64Encode(bytes) and HttpBase64Decode(text) were moved from libhttp.chh to libbase64.chh
+		- your code will need to be updated
+		- use Base64Encode(bytes) and Base64Decode(text)
+
+	- header and body sizes are now capped by default in libhttp.chh
+		- if you send or process large header or body sizes you might need to adjust the variables HTTPMAXHEADERS and HTTPMAXBODY respectively to avoid unexpected connection closures
