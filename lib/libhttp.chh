@@ -9,17 +9,11 @@ load("libnet.chh");
 load("libtls.chh");
 load("libstrings.chh");
 
-#@ <HTTPMAXBODY>
-#@ (2026-11-12)
-#@ Maximum size in bytes of the body of a request or response read from the peer
+#@ <HTTPMAXSIZE>
+#@ (2026-11-22)
+#@ Maximum size in bytes of one HTTP request or response read from the peer
 
-var HTTPMAXBODY = 67108864;
-
-#@ <HTTPMAXHEADERS>
-#@ (2026-11-12)
-#@ Maximum size in bytes of the header section read from the peer
-
-var HTTPMAXHEADERS = 65536;
+var HTTPMAXSIZE = 64 * 1024 * 1024;
 
 #@ <HttpGet(url, headers)>
 #@ V-1.0.1 (2026-01-22)
@@ -398,9 +392,9 @@ func _HttpReadHeaders_(conn, isTLS, bufSize)
 
 		if iserr(chunk) or len(chunk) == 0 { break; }
 
-		if len(buf) + len(chunk) > HTTPMAXHEADERS { return err; }
-
 		buf = buf + chunk;
+
+		if len(buf) > HTTPMAXSIZE { return err; }
 
 		if not iserr(indexof(unpack(buf), "\r\n\r\n")) { return buf; }
 	}
@@ -544,7 +538,6 @@ func _HttpParseHex_(hexString)
 func _HttpReadChunkedBody_(conn, isTLS, responseBytes, currentBody)
 {
 	var pos = 1;
-	var bodyBytesRead = len(currentBody);
 
 	while true
 	{
@@ -568,11 +561,11 @@ func _HttpReadChunkedBody_(conn, isTLS, responseBytes, currentBody)
 
 			if iserr(chunk) or len(chunk) == 0 { break; }
 
-			if bodyBytesRead + len(chunk) > HTTPMAXBODY { return err; }
-
 			responseBytes = responseBytes + chunk;
+
+			if len(responseBytes) > HTTPMAXSIZE { return err; }
+
 			currentBody = currentBody + chunk;
-			bodyBytesRead = bodyBytesRead + len(chunk);
 		}
 
 		if iserr(crlfBytePos) { break; }
@@ -597,11 +590,11 @@ func _HttpReadChunkedBody_(conn, isTLS, responseBytes, currentBody)
 
 			if iserr(chunk) or len(chunk) == 0 { break; }
 
-			if bodyBytesRead + len(chunk) > HTTPMAXBODY { return err; }
-
 			responseBytes = responseBytes + chunk;
+
+			if len(responseBytes) > HTTPMAXSIZE { return err; }
+
 			currentBody = currentBody + chunk;
-			bodyBytesRead = bodyBytesRead + len(chunk);
 		}
 
 		if len(currentBody) < needed { break; }
@@ -623,7 +616,6 @@ func _HttpReadBody_(conn, isTLS, responseBytes, currentBody, length)
 {
 	var contentLength = length["contentLength"];
 	var isChunked = length["isChunked"];
-	var bodyBytesRead = len(currentBody);
 
 	# RFC 9112 6.3: Transfer-Encoding overrides Content-Length
 	if not iserr(contentLength) and not isChunked
@@ -636,11 +628,11 @@ func _HttpReadBody_(conn, isTLS, responseBytes, currentBody, length)
 
 			if iserr(chunk) or len(chunk) == 0 { break; }
 
-			if bodyBytesRead + len(chunk) > HTTPMAXBODY { return err; }
-
 			responseBytes = responseBytes + chunk;
+
+			if len(responseBytes) > HTTPMAXSIZE { return err; }
+
 			bodyBytesNeeded = bodyBytesNeeded - len(chunk);
-			bodyBytesRead = bodyBytesRead + len(chunk);
 		}
 
 		return responseBytes;
@@ -657,10 +649,9 @@ func _HttpReadBody_(conn, isTLS, responseBytes, currentBody, length)
 
 		if iserr(chunk) or len(chunk) == 0 { break; }
 
-		if bodyBytesRead + len(chunk) > HTTPMAXBODY { return err; }
-
 		responseBytes = responseBytes + chunk;
-		bodyBytesRead = bodyBytesRead + len(chunk);
+
+		if len(responseBytes) > HTTPMAXSIZE { return err; }
 	}
 
 	return responseBytes;
@@ -785,13 +776,13 @@ func HttpRequestFollow(method, url, headers, body, maxRedirects)
 				return err;
 			}
 
-			if len(responseBytes) + len(chunk) > HTTPMAXHEADERS
+			responseBytes = responseBytes + chunk;
+
+			if len(responseBytes) > HTTPMAXSIZE
 			{
 				_HttpClose_(conn, isTLS);
 				return err;
 			}
-
-			responseBytes = responseBytes + chunk;
 		}
 
 		parsedResp = _http_parseresponse_(responseBytes);
@@ -914,8 +905,8 @@ func _HttpReadRequest_(conn, isTLS)
 	}
 
 	var headerByteLen = len(pack(headerSection));
-	var bodyBytesRead = len(requestBytes) - (headerByteLen + 4);
-	var bodyNeeded = contentLength - bodyBytesRead;
+	var bodyBytesOverread = len(requestBytes) - (headerByteLen + 4);
+	var bodyNeeded = contentLength - bodyBytesOverread;
 
 	while bodyNeeded > 0
 	{
@@ -923,11 +914,11 @@ func _HttpReadRequest_(conn, isTLS)
 
 		if iserr(chunk) or len(chunk) == 0 { break; }
 
-		if bodyBytesRead + len(chunk) > HTTPMAXBODY { return err; }
-
 		requestBytes = requestBytes + chunk;
+
+		if len(requestBytes) > HTTPMAXSIZE { return err; }
+
 		bodyNeeded = bodyNeeded - len(chunk);
-		bodyBytesRead = bodyBytesRead + len(chunk);
 	}
 
 	return requestBytes;
