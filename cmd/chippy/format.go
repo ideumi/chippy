@@ -10,8 +10,6 @@ import (
 	"chip-go/cmd/chippy/formatter"
 	"fmt"
 	"os"
-	"path/filepath"
-	"strings"
 )
 
 func handleFormatCommand(args []string) {
@@ -51,19 +49,7 @@ func formatAllFiles(dir string, checkOnly bool) {
 		os.Exit(1)
 	}
 
-	var files []string
-
-	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if !info.IsDir() && (strings.HasSuffix(path, ".chp") || strings.HasSuffix(path, ".chh")) {
-			files = append(files, path)
-		}
-
-		return nil
-	})
+	files, err := walkChippyFiles(dir)
 
 	if err != nil {
 		fmt.Printf("Error: can't walk directory: %v\n", err)

@@ -11,8 +11,6 @@ import (
 	"chip-go/internal/parser"
 	"fmt"
 	"os"
-	"path/filepath"
-	"strings"
 )
 
 func handleCheckCommand(args []string) {
@@ -56,19 +54,7 @@ func checkAllFiles(dir string) {
 		os.Exit(1)
 	}
 
-	var files []string
-
-	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if !info.IsDir() && (strings.HasSuffix(path, ".chp") || strings.HasSuffix(path, ".chh")) {
-			files = append(files, path)
-		}
-
-		return nil
-	})
+	files, err := walkChippyFiles(dir)
 
 	if err != nil {
 		fmt.Printf("Error: can't walk directory: %v\n", err)
