@@ -2,6 +2,17 @@
 
 The Chippy documentation system supports both static ''.chpdoc'' files and symbol extraction from source files.
 
+*Usage*
+
+- ''chippy doc''                    List all documentation topics
+- ''chippy doc <topic>''            View documentation for a topic
+
+- ''chippy doc <file.chpdoc>''      Render chpdoc to terminal
+
+- ''chippy doc <file>''             List symbols in source file
+- ''chippy doc <file> <symbol>''    Show symbol documentation
+- ''chippy doc <file> all''         Show all symbol documentation
+
 *Search Order*
 
 The documentation system searches paths in the following priority order:
@@ -9,17 +20,6 @@ The documentation system searches paths in the following priority order:
 1. ''doc/'' - Local development directory
 2. ''~/.local/share/chippy/doc/'' - User-local documentation
 3. ''/usr/share/doc/chippy'' - System documentation (managed by installer)
-
-*Usage*
-
-'''
-chippy doc                        # List all available documents
-chippy doc <document>             # Show specific document
-chippy doc <file.chpdoc>          # Render .chpdoc file directly
-chippy doc <file>                 # List symbols in source file
-chippy doc <file> <symbol>        # Show symbol documentation
-chippy doc <file> all             # Show all symbol documentation
-'''
 
 *Document Types*
 
