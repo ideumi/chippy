@@ -1,6 +1,6 @@
 /*
  *
- * Shared file helpers
+ * Shared helpers
  *
  */
 
