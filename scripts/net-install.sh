@@ -26,9 +26,12 @@ else
 fi
 
 echo "Fetching latest release info..."
+
 TAG=$(curl -fsSL "https://codeberg.org/api/v1/repos/${REPO}/releases" \
 	| grep -o '"tag_name":"[^"]*"' | head -1 | cut -d'"' -f4)
+
 [ -n "$TAG" ] || die "Could not determine latest version"
+
 VERSION="${TAG#V-}"
 echo "Latest: $TAG"
 
@@ -43,12 +46,14 @@ curl -fsSL -o "$TMPDIR/$TARBALL" "$URL" || die "Download failed: $URL"
 
 echo "Extracting..."
 tar -xf "$TMPDIR/$TARBALL" -C "$TMPDIR"
+
 EXTRACTED="$TMPDIR/${PREFIX}-${VERSION}-linux-${ARCH}"
 [ -d "$EXTRACTED" ] || die "Expected directory not found after extract: $EXTRACTED"
 
 [ -f "$EXTRACTED/install.sh" ] || die "Bundled install.sh not found in tarball"
 
 cd "$EXTRACTED"
+
 $SUDO sh ./install.sh
 
 echo "Run 'chippy --help' to get started."

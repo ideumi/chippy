@@ -8,10 +8,15 @@ build:
 	./chippy check all installer/
 	./chippy check all lib/
 	./chippy check all misc/
+	./chippy check all tests/
 
 	./chippy format check all installer/
 	./chippy format check all lib/
 	./chippy format check all misc/
+	./chippy format check all tests/
+
+test: build
+	cd tests && ../chippy combine test
 
 release:
 	@mkdir -p rel

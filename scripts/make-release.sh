@@ -25,13 +25,22 @@ mkdir -p "${RELEASE_DIR}/content/lib" "${RELEASE_DIR}/content/doc"
 if [ -n "${TARGET_GOARCH}" ] && [ "${TARGET_GOARCH}" != "$(go env GOARCH)" ]; then
     # Need native chippy for combine
     run_cmd "cd .. && ${GO_BUILD} -o chippy-native cmd/chippy/*.go && cd rel"
-    run_cmd "cd .. && ./chippy-native check all installer/ && ./chippy-native check all lib/ && ./chippy-native check all misc/ && cd rel"
+
+    for dir in installer/ lib/ misc/ tests/
+    do
+        run_cmd "cd .. && ./chippy-native check all ${dir} && ./chippy-native format check all ${dir} && cd rel"
+    done
+
     run_cmd "cd .. && GOARCH=${TARGET_GOARCH} ${GO_BUILD} -o chippy cmd/chippy/*.go && cd rel"
+
     [ -f "../chippy" ] || die "chippy binary not found after build"
+
     run_cmd "cd ../installer && ../chippy-native combine && cd ../rel"
+    run_cmd "cd ../tests && ../chippy-native combine test && cd ../rel"
+
     rm ../chippy-native
 else
-    run_cmd "cd .. && make build && cd rel"
+    run_cmd "cd .. && make build test && cd rel"
     [ -f "../chippy" ] || die "chippy binary not found after build"
     run_cmd "cd ../installer && ../chippy combine && cd ../rel"
 fi
@@ -41,15 +50,19 @@ fi
 # Copy files
 cp ../chippy "${RELEASE_DIR}/content/"
 [ -d "../lib" ] || die "lib directory not found"
+
 cp ../lib/*.chh "${RELEASE_DIR}/content/lib/"
 [ -d "../doc" ] && cp -r ../doc/* "${RELEASE_DIR}/content/doc/"
+
 cp ../installer/out/installer "${RELEASE_DIR}/"
 
 # Copy scripts and licenses
 cp ../scripts/install-template.sh "${RELEASE_DIR}/install.sh"
 cp ../scripts/uninstall-template.sh "${RELEASE_DIR}/uninstall.sh"
+
 chmod +x "${RELEASE_DIR}/install.sh"
 chmod +x "${RELEASE_DIR}/uninstall.sh"
+
 [ -f "../LICENCE.txt" ] && cp ../LICENCE.txt "${RELEASE_DIR}/"
 [ -f "../LICENCES_THIRDPARTY.txt" ] && cp ../LICENCES_THIRDPARTY.txt "${RELEASE_DIR}/"
 
