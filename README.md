@@ -45,6 +45,7 @@ curl -fsSL https://codeberg.org/ideumi/chippy/raw/branch/main/scripts/net-instal
 - TLS sockets
 - Hashing (SHA-2, SHA-3 etc.)
 - Regular expressions
+- Automated testing
 - ....
 
 **Built-in Primitives**
@@ -75,6 +76,7 @@ curl -fsSL https://codeberg.org/ideumi/chippy/raw/branch/main/scripts/net-instal
 - Built-in formatter (`chippy format`)
 - Build system (`chippy combine`) with dependency resolution and bundling
     - Syntax validation and symbol collision detection
+    - Automated test runner (`chippy combine test`)
 - Built-in bytecode compiler (`chippy compile`) and disassembler (`chippy disasm`)
 
 **Hello World Sample**
