@@ -1,0 +1,43 @@
+#!/usr/bin/chippy
+#
+# Combine configuration file
+#
+
+# Metadata
+
+var Project = "Chippy Tests";
+var Version = "1.0.0";
+var Licence = "../LICENCE.txt";
+# var Output = "";
+
+# Entry point
+
+# var Source = "";
+
+# Search paths for dependencies
+
+var Paths = [];
+Paths = Paths + ["../lib"];
+
+# Add user-local library path if HOME is available
+
+var homePath = getenv("HOME");
+
+if not iserr(homePath)
+{
+	Paths = Paths + [homePath + "/.local/share/chippy/lib"];
+}
+
+Paths = Paths + ["/usr/lib/chippy"];
+
+# Dependencies combine shouldn't bundle and just keep as loads
+
+var External = [];
+
+# Options
+
+var Compile = true;
+var AddShebang = true;
+
+var StripComments = true;
+var StripWhitespace = true;
