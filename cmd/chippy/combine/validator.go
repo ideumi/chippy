@@ -5,7 +5,7 @@
  *
  */
 
-package safety
+package combine
 
 import (
 	"chip-go/internal/ast"

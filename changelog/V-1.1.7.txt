@@ -1,0 +1,35 @@
+What's New:
+
+	- combine:
+		- code cleanups and streamlining
+
+		- added new combine test runner
+			- added the "test" subcommand, see 'chippy doc testing'
+				- add "*-test.chp" files with "Test*" functions to your project, the test runner finds and runs them automatically
+					- passed and failed tests are displayed in the CLI with color and formatting
+
+		- added the "run" subcommand
+			- runs a combine project directly without writing a bundle, see 'chippy doc combine'
+
+	- corelib:
+		- added libtest.chh
+
+		- libhttp.chh:
+			- bug: the HTTPMAXHEADERS and HTTPMAXBODY size checks could reject a valid request or accept an oversized one
+				- HTTPMAXHEADERS and HTTPMAXBODY were replaced with HTTPMAXSIZE
+
+	- modena: the engine can now execute a named global function directly with no arguments
+
+	- tests:
+		- added tests/
+		- added tests for libtest.chh
+
+	- misc:
+		- updated build system
+			- added "test" target
+			- "release" and "release-all" targets now run tests
+
+FYI Breaking:
+
+	- HTTPMAXHEADERS and HTTPMAXBODY were removed from libhttp.chh, use HTTPMAXSIZE instead
+		- HTTPMAXSIZE is the total size limit of one request or response

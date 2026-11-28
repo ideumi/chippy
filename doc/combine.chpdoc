@@ -1,16 +1,25 @@
 *combine* | V-$CHIPVR ($CHIPCN)
 
-Chip's build system
-
-Bundles multiple Chippy source files into a single executable program based on the configuration in ''combine.chp''.
-Programs, properly built using combine have no dependencies outside of the ''chippy'' interpreter itself.
+Chippy's bundler and build system
 
 *Usage:*
-- ''chippy combine'' - Process default ''combine.chp'' configuration
-- ''chippy combine path/to/config.chp'' - Process specific configuration file
-- ''chippy combine new'' - Generate new template ''combine.chp'' file
+
+- ''chippy combine''                          Bundle a project
+- ''chippy combine <config>''                 Bundle a project with an explicit combine config file
+- ''chippy combine new''                      Create a new combine.chp file
+
+- ''chippy combine test''                     Run the project's test suite
+- ''chippy combine test <file>''              Run the tests in one test file
+- ''chippy combine test <pattern>''           Run the tests whose names match a pattern
+- ''chippy combine test <file> <pattern>''    Run the matching tests in one test file
+- ''chippy combine <config> test ...''        Any of the above with an explicit combine config file
+
+- ''chippy combine run''                      Run the project without writing a bundle
+- ''chippy combine run <args...>''            Run the project with command line arguments
+- ''chippy combine <config> run <args...>''   Any of the above with an explicit combine config file
 
 *Configuration:*
+
 - ''Project'': Output program name
 - ''Version'': Program version string
 - ''Licence'': Path to license file to include
@@ -24,6 +33,7 @@ Programs, properly built using combine have no dependencies outside of the ''chi
 - ''AddShebang'': Add ''#!/usr/bin/chippy'' shebang to output, source or bytecode
 
 *What it does:*
+
 - Automatic dependency resolution via ''load(filename)'' statements
 - Circular dependency prevention
 - Licence header insertion (when configured)
@@ -44,6 +54,23 @@ With ''Compile'' set to ''true'', combine bundles the sources exactly the same w
 
 Dependencies listed in ''External'' stay as ''load(filename)'' calls in both cases, and are resolved when the program runs.
 
+*Running without bundling:*
+
+''chippy combine run'' resolves the exact same dependency graph as a regular bundle build, and then runs the program. It runs every dependency in topological order, under their own paths. After this, it runs the file at ''Source''.
+
+This only honours the options ''Source'', ''Paths'' and ''External'', as nothing is written to disk.
+
+Because each file runs under its real path, RTErrors point at the actual files and lines on disk instead of a generated bundle. This makes it somewhat better for debugging.
+
+*Testing*
+
+Please see ''chippy doc testing''.
+
 *Returns:*
-- Creates bundled executable file
+
 - Exit code 0 on success, non-zero on failure
+
+*Recommended Reading*
+
+''chippy doc testing''
+''chippy doc chpdoc''

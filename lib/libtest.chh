@@ -1,0 +1,405 @@
+#!/usr/bin/chippy
+#
+# corelib - libtest.chh
+#
+
+load("libprint.chh");
+load("libstrings.chh");
+
+#@ <TESTPASS>
+#@ (2026-11-26)
+#@ Value that marks a test as PASSed
+
+var TESTPASS = 0;
+
+#@ <TESTFAIL>
+#@ (2026-11-26)
+#@ Value that marks a test as FAILed
+
+var TESTFAIL = 1;
+
+# <_TestPrintValue_(value)>
+# V-1.0.0 (2026-11-25)
+#
+# Renders ''value'' for assert reports.
+
+func _TestPrintValue_(value)
+{
+	var text = str(value);
+
+	if type(value) == "string" { return "\"" + text + "\""; }
+
+	return text;
+}
+
+# <_TestReport_(path, actual, expected, note, showTypes)>
+# V-1.0.0 (2026-11-25)
+#
+# Prints an assert mismatch report to ''STDERR''. ''path'' is the optional location
+# inside a nested value. ''note'' is an optional extra line. ''showTypes'' appends
+# the type of both values.
+
+func _TestReport_(path, actual, expected, note, showTypes)
+{
+	var text = "assert mismatch";
+
+	if path != "" { text = text + " at " + path; }
+
+	text = text + ":\n  actual:   " + _TestPrintValue_(actual);
+
+	if showTypes { text = text + " (" + type(actual) + ")"; }
+
+	text = text + "\n  expected: " + _TestPrintValue_(expected);
+
+	if showTypes { text = text + " (" + type(expected) + ")"; }
+
+	if note != "" { text = text + "\n  " + note; }
+
+	Printeln(text);
+}
+
+#@ <Assert(actual, expected)>
+#@ V-1.0.0 (2026-11-26)
+#@
+#@ Deep-compares ''actual'' against ''expected'' and returns ''true'' when they
+#@ are equal, and ''false'' when they differ. On a mismatch, a diff is printed to
+#@ ''STDERR''.
+
+func Assert(actual, expected)
+{
+	var box = m[];
+
+	box["walk"] = func(a, e, path)
+	{
+		var aType = type(a);
+		var eType = type(e);
+
+		if aType != eType
+		{
+			_TestReport_(path, a, e, "", true);
+
+			return false;
+		}
+
+		if aType == "function" or aType == "builtin"
+		{
+			_TestReport_(path, a, e, "functions and builtins are not comparable", false);
+
+			return false;
+		}
+
+		if aType == "number" or aType == "string"
+		{
+			if a == e { return true; }
+
+			_TestReport_(path, a, e, "", false);
+
+			return false;
+		}
+
+		# A list or map may hold values of mixed types, or functions, so walk
+		# containers element by element
+		if aType == "bytes" or aType == "list"
+		{
+			if len(a) != len(e)
+			{
+				_TestReport_(path, a, e, "lengths differ: " + str(len(a)) + " vs " + str(len(e)), false);
+
+				return false;
+			}
+
+			for index = 1 to len(a)
+			{
+				if not box["walk"](a[index], e[index], path + "[" + str(index) + "]")
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		if aType == "map"
+		{
+			var aKeys = keys(a);
+			var eKeys = keys(e);
+
+			if len(aKeys) != len(eKeys)
+			{
+				_TestReport_(path, a, e, "key counts differ: " + str(len(aKeys)) + " vs " + str(len(eKeys)), false);
+
+				return false;
+			}
+
+			for keyIndex = 1 to len(aKeys)
+			{
+				var key = aKeys[keyIndex];
+
+				if not has(e, key)
+				{
+					_TestReport_(path, a, e, "key \"" + key + "\" set in actual, not in expected", false);
+
+					return false;
+				}
+
+				if not box["walk"](a[key], e[key], path + "[" + "\"" + key + "\"" + "]")
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		_TestReport_(path, a, e, "type " + aType + " is not comparable", true);
+
+		return false;
+	};
+
+	return box["walk"](actual, expected, "");
+}
+
+#@ <Fail(message)>
+#@ V-1.0.0 (2026-11-25)
+#@
+#@ Fails the test immediately with ''message''.
+
+func Fail(message)
+{
+	if type(message) != "string" { message = str(message); }
+
+	error("FAIL: " + message);
+}
+
+#@ <AssertErr(value)>
+#@ V-1.0.0 (2026-11-25)
+#@
+#@ Returns ''true'' when ''value'' is ''err'', and ''false'' otherwise. On a
+#@ mismatch, a diff is printed to ''STDERR''.
+
+func AssertErr(value)
+{
+	if iserr(value) { return true; }
+
+	_TestReport_("", value, err, "", false);
+
+	return false;
+}
+
+#@ <AssertOk(value)>
+#@ V-1.0.0 (2026-11-25)
+#@
+#@ Returns ''true'' when ''value'' is ''ok'', and ''false'' otherwise. On a
+#@ mismatch, a diff is printed to ''STDERR''.
+
+func AssertOk(value)
+{
+	if isok(value) { return true; }
+
+	_TestReport_("", value, ok, "", false);
+
+	return false;
+}
+
+#@ <AssertTrue(condition)>
+#@ V-1.0.0 (2026-11-25)
+#@
+#@ Returns ''true'' when ''condition'' is true, and ''false'' otherwise. On a
+#@ mismatch, a diff is printed to ''STDERR''.
+
+func AssertTrue(condition)
+{
+	if type(condition) != "number"
+	{
+		_TestReport_("", condition, true, "condition must be a boolean", true);
+		return false;
+	}
+
+	if condition == true { return true; }
+
+	_TestReport_("", condition, true, "", false);
+
+	return false;
+}
+
+#@ <AssertFalse(condition)>
+#@ V-1.0.0 (2026-11-25)
+#@
+#@ Returns ''true'' when ''condition'' is false, and ''false'' otherwise. On a
+#@ mismatch, a diff is printed to ''STDERR''.
+
+func AssertFalse(condition)
+{
+	if type(condition) != "number"
+	{
+		_TestReport_("", condition, false, "condition must be a boolean", true);
+		return false;
+	}
+
+	if condition == false { return true; }
+
+	_TestReport_("", condition, false, "", false);
+
+	return false;
+}
+
+#@ <AssertType(value, typeName)>
+#@ V-1.0.0 (2026-11-25)
+#@
+#@ Returns ''true'' when the ''type(value)'' of ''value'' is ''typeName''. On a
+#@ mismatch, a diff is printed to ''STDERR''.
+
+func AssertType(value, typeName)
+{
+	if type(typeName) != "string"
+	{
+		_TestReport_("", typeName, "string", "typeName must be a string", true);
+
+		return false;
+	}
+
+	var actual = type(value);
+
+	if actual == typeName { return true; }
+
+	_TestReport_("", actual, typeName, "", false);
+
+	return false;
+}
+
+#@ <AssertLen(value, length)>
+#@ V-1.0.0 (2026-11-25)
+#@
+#@ Returns ''true'' when ''len(value)'' equals ''length''. On a mismatch, a diff
+#@ is printed to ''STDERR''.
+
+func AssertLen(value, length)
+{
+	var vType = type(value);
+
+	if vType != "string" and vType != "list" and vType != "bytes" and vType != "map"
+	{
+		_TestReport_("", value, "a string, list, bytes, or map", "value must be a string, list, bytes, or map", true);
+
+		return false;
+	}
+
+	if type(length) != "number"
+	{
+		_TestReport_("", length, 0, "length must be a number", true);
+
+		return false;
+	}
+
+	var actual = len(value);
+
+	if actual == length { return true; }
+
+	_TestReport_("", actual, length, "", false);
+
+	return false;
+}
+
+#@ <AssertHas(container, needle)>
+#@ V-1.0.0 (2026-11-25)
+#@
+#@ Returns ''true'' when ''container'' contains ''needle''. On a mismatch, a diff
+#@ is printed to ''STDERR''.
+
+func AssertHas(container, needle)
+{
+	var cType = type(container);
+
+	if cType != "string" and cType != "list" and cType != "bytes" and cType != "map"
+	{
+		_TestReport_("", container, "a string, list, bytes, or map", "container must be a string, list, bytes, or map", true);
+
+		return false;
+	}
+
+	if (cType == "string" or cType == "map") and type(needle) != "string"
+	{
+		_TestReport_("", needle, "a string", "needle must be a string", true);
+
+		return false;
+	}
+
+	if cType == "bytes" and type(needle) != "number"
+	{
+		_TestReport_("", needle, 0, "needle must be a number", true);
+
+		return false;
+	}
+
+	var actual = has(container, needle);
+
+	if iserr(actual)
+	{
+		_TestReport_("", container, needle, "needle is an empty string", false);
+		return false;
+	}
+
+	if actual { return true; }
+
+	_TestReport_("", container, needle, "needle not found in container", false);
+
+	return false;
+}
+
+#@ <AssertStartsWith(value, prefix)>
+#@ V-1.0.0 (2026-11-25)
+#@
+#@ Returns ''true'' when ''value'' starts with ''prefix''. On a mismatch, a diff
+#@ is printed to ''STDERR''.
+
+func AssertStartsWith(value, prefix)
+{
+	if type(value) != "string"
+	{
+		_TestReport_("", value, "a string", "value must be a string", true);
+
+		return false;
+	}
+
+	if type(prefix) != "string"
+	{
+		_TestReport_("", prefix, "a string", "prefix must be a string", true);
+
+		return false;
+	}
+
+	if StartsWith(value, prefix) { return true; }
+
+	_TestReport_("", value, prefix, "value does not start with prefix", false);
+
+	return false;
+}
+
+#@ <AssertEndsWith(value, suffix)>
+#@ V-1.0.0 (2026-11-25)
+#@
+#@ Returns ''true'' when ''value'' ends with ''suffix''. On a mismatch, a diff is
+#@ printed to ''STDERR''.
+
+func AssertEndsWith(value, suffix)
+{
+	if type(value) != "string"
+	{
+		_TestReport_("", value, "a string", "value must be a string", true);
+
+		return false;
+	}
+
+	if type(suffix) != "string"
+	{
+		_TestReport_("", suffix, "a string", "suffix must be a string", true);
+
+		return false;
+	}
+
+	if EndsWith(value, suffix) { return true; }
+
+	_TestReport_("", value, suffix, "value does not end with suffix", false);
+
+	return false;
+}

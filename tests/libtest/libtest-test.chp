@@ -1,0 +1,285 @@
+#!/usr/bin/chippy
+#
+# tests - libtest-test.chp
+#
+
+load("libtest.chh");
+
+func ProbeFunction()
+{
+	return 1;
+}
+
+func TestAssert()
+{
+	if not Assert(TESTPASS, 0) { return TESTFAIL; }
+	if not Assert(TESTFAIL, 1) { return TESTFAIL; }
+
+	if not Assert(1 + 1, 2) { return TESTFAIL; }
+	if not Assert("same", "same") { return TESTFAIL; }
+	if not Assert(1.5, 1.5) { return TESTFAIL; }
+	if not Assert(b[1, 2, 3], b[1, 2, 3]) { return TESTFAIL; }
+
+	var actual = m["a": [1, "x", b[1, 2]], "b": m["c": 3]];
+	var expected = m["b": m["c": 3], "a": [1, "x", b[1, 2]]];
+
+	if not Assert(actual, expected) { return TESTFAIL; }
+
+	# Special values compare equal to themselves
+
+	if not Assert(err, err) { return TESTFAIL; }
+	if not Assert(ok, ok) { return TESTFAIL; }
+	if not Assert(null, 0) { return TESTFAIL; }
+	if not Assert(true, 1) { return TESTFAIL; }
+	if not Assert(false, 0) { return TESTFAIL; }
+	if not Assert(m["a": err], m["a": err]) { return TESTFAIL; }
+
+	if Assert(m["a": [1, 2]], m["a": [1, 9]]) { return TESTFAIL; }
+	if Assert([1, 2], [1, 2, 3]) { return TESTFAIL; }
+	if Assert(m["a": 1, "b": 2], m["a": 1]) { return TESTFAIL; }
+	if Assert(m["a": 1], m["a": 1, "b": 2]) { return TESTFAIL; }
+	if Assert(m["a": 1, "b": 2], m["a": 1, "c": 3]) { return TESTFAIL; }
+	if Assert(b[1, 2, 9], b[1, 2, 3]) { return TESTFAIL; }
+	if Assert("same", "Same") { return TESTFAIL; }
+	if Assert(err, ok) { return TESTFAIL; }
+	if Assert(err, 1) { return TESTFAIL; }
+	if Assert(ok, "ok") { return TESTFAIL; }
+	if Assert("1", 1) { return TESTFAIL; }
+	if Assert(true, false) { return TESTFAIL; }
+	if Assert(null, 1) { return TESTFAIL; }
+	if Assert(b[0, 1], b[0, 2]) { return TESTFAIL; }
+	if Assert(m["a": err], m["a": ok]) { return TESTFAIL; }
+	if Assert(m["a": 1], m["a": 2]) { return TESTFAIL; }
+	if Assert([[1]], [m[]]) { return TESTFAIL; }
+
+	# Deep nesting, list in list in map
+
+	var deepActual = m["a": [1, [2, [3, 4]]], "b": m["c": b[1, 2]]];
+	var deepExpected = m["a": [1, [2, [3, 4]]], "b": m["c": b[1, 2]]];
+
+	if not Assert(deepActual, deepExpected) { return TESTFAIL; }
+
+	var deepBroken = m["a": [1, [2, [3, 5]]], "b": m["c": b[1, 2]]];
+
+	if Assert(deepActual, deepBroken) { return TESTFAIL; }
+
+	# Deep-path mismatches inside nested maps and lists return false without
+	# crashing
+
+	var deepNested = m["x": m["b": 1, "c": 2], "y": [1, [2]]];
+	var deepNestedCount = m["x": m["b": 1], "y": [1, [2]]];
+	var deepNestedKey = m["x": m["d": 1, "c": 2], "y": [1, [2]]];
+	var deepNestedLen = m["x": m["b": 1, "c": 2], "y": [1]];
+
+	if Assert(deepNested, deepNestedCount) { return TESTFAIL; }
+	if Assert(deepNested, deepNestedKey) { return TESTFAIL; }
+	if Assert(deepNested, deepNestedLen) { return TESTFAIL; }
+
+	# Functions and builtins are never comparable
+
+	if Assert(ProbeFunction, ProbeFunction) { return TESTFAIL; }
+	if Assert(type, type) { return TESTFAIL; }
+	if Assert(ProbeFunction, 1) { return TESTFAIL; }
+
+	# Nested type mismatches must report instead of crashing
+
+	if Assert(["1"], [1]) { return TESTFAIL; }
+	if Assert(m["a": "1"], m["a": 1]) { return TESTFAIL; }
+	if Assert(m["a": [err]], m["a": [1]]) { return TESTFAIL; }
+
+	# err is a plain string, so its literal form compares equal to it
+
+	if not Assert(["__~err~__"], [err]) { return TESTFAIL; }
+
+	# Functions and builtins are never comparable, at any depth
+
+	if Assert([ProbeFunction], [ProbeFunction]) { return TESTFAIL; }
+	if Assert(m["a": ProbeFunction], m["a": ProbeFunction]) { return TESTFAIL; }
+	if Assert([type], [type]) { return TESTFAIL; }
+	if Assert([type], [ProbeFunction]) { return TESTFAIL; }
+
+	# Equal containers with mixed content compare element by element
+
+	if not Assert([b[1, 2], m["c": err]], [b[1, 2], m["c": err]])
+	{
+		return TESTFAIL;
+	}
+
+	if not Assert([err, ok], [err, ok]) { return TESTFAIL; }
+	if Assert([err], [ok]) { return TESTFAIL; }
+	if not Assert(1, 1.0) { return TESTFAIL; }
+	if not Assert(-1, -1) { return TESTFAIL; }
+	if not Assert(2.5, 2.5) { return TESTFAIL; }
+	if not Assert(b[0, 1], b[0, 1]) { return TESTFAIL; }
+
+	# Empty containers are equal to each other, and to nothing else
+
+	if not Assert([], []) { return TESTFAIL; }
+	if not Assert(m[], m[]) { return TESTFAIL; }
+	if not Assert(b[], b[]) { return TESTFAIL; }
+	if not Assert("", "") { return TESTFAIL; }
+	if not Assert(m["a": []], m["a": []]) { return TESTFAIL; }
+
+	if Assert([], m[]) { return TESTFAIL; }
+	if Assert(b[], []) { return TESTFAIL; }
+}
+
+func TestAssertErr()
+{
+	if not AssertErr(err) { return TESTFAIL; }
+
+	if AssertErr(1) { return TESTFAIL; }
+	if AssertErr(ok) { return TESTFAIL; }
+	if AssertErr("err") { return TESTFAIL; }
+	if AssertErr(null) { return TESTFAIL; }
+	if AssertErr([1]) { return TESTFAIL; }
+}
+
+func TestAssertOk()
+{
+	if not AssertOk(ok) { return TESTFAIL; }
+
+	if AssertOk(1) { return TESTFAIL; }
+	if AssertOk(err) { return TESTFAIL; }
+	if AssertOk("ok") { return TESTFAIL; }
+	if AssertOk(m[]) { return TESTFAIL; }
+}
+
+func TestAssertTrue()
+{
+	if not AssertTrue(1 == 1) { return TESTFAIL; }
+	if not AssertTrue(1) { return TESTFAIL; }
+	if not AssertTrue(1.0) { return TESTFAIL; }
+
+	if AssertTrue(0) { return TESTFAIL; }
+	if AssertTrue(2) { return TESTFAIL; }
+	if AssertTrue("yes") { return TESTFAIL; }
+	if AssertTrue([1]) { return TESTFAIL; }
+}
+
+func TestAssertFalse()
+{
+	if not AssertFalse(1 == 2) { return TESTFAIL; }
+	if not AssertFalse(0) { return TESTFAIL; }
+	if not AssertFalse(0.0) { return TESTFAIL; }
+
+	if AssertFalse(1) { return TESTFAIL; }
+	if AssertFalse(2) { return TESTFAIL; }
+	if AssertFalse("no") { return TESTFAIL; }
+	if AssertFalse(b[1]) { return TESTFAIL; }
+}
+
+func TestAssertType()
+{
+	if not AssertType([1, 2, 3], "list") { return TESTFAIL; }
+	if not AssertType("text", "string") { return TESTFAIL; }
+	if not AssertType(b[1, 2], "bytes") { return TESTFAIL; }
+	if not AssertType(m["a": 1], "map") { return TESTFAIL; }
+	if not AssertType(1, "number") { return TESTFAIL; }
+	if not AssertType(false, "number") { return TESTFAIL; }
+	if not AssertType(err, "string") { return TESTFAIL; }
+	if not AssertType(ok, "string") { return TESTFAIL; }
+	if not AssertType(null, "number") { return TESTFAIL; }
+	if not AssertType(ProbeFunction, "function") { return TESTFAIL; }
+	if not AssertType(type, "builtin") { return TESTFAIL; }
+
+	if AssertType(1, "string") { return TESTFAIL; }
+	if AssertType(b[1], "list") { return TESTFAIL; }
+	if AssertType(err, "number") { return TESTFAIL; }
+	if AssertType(1, 42) { return TESTFAIL; }
+	if AssertType(1, "integer") { return TESTFAIL; }
+}
+
+func TestAssertLen()
+{
+	if not AssertLen("abc", 3) { return TESTFAIL; }
+	if not AssertLen([1, 2], 2) { return TESTFAIL; }
+	if not AssertLen(m["a": 1, "b": 2], 2) { return TESTFAIL; }
+	if not AssertLen(b[1, 2, 3, 4], 4) { return TESTFAIL; }
+	if not AssertLen("abc", 3.0) { return TESTFAIL; }
+
+	# Empty containers
+
+	if not AssertLen("", 0) { return TESTFAIL; }
+	if not AssertLen([], 0) { return TESTFAIL; }
+	if not AssertLen(m[], 0) { return TESTFAIL; }
+	if not AssertLen(b[], 0) { return TESTFAIL; }
+
+	if AssertLen("abc", 2) { return TESTFAIL; }
+	if AssertLen(m["a": 1], 2) { return TESTFAIL; }
+	if AssertLen(5, 1) { return TESTFAIL; }
+	if AssertLen("abc", "3") { return TESTFAIL; }
+}
+
+func TestAssertHas()
+{
+	if not AssertHas("hello world", "world") { return TESTFAIL; }
+	if not AssertHas([1, 2, 3], 2) { return TESTFAIL; }
+	if not AssertHas(m["a": 1, "b": 2], "b") { return TESTFAIL; }
+	if not AssertHas(b[1, 2, 3], 2) { return TESTFAIL; }
+
+	# err in a list is found, an empty string is a valid map key
+
+	if not AssertHas([1, err], err) { return TESTFAIL; }
+	if not AssertHas(m["": 1], "") { return TESTFAIL; }
+
+	# A bytes needle outside 0-255 is simply not found
+
+	if AssertHas(b[1, 2, 3], 300) { return TESTFAIL; }
+	if AssertHas(b[1, 2, 3], -1) { return TESTFAIL; }
+
+	# The bytes boundary values 0 and 255 are valid needles
+
+	if not AssertHas(b[0, 255], 0) { return TESTFAIL; }
+	if not AssertHas(b[0, 255], 255) { return TESTFAIL; }
+
+	# A list holding containers is searched by deep equality
+
+	if not AssertHas([b[1, 2], "x"], b[1, 2]) { return TESTFAIL; }
+	if not AssertHas([m["a": 1]], m["a": 1]) { return TESTFAIL; }
+	if not AssertHas([b[0]], b[0]) { return TESTFAIL; }
+	if AssertHas([b[1, 2]], b[1, 3]) { return TESTFAIL; }
+	if AssertHas([m["a": 1]], m["a": 2]) { return TESTFAIL; }
+
+	if AssertHas("hello", "") { return TESTFAIL; }
+	if AssertHas("hello", "z") { return TESTFAIL; }
+	if AssertHas([1, 2, 3], 9) { return TESTFAIL; }
+	if AssertHas([1, 2, 3], "a") { return TESTFAIL; }
+	if AssertHas(m["a": 1], "z") { return TESTFAIL; }
+	if AssertHas(m["a": 1], "") { return TESTFAIL; }
+	if AssertHas(b[1, 2, 3], 9) { return TESTFAIL; }
+
+	# Wrong types report instead of crashing
+
+	if AssertHas(5, 1) { return TESTFAIL; }
+	if AssertHas("hello", 5) { return TESTFAIL; }
+	if AssertHas(b[1], "x") { return TESTFAIL; }
+	if AssertHas(m["a": 1], 5) { return TESTFAIL; }
+}
+
+func TestAssertStartsWith()
+{
+	if not AssertStartsWith("hello", "he") { return TESTFAIL; }
+	if not AssertStartsWith("hello", "") { return TESTFAIL; }
+	if not AssertStartsWith("hello", "hello") { return TESTFAIL; }
+	if not AssertStartsWith("", "") { return TESTFAIL; }
+
+	if AssertStartsWith("hello", "lo") { return TESTFAIL; }
+	if AssertStartsWith("he", "hello") { return TESTFAIL; }
+	if AssertStartsWith(5, "x") { return TESTFAIL; }
+	if AssertStartsWith("a", 1) { return TESTFAIL; }
+}
+
+func TestAssertEndsWith()
+{
+	if not AssertEndsWith("hello", "lo") { return TESTFAIL; }
+	if not AssertEndsWith("hello", "") { return TESTFAIL; }
+	if not AssertEndsWith("hello", "hello") { return TESTFAIL; }
+	if not AssertEndsWith("x", "") { return TESTFAIL; }
+	if not AssertEndsWith("", "") { return TESTFAIL; }
+
+	if AssertEndsWith("hello", "he") { return TESTFAIL; }
+	if AssertEndsWith("lo", "hello") { return TESTFAIL; }
+	if AssertEndsWith(5, "x") { return TESTFAIL; }
+	if AssertEndsWith("a", 1) { return TESTFAIL; }
+}

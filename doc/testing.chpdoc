@@ -1,0 +1,51 @@
+*testing* | V-$CHIPVR ($CHIPCN)
+
+Testing with Combine
+
+*Usage:*
+
+- ''chippy combine test''                     Run the project's test suite
+- ''chippy combine test <file>''              Run the tests in one test file
+- ''chippy combine test <pattern>''           Run the tests whose names match a pattern
+- ''chippy combine test <file> <pattern>''    Run the matching tests in one test file
+- ''chippy combine <config> test ...''        Any of the above with an explicit combine config file
+
+The ''<file>'' slot is interpreted as a test file only when it contains ''/'' or ends with ''.chp''. Everything else is interpreted as a pattern.
+
+*Configuration:*
+
+This only honours the options ''Project'', ''Version'', ''Paths'' and ''External'', as nothing is written to disk.
+
+*Test files:*
+
+- Must be named with the suffix ''-test.chp''.
+  - Combine scans the config's directory. It skips the combine config itself, dot directories and bytecode files.
+
+- Any function in global-scope, named ''Test*'' contained in a test file, is seen as a test.
+
+*Running tests:*
+
+When running one or multiple tests, combine resolves the dependency graph for each ''*-test.chp'' file, and then runs the ''Test*'' functions within the test files.
+
+No test can leak state into other tests, all test functions run isolated from each other.
+
+*Test results:*
+
+A test PASSes only when it returned ''0'' or ''null'', for example: ''return 0;'' or ''return null;'' was called, or the program fell off the end. Anything else returned is interpreted as a FAIL and is printed in the test report.
+
+*Reporting:*
+
+The runner captures each test's ''STDOUT'' and ''STDERR'' outputs, and re-prints them in the test report under the corresponding test.
+
+Only Output within the actual test runtime (''CHIPRT == 0'') is captured, outputs written from an ''actor(function, arg1, arg2, ...)'' is not captured.
+
+Printing to ''STDOUT'' or ''STDERR'' in a test has no influence on if a test is interpreted as PASS or FAIL.
+
+*Returns:*
+
+- Exit code 0 when all tests PASSed
+- Exit code 1 when at least one test FAILed
+
+*Recommended Reading*
+
+''chippy doc combine''

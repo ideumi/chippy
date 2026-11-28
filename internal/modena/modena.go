@@ -74,6 +74,32 @@ func (e *Modena) Run(filename, text string) (retVal values.Value, halted bool, r
 	return vm.NewVM(chunk, e.globalContext, e.globalContext.Kind).Run()
 }
 
+// CallFunction looks up a global by name and executes it as a Chippy function
+// with no arguments. chippy combine test needs this to call test functions.
+func (e *Modena) CallFunction(name string) (value values.Value, err error) {
+	defer recoverPanic(e.globalContext, &err, false)
+
+	global := e.globalContext.Globals.GetByName(name)
+
+	if global.IsUnset() {
+		return values.Value{}, fmt.Errorf("global '%s' not found", name)
+	}
+
+	fn, ok := global.FunctionObject().(*vm.Function)
+
+	if !ok {
+		return values.Value{}, fmt.Errorf("global '%s' is not a function", name)
+	}
+
+	result := fn.Execute(nil, e.globalContext)
+
+	if result.Error != nil {
+		return values.Value{}, result.Error
+	}
+
+	return result.Value, nil
+}
+
 func (e *Modena) GetGlobalContext() values.Ctx {
 	return e.globalContext
 }
